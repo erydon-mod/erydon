@@ -1,0 +1,15 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "erydon:block/slab/porphyros_rock_slab"
+    },
+    "type=top": {
+      "model": "erydon:block/slab/porphyros_rock_slab_top"
+    },
+    "type=double": {
+      "model": "erydon:block/block/porphyros_rock_block"
+    }
+  }
+}
+
+

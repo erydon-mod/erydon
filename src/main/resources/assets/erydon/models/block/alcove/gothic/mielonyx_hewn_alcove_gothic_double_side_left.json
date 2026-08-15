@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/alcove/gothic/alcove_gothic_double_side_left",
+    "textures":  {
+                     "stone":  "erydon:block/mielonyx_hewn_block",
+                     "particle":  "erydon:block/mielonyx_hewn_block"
+                 }
+}

@@ -1,0 +1,252 @@
+{
+    "format_version":  "1.21.11",
+    "credit":  "Made with Blockbench",
+    "elements":  [
+                     {
+                         "name":  "inner_dome_panel_125",
+                         "from":  [
+                                      0.03913,
+                                      0.05696,
+                                      0.72942
+                                  ],
+                         "to":  [
+                                    3.9246,
+                                    16.05696,
+                                    0.76702
+                                ],
+                         "rotation":  {
+                                          "angle":  0,
+                                          "axis":  "y",
+                                          "origin":  [
+                                                         8.74093,
+                                                         8.02898,
+                                                         5.29925
+                                                     ]
+                                      },
+                         "color":  4,
+                         "faces":  {
+                                       "north":  {
+                                                     "texture":  "#missing"
+                                                 },
+                                       "east":  {
+                                                    "texture":  "#missing"
+                                                },
+                                       "south":  {
+                                                     "texture":  "#missing"
+                                                 },
+                                       "west":  {
+                                                    "texture":  "#missing"
+                                                },
+                                       "up":  {
+                                                  "texture":  "#missing"
+                                              },
+                                       "down":  {
+                                                    "texture":  "#missing"
+                                                }
+                                   }
+                     },
+                     {
+                         "name":  "inner_dome_panel_124",
+                         "from":  [
+                                      0.67857,
+                                      0.05796,
+                                      3.29116
+                                  ],
+                         "to":  [
+                                    8.48937,
+                                    16.05596,
+                                    3.32876
+                                ],
+                         "rotation":  {
+                                          "angle":  -22.5,
+                                          "axis":  "y",
+                                          "origin":  [
+                                                         8.74093,
+                                                         8.02898,
+                                                         5.29925
+                                                     ]
+                                      },
+                         "color":  4,
+                         "faces":  {
+                                       "north":  {
+                                                     "texture":  "#missing",
+                                                     "erydon_uv_offset": [0,0.05695915222167969]
+                                                 },
+                                       "east":  {
+                                                    "texture":  "#missing",
+                                                    "erydon_uv_offset": [0,0.05695915222167969]
+                                                },
+                                       "south":  {
+                                                     "texture":  "#missing",
+                                                     "erydon_uv_offset": [0,0.05695915222167969]
+                                                 },
+                                       "west":  {
+                                                    "texture":  "#missing",
+                                                    "erydon_uv_offset": [0,0.05695915222167969]
+                                                },
+                                       "up":  {
+                                                  "texture":  "#missing"
+                                              },
+                                       "down":  {
+                                                    "texture":  "#missing"
+                                                }
+                                   }
+                     },
+                     {
+                         "name":  "inner_dome_panel_123",
+                         "from":  [
+                                      5.87622,
+                                      0.05696,
+                                      3.91102
+                                  ],
+                         "to":  [
+                                    13.68702,
+                                    16.05696,
+                                    3.94862
+                                ],
+                         "rotation":  {
+                                          "angle":  -45,
+                                          "axis":  "y",
+                                          "origin":  [
+                                                         8.74093,
+                                                         8.02898,
+                                                         5.29925
+                                                     ]
+                                      },
+                         "color":  4,
+                         "faces":  {
+                                       "north":  {
+                                                     "texture":  "#missing",
+                                                     "erydon_uv_offset": [0,0.05695915222167969]
+                                                 },
+                                       "east":  {
+                                                    "texture":  "#missing",
+                                                    "erydon_uv_offset": [0,0.05695915222167969]
+                                                },
+                                       "south":  {
+                                                     "texture":  "#missing",
+                                                     "erydon_uv_offset": [0,0.05695915222167969]
+                                                 },
+                                       "west":  {
+                                                    "texture":  "#missing",
+                                                    "erydon_uv_offset": [0,0.05695915222167969]
+                                                },
+                                       "up":  {
+                                                  "texture":  "#missing"
+                                              },
+                                       "down":  {
+                                                    "texture":  "#missing"
+                                                }
+                                   }
+                     },
+                     {
+                         "name":  "inner_dome_panel_122",
+                         "from":  [
+                                      10.91545,
+                                      0.05796,
+                                      2.49466
+                                  ],
+                         "to":  [
+                                    18.72625,
+                                    16.05596,
+                                    2.53226
+                                ],
+                         "rotation":  {
+                                          "x":  0,
+                                          "y":  -67.5,
+                                          "z":  0,
+                                          "origin":  [
+                                                         8.74093,
+                                                         8.02898,
+                                                         5.29925
+                                                     ]
+                                      },
+                         "color":  9,
+                         "faces":  {
+                                       "north":  {
+                                                     "texture":  "#missing",
+                                                     "erydon_uv_offset": [0,0.05695915222167969]
+                                                 },
+                                       "east":  {
+                                                    "texture":  "#missing",
+                                                    "erydon_uv_offset": [0,0.05695915222167969]
+                                                },
+                                       "south":  {
+                                                     "texture":  "#missing",
+                                                     "erydon_uv_offset": [0,0.05695915222167969]
+                                                 },
+                                       "west":  {
+                                                    "texture":  "#missing",
+                                                    "erydon_uv_offset": [0,0.05695915222167969]
+                                                },
+                                       "up":  {
+                                                  "texture":  "#missing"
+                                              },
+                                       "down":  {
+                                                    "texture":  "#missing"
+                                                }
+                                   }
+                     },
+                     {
+                         "name":  "straight",
+                         "from":  [
+                                      3.48146,
+                                      0.001,
+                                      -1.95981
+                                  ],
+                         "to":  [
+                                    19.44168,
+                                    16.001,
+                                    -0.95981
+                                ],
+                         "rotation":  {
+                                          "x":  0,
+                                          "y":  -90,
+                                          "z":  0,
+                                          "origin":  [
+                                                         8.74093,
+                                                         8.02898,
+                                                         5.29925
+                                                     ]
+                                      },
+                         "color":  8,
+                         "faces":  {
+                                       "north":  {
+                                                     "texture":  "#missing",
+                                                     "erydon_uv_offset": [1.9073486328125e-06,0.00099945068359375]
+                                                 },
+                                       "east":  {
+                                                    "texture":  "#missing",
+                                                    "erydon_uv_offset": [0,0.00099945068359375]
+                                                },
+                                       "south":  {
+                                                     "texture":  "#missing",
+                                                     "erydon_uv_offset": [-1.9073486328125e-06,0.00099945068359375]
+                                                 },
+                                       "west":  {
+                                                    "texture":  "#missing",
+                                                    "erydon_uv_offset": [0,0.00099945068359375]
+                                                }
+                                   }
+                     }
+                 ],
+    "groups":  [
+                   {
+                       "name":  "sides",
+                       "origin":  [
+                                      0.14728,
+                                      8,
+                                      14.17713
+                                  ],
+                       "scope":  0,
+                       "color":  0,
+                       "children":  [
+                                        0,
+                                        1,
+                                        2,
+                                        3,
+                                        4
+                                    ]
+                   }
+               ]
+}

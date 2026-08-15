@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/mielonyx_imperium_weave_grout_slope_vertical_shallow_broad_lh",
+  "textures": {
+    "stone": "erydon:block/mielonyx_imperium_weave_grout_block",
+    "particle": "erydon:block/mielonyx_imperium_weave_grout_block"
+  }
+}

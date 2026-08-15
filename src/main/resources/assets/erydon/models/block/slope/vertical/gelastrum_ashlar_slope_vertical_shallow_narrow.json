@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/gelastrum_ashlar_slope_vertical_shallow_narrow_lh",
+  "textures": {
+    "stone": "erydon:block/gelastrum_ashlar_block",
+    "particle": "erydon:block/gelastrum_ashlar_block"
+  }
+}

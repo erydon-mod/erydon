@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/shallow/slope_shallow_upper_outer",
+  "textures": {
+    "stone": "erydon:block/gelastrum_etruscus_weave_grout_block",
+    "particle": "#stone"
+  }
+}

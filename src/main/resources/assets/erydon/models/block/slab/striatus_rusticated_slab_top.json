@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/slab_top",
+  "textures": {
+    "bottom": "erydon:block/striatus_rusticated_block",
+    "top": "erydon:block/striatus_rusticated_block",
+    "side": "erydon:block/striatus_rusticated_block"
+  }
+}
+

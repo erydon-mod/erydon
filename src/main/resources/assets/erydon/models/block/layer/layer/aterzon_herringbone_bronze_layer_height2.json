@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/snow_height2",
+  "textures": {
+    "texture": "erydon:block/aterzon_herringbone_bronze_block",
+    "particle": "erydon:block/aterzon_herringbone_bronze_block"
+  }
+}

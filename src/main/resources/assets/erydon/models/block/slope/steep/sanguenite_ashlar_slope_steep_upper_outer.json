@@ -1,0 +1,8 @@
+{
+  "parent": "erydon:block/slope/steep/slope_steep_upper_outer",
+  "textures": {
+    "stone": "erydon:block/sanguenite_ashlar_block",
+    "0": "#stone",
+    "particle": "#stone"
+  }
+}

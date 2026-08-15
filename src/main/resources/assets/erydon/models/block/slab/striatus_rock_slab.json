@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {
+    "bottom": "erydon:block/striatus_rock_block",
+    "top": "erydon:block/striatus_rock_block",
+    "side": "erydon:block/striatus_rock_block"
+  }
+}
+

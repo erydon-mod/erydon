@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/alcove/georgian/alcove_georgian_back",
+    "textures":  {
+                     "stone":  "erydon:block/psamatheon_block_aged",
+                     "particle":  "erydon:block/psamatheon_block_aged"
+                 }
+}

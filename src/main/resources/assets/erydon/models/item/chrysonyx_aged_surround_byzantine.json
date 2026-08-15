@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:item/surround_guilloche_icon",
+  "textures": {
+    "stone": "erydon:block/chrysonyx_block_aged"
+  }
+}

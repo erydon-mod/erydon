@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/column/square/etruscus_column_square_base",
+  "textures": {
+    "all": "erydon:block/etruscus_block"
+  }
+}

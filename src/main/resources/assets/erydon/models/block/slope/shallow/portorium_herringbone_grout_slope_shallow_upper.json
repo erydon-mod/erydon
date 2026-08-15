@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/shallow/slope_shallow_upper",
+  "textures": {
+    "stone": "erydon:block/portorium_herringbone_grout_block",
+    "particle": "#stone"
+  }
+}

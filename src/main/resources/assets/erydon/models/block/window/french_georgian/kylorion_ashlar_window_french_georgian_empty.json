@@ -1,0 +1,7 @@
+{
+  "textures": {
+    "particle": "#stone",
+    "stone": "erydon:block/kylorion_ashlar_block"
+  },
+  "elements": []
+}

@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/wall_inventory",
+  "textures": {
+    "wall": "erydon:block/glacium_herringbone_grout_block"
+  }
+}

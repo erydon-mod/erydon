@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/layer/layer_multiface/parent/height14",
+  "textures": {
+    "texture": "erydon:block/imperium_ashlar_block"
+  }
+}

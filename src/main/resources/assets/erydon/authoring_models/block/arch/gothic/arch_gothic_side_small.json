@@ -1,0 +1,69 @@
+{
+  "format_version": "1.21.11",
+  "credit": "Made with Blockbench",
+  "textures": {
+    "particle": "erydon:block/aganite_block",
+    "stone": "erydon:block/aganite_block"
+  },
+  "elements": [
+    {
+      "from": [
+        15.36592,
+        0,
+        0.001
+      ],
+      "to": [
+        16,
+        16,
+        15.999
+      ],
+      "rotation": {
+        "angle": 0,
+        "axis": "y",
+        "origin": [
+          9.04496,
+          10.36736,
+          8
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone",
+          "cullface": "east"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone",
+          "cullface": "up"
+        },
+        "down": {
+          "texture": "#stone",
+          "cullface": "down"
+        }
+      }
+    }
+  ],
+  "groups": [
+    {
+      "name": "arch_romanesque_side_small",
+      "origin": [
+        8,
+        10.11064,
+        8
+      ],
+      "scope": 0,
+      "color": 0,
+      "children": [
+        0
+      ]
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/cornice/modern/cornice_modern_outer",
+    "textures":  {
+                     "all":  "erydon:block/kelastrion_block",
+                     "particle":  "#all"
+                 }
+}

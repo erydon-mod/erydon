@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/imperium_herringbone_grout_slope_vertical_shallow_broad_lh",
+  "textures": {
+    "stone": "erydon:block/imperium_herringbone_grout_block",
+    "particle": "erydon:block/imperium_herringbone_grout_block"
+  }
+}

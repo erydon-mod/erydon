@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "erydon:block/slab/borealis_slab_aged"
+    },
+    "type=top": {
+      "model": "erydon:block/slab/borealis_slab_top_aged"
+    },
+    "type=double": {
+      "model": "erydon:block/block/borealis_block_aged"
+    }
+  }
+}

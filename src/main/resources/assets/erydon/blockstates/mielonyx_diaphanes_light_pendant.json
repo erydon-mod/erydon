@@ -1,0 +1,22 @@
+{
+  "multipart": [
+    { "when": { "frame": "bronze", "part": "single" }, "apply": { "model": "erydon:block/light/pendant/light_pendant_rose_bronze" } },
+    { "when": { "frame": "bronze", "part": "top" }, "apply": { "model": "erydon:block/light/pendant/light_pendant_rose_bronze" } },
+    { "when": { "frame": "silver", "part": "single" }, "apply": { "model": "erydon:block/light/pendant/light_pendant_rose_silver" } },
+    { "when": { "frame": "silver", "part": "top" }, "apply": { "model": "erydon:block/light/pendant/light_pendant_rose_silver" } },
+
+    { "when": { "frame": "bronze", "part": "top" }, "apply": { "model": "erydon:block/light/pendant/light_pendant_rod_bronze" } },
+    { "when": { "frame": "bronze", "part": "rod" }, "apply": { "model": "erydon:block/light/pendant/light_pendant_rod_bronze" } },
+    { "when": { "frame": "silver", "part": "top" }, "apply": { "model": "erydon:block/light/pendant/light_pendant_rod_silver" } },
+    { "when": { "frame": "silver", "part": "rod" }, "apply": { "model": "erydon:block/light/pendant/light_pendant_rod_silver" } },
+
+    { "when": { "body": "small", "frame": "bronze", "part": "single" }, "apply": { "model": "erydon:block/light/pendant/mielonyx_diaphanes_light_pendant_small_bronze" } },
+    { "when": { "body": "small", "frame": "bronze", "part": "bottom" }, "apply": { "model": "erydon:block/light/pendant/mielonyx_diaphanes_light_pendant_small_bronze" } },
+    { "when": { "body": "small", "frame": "silver", "part": "single" }, "apply": { "model": "erydon:block/light/pendant/mielonyx_diaphanes_light_pendant_small_silver" } },
+    { "when": { "body": "small", "frame": "silver", "part": "bottom" }, "apply": { "model": "erydon:block/light/pendant/mielonyx_diaphanes_light_pendant_small_silver" } },
+    { "when": { "body": "large", "frame": "bronze", "part": "single" }, "apply": { "model": "erydon:block/light/pendant/mielonyx_diaphanes_light_pendant_large_bronze" } },
+    { "when": { "body": "large", "frame": "bronze", "part": "bottom" }, "apply": { "model": "erydon:block/light/pendant/mielonyx_diaphanes_light_pendant_large_bronze" } },
+    { "when": { "body": "large", "frame": "silver", "part": "single" }, "apply": { "model": "erydon:block/light/pendant/mielonyx_diaphanes_light_pendant_large_silver" } },
+    { "when": { "body": "large", "frame": "silver", "part": "bottom" }, "apply": { "model": "erydon:block/light/pendant/mielonyx_diaphanes_light_pendant_large_silver" } }
+  ]
+}

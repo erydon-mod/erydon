@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/snow_height2",
+  "textures": {
+    "texture": "erydon:block/brectite_block_aged",
+    "particle": "erydon:block/brectite_block_aged"
+  }
+}

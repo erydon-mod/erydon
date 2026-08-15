@@ -1,0 +1,6 @@
+{
+    "parent":  "erydon:block/internal/wrapped/nerium_herringbone_bronze_slope_vertical_shallow_narrow",
+    "textures":  {
+                     "texture":  "erydon:block/nerium_herringbone_bronze_block"
+                 }
+}

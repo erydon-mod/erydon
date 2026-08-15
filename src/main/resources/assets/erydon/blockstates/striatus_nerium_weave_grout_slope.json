@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/striatus_nerium_weave_grout_slope"
+                                    }
+                      }
+                  ]
+}

@@ -1,0 +1,507 @@
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+
+tasks.register('auditErydonModelPerformance') {
+    group = 'verification'
+    description = 'Writes ERYDON model performance counters to JSON and CSV reports.'
+    dependsOn tasks.named('verifyCtmIsolation')
+
+    doLast {
+        def projectRoot = project.projectDir
+        def reportDir = layout.buildDirectory.dir('reports').get().asFile
+        reportDir.mkdirs()
+
+        def jsonReportFile = new File(reportDir, 'erydon-model-performance.json')
+        def csvReportFile = new File(reportDir, 'erydon-model-performance.csv')
+        def historyReportFile = new File(reportDir, 'erydon-model-performance-history.jsonl')
+        def ctmReportFile = new File(reportDir, 'erydon-ctm-isolation.json')
+        def runtimeReportFile = new File(reportDir, 'erydon-model-performance-runtime.json')
+        def clientReloadLogFiles = {
+            def buildDirFile = file('build')
+            if (!buildDirFile.exists()) {
+                return []
+            }
+            buildDirFile.listFiles().findAll {
+                it.name ==~ /runclient-model-performance.*\.out/
+            }.sort { it.name }
+        }
+        def slurper = new JsonSlurper()
+        def parseFailures = []
+        long parseStartedNanos = System.nanoTime()
+
+        def relPath = { File file ->
+            projectRoot.toPath().relativize(file.toPath()).toString().replace(File.separator, '/')
+        }
+        def filesUnder = { File root, Closure<Boolean> keep ->
+            def result = []
+            if (root.exists()) {
+                root.eachFileRecurse(groovy.io.FileType.FILES) { file ->
+                    if (keep(file)) {
+                        result << file
+                    }
+                }
+            }
+            result.sort { relPath(it) }
+        }
+        def parseJson = { File file ->
+            try {
+                slurper.parse(file)
+            } catch (Exception exception) {
+                parseFailures << "${relPath(file)} :: ${exception.message}"
+                null
+            }
+        }
+        def collectModelRefs
+        collectModelRefs = { Object node, List<String> refs ->
+            if (node instanceof Map) {
+                node.each { key, value ->
+                    if (key.toString() == 'model' && value instanceof CharSequence) {
+                        refs << value.toString()
+                    }
+                    collectModelRefs(value, refs)
+                }
+            } else if (node instanceof Iterable) {
+                node.each { value -> collectModelRefs(value, refs) }
+            }
+        }
+        def stripAged = { String blockId ->
+            if (blockId.startsWith('aged_')) {
+                return blockId.substring('aged_'.length())
+            }
+            def infix = blockId.indexOf('_aged_')
+            if (infix >= 0) {
+                return blockId.substring(0, infix) + '_' + blockId.substring(infix + '_aged_'.length())
+            }
+            blockId.endsWith('_aged')
+                    ? blockId.substring(0, blockId.length() - '_aged'.length())
+                    : blockId
+        }
+        def isSlope = { String blockId ->
+            if (blockId.startsWith('glazing_')) {
+                return false
+            }
+            blockId.contains('_slope_vertical_shallow_broad')
+                    || blockId.contains('_slope_vertical_shallow_narrow')
+                    || (blockId.contains('_slope_vertical') && !blockId.contains('_slope_vertical_shallow_'))
+                    || blockId.contains('_slope_shallow_lower')
+                    || blockId.contains('_slope_shallow_upper')
+                    || blockId.contains('_slope_steep_lower')
+                    || blockId.contains('_slope_steep_upper')
+                    || blockId.endsWith('_slope')
+                    || blockId.endsWith('_slope_aged')
+        }
+        def familyForBlock = { String blockId ->
+            def base = stripAged(blockId)
+            if (base.contains('column_circular') || base.contains('column_gothic') || base.contains('column_square')) {
+                return 'columns'
+            }
+            if (base.contains('_cornice_')) {
+                return 'cornices'
+            }
+            if (base.contains('_ceiling_coffered_') || base.startsWith('ceiling_coffered_')) {
+                return 'coffered_ceilings'
+            }
+            if (base.contains('layer_vertical') && !base.contains('slope')) {
+                return 'layer_vertical'
+            }
+            if (base.contains('_surround_')) {
+                return 'surrounds'
+            }
+            if (base.contains('_window_french_georgian')) {
+                return 'french_georgian_windows'
+            }
+            if (base.contains('_window_arch')) {
+                return 'arch_windows'
+            }
+            if (base.contains('_arch_romanesque')) {
+                return 'romanesque_arches'
+            }
+            if (base.contains('_arch_modern')) {
+                return 'modern_arches'
+            }
+            if (base.contains('_arch_gothic')) {
+                return 'gothic_arches'
+            }
+            if (isSlope(blockId)) {
+                return 'slopes'
+            }
+            if (['cover_white', 'cover_black', 'cover_bronze', 'cover_silver'].contains(base)) {
+                return 'covers'
+            }
+            'other'
+        }
+        def familyOrder = [
+                'columns',
+                'cornices',
+                'coffered_ceilings',
+                'layer_vertical',
+                'surrounds',
+                'arch_windows',
+                'french_georgian_windows',
+                'romanesque_arches',
+                'modern_arches',
+                'gothic_arches',
+                'slopes',
+                'covers',
+                'other'
+        ]
+        def emptyFamilyRow = { String family ->
+            [
+                    family: family,
+                    blockstateFiles: 0,
+                    modelReferences: 0,
+                    uniqueReferencedModels: new TreeSet<String>(),
+                    topBlocks: []
+            ]
+        }
+        def modelFileExists = { String modelRef ->
+            int colon = modelRef.indexOf(':')
+            if (colon <= 0 || colon == modelRef.length() - 1) {
+                return false
+            }
+            def namespace = modelRef.substring(0, colon)
+            def path = modelRef.substring(colon + 1)
+            new File(projectRoot, "src/main/resources/assets/${namespace}/models/${path}.json").exists()
+        }
+        def readText = { String relative ->
+            def sourceFile = file(relative)
+            sourceFile.exists() ? sourceFile.getText('UTF-8') : ''
+        }
+        def registeredModelPlugins = {
+            def clientSource = readText('src/main/java/com/oliver/erydon/ErydonClient.java')
+            def registered = new TreeSet<String>()
+            def matcher = clientSource =~ /ModelLoadingPlugin\.register\(new\s+([A-Za-z0-9_]+)\(\)\)/
+            matcher.each { match -> registered << match[1] }
+            def preparableMatcher = clientSource =~ /PreparableModelLoadingPlugin\.register\([^,]+,\s*new\s+([A-Za-z0-9_]+)\(\)\)/
+            preparableMatcher.each { match -> registered << match[1] }
+            registered
+        }
+        def pluginByFamily = [
+                columns: 'ErydonFamilyModelLoadingPlugin',
+                cornices: 'ErydonFamilyModelLoadingPlugin',
+                coffered_ceilings: 'ErydonFamilyModelLoadingPlugin',
+                layer_vertical: 'ErydonFamilyModelLoadingPlugin',
+                surrounds: 'ErydonFamilyModelLoadingPlugin',
+                arch_windows: 'ErydonFamilyModelLoadingPlugin',
+                french_georgian_windows: 'ErydonFamilyModelLoadingPlugin',
+                romanesque_arches: 'ErydonFamilyModelLoadingPlugin',
+                modern_arches: 'ErydonFamilyModelLoadingPlugin',
+                gothic_arches: 'ErydonFamilyModelLoadingPlugin',
+                slopes: 'ErydonSlopeModelLoadingPlugin',
+                covers: 'CoverModelLoadingPlugin'
+        ]
+        def configuredJvmArgs = {
+            def maxHeap = providers.gradleProperty('erydon.client.maxHeap').getOrElse('24G')
+            ["-Xms6G", "-Xmx${maxHeap}", "-XshowSettings:vm"]
+        }
+        def enabledResourcePacks = {
+            def options = file('run-dev/options.txt')
+            if (!options.exists()) {
+                return []
+            }
+            def line = options.readLines('UTF-8').find { it.startsWith('resourcePacks:') }
+            if (line == null) {
+                return []
+            }
+            line.substring('resourcePacks:'.length()).trim()
+        }
+        def readOptionalJson = { File jsonFile ->
+            if (!jsonFile.exists()) {
+                return null
+            }
+            try {
+                slurper.parse(jsonFile)
+            } catch (Exception ignored) {
+                null
+            }
+        }
+        def timestampSeconds = { String line ->
+            def matcher = line =~ /\[(\d\d):(\d\d):(\d\d)\]/
+            if (!matcher.find()) {
+                return null
+            }
+            matcher.group(1).toInteger() * 3600 + matcher.group(2).toInteger() * 60 + matcher.group(3).toInteger()
+        }
+        def measuredReloadTimingFromLog = { File logFile ->
+            if (!logFile.exists()) {
+                return null
+            }
+
+            String reloadLine = null
+            String atlasLine = null
+            logFile.eachLine('UTF-8') { line ->
+                if (reloadLine == null && line.contains('Reloading ResourceManager')) {
+                    reloadLine = line
+                }
+                if (atlasLine == null && line.contains('Created:')
+                        && line.contains('minecraft:textures/atlas/blocks.png-atlas')) {
+                    atlasLine = line
+                }
+            }
+
+            def reloadSecond = reloadLine == null ? null : timestampSeconds(reloadLine)
+            def atlasSecond = atlasLine == null ? null : timestampSeconds(atlasLine)
+            if (reloadSecond == null || atlasSecond == null) {
+                return null
+            }
+
+            int elapsedSeconds = atlasSecond - reloadSecond
+            if (elapsedSeconds < 0) {
+                elapsedSeconds += 24 * 60 * 60
+            }
+
+            [
+                    totalMeasuredResourceReloadMs: elapsedSeconds * 1000L,
+                    source: relPath(logFile),
+                    precision: 'client log timestamps have one-second precision',
+                    startLine: reloadLine.take(220),
+                    endLine: atlasLine.take(220)
+            ]
+        }
+        def numericStats = { List values ->
+            def numbers = values.findAll { it != null }.collect { ((Number) it).doubleValue() }.sort()
+            if (numbers.isEmpty()) {
+                return null
+            }
+            def average = numbers.sum() / numbers.size()
+            def middle = numbers.size().intdiv(2)
+            def median = numbers.size() % 2 == 1
+                    ? numbers[middle]
+                    : (numbers[middle - 1] + numbers[middle]) / 2.0d
+            def variance = numbers.collect { value -> Math.pow(value - average, 2.0d) }.sum() / numbers.size()
+            [
+                    sampleCount: numbers.size(),
+                    min: numbers.min(),
+                    max: numbers.max(),
+                    median: Math.round(median * 100.0d) / 100.0d,
+                    average: Math.round(average * 100.0d) / 100.0d,
+                    range: numbers.max() - numbers.min(),
+                    variance: Math.round(variance * 100.0d) / 100.0d
+            ]
+        }
+        def csvEscape = { Object value ->
+            def text = value == null ? '' : value.toString()
+            '"' + text.replace('"', '""') + '"'
+        }
+
+        def blockstateFiles = filesUnder(file('src/main/resources/assets/erydon/blockstates')) {
+            it.name.endsWith('.json')
+        }
+        def familyRows = new TreeMap<String, Map>()
+        familyOrder.each { familyRows[it] = emptyFamilyRow(it) }
+        def allReferencedModels = new TreeSet<String>()
+        def missingReferencedModels = new TreeSet<String>()
+        def perBlockRows = []
+
+        blockstateFiles.each { blockstateFile ->
+            def blockId = blockstateFile.name.substring(0, blockstateFile.name.length() - '.json'.length())
+            def refs = []
+            def json = parseJson(blockstateFile)
+            collectModelRefs(json, refs)
+
+            def family = familyForBlock(blockId)
+            def row = familyRows[family] ?: emptyFamilyRow(family)
+            familyRows[family] = row
+            row.blockstateFiles += 1
+            row.modelReferences += refs.size()
+            row.uniqueReferencedModels.addAll(refs)
+            row.topBlocks << [block: blockId, references: refs.size()]
+
+            allReferencedModels.addAll(refs)
+            refs.findAll { ref -> ref.startsWith('erydon:') && !modelFileExists(ref) }.each { missingReferencedModels << it }
+            perBlockRows << [
+                    block: blockId,
+                    family: family,
+                    modelReferences: refs.size(),
+                    uniqueReferencedModels: (refs as TreeSet<String>).size()
+            ]
+        }
+
+        long parseElapsedMs = (System.nanoTime() - parseStartedNanos) / 1_000_000L
+        def registeredPlugins = registeredModelPlugins()
+        def ctmReport = readOptionalJson(ctmReportFile)
+        def runtimeReport = readOptionalJson(runtimeReportFile)
+        def clientReloadMeasurements = clientReloadLogFiles().collect {
+            measuredReloadTimingFromLog(it)
+        }.findAll { it != null }
+        def clientReloadStats = numericStats(clientReloadMeasurements.collect { it.totalMeasuredResourceReloadMs })
+        def clientReloadTiming = clientReloadStats == null ? null : [
+                totalMeasuredResourceReloadMs: Math.round(clientReloadStats.median) as long,
+                source: clientReloadMeasurements.collect { it.source },
+                precision: 'client log timestamps have one-second precision',
+                measurements: clientReloadMeasurements,
+                stats: clientReloadStats
+        ]
+        def totalMeasuredResourceReloadMs = runtimeReport?.timings?.totalMeasuredResourceReloadMs
+                ?: clientReloadTiming?.totalMeasuredResourceReloadMs
+        def familySummaries = familyOrder.collect { family ->
+            def row = familyRows[family] ?: emptyFamilyRow(family)
+            def plugin = pluginByFamily[family]
+            [
+                    family: family,
+                    blockstateFiles: row.blockstateFiles,
+                    modelReferences: row.modelReferences,
+                    uniqueReferencedModels: row.uniqueReferencedModels.size(),
+                    customPlugin: plugin,
+                    customPluginRegistered: plugin != null && registeredPlugins.contains(plugin),
+                    topBlocks: row.topBlocks.sort { a, b -> b.references <=> a.references ?: a.block <=> b.block }.take(12)
+            ]
+        }
+        def totalReferences = familySummaries.sum { it.modelReferences } ?: 0
+        def totalBlockstateModelsBaked = totalReferences
+        def foreignAlterations = ctmReport?.counts?.foreignModelIdsAlteredOrSkippedByErydon
+        def activeNonSlopeCustomFamilies = familySummaries.findAll {
+            it.customPluginRegistered && !['slopes', 'covers'].contains(it.family)
+        }.collect { it.family }
+        def generatedAt = new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        def runLabel = providers.gradleProperty('erydon.modelPerformance.runLabel').getOrElse('baseline')
+        def previousHistory = []
+        if (historyReportFile.exists()) {
+            historyReportFile.eachLine('UTF-8') { line ->
+                if (!line.isBlank()) {
+                    try {
+                        previousHistory << slurper.parseText(line)
+                    } catch (Exception ignored) {
+                        // Ignore malformed old history rows; the current report remains valid.
+                    }
+                }
+            }
+        }
+        def historyEntry = [
+                generatedAt: generatedAt,
+                runLabel: runLabel,
+                blockstateFiles: blockstateFiles.size(),
+                blockstateModelReferences: totalReferences,
+                uniqueReferencedModelResources: allReferencedModels.size(),
+                missingErydonReferencedModelResources: missingReferencedModels.size(),
+                sourceBlockstateParseMs: parseElapsedMs,
+                foreignModelAlterations: foreignAlterations,
+                activeNonSlopeCustomFamilies: activeNonSlopeCustomFamilies
+        ]
+        def comparableHistory = (previousHistory + [historyEntry]).findAll { it.runLabel == runLabel }
+        def referenceStats = numericStats(comparableHistory.collect { it.blockstateModelReferences })
+        def parseStats = numericStats(comparableHistory.collect { it.sourceBlockstateParseMs })
+
+        def report = [
+                generatedAt: generatedAt,
+                runLabel: runLabel,
+                objective: 'ERYDON model performance baseline and family reference counts',
+                measurementKind: 'source blockstate/model reference audit plus CTM isolation report',
+                environment: [
+                        javaVersion: System.getProperty('java.version'),
+                        gradleVersion: gradle.gradleVersion,
+                        minecraftVersion: project.findProperty('minecraft_version'),
+                        yarnMappings: project.findProperty('yarn_mappings'),
+                        fabricLoader: project.findProperty('loader_version'),
+                        fabricApi: project.findProperty('fabric_api_version'),
+                        loom: '1.6.12',
+                        configuredClientJvmArgs: configuredJvmArgs(),
+                        enabledResourcePacks: enabledResourcePacks()
+                ],
+                totals: [
+                        blockstateFiles: blockstateFiles.size(),
+                        blockstateModelReferences: totalReferences,
+                        uniqueReferencedModelResources: allReferencedModels.size(),
+                        missingErydonReferencedModelResources: missingReferencedModels.size(),
+                        blockstateModelsBaked: totalBlockstateModelsBaked,
+                        activeModelLoadingPlugins: registeredPlugins.size(),
+                        activeNonSlopeCustomFamilies: activeNonSlopeCustomFamilies,
+                        foreignModelAlterations: foreignAlterations
+                ],
+                timings: [
+                        sourceBlockstateParseMs: parseElapsedMs,
+                        erydonBlockstateParsingMs: parseElapsedMs,
+                        erydonModelBakingMs: runtimeReport?.timings?.erydonModelBakingMs,
+                        totalMeasuredResourceReloadMs: totalMeasuredResourceReloadMs,
+                        totalMeasuredResourceReloadSource: runtimeReport?.timings?.totalMeasuredResourceReloadMs != null
+                                ? 'build/reports/erydon-model-performance-runtime.json'
+                                : clientReloadTiming?.source,
+                        totalMeasuredResourceReloadPrecision: clientReloadTiming?.precision,
+                        totalMeasuredResourceReloadMeasurements: clientReloadTiming?.measurements,
+                        totalMeasuredResourceReloadStats: clientReloadTiming?.stats,
+                        note: runtimeReport == null
+                                ? 'No runtime client measurement file was present. This report does not invent reload or bake timings.'
+                                : 'Runtime timings were imported from erydon-model-performance-runtime.json. Full resource reload timing uses median client log timestamps when the runtime report does not provide it.'
+                ],
+                runtimeCounters: [
+                        available: runtimeReport != null,
+                        customModelsCreated: runtimeReport?.counters?.customModelsCreated,
+                        customModelCacheHits: runtimeReport?.counters?.customModelCacheHits,
+                        customModelCacheMisses: runtimeReport?.counters?.customModelCacheMisses,
+                        continuityWrapperCounts: runtimeReport?.counters?.continuityWrapperCounts,
+                        erydonSlopeWrapperCounts: runtimeReport?.counters?.erydonSlopeWrapperCounts
+                ],
+                familyReferenceCounts: familySummaries,
+                perBlockReferenceCounts: perBlockRows.sort { a, b -> b.modelReferences <=> a.modelReferences ?: a.block <=> b.block },
+                registeredModelLoadingPlugins: registeredPlugins,
+                ctmIsolation: [
+                        report: ctmReportFile.exists() ? relPath(ctmReportFile) : null,
+                        nonErydonModelIdsInspected: ctmReport?.counts?.nonErydonModelIdsInspected,
+                        foreignModelIdsAlteredOrSkippedByErydon: foreignAlterations,
+                        erydonSlopeIdsDeliberatelyHandled: ctmReport?.counts?.erydonSlopeIdsDeliberatelyHandled
+                ],
+                measurementVariance: [
+                        sampleCount: comparableHistory.size(),
+                        historyReport: relPath(historyReportFile),
+                        blockstateModelReferences: referenceStats,
+                        sourceBlockstateParseMs: parseStats,
+                        runtimeTimingVariance: clientReloadStats,
+                        note: 'Static reference-count variance is based on repeated runs with the same runLabel. Runtime timing variance is based on bounded client reload logs when present.'
+                ],
+                missingReferencedModels: missingReferencedModels.take(100),
+                parseFailures: parseFailures.take(100)
+        ]
+
+        jsonReportFile.text = JsonOutput.prettyPrint(JsonOutput.toJson(report)) + System.lineSeparator()
+
+        def csvLines = []
+        csvLines << [
+                'generatedAt',
+                'runLabel',
+                'family',
+                'blockstateFiles',
+                'modelReferences',
+                'uniqueReferencedModels',
+                'customPlugin',
+                'customPluginRegistered',
+                'sourceBlockstateParseMs',
+                'foreignModelAlterations'
+        ].join(',')
+        csvLines << [
+                report.generatedAt,
+                report.runLabel,
+                'TOTAL',
+                report.totals.blockstateFiles,
+                report.totals.blockstateModelReferences,
+                report.totals.uniqueReferencedModelResources,
+                '',
+                '',
+                report.timings.sourceBlockstateParseMs,
+                report.totals.foreignModelAlterations
+        ].collect(csvEscape).join(',')
+        familySummaries.each { row ->
+            csvLines << [
+                    report.generatedAt,
+                    report.runLabel,
+                    row.family,
+                    row.blockstateFiles,
+                    row.modelReferences,
+                    row.uniqueReferencedModels,
+                    row.customPlugin ?: '',
+                    row.customPluginRegistered,
+                    report.timings.sourceBlockstateParseMs,
+                    report.totals.foreignModelAlterations
+            ].collect(csvEscape).join(',')
+        }
+        csvReportFile.text = csvLines.join(System.lineSeparator()) + System.lineSeparator()
+        historyReportFile << JsonOutput.toJson(historyEntry) + System.lineSeparator()
+
+        logger.lifecycle("ERYDON model performance report written to ${jsonReportFile}")
+        logger.lifecycle("ERYDON model performance CSV written to ${csvReportFile}")
+        logger.lifecycle("ERYDON blockstate model references: ${totalReferences}; unique referenced models: ${allReferencedModels.size()}; foreign alterations: ${foreignAlterations}")
+    }
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('auditErydonModelPerformance')
+}

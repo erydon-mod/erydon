@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/alcove/gothic/alcove_gothic_double_top_left",
+    "textures":  {
+                     "stone":  "erydon:block/solistra_hewn_block",
+                     "particle":  "erydon:block/solistra_hewn_block"
+                 }
+}

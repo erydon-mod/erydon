@@ -1,0 +1,6 @@
+{
+    "parent":  "erydon:block/surround/guilloche/surround_guilloche_icon",
+    "textures":  {
+                     "particle":  "#stone"
+                 }
+}

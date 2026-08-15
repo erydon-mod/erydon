@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/surround/modern/surround_modern_corbel",
+  "textures": {
+    "particle": "erydon:block/kelastrion_block",
+    "0": "erydon:block/kelastrion_block",
+    "1": "erydon:block/kelastrion_block",
+    "texture": "erydon:block/kelastrion_block",
+    "stone": "erydon:block/kelastrion_block"
+  }
+}

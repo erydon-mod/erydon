@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/aganite_slope_vertical_shallow_broad_aged"
+                                    }
+                      }
+                  ]
+}

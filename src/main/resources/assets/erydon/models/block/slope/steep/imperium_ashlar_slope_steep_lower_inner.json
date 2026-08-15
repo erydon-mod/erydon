@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/steep/slope_steep_lower_inner",
+  "textures": {
+    "stone": "erydon:block/imperium_ashlar_block",
+    "particle": "#stone"
+  }
+}

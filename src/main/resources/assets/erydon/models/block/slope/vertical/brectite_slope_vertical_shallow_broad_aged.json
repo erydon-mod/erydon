@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/brectite_slope_vertical_shallow_broad_lh_aged",
+  "textures": {
+    "stone": "erydon:block/brectite_block_aged",
+    "particle": "erydon:block/brectite_block_aged"
+  }
+}

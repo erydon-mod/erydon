@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/snow_height8",
+  "textures": {
+    "texture": "erydon:block/glacium_nerium_weave_bronze_block",
+    "particle": "erydon:block/glacium_nerium_weave_bronze_block"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/layer/layer_multiface/parent/top_height16",
+  "textures": {
+    "texture": "erydon:block/hesperion_glacium_weave_bronze_block"
+  }
+}

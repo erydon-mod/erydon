@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/light/modern/light_modern",
+  "textures": {
+    "stone": "erydon:block/kelastrion_block",
+    "metal": "erydon:block/cover_bronze_gloss"
+  }
+}

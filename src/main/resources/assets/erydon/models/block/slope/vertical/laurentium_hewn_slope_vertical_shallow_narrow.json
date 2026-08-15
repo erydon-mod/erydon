@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/laurentium_hewn_slope_vertical_shallow_narrow_lh",
+  "textures": {
+    "stone": "erydon:block/laurentium_hewn_block",
+    "particle": "erydon:block/laurentium_hewn_block"
+  }
+}

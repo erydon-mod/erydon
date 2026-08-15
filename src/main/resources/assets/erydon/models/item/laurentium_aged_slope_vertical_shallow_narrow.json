@@ -1,0 +1,6 @@
+{
+    "parent":  "erydon:block/internal/wrapped/laurentium_slope_vertical_shallow_narrow_aged",
+    "textures":  {
+                     "texture":  "erydon:block/laurentium_block_aged"
+                 }
+}

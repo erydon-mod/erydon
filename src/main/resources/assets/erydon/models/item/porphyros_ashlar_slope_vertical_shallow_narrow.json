@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/internal/wrapped/porphyros_ashlar_slope_vertical_shallow_narrow",
+    "textures":  {
+                     "texture":  "erydon:block/porphyros_ashlar_block"
+                 }
+}
+

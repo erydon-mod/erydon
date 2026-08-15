@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/stairs",
+  "textures": {
+    "side": "erydon:block/calacattum_portorium_weave_grout_block",
+    "top": "erydon:block/calacattum_portorium_weave_grout_block",
+    "bottom": "erydon:block/calacattum_portorium_weave_grout_block"
+  }
+}

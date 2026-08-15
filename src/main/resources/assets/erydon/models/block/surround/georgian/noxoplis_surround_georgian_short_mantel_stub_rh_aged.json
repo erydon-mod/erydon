@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/surround/georgian/surround_georgian_short_mantel_stub_rh",
+  "textures": {
+    "stone": "erydon:block/noxoplis_block_aged",
+    "particle": "#stone"
+  }
+}

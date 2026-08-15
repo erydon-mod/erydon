@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/noxoplis_ashlar_layer_vertical"
+                                    }
+                      }
+                  ]
+}

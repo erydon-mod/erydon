@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/slope_vertical_shallow_broad_rh",
+  "textures": {
+    "stone": "erydon:block/etruscus_block_aged",
+    "particle": "erydon:block/etruscus_block_aged"
+  }
+}

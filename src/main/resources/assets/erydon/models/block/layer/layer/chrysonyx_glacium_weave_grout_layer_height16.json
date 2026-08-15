@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/block/calacattum_portorium_weave_bronze_block",
+  "textures": {
+    "texture": "erydon:block/chrysonyx_glacium_weave_grout_block",
+    "particle": "erydon:block/chrysonyx_glacium_weave_grout_block"
+  }
+}

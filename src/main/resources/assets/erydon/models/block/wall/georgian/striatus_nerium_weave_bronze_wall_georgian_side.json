@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/wall/georgian/wall_georgian_side",
+    "textures":  {
+                     "wall":  "erydon:block/striatus_nerium_weave_bronze_block",
+                     "particle":  "erydon:block/striatus_nerium_weave_bronze_block"
+                 }
+}

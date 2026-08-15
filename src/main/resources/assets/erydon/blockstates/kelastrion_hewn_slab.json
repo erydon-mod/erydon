@@ -1,0 +1,14 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "erydon:block/slab/kelastrion_hewn_slab"
+    },
+    "type=top": {
+      "model": "erydon:block/slab/kelastrion_hewn_slab_top"
+    },
+    "type=double": {
+      "model": "erydon:block/block/kelastrion_hewn_block"
+    }
+  }
+}
+

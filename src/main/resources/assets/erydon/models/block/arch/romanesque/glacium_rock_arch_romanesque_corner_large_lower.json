@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/arch/romanesque/arch_romanesque_corner_large_lower",
+  "textures": {
+    "stone": "erydon:block/glacium_rock_block"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "erydon:block/internal/wrapped/gelastrum_rock_alcove_georgian"
+      }
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/mielonyx_imperium_weave_bronze_slope"
+                                    }
+                      }
+                  ]
+}

@@ -1,0 +1,60 @@
+{
+  "multipart": [
+    {
+      "when": {"up": "true", "north": "none|low", "east": "none|low", "south": "none|low", "west": "none|low"},
+      "apply": {"model": "erydon:block/wall/georgian/aganite_wall_georgian_aged_post"}
+    },
+    {
+      "when": {"north": "low", "east": "none|low", "south": "none|low", "west": "none|low"},
+      "apply": {"model": "erydon:block/wall/georgian/aganite_wall_georgian_aged_side", "uvlock": true}
+    },
+    {
+      "when": {"east": "low", "north": "none|low", "south": "none|low", "west": "none|low"},
+      "apply": {"model": "erydon:block/wall/georgian/aganite_wall_georgian_aged_side", "y": 90, "uvlock": true}
+    },
+    {
+      "when": {"south": "low", "north": "none|low", "east": "none|low", "west": "none|low"},
+      "apply": {"model": "erydon:block/wall/georgian/aganite_wall_georgian_aged_side", "y": 180, "uvlock": true}
+    },
+    {
+      "when": {"west": "low", "north": "none|low", "east": "none|low", "south": "none|low"},
+      "apply": {"model": "erydon:block/wall/georgian/aganite_wall_georgian_aged_side", "y": 270, "uvlock": true}
+    },
+    {
+      "when": {"north_east": "true"},
+      "apply": {"model": "erydon:block/wall/georgian/aganite_wall_georgian_aged_side_diagonal", "uvlock": true}
+    },
+    {
+      "when": {"south_east": "true"},
+      "apply": {"model": "erydon:block/wall/georgian/aganite_wall_georgian_aged_side_diagonal", "y": 90, "uvlock": true}
+    },
+    {
+      "when": {"south_west": "true"},
+      "apply": {"model": "erydon:block/wall/georgian/aganite_wall_georgian_aged_side_diagonal", "y": 180, "uvlock": true}
+    },
+    {
+      "when": {"north_west": "true"},
+      "apply": {"model": "erydon:block/wall/georgian/aganite_wall_georgian_aged_side_diagonal", "y": 270, "uvlock": true}
+    },
+    {
+      "when": {"OR": [{"north": "tall"}, {"east": "tall"}, {"south": "tall"}, {"west": "tall"}, {"up": "false", "north": "none", "east": "none", "south": "none", "west": "none", "north_east": "true", "south_east": "true"}, {"up": "false", "north": "none", "east": "none", "south": "none", "west": "none", "south_east": "true", "south_west": "true"}, {"up": "false", "north": "none", "east": "none", "south": "none", "west": "none", "south_west": "true", "north_west": "true"}, {"up": "false", "north": "none", "east": "none", "south": "none", "west": "none", "north_west": "true", "north_east": "true"}, {"up": "false", "north": "none", "east": "none", "south": "none", "west": "none", "north_east": "false", "south_east": "false", "south_west": "false", "north_west": "false"}]},
+      "apply": {"model": "erydon:block/wall/georgian/aganite_wall_georgian_aged_pier"}
+    },
+    {
+      "when": {"OR": [{"north": "tall"}, {"north": "low|tall", "east": "tall"}, {"north": "low|tall", "south": "tall"}, {"north": "low|tall", "west": "tall"}]},
+      "apply": {"model": "erydon:block/wall/georgian/aganite_wall_georgian_aged_pier_stub", "uvlock": true}
+    },
+    {
+      "when": {"OR": [{"east": "low|tall", "north": "tall"}, {"east": "tall"}, {"east": "low|tall", "south": "tall"}, {"east": "low|tall", "west": "tall"}]},
+      "apply": {"model": "erydon:block/wall/georgian/aganite_wall_georgian_aged_pier_stub", "y": 90, "uvlock": true}
+    },
+    {
+      "when": {"OR": [{"south": "low|tall", "north": "tall"}, {"south": "low|tall", "east": "tall"}, {"south": "tall"}, {"south": "low|tall", "west": "tall"}]},
+      "apply": {"model": "erydon:block/wall/georgian/aganite_wall_georgian_aged_pier_stub", "y": 180, "uvlock": true}
+    },
+    {
+      "when": {"OR": [{"west": "low|tall", "north": "tall"}, {"west": "low|tall", "east": "tall"}, {"west": "low|tall", "south": "tall"}, {"west": "tall"}]},
+      "apply": {"model": "erydon:block/wall/georgian/aganite_wall_georgian_aged_pier_stub", "y": 270, "uvlock": true}
+    }
+  ]
+}

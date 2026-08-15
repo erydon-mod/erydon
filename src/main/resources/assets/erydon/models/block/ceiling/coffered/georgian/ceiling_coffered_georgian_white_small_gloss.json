@@ -1,0 +1,8 @@
+{
+  "parent": "erydon:block/ceiling/coffered/georgian/ceiling_coffered_georgian",
+  "textures": {
+    "colour": "erydon:block/cover_white_gloss",
+    "stone": "erydon:block/cover_white_gloss",
+    "particle": "erydon:block/cover_white_gloss"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/surround/guilloche/surround_guilloche_plinth_lh",
+  "textures": {
+    "particle": "erydon:block/borealis_block_aged",
+    "0": "erydon:block/borealis_block_aged",
+    "1": "erydon:block/borealis_block_aged",
+    "texture": "erydon:block/borealis_block_aged",
+    "stone": "erydon:block/borealis_block_aged"
+  }
+}

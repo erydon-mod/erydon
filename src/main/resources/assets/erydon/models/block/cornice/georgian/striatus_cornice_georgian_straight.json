@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/cornice/georgian/cornice_georgian_straight",
+  "textures": {
+    "stone": "erydon:block/striatus_block",
+    "particle": "erydon:block/striatus_block"
+  }
+}

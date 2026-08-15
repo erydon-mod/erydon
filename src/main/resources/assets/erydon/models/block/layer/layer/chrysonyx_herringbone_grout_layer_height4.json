@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/layer/layer/layer_height4",
+  "textures": {
+    "all": "erydon:block/chrysonyx_herringbone_grout_block",
+    "particle": "erydon:block/chrysonyx_herringbone_grout_block"
+  }
+}

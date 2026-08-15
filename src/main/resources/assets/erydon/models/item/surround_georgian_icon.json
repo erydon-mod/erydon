@@ -1,0 +1,6 @@
+{
+    "parent":  "erydon:block/surround/georgian/surround_georgian_icon",
+    "textures":  {
+                     "particle":  "#stone"
+                 }
+}

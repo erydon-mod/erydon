@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/alcove/georgian/alcove_georgian_triple_side_right",
+    "textures":  {
+                     "stone":  "erydon:block/kelastrion_hewn_block",
+                     "particle":  "erydon:block/kelastrion_hewn_block"
+                 }
+}

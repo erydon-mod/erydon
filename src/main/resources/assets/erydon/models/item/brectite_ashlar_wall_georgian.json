@@ -1,0 +1,7 @@
+{
+    "parent": "erydon:block/wall/georgian/wall_georgian_icon",
+    "textures": {
+        "wall": "erydon:block/brectite_ashlar_block",
+        "particle": "erydon:block/brectite_ashlar_block"
+    }
+}

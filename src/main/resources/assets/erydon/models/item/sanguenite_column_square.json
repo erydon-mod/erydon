@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/column/square/sanguenite_column_square_base",
+  "textures": {
+    "all": "erydon:block/sanguenite_block"
+  }
+}

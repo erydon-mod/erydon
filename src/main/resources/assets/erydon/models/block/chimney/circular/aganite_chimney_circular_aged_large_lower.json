@@ -1,0 +1,8 @@
+{
+  "parent": "erydon:block/chimney/circular/chimney_circular_large_lower",
+  "textures": {
+    "stone": "erydon:block/aganite_block_aged",
+    "particle": "erydon:block/aganite_block_aged"
+  }
+}
+

@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/wall/georgian/wall_georgian",
+    "textures":  {
+                     "wall":  "erydon:block/laurentium_calacattum_weave_bronze_block",
+                     "particle":  "erydon:block/laurentium_calacattum_weave_bronze_block"
+                 }
+}

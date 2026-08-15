@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.oliver.erydon.mixin.client.texturealias",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "ModResourcePackCreatorMixin",
+    "ResourcePackProfileMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

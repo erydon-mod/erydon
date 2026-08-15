@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/slope_vertical",
+  "textures": {
+    "stone": "erydon:block/kylorion_glacium_weave_bronze_block",
+    "particle": "#stone"
+  }
+}

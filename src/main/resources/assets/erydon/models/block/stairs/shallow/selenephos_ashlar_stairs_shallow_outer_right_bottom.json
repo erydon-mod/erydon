@@ -1,0 +1,8 @@
+{
+    "parent":  "erydon:block/stairs/shallow/shallow_stairs_outer_right_bottom",
+    "textures":  {
+                     "all":  "erydon:block/selenephos_ashlar_block",
+                     "particle":  "#all",
+                     "underside":  "erydon:block/selenephos_ashlar_block"
+                 }
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/stairs",
+  "textures": {
+    "side": "erydon:block/aterzon_rock_block",
+    "top": "erydon:block/aterzon_rock_block",
+    "bottom": "erydon:block/aterzon_rock_block"
+  }
+}

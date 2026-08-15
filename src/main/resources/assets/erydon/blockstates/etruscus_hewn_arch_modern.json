@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "erydon:block/internal/wrapped/etruscus_hewn_arch_modern"
+      }
+    }
+  ]
+}

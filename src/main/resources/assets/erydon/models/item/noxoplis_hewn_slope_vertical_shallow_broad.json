@@ -1,0 +1,6 @@
+{
+    "parent":  "erydon:block/internal/wrapped/noxoplis_hewn_slope_vertical_shallow_broad",
+    "textures":  {
+                     "texture":  "erydon:block/noxoplis_hewn_block"
+                 }
+}

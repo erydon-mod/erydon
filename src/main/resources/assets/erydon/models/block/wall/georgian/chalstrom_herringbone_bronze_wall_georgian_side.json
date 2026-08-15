@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/wall/georgian/wall_georgian_side",
+    "textures":  {
+                     "wall":  "erydon:block/chalstrom_herringbone_bronze_block",
+                     "particle":  "erydon:block/chalstrom_herringbone_bronze_block"
+                 }
+}

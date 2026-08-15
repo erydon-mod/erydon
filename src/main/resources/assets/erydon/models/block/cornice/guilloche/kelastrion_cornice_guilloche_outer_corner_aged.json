@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/cornice/guilloche/cornice_guilloche_outer_corner",
+  "textures": {
+    "stone": "erydon:block/kelastrion_block_aged",
+    "particle": "erydon:block/kelastrion_block_aged"
+  }
+}

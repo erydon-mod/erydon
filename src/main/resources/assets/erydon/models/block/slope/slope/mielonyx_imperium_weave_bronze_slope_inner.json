@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/slope/slope_inner",
+  "textures": {
+    "stone": "erydon:block/mielonyx_imperium_weave_bronze_block",
+    "particle": "#stone"
+  }
+}

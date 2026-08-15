@@ -1,0 +1,46 @@
+{
+    "elements":  [
+                     {
+                         "from":  [
+                                      0,
+                                      0,
+                                      0
+                                  ],
+                         "to":  [
+                                    16,
+                                    16,
+                                    16
+                                ],
+                         "faces":  {
+                                       "north":  {
+                                                     "texture":  "#texture",
+                                                     "cullface":  "north"
+                                                 },
+                                       "south":  {
+                                                     "texture":  "#texture",
+                                                     "cullface":  "south"
+                                                 },
+                                       "east":  {
+                                                    "texture":  "#texture",
+                                                    "cullface":  "east"
+                                                },
+                                       "west":  {
+                                                    "texture":  "#texture",
+                                                    "cullface":  "west"
+                                                },
+                                       "up":  {
+                                                  "texture":  "#texture",
+                                                  "cullface":  "up"
+                                              },
+                                       "down":  {
+                                                    "texture":  "#texture",
+                                                    "cullface":  "down"
+                                                }
+                                   }
+                     }
+                 ],
+    "textures":  {
+                     "texture":  "erydon:block/mielonyx_rusticated_block",
+                     "particle":  "erydon:block/mielonyx_rusticated_block"
+                 }
+}

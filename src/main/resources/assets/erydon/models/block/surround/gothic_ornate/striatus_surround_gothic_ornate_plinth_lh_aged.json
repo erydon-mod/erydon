@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/surround/gothic_ornate/surround_gothic_ornate_plinth_lh",
+  "textures": {
+    "particle": "erydon:block/striatus_block_aged",
+    "0": "erydon:block/striatus_block_aged",
+    "1": "erydon:block/striatus_block_aged",
+    "texture": "erydon:block/striatus_block_aged",
+    "stone": "erydon:block/striatus_block_aged"
+  }
+}

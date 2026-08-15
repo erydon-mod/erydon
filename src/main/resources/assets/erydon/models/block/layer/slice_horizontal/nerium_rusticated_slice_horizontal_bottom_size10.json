@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/layer/slice_horizontal/slice_horizontal_bottom_size10",
+  "textures": {
+    "texture": "erydon:block/nerium_rusticated_block",
+    "particle": "erydon:block/nerium_rusticated_block"
+  }
+}

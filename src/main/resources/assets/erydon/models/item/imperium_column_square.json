@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/column/square/imperium_column_square_base",
+  "textures": {
+    "all": "erydon:block/imperium_block"
+  }
+}

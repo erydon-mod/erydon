@@ -1,0 +1,6 @@
+{
+    "parent":  "erydon:block/internal/wrapped/sanguenite_ashlar_slope_vertical_shallow_narrow",
+    "textures":  {
+                     "texture":  "erydon:block/sanguenite_ashlar_block"
+                 }
+}

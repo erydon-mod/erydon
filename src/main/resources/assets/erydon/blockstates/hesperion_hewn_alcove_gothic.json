@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "erydon:block/internal/wrapped/hesperion_hewn_alcove_gothic"
+      }
+    }
+  ]
+}

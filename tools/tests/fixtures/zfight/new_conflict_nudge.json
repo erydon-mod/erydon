@@ -1,0 +1,28 @@
+{
+  "textures": {
+    "stone": "erydon:block/aganite_block"
+  },
+  "elements": [
+    {
+      "from": [0, 0, 0],
+      "to": [8, 4, 8],
+      "faces": {
+        "east": {"texture": "#stone"}
+      }
+    },
+    {
+      "from": [4, 1, 4],
+      "to": [8, 3, 6],
+      "faces": {
+        "east": {"texture": "#stone"}
+      }
+    },
+    {
+      "from": [6, 1, 4],
+      "to": [8.001, 3, 6],
+      "faces": {
+        "east": {"texture": "#stone"}
+      }
+    }
+  ]
+}

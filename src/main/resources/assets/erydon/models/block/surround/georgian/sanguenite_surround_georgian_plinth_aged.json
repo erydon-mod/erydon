@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/surround/georgian/surround_georgian_plinth",
+  "textures": {
+    "stone": "erydon:block/sanguenite_block_aged",
+    "particle": "#stone"
+  }
+}

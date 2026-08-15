@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/arch/romanesque/arch_romanesque_corner_medium",
+  "textures": {
+    "stone": "erydon:block/imperium_block"
+  }
+}

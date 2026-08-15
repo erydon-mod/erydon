@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    "erydon:borealis_diaphanes",
+    "erydon:gelastrum_diaphanes",
+    "erydon:glazing_bronze",
+    "erydon:glazing_crystal",
+    "erydon:glazing_silver",
+    "erydon:glazing_tinted",
+    "erydon:mielonyx_diaphanes",
+    "erydon:selenephos_diaphanes"
+  ]
+}

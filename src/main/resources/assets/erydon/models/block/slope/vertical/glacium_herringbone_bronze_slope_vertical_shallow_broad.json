@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/glacium_herringbone_bronze_slope_vertical_shallow_broad_lh",
+  "textures": {
+    "stone": "erydon:block/glacium_herringbone_bronze_block",
+    "particle": "erydon:block/glacium_herringbone_bronze_block"
+  }
+}

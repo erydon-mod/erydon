@@ -1,0 +1,9 @@
+{
+  "parent": "erydon:block/chimney/circular/chimney_circular_large_upper",
+  "textures": {
+    "stone": "erydon:block/portorium_ashlar_block",
+    "particle": "erydon:block/portorium_ashlar_block"
+  }
+}
+
+

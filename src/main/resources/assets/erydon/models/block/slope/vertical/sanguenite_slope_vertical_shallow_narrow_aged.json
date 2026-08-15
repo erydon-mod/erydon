@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/sanguenite_slope_vertical_shallow_narrow_lh_aged",
+  "textures": {
+    "stone": "erydon:block/sanguenite_block_aged",
+    "particle": "erydon:block/sanguenite_block_aged"
+  }
+}

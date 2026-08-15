@@ -1,0 +1,14 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "erydon:block/slab/nerium_hewn_slab"
+    },
+    "type=top": {
+      "model": "erydon:block/slab/nerium_hewn_slab_top"
+    },
+    "type=double": {
+      "model": "erydon:block/block/nerium_hewn_block"
+    }
+  }
+}
+

@@ -1,0 +1,229 @@
+{
+  "format_version": "1.21.11",
+  "credit": "Made with Blockbench",
+  "textures": {
+    "particle": "erydon:block/aganite_block",
+    "stone": "erydon:block/aganite_block"
+  },
+  "elements": [
+    {
+      "name": "inner_dome_panel_088",
+      "from": [
+        -4.32982,
+        0.78494,
+        11.6562
+      ],
+      "to": [
+        11.66018,
+        7.30529,
+        16.3458
+      ],
+      "rotation": {
+        "x": -48.05744,
+        "y": -90,
+        "z": 0,
+        "origin": [
+          9.66518,
+          1.39669,
+          14.001
+        ]
+      },
+      "faces": {
+        "east": {
+          "texture": "#stone",
+          "erydon_uv_offset": [
+            0,
+            -0.7562923431396484
+          ]
+        },
+        "west": {
+          "texture": "#stone",
+          "erydon_uv_offset": [
+            0,
+            -0.7562923431396484
+          ]
+        },
+        "down": {
+          "texture": "#stone",
+          "erydon_uv_offset": [
+            0,
+            -0.7562923431396484
+          ]
+        }
+      },
+      "color": 4
+    },
+    {
+      "name": "inner_dome_panel_072",
+      "from": [
+        -7.17886,
+        3.6084,
+        11.6566
+      ],
+      "to": [
+        8.81114,
+        14.75417,
+        16.3462
+      ],
+      "rotation": {
+        "x": -41.88181,
+        "y": -90,
+        "z": 0,
+        "origin": [
+          6.81614,
+          4.22015,
+          14.0014
+        ]
+      },
+      "faces": {
+        "east": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      },
+      "color": 4
+    },
+    {
+      "name": "inner_dome_panel_056",
+      "from": [
+        -10.26614,
+        6.1709,
+        11.657
+      ],
+      "to": [
+        5.72386,
+        16.27221,
+        16.3466
+      ],
+      "rotation": {
+        "x": -37.75229,
+        "y": -90,
+        "z": 0,
+        "origin": [
+          3.72886,
+          6.78265,
+          14.0018
+        ]
+      },
+      "faces": {
+        "east": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      },
+      "color": 4
+    },
+    {
+      "name": "inner_dome_panel_040",
+      "from": [
+        -13.50442,
+        8.5404,
+        11.6574
+      ],
+      "to": [
+        2.48558,
+        15.80678,
+        16.347
+      ],
+      "rotation": {
+        "x": -34.78285,
+        "y": -90,
+        "z": 0,
+        "origin": [
+          0.49058,
+          9.15214,
+          14.0022
+        ]
+      },
+      "faces": {
+        "east": {
+          "texture": "#stone",
+          "erydon_uv_offset": [
+            1.7842291593551636,
+            0
+          ]
+        },
+        "west": {
+          "texture": "#stone",
+          "erydon_uv_offset": [
+            -1.7842292785644531,
+            0
+          ]
+        },
+        "down": {
+          "texture": "#stone",
+          "erydon_uv_offset": [
+            1.7842291593551636,
+            0
+          ]
+        }
+      },
+      "color": 4
+    },
+    {
+      "from": [
+        -4.23998,
+        12.72755,
+        0.0
+      ],
+      "to": [
+        13.63501,
+        16.00795,
+        16.0
+      ],
+      "rotation": {
+        "angle": 0,
+        "axis": "y",
+        "origin": [
+          2.78887,
+          5.49481,
+          7.9375
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        }
+      },
+      "color": 4
+    }
+  ],
+  "groups": [
+    {
+      "name": "arch_gothic_corner_large_upper",
+      "origin": [
+        8,
+        8,
+        8
+      ],
+      "scope": 0,
+      "color": 4,
+      "children": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    }
+  ]
+}

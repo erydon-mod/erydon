@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/brectite_ashlar_slope_vertical_shallow_broad_lh",
+  "textures": {
+    "stone": "erydon:block/brectite_ashlar_block",
+    "particle": "erydon:block/brectite_ashlar_block"
+  }
+}

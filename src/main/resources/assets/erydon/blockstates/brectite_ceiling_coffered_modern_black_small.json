@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "erydon:block/internal/wrapped/brectite_ceiling_coffered_modern_black_small"
+      }
+    }
+  ]
+}

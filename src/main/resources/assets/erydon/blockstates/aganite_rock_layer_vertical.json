@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/aganite_rock_layer_vertical"
+                                    }
+                      }
+                  ]
+}

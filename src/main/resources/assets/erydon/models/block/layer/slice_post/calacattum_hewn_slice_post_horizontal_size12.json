@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/layer/slice_post/slice_post_horizontal_size12",
+  "textures": {
+    "texture": "erydon:block/calacattum_hewn_block",
+    "particle": "erydon:block/calacattum_hewn_block"
+  }
+}

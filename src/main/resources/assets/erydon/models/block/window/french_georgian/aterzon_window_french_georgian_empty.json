@@ -1,0 +1,7 @@
+{
+  "textures": {
+    "particle": "#stone",
+    "stone": "erydon:block/aterzon_block"
+  },
+  "elements": []
+}

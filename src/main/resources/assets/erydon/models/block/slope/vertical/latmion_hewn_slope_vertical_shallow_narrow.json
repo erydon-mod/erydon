@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/latmion_hewn_slope_vertical_shallow_narrow_lh",
+  "textures": {
+    "stone": "erydon:block/latmion_hewn_block",
+    "particle": "erydon:block/latmion_hewn_block"
+  }
+}

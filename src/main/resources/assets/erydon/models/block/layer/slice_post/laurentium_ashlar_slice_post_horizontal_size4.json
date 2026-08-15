@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/layer/slice_post/slice_post_horizontal_size4",
+  "textures": {
+    "texture": "erydon:block/laurentium_ashlar_block",
+    "particle": "erydon:block/laurentium_ashlar_block"
+  }
+}

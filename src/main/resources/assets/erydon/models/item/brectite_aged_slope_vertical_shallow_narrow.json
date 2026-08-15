@@ -1,0 +1,6 @@
+{
+    "parent":  "erydon:block/internal/wrapped/brectite_slope_vertical_shallow_narrow_aged",
+    "textures":  {
+                     "texture":  "erydon:block/brectite_block_aged"
+                 }
+}

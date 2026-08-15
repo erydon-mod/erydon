@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/kylorion_hewn_slope_vertical_shallow_narrow_lh",
+  "textures": {
+    "stone": "erydon:block/kylorion_hewn_block",
+    "particle": "erydon:block/kylorion_hewn_block"
+  }
+}

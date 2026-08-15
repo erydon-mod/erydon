@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/surround/modern/surround_modern_corbel_lh",
+  "textures": {
+    "particle": "erydon:block/chrysonyx_block",
+    "0": "erydon:block/chrysonyx_block",
+    "1": "erydon:block/chrysonyx_block",
+    "texture": "erydon:block/chrysonyx_block",
+    "stone": "erydon:block/chrysonyx_block"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/layer/layer_multiface/parent/height10",
+  "textures": {
+    "texture": "erydon:block/psamatheon_ashlar_block"
+  }
+}

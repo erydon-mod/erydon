@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/alcove/georgian/alcove_georgian_sides",
+  "textures": {
+    "stone": "erydon:block/latmion_rusticated_block",
+    "particle": "erydon:block/latmion_rusticated_block"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/surround/gothic_ornate/surround_gothic_ornate_shaft_lh",
+  "textures": {
+    "particle": "erydon:block/striatus_block",
+    "0": "erydon:block/striatus_block",
+    "1": "erydon:block/striatus_block",
+    "texture": "erydon:block/striatus_block",
+    "stone": "erydon:block/striatus_block"
+  }
+}

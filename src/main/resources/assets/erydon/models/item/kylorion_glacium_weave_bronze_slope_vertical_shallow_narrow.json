@@ -1,0 +1,6 @@
+{
+    "parent":  "erydon:block/internal/wrapped/kylorion_glacium_weave_bronze_slope_vertical_shallow_narrow",
+    "textures":  {
+                     "texture":  "erydon:block/kylorion_glacium_weave_bronze_block"
+                 }
+}

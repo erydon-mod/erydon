@@ -1,0 +1,8 @@
+{
+  "parent": "erydon:block/window/french_georgian/window_french_georgian_open_upper_single_lh",
+  "textures": {
+    "stone": "erydon:block/striatus_block_aged",
+    "pane": "erydon:block/glazing_silver",
+    "lead": "erydon:block/lead_black"
+  }
+}

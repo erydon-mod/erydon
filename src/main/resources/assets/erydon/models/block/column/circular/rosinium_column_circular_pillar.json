@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/column/circular/column_circular_pillar",
+  "textures": {
+    "stone": "erydon:block/rosinium_block",
+    "particle": "erydon:block/rosinium_block"
+  }
+}

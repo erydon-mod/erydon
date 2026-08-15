@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/cornice/georgian/cornice_georgian_straight",
+  "textures": {
+    "stone": "erydon:block/chalstrom_block_aged",
+    "particle": "erydon:block/chalstrom_block_aged"
+  }
+}

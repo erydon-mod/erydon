@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/layer/layer/layer_vertical_depth2",
+  "textures": {
+    "all": "erydon:block/aganite_herringbone_grout_block",
+    "particle": "erydon:block/aganite_herringbone_grout_block"
+  }
+}

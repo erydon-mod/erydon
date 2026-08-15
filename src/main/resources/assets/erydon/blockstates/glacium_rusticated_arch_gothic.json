@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "erydon:block/internal/wrapped/glacium_rusticated_arch_gothic"
+      }
+    }
+  ]
+}

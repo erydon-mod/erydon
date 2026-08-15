@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/column/circular/column_circular_capital",
+  "textures": {
+    "stone": "erydon:block/calacattum_block",
+    "particle": "erydon:block/calacattum_block"
+  }
+}

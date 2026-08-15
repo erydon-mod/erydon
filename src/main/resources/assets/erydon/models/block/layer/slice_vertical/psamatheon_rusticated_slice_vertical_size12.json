@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/layer/slice_vertical/slice_vertical_size12",
+  "textures": {
+    "texture": "erydon:block/psamatheon_rusticated_block",
+    "particle": "erydon:block/psamatheon_rusticated_block"
+  }
+}

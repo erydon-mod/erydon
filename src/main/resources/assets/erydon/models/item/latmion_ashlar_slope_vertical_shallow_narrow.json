@@ -1,0 +1,6 @@
+{
+    "parent":  "erydon:block/internal/wrapped/latmion_ashlar_slope_vertical_shallow_narrow",
+    "textures":  {
+                     "texture":  "erydon:block/latmion_ashlar_block"
+                 }
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/alcove/georgian/alcove_georgian_base",
+  "textures": {
+    "stone": "erydon:block/calacattum_hewn_block",
+    "particle": "erydon:block/calacattum_hewn_block"
+  }
+}

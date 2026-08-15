@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab_top",
+  "textures": {
+    "bottom": "erydon:block/noxoplis_block_aged",
+    "top": "erydon:block/noxoplis_block_aged",
+    "side": "erydon:block/noxoplis_block_aged"
+  }
+}

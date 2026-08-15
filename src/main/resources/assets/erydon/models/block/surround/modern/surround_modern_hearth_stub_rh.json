@@ -1,0 +1,54 @@
+{
+	"format_version": "1.9.0",
+	"credit": "Made with Blockbench",
+	"elements": [
+		{
+			"from": [0, 2, 0],
+			"to": [9, 3, 5],
+			"rotation": {"angle": 0, "axis": "y", "origin": [7.5, 1.5, 5]},
+			"color": 4,
+			"faces": {
+				"north": {"texture": "#stone", "cullface": "north"},
+				"east": {"texture": "#stone"},
+				"south": {"texture": "#stone"},
+				"west": {"texture": "#stone", "cullface": "west"},
+				"up": {"texture": "#stone"}
+			}
+		},
+		{
+			"from": [0.02971, 1, 0.00757],
+			"to": [10.06061, 2, 5.96212],
+			"rotation": {"angle": 0, "axis": "y", "origin": [7.5, 1.5, 5]},
+			"color": 7,
+			"faces": {
+				"north": {"texture": "#stone"},
+				"east": {"texture": "#stone"},
+				"south": {"texture": "#stone"},
+				"west": {"texture": "#stone"},
+				"up": {"texture": "#stone"}
+			}
+		},
+		{
+			"from": [0, 0, 0],
+			"to": [11, 1, 7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [7.5, 1.5, 5]},
+			"color": 9,
+			"faces": {
+				"north": {"texture": "#stone", "cullface": "north"},
+				"east": {"texture": "#stone"},
+				"south": {"texture": "#stone"},
+				"west": {"texture": "#stone", "cullface": "west"},
+				"up": {"texture": "#stone"},
+				"down": {"texture": "#stone", "cullface": "down"}
+			}
+		}
+	],
+	"groups": [
+		{
+			"name": "hearth stub rh",
+			"origin": [13, 0, 0],
+			"color": 0,
+			"children": [0, 1, 2]
+		}
+	]
+}

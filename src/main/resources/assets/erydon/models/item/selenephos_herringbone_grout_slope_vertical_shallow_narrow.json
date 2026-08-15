@@ -1,0 +1,6 @@
+{
+    "parent":  "erydon:block/internal/wrapped/selenephos_herringbone_grout_slope_vertical_shallow_narrow",
+    "textures":  {
+                     "texture":  "erydon:block/selenephos_herringbone_grout_block"
+                 }
+}

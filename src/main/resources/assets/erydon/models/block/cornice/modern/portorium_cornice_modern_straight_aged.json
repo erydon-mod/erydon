@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/cornice/modern/cornice_modern_straight",
+    "textures":  {
+                     "all":  "erydon:block/portorium_block_aged",
+                     "particle":  "#all"
+                 }
+}

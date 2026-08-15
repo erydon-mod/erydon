@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "#erydon:coffered",
+    "#erydon:guilloche",
+    "#erydon:herringbone",
+    "#erydon:quatrefoil",
+    "#erydon:rose",
+    "#erydon:trim",
+    "#erydon:weave"
+  ]
+}

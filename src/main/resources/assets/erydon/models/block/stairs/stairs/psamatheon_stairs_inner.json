@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/inner_stairs",
+  "textures": {
+    "side": "erydon:block/psamatheon_block",
+    "top": "erydon:block/psamatheon_block",
+    "bottom": "erydon:block/psamatheon_block"
+  }
+}

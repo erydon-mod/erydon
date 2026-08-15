@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/surround/gothic_ornate/surround_gothic_ornate_hearth",
+  "textures": {
+    "particle": "erydon:block/nerium_block",
+    "0": "erydon:block/nerium_block",
+    "1": "erydon:block/nerium_block",
+    "texture": "erydon:block/nerium_block",
+    "stone": "erydon:block/nerium_block"
+  }
+}

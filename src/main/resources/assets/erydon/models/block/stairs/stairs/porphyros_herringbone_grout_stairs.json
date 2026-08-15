@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/stairs",
+  "textures": {
+    "side": "erydon:block/porphyros_herringbone_grout_block",
+    "top": "erydon:block/porphyros_herringbone_grout_block",
+    "bottom": "erydon:block/porphyros_herringbone_grout_block"
+  }
+}

@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/calacattum_herringbone_grout_slope_vertical"
+                                    }
+                      }
+                  ]
+}

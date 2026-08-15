@@ -1,0 +1,9 @@
+{
+  "parent": "erydon:block/slope/shallow/slope_shallow_lower",
+  "textures": {
+    "stone": "erydon:block/selenephos_rock_block",
+    "particle": "#stone"
+  }
+}
+
+

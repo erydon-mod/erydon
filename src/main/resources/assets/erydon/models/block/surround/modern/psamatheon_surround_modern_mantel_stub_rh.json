@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/surround/modern/surround_modern_mantel_stub_rh",
+  "textures": {
+    "particle": "erydon:block/psamatheon_block",
+    "0": "erydon:block/psamatheon_block",
+    "1": "erydon:block/psamatheon_block",
+    "texture": "erydon:block/psamatheon_block",
+    "stone": "erydon:block/psamatheon_block"
+  }
+}

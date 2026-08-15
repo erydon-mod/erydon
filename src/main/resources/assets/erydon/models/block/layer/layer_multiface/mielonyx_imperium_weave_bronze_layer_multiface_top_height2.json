@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/layer/layer_multiface/parent/top_height2",
+  "textures": {
+    "texture": "erydon:block/mielonyx_imperium_weave_bronze_block"
+  }
+}

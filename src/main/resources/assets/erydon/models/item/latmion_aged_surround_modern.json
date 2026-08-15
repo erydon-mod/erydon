@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:item/surround_modern_icon",
+  "textures": {
+    "stone": "erydon:block/latmion_block_aged"
+  }
+}

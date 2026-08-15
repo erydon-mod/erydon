@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/surround/guilloche/surround_guilloche_short_jamb_lh",
+  "textures": {
+    "particle": "erydon:block/mielonyx_block",
+    "0": "erydon:block/mielonyx_block",
+    "1": "erydon:block/mielonyx_block",
+    "texture": "erydon:block/mielonyx_block",
+    "stone": "erydon:block/mielonyx_block"
+  }
+}

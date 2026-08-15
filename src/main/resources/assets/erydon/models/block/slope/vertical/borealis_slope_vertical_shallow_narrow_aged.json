@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/borealis_slope_vertical_shallow_narrow_lh_aged",
+  "textures": {
+    "stone": "erydon:block/borealis_block_aged",
+    "particle": "erydon:block/borealis_block_aged"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/snow_height2",
+  "textures": {
+    "texture": "erydon:block/chrysonyx_glacium_weave_bronze_block",
+    "particle": "erydon:block/chrysonyx_glacium_weave_bronze_block"
+  }
+}

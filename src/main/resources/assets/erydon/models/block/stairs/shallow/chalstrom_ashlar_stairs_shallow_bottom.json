@@ -1,0 +1,8 @@
+{
+    "parent":  "erydon:block/stairs/shallow/shallow_stairs_bottom",
+    "textures":  {
+                     "all":  "erydon:block/chalstrom_ashlar_block",
+                     "underside":  "erydon:block/chalstrom_ashlar_block",
+                     "particle":  "#all"
+                 }
+}

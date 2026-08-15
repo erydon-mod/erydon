@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/striatus_hewn_slope_vertical_shallow_broad_lh",
+  "textures": {
+    "stone": "erydon:block/striatus_hewn_block",
+    "particle": "erydon:block/striatus_hewn_block"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/surround/guilloche/surround_guilloche_hearth",
+  "textures": {
+    "particle": "erydon:block/etruscus_block",
+    "0": "erydon:block/etruscus_block",
+    "1": "erydon:block/etruscus_block",
+    "texture": "erydon:block/etruscus_block",
+    "stone": "erydon:block/etruscus_block"
+  }
+}

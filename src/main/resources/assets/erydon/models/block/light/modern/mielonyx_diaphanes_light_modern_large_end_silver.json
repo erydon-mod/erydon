@@ -1,0 +1,8 @@
+{
+  "parent": "erydon:block/light/modern/light_modern_large_end_diaphanes",
+  "textures": {
+    "0": "erydon:block/mielonyx_diaphanes_block",
+    "particle": "erydon:block/mielonyx_diaphanes_block",
+    "2": "erydon:block/mielonyx_diaphanes_block"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "erydon:block/slab/portorium_slab_aged"
+    },
+    "type=top": {
+      "model": "erydon:block/slab/portorium_slab_top_aged"
+    },
+    "type=double": {
+      "model": "erydon:block/block/portorium_block_aged"
+    }
+  }
+}

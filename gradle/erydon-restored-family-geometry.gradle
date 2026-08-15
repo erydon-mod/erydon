@@ -1,0 +1,592 @@
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+
+import java.security.MessageDigest
+
+tasks.register('auditErydonRestoredFamilyGeometry') {
+    group = 'verification'
+    description = 'Checks representative restored ERYDON custom-model families against compact legacy multipart fixtures.'
+
+    doLast {
+        def projectRoot = project.projectDir
+        def reportDir = layout.buildDirectory.dir('reports').get().asFile
+        reportDir.mkdirs()
+
+        def reportFile = new File(reportDir, 'erydon-restored-family-geometry.json')
+        def currentAssetsRoot = file('src/main/resources/assets')
+        def oldAssetsRoot = file('src/test/resources/restored-family-geometry/legacy-assets')
+        def slurper = new JsonSlurper()
+        def parseFailures = []
+
+        def relPath = { File file ->
+            projectRoot.toPath().relativize(file.toPath()).toString().replace(File.separator, '/')
+        }
+        def filesUnder = { File root, Closure<Boolean> keep ->
+            def result = []
+            if (root.exists()) {
+                root.eachFileRecurse(groovy.io.FileType.FILES) { file ->
+                    if (keep(file)) {
+                        result << file
+                    }
+                }
+            }
+            result.sort { relPath(it) }
+        }
+        def parseJson = { File file ->
+            try {
+                slurper.parse(file)
+            } catch (Exception exception) {
+                parseFailures << "${relPath(file)} :: ${exception.message}"
+                null
+            }
+        }
+        def sha256 = { Object value ->
+            MessageDigest digest = MessageDigest.getInstance('SHA-256')
+            byte[] bytes = JsonOutput.toJson(value).getBytes('UTF-8')
+            digest.digest(bytes).collect { String.format('%02x', it & 0xff) }.join()
+        }
+        def splitModelRef = { String rawRef ->
+            int colon = rawRef.indexOf(':')
+            if (colon >= 0) {
+                return [namespace: rawRef.substring(0, colon), path: rawRef.substring(colon + 1)]
+            }
+            [namespace: 'minecraft', path: rawRef]
+        }
+        def normalizeModelRef = { String rawRef, String defaultNamespace = 'erydon' ->
+            rawRef.contains(':') ? rawRef : "${defaultNamespace}:${rawRef}"
+        }
+        def modelFile = { File assetsRoot, String rawRef ->
+            def ref = splitModelRef(normalizeModelRef(rawRef))
+            new File(assetsRoot, "${ref.namespace}/models/${ref.path}.json")
+        }
+        def currentBlockstateFile = { String blockId ->
+            new File(currentAssetsRoot, "erydon/blockstates/${blockId}.json")
+        }
+        def oldBlockstateFile = { String blockId ->
+            new File(oldAssetsRoot, "erydon/blockstates/${blockId}.json")
+        }
+        def normalizeDegrees = { Object value ->
+            if (value == null) {
+                return 0
+            }
+            Math.floorMod((value as Number).intValue(), 360)
+        }
+        def normalizeApply = { Object apply ->
+            [
+                    model : normalizeModelRef(apply.model.toString()),
+                    x     : normalizeDegrees(apply.x),
+                    y     : normalizeDegrees(apply.y),
+                    uvlock: apply.uvlock == true
+            ]
+        }
+        def comparableComponents = { Collection components ->
+            components.collect { component ->
+                [
+                        model: component.model,
+                        x    : component.x,
+                        y    : component.y
+                ]
+            }
+        }
+        def matchesCondition
+        matchesCondition = { Object condition, Map<String, String> state ->
+            if (condition == null) {
+                return true
+            }
+            if (!(condition instanceof Map)) {
+                return true
+            }
+            if (condition.OR instanceof Iterable) {
+                return condition.OR.any { matchesCondition(it, state) }
+            }
+            if (condition.AND instanceof Iterable) {
+                return condition.AND.every { matchesCondition(it, state) }
+            }
+
+            condition.every { key, expected ->
+                String actual = state[key.toString()]
+                if (actual == null) {
+                    return false
+                }
+                expected.toString().split(/\|/).any { option -> option == actual }
+            }
+        }
+        def evaluateMultipart = { File blockstateFile, Map<String, String> state ->
+            if (!blockstateFile.exists()) {
+                return [available: false, components: [], source: relPath(blockstateFile)]
+            }
+            def json = parseJson(blockstateFile)
+            def components = []
+            if (json?.multipart instanceof Iterable) {
+                json.multipart.each { part ->
+                    if (!matchesCondition(part.when, state)) {
+                        return
+                    }
+                    def applies = part.apply instanceof Iterable ? part.apply : [part.apply]
+                    applies.findAll { it instanceof Map && it.model != null }.each { apply ->
+                        components << normalizeApply(apply)
+                    }
+                }
+                return [available: true, components: components, source: relPath(blockstateFile)]
+            }
+
+            if (json?.variants instanceof Map) {
+                json.variants.each { key, value ->
+                    boolean matches = key.toString().isEmpty() ? state.isEmpty() : key.toString().split(',').every { assignment ->
+                        def parts = assignment.split('=', 2)
+                        parts.size() == 2 && state[parts[0]] == parts[1]
+                    }
+                    if (matches) {
+                        def applies = value instanceof Iterable ? value : [value]
+                        applies.findAll { it instanceof Map && it.model != null }.each { apply ->
+                            components << normalizeApply(apply)
+                        }
+                    }
+                }
+            }
+            [available: true, components: components, source: relPath(blockstateFile)]
+        }
+        def wrappedAnchorForBlockstate = { String blockId ->
+            def blockstateFile = currentBlockstateFile(blockId)
+            def selection = evaluateMultipart(blockstateFile, [:])
+            def expected = "erydon:block/internal/wrapped/${blockId}"
+            [
+                    blockstateExists: blockstateFile.exists(),
+                    source          : relPath(blockstateFile),
+                    expectedModel   : expected,
+                    present         : selection.components.any { it.model == expected },
+                    modelExists     : modelFile(currentAssetsRoot, expected).exists(),
+                    components      : selection.components
+            ]
+        }
+        def resolveTexture
+        resolveTexture = { String texture, Map textures ->
+            if (texture == null) {
+                return null
+            }
+            String current = texture
+            def seen = new LinkedHashSet<String>()
+            while (current.startsWith('#') && seen.add(current)) {
+                String key = current.substring(1)
+                Object resolved = textures[key]
+                if (resolved == null) {
+                    return current
+                }
+                current = resolved.toString()
+            }
+            current
+        }
+        def numberValue = { Object value ->
+            if (value == null) {
+                return null
+            }
+            double rounded = Math.round(((Number) value).doubleValue() * 100000D) / 100000D
+            rounded == Math.rint(rounded) ? (int) rounded : rounded
+        }
+        def vectorValue = { Object values ->
+            values instanceof Iterable ? values.collect { numberValue(it) } : []
+        }
+        def modelSummary
+        modelSummary = { File assetsRoot, String rawRef, Set<String> seen ->
+            String modelRef = normalizeModelRef(rawRef)
+            if (!seen.add(modelRef)) {
+                return [
+                        modelRef         : modelRef,
+                        exists           : true,
+                        cyclicParent     : true,
+                        sourceFiles      : [],
+                        unresolvedParents: [],
+                        textures         : [:],
+                        elements         : []
+                ]
+            }
+
+            def ref = splitModelRef(modelRef)
+            def sourceFile = modelFile(assetsRoot, modelRef)
+            if (!sourceFile.exists()) {
+                return [
+                        modelRef         : modelRef,
+                        exists           : false,
+                        externalOrMissing: ref.namespace != 'erydon',
+                        sourceFiles      : [],
+                        unresolvedParents: [modelRef],
+                        textures         : [:],
+                        elements         : []
+                ]
+            }
+
+            def raw = parseJson(sourceFile)
+            if (!(raw instanceof Map)) {
+                return [
+                        modelRef         : modelRef,
+                        exists           : false,
+                        sourceFiles      : [relPath(sourceFile)],
+                        unresolvedParents: [],
+                        textures         : [:],
+                        elements         : []
+                ]
+            }
+
+            def parent = null
+            if (raw.parent instanceof CharSequence) {
+                String parentNamespace = raw.parent.toString().contains(':') ? null : ref.namespace
+                parent = modelSummary(assetsRoot, normalizeModelRef(raw.parent.toString(), parentNamespace ?: 'erydon'), seen)
+            }
+
+            def textures = new LinkedHashMap<String, String>()
+            if (parent?.textures instanceof Map) {
+                textures.putAll(parent.textures.collectEntries { key, value -> [(key.toString()): value.toString()] })
+            }
+            if (raw.textures instanceof Map) {
+                textures.putAll(raw.textures.collectEntries { key, value -> [(key.toString()): value.toString()] })
+            }
+
+            def elements = raw.containsKey('elements') ? raw.elements : (parent?.elements ?: [])
+            def sourceFiles = []
+            if (parent?.sourceFiles instanceof Iterable) {
+                sourceFiles.addAll(parent.sourceFiles)
+            }
+            sourceFiles << relPath(sourceFile)
+
+            def unresolvedParents = []
+            if (parent?.unresolvedParents instanceof Iterable) {
+                unresolvedParents.addAll(parent.unresolvedParents)
+            }
+
+            [
+                    modelRef         : modelRef,
+                    exists           : true,
+                    parent           : raw.parent?.toString(),
+                    sourceFiles      : sourceFiles.unique(),
+                    unresolvedParents: unresolvedParents.unique(),
+                    textures         : textures,
+                    ambientOcclusion : raw.containsKey('ambientocclusion') ? raw.ambientocclusion : parent?.ambientOcclusion,
+                    guiLight         : raw.gui_light ?: parent?.guiLight,
+                    elements         : elements instanceof Iterable ? elements : []
+            ]
+        }
+        def fingerprintModel = { File assetsRoot, String rawRef ->
+            def graph = modelSummary(assetsRoot, rawRef, new LinkedHashSet<String>())
+            def elementSummaries = []
+            def sprites = new TreeSet<String>()
+            def cullFaces = new TreeMap<String, Integer>()
+            def nominalFaces = new TreeSet<String>()
+            def tintIndexes = new TreeSet<String>()
+            def uvBoxes = new TreeSet<String>()
+            int faceCount = 0
+            def min = [Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY]
+            def max = [Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY]
+
+            graph.elements.eachWithIndex { element, index ->
+                def from = vectorValue(element.from)
+                def to = vectorValue(element.to)
+                if (from.size() == 3 && to.size() == 3) {
+                    (0..2).each { axis ->
+                        min[axis] = Math.min(min[axis], ((Number) from[axis]).doubleValue())
+                        min[axis] = Math.min(min[axis], ((Number) to[axis]).doubleValue())
+                        max[axis] = Math.max(max[axis], ((Number) from[axis]).doubleValue())
+                        max[axis] = Math.max(max[axis], ((Number) to[axis]).doubleValue())
+                    }
+                }
+
+                def faces = []
+                if (element.faces instanceof Map) {
+                    element.faces.each { direction, face ->
+                        faceCount++
+                        nominalFaces << direction.toString()
+                        if (face.cullface != null) {
+                            String cullface = face.cullface.toString()
+                            cullFaces[cullface] = (cullFaces[cullface] ?: 0) + 1
+                        }
+                        if (face.tintindex != null) {
+                            tintIndexes << face.tintindex.toString()
+                        }
+                        if (face.uv instanceof Iterable) {
+                            uvBoxes << JsonOutput.toJson(vectorValue(face.uv))
+                        }
+                        String sprite = resolveTexture(face.texture?.toString(), graph.textures)
+                        if (sprite != null) {
+                            sprites << sprite
+                        }
+                        faces << [
+                                direction: direction.toString(),
+                                texture  : sprite,
+                                cullface : face.cullface?.toString(),
+                                tintindex: face.tintindex,
+                                uv       : face.uv instanceof Iterable ? vectorValue(face.uv) : null
+                        ]
+                    }
+                }
+
+                elementSummaries << [
+                        index   : index,
+                        from    : from,
+                        to      : to,
+                        rotation: element.rotation ?: null,
+                        shade   : element.containsKey('shade') ? element.shade : null,
+                        faces   : faces.sort { it.direction }
+                ]
+            }
+
+            def bounds = graph.elements.isEmpty() ? null : [
+                    from: min.collect { numberValue(it) },
+                    to  : max.collect { numberValue(it) }
+            ]
+            String particle = resolveTexture(graph.textures?.particle?.toString(), graph.textures ?: [:])
+            def normalized = [
+                    modelRef         : graph.modelRef,
+                    exists           : graph.exists,
+                    sourceFiles      : graph.sourceFiles,
+                    unresolvedParents: graph.unresolvedParents,
+                    bounds           : bounds,
+                    elementCount     : graph.elements.size(),
+                    sourceQuadCount  : faceCount,
+                    nominalFaces     : nominalFaces.toList(),
+                    cullFaces        : cullFaces,
+                    tintIndexes      : tintIndexes.toList(),
+                    sprites          : sprites.toList(),
+                    particle         : particle,
+                    uvBoxes          : uvBoxes.collect { new JsonSlurper().parseText(it) },
+                    ambientOcclusion : graph.ambientOcclusion == null ? true : graph.ambientOcclusion,
+                    guiLight         : graph.guiLight,
+                    elements         : elementSummaries
+            ]
+            normalized.hash = sha256(normalized)
+            normalized
+        }
+        def ctmProperties = filesUnder(file('run-dev/resourcepacks')) {
+            it.name.endsWith('.properties')
+        } + filesUnder(file('src/main/resources')) {
+            it.name.endsWith('.properties')
+        }
+        def ctmMatchesForSprites = { Collection<String> sprites ->
+            def tokens = new TreeSet<String>()
+            sprites.findAll { it != null }.each { sprite ->
+                String noNamespace = sprite.contains(':') ? sprite.substring(sprite.indexOf(':') + 1) : sprite
+                tokens << noNamespace
+                tokens << noNamespace.tokenize('/').last()
+            }
+            def matches = []
+            ctmProperties.each { propertyFile ->
+                String text = propertyFile.getText('UTF-8')
+                if (tokens.any { token -> token && text.contains(token) }) {
+                    matches << [
+                            file: relPath(propertyFile),
+                            hash: sha256(text)
+                    ]
+                }
+            }
+            [
+                    spriteCount      : sprites.findAll { it != null }.unique().size(),
+                    matchedProperties: matches.take(25),
+                    matchedCount     : matches.size(),
+                    fingerprint      : sha256(matches)
+            ]
+        }
+
+        def c = { String model, int y = 0 -> [model: normalizeModelRef(model), x: 0, y: normalizeDegrees(y), uvlock: false] }
+        def samples = [
+                [
+                        id          : 'column_circular_base_narrow',
+                        family      : 'columns',
+                        block       : 'aganite_column_circular',
+                        state       : [part: 'base', base: 'narrow', capital: 'georgian'],
+                        mode        : 'must_match_old_multipart',
+                        expected    : [c('erydon:block/column/circular/aganite_column_circular_base_narrow')],
+                        note        : 'Standard narrow base component should match the old multipart component.'
+                ],
+                [
+                        id          : 'column_circular_capital_narrow_current_fix',
+                        family      : 'columns',
+                        block       : 'aganite_column_circular',
+                        state       : [part: 'capital', capital: 'narrow', base: 'full'],
+                        mode        : 'documented_current_difference',
+                        expected    : [c('erydon:block/column/circular/aganite_column_circular_capital_narrow')],
+                        note        : 'Old snapshot had no capital=narrow circular component; current custom model keeps the published narrow-capital culling fix.'
+                ],
+                [
+                        id          : 'cornice_georgian_inner_corner',
+                        family      : 'cornices',
+                        block       : 'aganite_cornice_georgian',
+                        state       : [facing: 'east', shape: 'inner_corner'],
+                        mode        : 'must_match_old_multipart',
+                        expected    : [
+                                c('erydon:block/cornice/georgian/aganite_cornice_georgian_straight', 90),
+                                c('erydon:block/cornice/georgian/aganite_cornice_georgian_straight')
+                        ],
+                        note        : 'Inner Georgian cornice remains two straight pieces.'
+                ],
+                [
+                        id          : 'cornice_georgian_outer_corner_consolidated',
+                        family      : 'cornices',
+                        block       : 'aganite_cornice_georgian',
+                        state       : [facing: 'north', shape: 'outer_corner'],
+                        mode        : 'documented_current_difference',
+                        expected    : [c('erydon:block/cornice/georgian/aganite_cornice_georgian_outer_corner', 270)],
+                        note        : 'Old snapshot used outer_corner_a plus outer_corner_b; current resources use the consolidated outer_corner model.'
+                ],
+                [
+                        id          : 'surround_georgian_corbel',
+                        family      : 'surrounds',
+                        block       : 'aganite_surround_georgian',
+                        state       : [facing: 'east', section: 'corbel'],
+                        mode        : 'must_match_old_multipart',
+                        expected    : [c('erydon:block/surround/georgian/aganite_surround_georgian_corbel', 90)],
+                        note        : 'Simple Georgian surround piece should match old multipart output.'
+                ],
+                [
+                        id          : 'window_arch_lower_single_closed',
+                        family      : 'arch_windows',
+                        block       : 'aganite_window_arch',
+                        state       : [facing: 'east', piece: 'lower_single', open: 'false', sill: 'false'],
+                        mode        : 'must_match_old_multipart',
+                        expected    : [
+                                c('erydon:block/window/arch/aganite_window_arch_wall', 90),
+                                c('erydon:block/window/arch/aganite_window_arch_glass_lower', 90),
+                                c('erydon:block/window/arch/aganite_window_arch_wall', 270)
+                        ],
+                        note        : 'Closed lower single arch window keeps both wall halves plus lower glass.'
+                ],
+                [
+                        id          : 'window_french_georgian_closed_upper_single',
+                        family      : 'french_georgian_windows',
+                        block       : 'aganite_window_french_georgian',
+                        state       : [facing: 'east', piece: 'upper_single', open: 'false', hinge: 'left', sill: 'false'],
+                        mode        : 'must_match_old_multipart',
+                        expected    : [c('erydon:block/window/french_georgian/aganite_window_french_georgian_closed_upper_single', 90)],
+                        note        : 'Closed French Georgian upper single panel should match old multipart output.'
+                ],
+                [
+                        id          : 'arch_romanesque_small_top',
+                        family      : 'romanesque_arches',
+                        block       : 'aganite_arch_romanesque',
+                        state       : [facing: 'north', arr: 'small_top'],
+                        mode        : 'must_match_old_multipart',
+                        expected    : [
+                                c('erydon:block/arch/romanesque/aganite_arch_romanesque_corner_small', 180),
+                                c('erydon:block/arch/romanesque/aganite_arch_romanesque_side_small', 180),
+                                c('erydon:block/arch/romanesque/aganite_arch_romanesque_side_small')
+                        ],
+                        note        : 'Small Romanesque top keeps the corner plus left/right side pieces.'
+                ],
+                [
+                        id          : 'ceiling_coffered_georgian_black_small_north_wall',
+                        family      : 'coffered_ceilings',
+                        block       : 'aganite_ceiling_coffered_georgian_black_small',
+                        state       : [finish: 'matte', unused: 'u01'],
+                        mode        : 'current_only_old_snapshot_missing',
+                        expected    : [
+                                c('erydon:block/ceiling/coffered/georgian/aganite_ceiling_coffered_georgian_black_small_matte'),
+                                c('erydon:block/ceiling/coffered/georgian/ceiling_coffered_georgian_black_small_matte_stem'),
+                                c('erydon:block/cornice/georgian/aganite_cornice_georgian_straight')
+                        ],
+                        note        : 'The old snapshot has no matching coffered ceiling blockstates, so this verifies current component completeness only.'
+                ],
+                [
+                        id          : 'layer_vertical_depth6_east',
+                        family      : 'layer_vertical',
+                        block       : 'aganite_layer_vertical',
+                        state       : [facing: 'east', layers: '3', waterlogged: 'false'],
+                        mode        : 'documented_current_difference',
+                        expected    : [
+                                c('erydon:block/layer/layer/aganite_layer_vertical_depth6', 90)
+                        ],
+                        note        : 'The old snapshot selected depth6 from block/layer/; the current project keeps the same depth selection in block/layer/layer/ component models.'
+                ]
+        ]
+
+        def failures = []
+        def rows = samples.collect { sample ->
+            def anchor = wrappedAnchorForBlockstate(sample.block)
+            if (!anchor.blockstateExists || !anchor.present || !anchor.modelExists) {
+                failures << "${sample.id}: current wrapped anchor missing or incomplete"
+            }
+
+            def oldSelection = evaluateMultipart(oldBlockstateFile(sample.block), sample.state)
+            def currentSelection = sample.expected.collect { normalizeApply(it) }
+            def oldComparable = comparableComponents(oldSelection.components)
+            def currentComparable = comparableComponents(currentSelection)
+            boolean matchesOld = oldSelection.available && oldComparable == currentComparable
+            if (sample.mode == 'must_match_old_multipart' && !matchesOld) {
+                failures << "${sample.id}: custom component selection did not match old multipart selection"
+            }
+
+            def currentFingerprints = currentSelection.collect { component ->
+                fingerprintModel(currentAssetsRoot, component.model)
+            }
+            def oldFingerprints = oldSelection.components.collect { component ->
+                fingerprintModel(oldAssetsRoot, component.model)
+            }
+            def missingCurrentModels = currentFingerprints.findAll {
+                !it.exists && it.modelRef.startsWith('erydon:')
+            }.collect { it.modelRef }
+            if (!missingCurrentModels.isEmpty()) {
+                failures << "${sample.id}: missing current component model(s): ${missingCurrentModels.join(', ')}"
+            }
+
+            def currentSprites = currentFingerprints.collectMany { it.sprites ?: [] }.unique().sort()
+            [
+                    id                   : sample.id,
+                    family               : sample.family,
+                    block                : sample.block,
+                    state                : sample.state,
+                    mode                 : sample.mode,
+                    note                 : sample.note,
+                    anchor               : anchor,
+                    oldSelectionAvailable: oldSelection.available,
+                    oldSelectionSource   : oldSelection.source,
+                    oldComponents        : oldSelection.components,
+                    currentComponents    : currentSelection,
+                    componentSelectionMatchesOld: matchesOld,
+                    currentFingerprints  : currentFingerprints.collect {
+                        it.findAll { key, value -> key != 'elements' }
+                    },
+                    oldFingerprintHashes : oldFingerprints.collect {
+                        [modelRef: it.modelRef, exists: it.exists, hash: it.hash]
+                    },
+                    modelFingerprintHashesMatchOld: oldFingerprints.size() == currentFingerprints.size()
+                            && oldFingerprints.collect { it.hash } == currentFingerprints.collect { it.hash },
+                    ctmRules             : ctmMatchesForSprites(currentSprites)
+            ]
+        }
+
+        def exactRows = rows.findAll { it.mode == 'must_match_old_multipart' }
+        def documentedRows = rows.findAll { it.mode != 'must_match_old_multipart' }
+        def report = [
+                generatedAt        : new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                objective          : 'Representative source geometry/component evidence for restored ERYDON custom baked-model families',
+                measurementKind    : 'legacy multipart fixture selection versus current custom component selection, plus source model fingerprints and CTM rule fingerprints',
+                legacyFixture      : oldAssetsRoot.exists() ? relPath(oldAssetsRoot) : null,
+                currentAssets      : relPath(currentAssetsRoot),
+                counts             : [
+                        samples                     : rows.size(),
+                        exactComparisonSamples      : exactRows.size(),
+                        exactComparisonsMatched     : exactRows.count { it.componentSelectionMatchesOld },
+                        documentedCurrentDifferences: documentedRows.size(),
+                        failures                    : failures.size()
+                ],
+                documentedCurrentDifferences: documentedRows.collect {
+                    [id: it.id, family: it.family, mode: it.mode, note: it.note, oldComponents: it.oldComponents, currentComponents: it.currentComponents]
+                },
+                samples           : rows,
+                parseFailures     : parseFailures.take(100),
+                conclusion        : failures.isEmpty()
+                        ? 'All exact representative restored-family selections matched the compact legacy fixtures, documented current differences were recorded, and all current component models/anchors were present.'
+                        : 'One or more restored-family geometry checks failed.'
+        ]
+
+        reportFile.text = JsonOutput.prettyPrint(JsonOutput.toJson(report)) + System.lineSeparator()
+
+        if (!failures.isEmpty() || !parseFailures.isEmpty()) {
+            throw new GradleException("ERYDON restored-family geometry audit failed: "
+                    + (failures + parseFailures.take(5)).join('; '))
+        }
+
+        logger.lifecycle("ERYDON restored-family geometry report written to ${reportFile}")
+        logger.lifecycle("ERYDON restored-family geometry summary: samples=${rows.size()}, exactMatched=${exactRows.count { it.componentSelectionMatchesOld }}/${exactRows.size()}, documentedDifferences=${documentedRows.size()}")
+    }
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('auditErydonRestoredFamilyGeometry')
+}

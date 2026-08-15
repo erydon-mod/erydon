@@ -1,0 +1,80 @@
+{
+	"format_version": "1.9.0",
+	"credit": "Made with Blockbench",
+	"elements": [
+		{
+			"from": [10, 0, 1],
+			"to": [12, 16, 3],
+			"rotation": {"angle": 0, "axis": "y", "origin": [18, 8, 1]},
+			"color": 1,
+			"faces": {
+				"east": {"texture": "#stone"},
+				"south": {"texture": "#stone"},
+				"up": {"texture": "#stone", "cullface": "up"}
+			}
+		},
+		{
+			"from": [12, 0, 1],
+			"to": [14, 16, 2],
+			"rotation": {"angle": 0, "axis": "y", "origin": [20, 8, 1]},
+			"color": 1,
+			"faces": {
+				"east": {"texture": "#stone"},
+				"south": {"texture": "#stone"},
+				"up": {"texture": "#stone", "cullface": "up"}
+			}
+		},
+		{
+			"from": [8, 0, 0.001],
+			"to": [15.999, 16, 1],
+			"rotation": {"angle": 0, "axis": "y", "origin": [16, 8, 0]},
+			"color": 3,
+			"faces": {
+				"north": {"texture": "#stone", "cullface": "north"},
+				"east": {"texture": "#stone", "cullface": "east"},
+				"south": {"texture": "#stone"},
+				"west": {"texture": "#stone"},
+				"up": {"texture": "#stone", "cullface": "up"}
+			}
+		},
+		{
+			"from": [8, 0, 1],
+			"to": [10, 16, 4],
+			"rotation": {"angle": 0, "axis": "y", "origin": [16, 8, 1]},
+			"color": 4,
+			"faces": {
+				"east": {"texture": "#stone"},
+				"south": {"texture": "#stone"},
+				"west": {"texture": "#stone"},
+				"up": {"texture": "#stone", "cullface": "up"}
+			}
+		},
+		{
+			"from": [7, 1, 0],
+			"to": [16, 2, 5],
+			"rotation": {"angle": 0, "axis": "y", "origin": [16, 0, 0]},
+			"color": 9,
+			"faces": {
+				"north": {"texture": "#stone", "cullface": "north"},
+				"east": {"texture": "#stone", "cullface": "east"},
+				"south": {"texture": "#stone"},
+				"west": {"texture": "#stone"},
+				"up": {"texture": "#stone"}
+			}
+		},
+		{
+			"from": [6, 0, 0],
+			"to": [16, 1, 6],
+			"rotation": {"angle": 0, "axis": "y", "origin": [16, -1, 0]},
+			"color": 9,
+			"faces": {
+				"north": {"texture": "#stone", "cullface": "north"},
+				"east": {"texture": "#stone", "cullface": "east"},
+				"south": {"texture": "#stone"},
+				"west": {"texture": "#stone"},
+				"up": {"texture": "#stone"},
+				"down": {"texture": "#stone", "cullface": "down"}
+			}
+		}
+	]
+}

@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "erydon:block/internal/wrapped/borealis_ashlar_arch_gothic"
+      }
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "erydon:block/kylorion_rusticated_block"
+  }
+}

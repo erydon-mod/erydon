@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/stairs/shallow/shallow_stairs_outer_right_top",
+    "textures":  {
+                     "all":  "erydon:block/aterzon_herringbone_grout_block",
+                     "particle":  "#all"
+                 }
+}

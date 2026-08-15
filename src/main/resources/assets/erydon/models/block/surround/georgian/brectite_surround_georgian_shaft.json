@@ -1,0 +1,8 @@
+{
+  "parent": "erydon:block/surround/georgian/surround_georgian_shaft",
+  "textures": {
+  "stone": "erydon:block/brectite_block",
+  "particle": "#stone"
+}
+
+}

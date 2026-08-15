@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/surround/gothic_ornate/surround_gothic_ornate_shaft_lh",
+  "textures": {
+    "particle": "erydon:block/mielonyx_block_aged",
+    "0": "erydon:block/mielonyx_block_aged",
+    "1": "erydon:block/mielonyx_block_aged",
+    "texture": "erydon:block/mielonyx_block_aged",
+    "stone": "erydon:block/mielonyx_block_aged"
+  }
+}

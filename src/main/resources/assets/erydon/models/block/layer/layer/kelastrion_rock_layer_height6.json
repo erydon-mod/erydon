@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/snow_height6",
+  "textures": {
+    "texture": "erydon:block/kelastrion_rock_block",
+    "particle": "erydon:block/kelastrion_rock_block"
+  }
+}

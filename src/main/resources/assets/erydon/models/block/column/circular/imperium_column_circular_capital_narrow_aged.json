@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/column/circular/column_circular_capital_narrow",
+  "textures": {
+    "stone": "erydon:block/imperium_block_aged",
+    "particle": "erydon:block/imperium_block_aged"
+  }
+}

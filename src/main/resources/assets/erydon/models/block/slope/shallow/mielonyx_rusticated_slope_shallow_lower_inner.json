@@ -1,0 +1,8 @@
+{
+  "parent": "erydon:block/slope/shallow/slope_shallow_lower_inner",
+  "textures": {
+    "stone": "erydon:block/mielonyx_rusticated_block",
+    "particle": "#stone"
+  }
+}
+

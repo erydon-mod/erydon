@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/alcove/gothic/alcove_gothic_back",
+    "textures":  {
+                     "stone":  "erydon:block/borealis_rock_block",
+                     "particle":  "erydon:block/borealis_rock_block"
+                 }
+}

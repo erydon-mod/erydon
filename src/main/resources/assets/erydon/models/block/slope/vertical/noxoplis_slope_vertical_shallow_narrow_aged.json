@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/noxoplis_slope_vertical_shallow_narrow_lh_aged",
+  "textures": {
+    "stone": "erydon:block/noxoplis_block_aged",
+    "particle": "erydon:block/noxoplis_block_aged"
+  }
+}

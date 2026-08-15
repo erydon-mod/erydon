@@ -1,0 +1,6 @@
+{
+    "parent":  "erydon:block/surround/modern/surround_modern_icon",
+    "textures":  {
+                     "particle":  "#stone"
+                 }
+}

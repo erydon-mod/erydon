@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "erydon:block/slab/aterzon_slab_aged"
+    },
+    "type=top": {
+      "model": "erydon:block/slab/aterzon_slab_top_aged"
+    },
+    "type=double": {
+      "model": "erydon:block/block/aterzon_block_aged"
+    }
+  }
+}

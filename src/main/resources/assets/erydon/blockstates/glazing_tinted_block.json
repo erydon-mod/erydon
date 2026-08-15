@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "erydon:block/glazing/block/glazing_tinted_block"
+    }
+  }
+}

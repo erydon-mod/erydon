@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/alcove/georgian/alcove_georgian_double_side_left",
+    "textures":  {
+                     "stone":  "erydon:block/psamatheon_ashlar_block",
+                     "particle":  "erydon:block/psamatheon_ashlar_block"
+                 }
+}

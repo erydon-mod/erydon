@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/arch/romanesque/arch_romanesque_top_large",
+  "textures": {
+    "stone": "erydon:block/striatus_ashlar_block"
+  }
+}

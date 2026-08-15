@@ -1,0 +1,156 @@
+{
+  "variants": {
+    "facing=north,layers=1": {
+      "model": "erydon:block/layer/slice_vertical/aterzon_ashlar_slice_vertical_size2",
+      "uvlock": true,
+      "y": 0
+    },
+    "facing=north,layers=2": {
+      "model": "erydon:block/layer/slice_vertical/aterzon_ashlar_slice_vertical_size4",
+      "uvlock": true,
+      "y": 0
+    },
+    "facing=north,layers=3": {
+      "model": "erydon:block/layer/slice_vertical/aterzon_ashlar_slice_vertical_size6",
+      "uvlock": true,
+      "y": 0
+    },
+    "facing=north,layers=4": {
+      "model": "erydon:block/layer/slice_vertical/aterzon_ashlar_slice_vertical_size8",
+      "uvlock": true,
+      "y": 0
+    },
+    "facing=north,layers=5": {
+      "model": "erydon:block/layer/slice_vertical/aterzon_ashlar_slice_vertical_size10",
+      "uvlock": true,
+      "y": 0
+    },
+    "facing=north,layers=6": {
+      "model": "erydon:block/layer/slice_vertical/aterzon_ashlar_slice_vertical_size12",
+      "uvlock": true,
+      "y": 0
+    },
+    "facing=north,layers=7": {
+      "model": "erydon:block/layer/slice_vertical/aterzon_ashlar_slice_vertical_size14",
+      "uvlock": true,
+      "y": 0
+    },
+    "facing=north,layers=8": {
+      "model": "erydon:block/block/aterzon_ashlar_block"
+    },
+    "facing=east,layers=1": {
+      "model": "erydon:block/layer/slice_vertical/aterzon_ashlar_slice_vertical_size2",
+      "uvlock": true,
+      "y": 90
+    },
+    "facing=east,layers=2": {
+      "model": "erydon:block/layer/slice_vertical/aterzon_ashlar_slice_vertical_size4",
+      "uvlock": true,
+      "y": 90
+    },
+    "facing=east,layers=3": {
+      "model": "erydon:block/layer/slice_vertical/aterzon_ashlar_slice_vertical_size6",
+      "uvlock": true,
+      "y": 90
+    },
+    "facing=east,layers=4": {
+      "model": "erydon:block/layer/slice_vertical/aterzon_ashlar_slice_vertical_size8",
+      "uvlock": true,
+      "y": 90
+    },
+    "facing=east,layers=5": {
+      "model": "erydon:block/layer/slice_vertical/aterzon_ashlar_slice_vertical_size10",
+      "uvlock": true,
+      "y": 90
+    },
+    "facing=east,layers=6": {
+      "model": "erydon:block/layer/slice_vertical/aterzon_ashlar_slice_vertical_size12",
+      "uvlock": true,
+      "y": 90
+    },
+    "facing=east,layers=7": {
+      "model": "erydon:block/layer/slice_vertical/aterzon_ashlar_slice_vertical_size14",
+      "uvlock": true,
+      "y": 90
+    },
+    "facing=east,layers=8": {
+      "model": "erydon:block/block/aterzon_ashlar_block"
+    },
+    "facing=south,layers=1": {
+      "model": "erydon:block/layer/slice_vertical/aterzon_ashlar_slice_vertical_size2",
+      "uvlock": true,
+      "y": 180
+    },
+    "facing=south,layers=2": {
+      "model": "erydon:block/layer/slice_vertical/aterzon_ashlar_slice_vertical_size4",
+      "uvlock": true,
+      "y": 180
+    },
+    "facing=south,layers=3": {
+      "model": "erydon:block/layer/slice_vertical/aterzon_ashlar_slice_vertical_size6",
+      "uvlock": true,
+      "y": 180
+    },
+    "facing=south,layers=4": {
+      "model": "erydon:block/layer/slice_vertical/aterzon_ashlar_slice_vertical_size8",
+      "uvlock": true,
+      "y": 180
+    },
+    "facing=south,layers=5": {
+      "model": "erydon:block/layer/slice_vertical/aterzon_ashlar_slice_vertical_size10",
+      "uvlock": true,
+      "y": 180
+    },
+    "facing=south,layers=6": {
+      "model": "erydon:block/layer/slice_vertical/aterzon_ashlar_slice_vertical_size12",
+      "uvlock": true,
+      "y": 180
+    },
+    "facing=south,layers=7": {
+      "model": "erydon:block/layer/slice_vertical/aterzon_ashlar_slice_vertical_size14",
+      "uvlock": true,
+      "y": 180
+    },
+    "facing=south,layers=8": {
+      "model": "erydon:block/block/aterzon_ashlar_block"
+    },
+    "facing=west,layers=1": {
+      "model": "erydon:block/layer/slice_vertical/aterzon_ashlar_slice_vertical_size2",
+      "uvlock": true,
+      "y": 270
+    },
+    "facing=west,layers=2": {
+      "model": "erydon:block/layer/slice_vertical/aterzon_ashlar_slice_vertical_size4",
+      "uvlock": true,
+      "y": 270
+    },
+    "facing=west,layers=3": {
+      "model": "erydon:block/layer/slice_vertical/aterzon_ashlar_slice_vertical_size6",
+      "uvlock": true,
+      "y": 270
+    },
+    "facing=west,layers=4": {
+      "model": "erydon:block/layer/slice_vertical/aterzon_ashlar_slice_vertical_size8",
+      "uvlock": true,
+      "y": 270
+    },
+    "facing=west,layers=5": {
+      "model": "erydon:block/layer/slice_vertical/aterzon_ashlar_slice_vertical_size10",
+      "uvlock": true,
+      "y": 270
+    },
+    "facing=west,layers=6": {
+      "model": "erydon:block/layer/slice_vertical/aterzon_ashlar_slice_vertical_size12",
+      "uvlock": true,
+      "y": 270
+    },
+    "facing=west,layers=7": {
+      "model": "erydon:block/layer/slice_vertical/aterzon_ashlar_slice_vertical_size14",
+      "uvlock": true,
+      "y": 270
+    },
+    "facing=west,layers=8": {
+      "model": "erydon:block/block/aterzon_ashlar_block"
+    }
+  }
+}

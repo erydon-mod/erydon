@@ -1,0 +1,15 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "erydon:block/slab/porphyros_rusticated_slab"
+    },
+    "type=top": {
+      "model": "erydon:block/slab/porphyros_rusticated_slab_top"
+    },
+    "type=double": {
+      "model": "erydon:block/block/porphyros_rusticated_block"
+    }
+  }
+}
+
+

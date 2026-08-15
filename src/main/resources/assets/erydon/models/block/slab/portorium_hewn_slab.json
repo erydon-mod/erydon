@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {
+    "bottom": "erydon:block/portorium_hewn_block",
+    "top": "erydon:block/portorium_hewn_block",
+    "side": "erydon:block/portorium_hewn_block"
+  }
+}

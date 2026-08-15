@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/light/modern/light_modern",
+  "textures": {
+    "stone": "erydon:block/brectite_block",
+    "metal": "erydon:block/cover_silver_gloss"
+  }
+}

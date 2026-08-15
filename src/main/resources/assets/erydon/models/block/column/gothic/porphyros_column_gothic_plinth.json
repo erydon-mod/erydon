@@ -1,0 +1,7 @@
+﻿{
+    "parent":  "erydon:block/column/gothic/column_gothic_plinth",
+    "textures":  {
+                     "stone":  "erydon:block/porphyros_block",
+                     "particle":  "erydon:block/porphyros_block"
+                 }
+}

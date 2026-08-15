@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/glacium_nerium_weave_grout_slope_shallow_upper"
+                                    }
+                      }
+                  ]
+}

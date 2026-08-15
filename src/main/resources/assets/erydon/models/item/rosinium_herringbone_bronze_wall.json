@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/wall_inventory",
+  "textures": {
+    "wall": "erydon:block/rosinium_herringbone_bronze_block"
+  }
+}

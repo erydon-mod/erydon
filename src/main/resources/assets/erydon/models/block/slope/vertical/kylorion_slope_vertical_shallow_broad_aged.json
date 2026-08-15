@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/kylorion_slope_vertical_shallow_broad_lh_aged",
+  "textures": {
+    "stone": "erydon:block/kylorion_block_aged",
+    "particle": "erydon:block/kylorion_block_aged"
+  }
+}

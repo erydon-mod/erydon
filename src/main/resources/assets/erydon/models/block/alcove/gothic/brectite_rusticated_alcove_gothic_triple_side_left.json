@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/alcove/gothic/alcove_gothic_triple_side_left",
+    "textures":  {
+                     "stone":  "erydon:block/brectite_rusticated_block",
+                     "particle":  "erydon:block/brectite_rusticated_block"
+                 }
+}

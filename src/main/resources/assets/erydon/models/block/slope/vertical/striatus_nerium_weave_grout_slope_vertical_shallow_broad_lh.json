@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/slope_vertical_shallow_broad_lh",
+  "textures": {
+    "stone": "erydon:block/striatus_nerium_weave_grout_block",
+    "particle": "erydon:block/striatus_nerium_weave_grout_block"
+  }
+}

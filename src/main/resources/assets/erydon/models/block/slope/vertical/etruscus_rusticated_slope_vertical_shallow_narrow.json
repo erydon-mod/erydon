@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/etruscus_rusticated_slope_vertical_shallow_narrow_lh",
+  "textures": {
+    "stone": "erydon:block/etruscus_rusticated_block",
+    "particle": "erydon:block/etruscus_rusticated_block"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/arch/modern/arch_modern_top_large",
+  "textures": {
+    "stone": "erydon:block/sanguenite_ashlar_block"
+  }
+}

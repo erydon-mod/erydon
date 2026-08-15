@@ -1,0 +1,14 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "erydon:block/slab/glacium_rock_slab"
+    },
+    "type=top": {
+      "model": "erydon:block/slab/glacium_rock_slab_top"
+    },
+    "type=double": {
+      "model": "erydon:block/block/glacium_rock_block"
+    }
+  }
+}
+

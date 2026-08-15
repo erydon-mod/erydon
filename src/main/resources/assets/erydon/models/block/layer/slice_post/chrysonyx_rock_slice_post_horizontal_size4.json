@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/layer/slice_post/slice_post_horizontal_size4",
+  "textures": {
+    "texture": "erydon:block/chrysonyx_rock_block",
+    "particle": "erydon:block/chrysonyx_rock_block"
+  }
+}

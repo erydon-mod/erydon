@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/rosinium_rusticated_slope_vertical_shallow_narrow_lh",
+  "textures": {
+    "stone": "erydon:block/rosinium_rusticated_block",
+    "particle": "erydon:block/rosinium_rusticated_block"
+  }
+}

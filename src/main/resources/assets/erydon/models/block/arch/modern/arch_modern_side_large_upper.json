@@ -1,0 +1,84 @@
+{
+	"format_version": "1.9.0",
+	"credit": "Made with Blockbench",
+	"textures": {
+		"particle": "#stone"
+	},
+	"elements": [
+		{
+			"from": [12.17776, 12.5, 0.001],
+			"to": [16, 16, 15.999],
+			"rotation": {"angle": 0, "axis": "y", "origin": [4.48419, 3.77873, 7.75]},
+			"faces": {
+				"north": {"texture": "#stone"},
+				"east": {"texture": "#stone", "cullface": "east"},
+				"south": {"texture": "#stone"},
+				"west": {"texture": "#stone"},
+				"up": {"texture": "#stone", "cullface": "up"}
+			}
+		},
+		{
+			"from": [11.92776, 11.5, 0.001],
+			"to": [16, 12.5, 15.999],
+			"rotation": {"angle": 0, "axis": "y", "origin": [4.48419, 3.77873, 7.75]},
+			"faces": {
+				"north": {"texture": "#stone", "cullface": "north"},
+				"east": {"texture": "#stone", "cullface": "east"},
+				"south": {"texture": "#stone", "cullface": "south"},
+				"west": {"texture": "#stone"},
+				"up": {"texture": "#stone"},
+				"down": {"texture": "#stone"}
+			}
+		},
+		{
+			"from": [8.40635, 13.76078, 0.01],
+			"to": [10.40635, 14.76078, 15.99],
+			"rotation": {"angle": -22.5, "axis": "z", "origin": [4.48419, 3.77873, 7.75]},
+			"faces": {
+				"north": {"texture": "#stone", "cullface": "north"},
+				"south": {"texture": "#stone", "cullface": "south"},
+				"down": {"texture": "#stone"}
+			}
+		},
+		{
+			"from": [13.66006, 1.46795, 0.02],
+			"to": [15.37206, 3.46795, 15.98],
+			"rotation": {"angle": 45, "axis": "z", "origin": [4.48419, 6.77873, 7.75]},
+			"faces": {
+				"north": {"texture": "#stone", "cullface": "north"},
+				"south": {"texture": "#stone", "cullface": "south"},
+				"west": {"texture": "#stone"}
+			}
+		},
+		{
+			"from": [14.11542, 2.89099, 0.01],
+			"to": [15.21942, 4.89099, 15.99],
+			"rotation": {"angle": 22.5, "axis": "z", "origin": [0.48419, 7.77873, 7.75]},
+			"faces": {
+				"north": {"texture": "#stone", "cullface": "north"},
+				"south": {"texture": "#stone", "cullface": "south"},
+				"west": {"texture": "#stone"}
+			}
+		},
+		{
+			"from": [14.94826, 8.4795, 0],
+			"to": [15.98826, 11.5035, 16],
+			"rotation": {"angle": 0, "axis": "z", "origin": [4.48419, 3.77873, 7.75]},
+			"faces": {
+				"north": {"texture": "#stone", "cullface": "north"},
+				"east": {"texture": "#stone"},
+				"south": {"texture": "#stone", "cullface": "south"},
+				"down": {"texture": "#stone"}
+			}
+		}
+	],
+	"groups": [
+		{
+			"name": "arch_romanesque_side_large_upper",
+			"origin": [8, 10.11064, 8],
+			"scope": 0,
+			"color": 0,
+			"children": [0, 1, 2, 3, 4, 5]
+		}
+	]
+}

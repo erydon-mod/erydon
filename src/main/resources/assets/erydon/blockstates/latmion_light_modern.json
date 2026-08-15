@@ -1,0 +1,496 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "facing": "north",
+        "frame": "bronze",
+        "part": "single"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/latmion_light_modern_small_bronze",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "frame": "bronze",
+        "part": "top"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/latmion_light_modern_large_end_bronze",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "frame": "bronze",
+        "part": "middle"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/latmion_light_modern_large_mid_bronze",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "frame": "bronze",
+        "part": "bottom"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/latmion_light_modern_large_end_bronze",
+        "x": 180,
+        "y": 180,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "bracket": "full"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/light_modern_bracket_full_bronze",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "bracket": "half_bottom"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/light_modern_bracket_half_bronze",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "bracket": "half_top"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/light_modern_bracket_half_bronze",
+        "x": 180,
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "frame": "bronze",
+        "part": "single"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/latmion_light_modern_small_bronze",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "frame": "bronze",
+        "part": "top"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/latmion_light_modern_large_end_bronze",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "frame": "bronze",
+        "part": "middle"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/latmion_light_modern_large_mid_bronze",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "frame": "bronze",
+        "part": "bottom"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/latmion_light_modern_large_end_bronze",
+        "x": 180,
+        "y": 270,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "bracket": "full"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/light_modern_bracket_full_bronze",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "bracket": "half_bottom"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/light_modern_bracket_half_bronze",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "bracket": "half_top"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/light_modern_bracket_half_bronze",
+        "x": 180,
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "frame": "bronze",
+        "part": "single"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/latmion_light_modern_small_bronze",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "frame": "bronze",
+        "part": "top"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/latmion_light_modern_large_end_bronze",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "frame": "bronze",
+        "part": "middle"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/latmion_light_modern_large_mid_bronze",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "frame": "bronze",
+        "part": "bottom"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/latmion_light_modern_large_end_bronze",
+        "x": 180,
+        "y": 0,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "bracket": "full"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/light_modern_bracket_full_bronze",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "bracket": "half_bottom"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/light_modern_bracket_half_bronze",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "bracket": "half_top"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/light_modern_bracket_half_bronze",
+        "x": 180,
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "frame": "bronze",
+        "part": "single"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/latmion_light_modern_small_bronze",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "frame": "bronze",
+        "part": "top"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/latmion_light_modern_large_end_bronze",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "frame": "bronze",
+        "part": "middle"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/latmion_light_modern_large_mid_bronze",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "frame": "bronze",
+        "part": "bottom"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/latmion_light_modern_large_end_bronze",
+        "x": 180,
+        "y": 90,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "bracket": "full"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/light_modern_bracket_full_bronze",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "bracket": "half_bottom"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/light_modern_bracket_half_bronze",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "bracket": "half_top"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/light_modern_bracket_half_bronze",
+        "x": 180,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "frame": "silver",
+        "part": "single"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/latmion_light_modern_small_silver",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "frame": "silver",
+        "part": "top"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/latmion_light_modern_large_end_silver",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "frame": "silver",
+        "part": "middle"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/latmion_light_modern_large_mid_silver",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "frame": "silver",
+        "part": "bottom"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/latmion_light_modern_large_end_silver",
+        "x": 180,
+        "y": 180,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "frame": "silver",
+        "part": "single"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/latmion_light_modern_small_silver",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "frame": "silver",
+        "part": "top"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/latmion_light_modern_large_end_silver",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "frame": "silver",
+        "part": "middle"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/latmion_light_modern_large_mid_silver",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "frame": "silver",
+        "part": "bottom"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/latmion_light_modern_large_end_silver",
+        "x": 180,
+        "y": 270,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "frame": "silver",
+        "part": "single"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/latmion_light_modern_small_silver",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "frame": "silver",
+        "part": "top"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/latmion_light_modern_large_end_silver",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "frame": "silver",
+        "part": "middle"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/latmion_light_modern_large_mid_silver",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "frame": "silver",
+        "part": "bottom"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/latmion_light_modern_large_end_silver",
+        "x": 180,
+        "y": 0,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "frame": "silver",
+        "part": "single"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/latmion_light_modern_small_silver",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "frame": "silver",
+        "part": "top"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/latmion_light_modern_large_end_silver",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "frame": "silver",
+        "part": "middle"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/latmion_light_modern_large_mid_silver",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "frame": "silver",
+        "part": "bottom"
+      },
+      "apply": {
+        "model": "erydon:block/light/modern/latmion_light_modern_large_end_silver",
+        "x": 180,
+        "y": 90,
+        "uvlock": true
+      }
+    }
+  ]
+}

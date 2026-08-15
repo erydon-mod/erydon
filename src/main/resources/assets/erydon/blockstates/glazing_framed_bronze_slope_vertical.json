@@ -1,0 +1,44 @@
+{
+  "variants": {
+    "facing=north,waterlogged=false": {
+      "model": "erydon:block/glazing/vertical/glazing_framed_bronze_slope_vertical",
+      "y": 0,
+      "uvlock": true
+    },
+    "facing=north,waterlogged=true": {
+      "model": "erydon:block/glazing/vertical/glazing_framed_bronze_slope_vertical",
+      "y": 0,
+      "uvlock": true
+    },
+    "facing=east,waterlogged=false": {
+      "model": "erydon:block/glazing/vertical/glazing_framed_bronze_slope_vertical",
+      "y": 90,
+      "uvlock": true
+    },
+    "facing=east,waterlogged=true": {
+      "model": "erydon:block/glazing/vertical/glazing_framed_bronze_slope_vertical",
+      "y": 90,
+      "uvlock": true
+    },
+    "facing=south,waterlogged=false": {
+      "model": "erydon:block/glazing/vertical/glazing_framed_bronze_slope_vertical",
+      "y": 180,
+      "uvlock": true
+    },
+    "facing=south,waterlogged=true": {
+      "model": "erydon:block/glazing/vertical/glazing_framed_bronze_slope_vertical",
+      "y": 180,
+      "uvlock": true
+    },
+    "facing=west,waterlogged=false": {
+      "model": "erydon:block/glazing/vertical/glazing_framed_bronze_slope_vertical",
+      "y": 270,
+      "uvlock": true
+    },
+    "facing=west,waterlogged=true": {
+      "model": "erydon:block/glazing/vertical/glazing_framed_bronze_slope_vertical",
+      "y": 270,
+      "uvlock": true
+    }
+  }
+}

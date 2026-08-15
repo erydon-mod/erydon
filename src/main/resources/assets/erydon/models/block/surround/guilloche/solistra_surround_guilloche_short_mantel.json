@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/surround/guilloche/surround_guilloche_short_mantel",
+  "textures": {
+    "particle": "erydon:block/solistra_block",
+    "0": "erydon:block/solistra_block",
+    "1": "erydon:block/solistra_block",
+    "texture": "erydon:block/solistra_block",
+    "stone": "erydon:block/solistra_block"
+  }
+}

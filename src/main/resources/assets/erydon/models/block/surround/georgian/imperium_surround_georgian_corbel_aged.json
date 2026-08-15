@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/surround/georgian/surround_georgian_corbel",
+  "textures": {
+    "stone": "erydon:block/imperium_block_aged",
+    "particle": "#stone"
+  }
+}

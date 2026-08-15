@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/arch/modern/arch_modern_corner_large_upper",
+  "textures": {
+    "stone": "erydon:block/borealis_hewn_block"
+  }
+}

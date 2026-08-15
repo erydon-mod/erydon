@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/stairs",
+  "textures": {
+    "side": "erydon:block/kylorion_hewn_block",
+    "top": "erydon:block/kylorion_hewn_block",
+    "bottom": "erydon:block/kylorion_hewn_block"
+  }
+}

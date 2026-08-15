@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/kelastrion_aged_column_gothic"
+                                    }
+                      }
+                  ]
+}

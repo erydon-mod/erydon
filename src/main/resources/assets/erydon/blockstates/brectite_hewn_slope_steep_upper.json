@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/brectite_hewn_slope_steep_upper"
+                                    }
+                      }
+                  ]
+}

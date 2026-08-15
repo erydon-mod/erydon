@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/stairs/shallow/shallow_stairs_inner_top",
+    "textures":  {
+                     "all":  "erydon:block/portorium_block_aged",
+                     "particle":  "#all"
+                 }
+}

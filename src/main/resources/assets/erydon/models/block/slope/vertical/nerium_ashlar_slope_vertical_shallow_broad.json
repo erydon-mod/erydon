@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/nerium_ashlar_slope_vertical_shallow_broad_lh",
+  "textures": {
+    "stone": "erydon:block/nerium_ashlar_block",
+    "particle": "erydon:block/nerium_ashlar_block"
+  }
+}

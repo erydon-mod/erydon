@@ -1,0 +1,9 @@
+{
+  "parent": "erydon:block/slope/slope/slope_outer",
+  "textures": {
+    "stone": "erydon:block/porphyros_hewn_block",
+    "particle": "#stone"
+  }
+}
+
+

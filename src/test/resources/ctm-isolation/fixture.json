@@ -1,0 +1,11 @@
+{
+  "namespace": "synthetic_foreign",
+  "normalCtmBlock": "synthetic_foreign:explicit_ctm_block",
+  "matchTilesBlock": "synthetic_foreign:synthetic_foreign_repeating_tile",
+  "highStateBlock": {
+    "id": "synthetic_foreign:high_state_ctm_block",
+    "states": 144
+  },
+  "preContinuityWrapper": "synthetic_foreign:PreContinuityProbeBakedModel",
+  "postContinuityWrapper": "synthetic_foreign:PostContinuityProbeBakedModel"
+}

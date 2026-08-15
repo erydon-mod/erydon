@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "erydon:block/internal/wrapped/rosinium_ceiling_coffered_modern_white_small"
+      }
+    }
+  ]
+}

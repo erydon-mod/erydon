@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/rosinium_sanguenite_weave_grout_slope_shallow_upper"
+                                    }
+                      }
+                  ]
+}

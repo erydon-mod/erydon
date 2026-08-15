@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "erydon:block/internal/wrapped/aganite_surround_modern_aged"
+      }
+    }
+  ]
+}

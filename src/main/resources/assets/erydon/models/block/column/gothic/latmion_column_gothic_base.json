@@ -1,0 +1,7 @@
+﻿{
+    "parent":  "erydon:block/column/gothic/column_gothic_base",
+    "textures":  {
+                     "stone":  "erydon:block/latmion_block",
+                     "particle":  "erydon:block/latmion_block"
+                 }
+}

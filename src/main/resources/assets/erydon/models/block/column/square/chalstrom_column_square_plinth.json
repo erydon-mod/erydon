@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/column/square/column_square_plinth_shared",
+  "textures": {
+    "particle": "erydon:block/chalstrom_block",
+    "stone": "erydon:block/chalstrom_block"
+  }
+}

@@ -1,0 +1,219 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "facing": "north",
+        "shape": "straight"
+      },
+      "apply": {
+        "model": "erydon:block/cornice/georgian/aganite_cornice_georgian_straight",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "shape": "straight"
+      },
+      "apply": {
+        "model": "erydon:block/cornice/georgian/aganite_cornice_georgian_straight",
+        "uvlock": true,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "shape": "straight"
+      },
+      "apply": {
+        "model": "erydon:block/cornice/georgian/aganite_cornice_georgian_straight",
+        "uvlock": true,
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "shape": "straight"
+      },
+      "apply": {
+        "model": "erydon:block/cornice/georgian/aganite_cornice_georgian_straight",
+        "uvlock": true,
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "shape": "inner_corner"
+      },
+      "apply": {
+        "model": "erydon:block/cornice/georgian/aganite_cornice_georgian_straight",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "shape": "inner_corner"
+      },
+      "apply": {
+        "model": "erydon:block/cornice/georgian/aganite_cornice_georgian_straight",
+        "uvlock": true,
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "shape": "inner_corner"
+      },
+      "apply": {
+        "model": "erydon:block/cornice/georgian/aganite_cornice_georgian_straight",
+        "uvlock": true,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "shape": "inner_corner"
+      },
+      "apply": {
+        "model": "erydon:block/cornice/georgian/aganite_cornice_georgian_straight",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "shape": "inner_corner"
+      },
+      "apply": {
+        "model": "erydon:block/cornice/georgian/aganite_cornice_georgian_straight",
+        "uvlock": true,
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "shape": "inner_corner"
+      },
+      "apply": {
+        "model": "erydon:block/cornice/georgian/aganite_cornice_georgian_straight",
+        "uvlock": true,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "shape": "inner_corner"
+      },
+      "apply": {
+        "model": "erydon:block/cornice/georgian/aganite_cornice_georgian_straight",
+        "uvlock": true,
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "shape": "inner_corner"
+      },
+      "apply": {
+        "model": "erydon:block/cornice/georgian/aganite_cornice_georgian_straight",
+        "uvlock": true,
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "shape": "outer_corner"
+      },
+      "apply": {
+        "model": "erydon:block/cornice/georgian/aganite_cornice_georgian_outer_corner_a",
+        "uvlock": true,
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "shape": "outer_corner"
+      },
+      "apply": {
+        "model": "erydon:block/cornice/georgian/aganite_cornice_georgian_outer_corner_b",
+        "uvlock": true,
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "shape": "outer_corner"
+      },
+      "apply": {
+        "model": "erydon:block/cornice/georgian/aganite_cornice_georgian_outer_corner_a",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "shape": "outer_corner"
+      },
+      "apply": {
+        "model": "erydon:block/cornice/georgian/aganite_cornice_georgian_outer_corner_b",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "shape": "outer_corner"
+      },
+      "apply": {
+        "model": "erydon:block/cornice/georgian/aganite_cornice_georgian_outer_corner_a",
+        "uvlock": true,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "shape": "outer_corner"
+      },
+      "apply": {
+        "model": "erydon:block/cornice/georgian/aganite_cornice_georgian_outer_corner_b",
+        "uvlock": true,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "shape": "outer_corner"
+      },
+      "apply": {
+        "model": "erydon:block/cornice/georgian/aganite_cornice_georgian_outer_corner_a",
+        "uvlock": true,
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "shape": "outer_corner"
+      },
+      "apply": {
+        "model": "erydon:block/cornice/georgian/aganite_cornice_georgian_outer_corner_b",
+        "uvlock": true,
+        "y": 180
+      }
+    }
+  ]
+}

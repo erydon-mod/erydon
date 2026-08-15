@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/arch/modern/arch_modern_side_large_upper",
+  "textures": {
+    "stone": "erydon:block/solistra_rusticated_block"
+  }
+}

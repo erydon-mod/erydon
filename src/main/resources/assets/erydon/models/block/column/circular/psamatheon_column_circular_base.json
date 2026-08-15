@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/column/circular/column_circular_base",
+  "textures": {
+    "stone": "erydon:block/psamatheon_block",
+    "particle": "erydon:block/psamatheon_block"
+  }
+}

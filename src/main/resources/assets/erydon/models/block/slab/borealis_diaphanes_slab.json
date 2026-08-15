@@ -1,0 +1,11 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {
+    "bottom": "erydon:block/borealis_diaphanes_block",
+    "top": "erydon:block/borealis_diaphanes_block",
+    "side": "erydon:block/borealis_diaphanes_block"
+  }
+}
+
+
+

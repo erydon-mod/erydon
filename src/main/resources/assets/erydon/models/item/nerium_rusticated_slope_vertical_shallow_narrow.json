@@ -1,0 +1,6 @@
+{
+    "parent":  "erydon:block/internal/wrapped/nerium_rusticated_slope_vertical_shallow_narrow",
+    "textures":  {
+                     "texture":  "erydon:block/nerium_rusticated_block"
+                 }
+}

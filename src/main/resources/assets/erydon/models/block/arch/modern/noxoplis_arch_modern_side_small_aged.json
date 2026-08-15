@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/arch/modern/arch_modern_side_small",
+  "textures": {
+    "stone": "erydon:block/noxoplis_block_aged"
+  }
+}

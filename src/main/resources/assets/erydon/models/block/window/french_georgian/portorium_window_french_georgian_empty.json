@@ -1,0 +1,7 @@
+{
+  "textures": {
+    "particle": "#stone",
+    "stone": "erydon:block/portorium_block"
+  },
+  "elements": []
+}

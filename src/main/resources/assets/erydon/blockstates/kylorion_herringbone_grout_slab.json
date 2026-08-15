@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "erydon:block/slab/kylorion_herringbone_grout_slab"
+    },
+    "type=top": {
+      "model": "erydon:block/slab/kylorion_herringbone_grout_slab_top"
+    },
+    "type=double": {
+      "model": "erydon:block/block/kylorion_herringbone_grout_block"
+    }
+  }
+}

@@ -1,0 +1,158 @@
+{
+  "format_version": "1.9.0",
+  "credit": "Made with Blockbench",
+  "elements": [
+    {
+      "from": [
+        0.02,
+        2.63798,
+        0.04468
+      ],
+      "to": [
+        15.98,
+        4.01998,
+        2.09468
+      ],
+      "rotation": {
+        "angle": -22.5,
+        "axis": "x",
+        "origin": [
+          5.03,
+          -2.50533,
+          7.38173
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone",
+          "cullface": "north"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone",
+          "cullface": "north"
+        },
+        "down": {
+          "texture": "#stone",
+          "cullface": "north"
+        }
+      }
+    },
+    {
+      "from": [
+        0.021,
+        0,
+        0
+      ],
+      "to": [
+        15.979,
+        1.478,
+        3.05
+      ],
+      "rotation": {
+        "angle": 0,
+        "axis": "y",
+        "origin": [
+          5.03,
+          -5.02531,
+          7.33705
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone",
+          "cullface": "north"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone",
+          "cullface": "down"
+        }
+      }
+    },
+    {
+      "from": [
+        0.04,
+        0.08972,
+        3.72083
+      ],
+      "to": [
+        15.96,
+        1.06772,
+        5.61483
+      ],
+      "rotation": {
+        "angle": 22.5,
+        "axis": "x",
+        "origin": [
+          7.54,
+          15.00532,
+          0.02808
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone",
+          "cullface": "north"
+        },
+        "east": {
+          "texture": "#stone",
+          "cullface": "north"
+        },
+        "south": {
+          "texture": "#stone",
+          "cullface": "down"
+        },
+        "west": {
+          "texture": "#stone",
+          "cullface": "north"
+        },
+        "down": {
+          "texture": "#stone",
+          "cullface": "down"
+        }
+      }
+    }
+  ],
+  "groups": [
+    {
+      "name": "sill",
+      "origin": [
+        0,
+        0.07612,
+        9.11732
+      ],
+      "color": 0,
+      "children": [
+        0,
+        1,
+        2
+      ]
+    }
+  ],
+  "textures": {
+    "particle": "#stone",
+    "stone": "#stone",
+    "pane": "#pane",
+    "lead": "#lead"
+  }
+}

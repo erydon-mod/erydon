@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/surround/gothic_ornate/surround_gothic_ornate_mantel_stub_rh",
+  "textures": {
+    "particle": "erydon:block/glacium_block",
+    "0": "erydon:block/glacium_block",
+    "1": "erydon:block/glacium_block",
+    "texture": "erydon:block/glacium_block",
+    "stone": "erydon:block/glacium_block"
+  }
+}

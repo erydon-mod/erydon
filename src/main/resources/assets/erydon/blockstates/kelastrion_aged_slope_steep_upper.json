@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/kelastrion_slope_steep_upper_aged"
+                                    }
+                      }
+                  ]
+}

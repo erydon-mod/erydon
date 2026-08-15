@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "#erydon:cover",
+    "#erydon:layer",
+    "#erydon:layer_multiface",
+    "#erydon:layer_vertical"
+  ]
+}

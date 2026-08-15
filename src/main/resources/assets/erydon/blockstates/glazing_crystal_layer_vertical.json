@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/glazing_crystal_layer_vertical"
+                                    }
+                      }
+                  ]
+}

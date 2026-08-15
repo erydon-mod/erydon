@@ -1,0 +1,8 @@
+{
+  "parent": "erydon:block/surround/georgian/surround_georgian_mantel",
+  "textures": {
+  "stone": "erydon:block/kelastrion_block",
+  "particle": "#stone"
+}
+
+}

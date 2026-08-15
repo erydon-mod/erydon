@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/internal/wrapped/aterzon_rusticated_slope_vertical_shallow_broad",
+    "textures":  {
+                     "texture":  "erydon:block/aterzon_rusticated_block"
+                 }
+}
+

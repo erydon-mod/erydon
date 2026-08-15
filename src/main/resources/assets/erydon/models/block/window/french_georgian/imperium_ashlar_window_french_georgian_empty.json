@@ -1,0 +1,7 @@
+{
+  "textures": {
+    "particle": "#stone",
+    "stone": "erydon:block/imperium_ashlar_block"
+  },
+  "elements": []
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/slope/slope_inner",
+  "textures": {
+    "stone": "erydon:block/calacattum_portorium_weave_grout_block",
+    "particle": "#stone"
+  }
+}

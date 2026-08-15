@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/layer/slice_horizontal/slice_horizontal_bottom_size12",
+  "textures": {
+    "texture": "erydon:block/portorium_ashlar_block",
+    "particle": "erydon:block/portorium_ashlar_block"
+  }
+}

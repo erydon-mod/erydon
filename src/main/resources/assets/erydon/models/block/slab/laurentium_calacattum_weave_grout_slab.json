@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {
+    "bottom": "erydon:block/laurentium_calacattum_weave_grout_block",
+    "top": "erydon:block/laurentium_calacattum_weave_grout_block",
+    "side": "erydon:block/laurentium_calacattum_weave_grout_block"
+  }
+}

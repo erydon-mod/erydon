@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/wall/georgian/wall_georgian_side",
+    "textures":  {
+                     "wall":  "erydon:block/imperium_block",
+                     "particle":  "erydon:block/imperium_block"
+                 }
+}

@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/alcove/georgian/alcove_georgian_triple_top_left",
+    "textures":  {
+                     "stone":  "erydon:block/hesperion_rock_block",
+                     "particle":  "erydon:block/hesperion_rock_block"
+                 }
+}

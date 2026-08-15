@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/inner_stairs",
+  "textures": {
+    "side": "erydon:block/striatus_nerium_weave_grout_block",
+    "top": "erydon:block/striatus_nerium_weave_grout_block",
+    "bottom": "erydon:block/striatus_nerium_weave_grout_block"
+  }
+}

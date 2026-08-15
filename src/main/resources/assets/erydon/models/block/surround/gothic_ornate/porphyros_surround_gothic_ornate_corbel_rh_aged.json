@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/surround/gothic_ornate/surround_gothic_ornate_corbel_rh",
+  "textures": {
+    "particle": "erydon:block/porphyros_block_aged",
+    "0": "erydon:block/porphyros_block_aged",
+    "1": "erydon:block/porphyros_block_aged",
+    "texture": "erydon:block/porphyros_block_aged",
+    "stone": "erydon:block/porphyros_block_aged"
+  }
+}

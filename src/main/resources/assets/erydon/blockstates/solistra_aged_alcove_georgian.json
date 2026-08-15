@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "erydon:block/internal/wrapped/solistra_aged_alcove_georgian"
+      }
+    }
+  ]
+}

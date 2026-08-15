@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/light/modern/light_modern_bracket_full",
+  "textures": {
+    "1": "erydon:block/cover_bronze_gloss",
+    "particle": "erydon:block/cover_bronze_gloss"
+  }
+}

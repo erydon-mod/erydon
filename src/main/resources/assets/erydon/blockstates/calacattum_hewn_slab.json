@@ -1,0 +1,14 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "erydon:block/slab/calacattum_hewn_slab"
+    },
+    "type=top": {
+      "model": "erydon:block/slab/calacattum_hewn_slab_top"
+    },
+    "type=double": {
+      "model": "erydon:block/block/calacattum_hewn_block"
+    }
+  }
+}
+

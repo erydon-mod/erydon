@@ -1,0 +1,7 @@
+﻿{
+    "parent":  "erydon:block/column/gothic/column_gothic_capital",
+    "textures":  {
+                     "stone":  "erydon:block/glacium_block_aged",
+                     "particle":  "erydon:block/glacium_block_aged"
+                 }
+}

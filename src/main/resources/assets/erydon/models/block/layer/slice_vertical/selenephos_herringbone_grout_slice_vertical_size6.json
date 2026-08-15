@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/layer/slice_vertical/slice_vertical_size6",
+  "textures": {
+    "texture": "erydon:block/selenephos_herringbone_grout_block",
+    "particle": "erydon:block/selenephos_herringbone_grout_block"
+  }
+}

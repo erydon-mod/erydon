@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/nerium_rock_slope_vertical_shallow_narrow_lh",
+  "textures": {
+    "stone": "erydon:block/nerium_rock_block",
+    "particle": "erydon:block/nerium_rock_block"
+  }
+}

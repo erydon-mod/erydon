@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/wall_inventory",
+  "textures": {
+    "wall": "erydon:block/gelastrum_etruscus_weave_grout_block"
+  }
+}

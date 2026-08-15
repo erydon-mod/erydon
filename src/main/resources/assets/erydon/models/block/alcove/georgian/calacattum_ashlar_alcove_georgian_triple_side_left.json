@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/alcove/georgian/alcove_georgian_triple_side_left",
+    "textures":  {
+                     "stone":  "erydon:block/calacattum_ashlar_block",
+                     "particle":  "erydon:block/calacattum_ashlar_block"
+                 }
+}

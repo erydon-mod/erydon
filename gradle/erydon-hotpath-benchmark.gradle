@@ -1,0 +1,110 @@
+tasks.register('verifyDiagonalWallRefresh', JavaExec) {
+    group = 'verification'
+    description = 'Differentially verifies the original and mutable diagonal-wall refresh algorithms.'
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.oliver.erydon.block.DiagonalWallRefreshAudit'
+    args '--verify'
+}
+
+tasks.register('benchmarkDiagonalWallRefresh', JavaExec) {
+    group = 'benchmark'
+    description = 'Benchmarks original and mutable diagonal-wall refresh position handling.'
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.oliver.erydon.block.DiagonalWallRefreshAudit'
+    maxHeapSize = '1G'
+
+    doFirst {
+        def outputFile = providers.gradleProperty('erydon.wallBenchmarkOutput')
+                .map { file(it) }
+                .getOrElse(layout.buildDirectory.file('benchmark-results/diagonal-wall-refresh.csv').get().asFile)
+        def iterations = providers.gradleProperty('erydon.wallBenchmarkIterations').getOrElse('500000')
+        def warmup = providers.gradleProperty('erydon.wallBenchmarkWarmup').getOrElse('100000')
+        args = [
+                '--benchmark',
+                '--output', outputFile.absolutePath,
+                '--iterations', iterations,
+                '--warmup', warmup
+        ]
+    }
+}
+
+tasks.register('verifyFixedSlopeRotation', JavaExec) {
+    group = 'verification'
+    description = 'Compares all eight fixed slope rotations with the current JOML implementation.'
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.oliver.erydon.client.model.FixedSlopeRotationAudit'
+    args '--verify'
+}
+
+tasks.register('verifyHorizontalUvLock', JavaExec) {
+    group = 'verification'
+    description = 'Verifies world-aligned horizontal UVs for CTM-enabled model families.'
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.oliver.erydon.client.model.HorizontalUvLockAudit'
+}
+
+tasks.register('verifySpiralStairCtmGeometry', JavaExec) {
+    group = 'verification'
+    description = 'Verifies cell splitting, UV projection, and repeat-tile arithmetic for large spiral stairs.'
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.oliver.erydon.client.model.SpiralStairCtmGeometryAudit'
+}
+
+tasks.register('verifyGothicArchCtmGeometry', JavaExec) {
+    group = 'verification'
+    description = 'Verifies Gothic arch post-Continuity selection and repeat-CTM cell splitting.'
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.oliver.erydon.client.model.GothicArchCtmGeometryAudit'
+}
+
+tasks.register('verifyModernArchCtmGeometry', JavaExec) {
+    group = 'verification'
+    description = 'Verifies Modern arch post-Continuity selection and rotated-face world projection.'
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.oliver.erydon.client.model.ModernArchCtmGeometryAudit'
+}
+
+tasks.register('verifyGothicHearthUvLock') {
+    group = 'verification'
+    description = 'Legacy alias for verifyHorizontalUvLock.'
+    dependsOn tasks.named('verifyHorizontalUvLock')
+    dependsOn tasks.named('verifySpiralStairCtmGeometry')
+}
+
+tasks.register('benchmarkFixedSlopeRotation', JavaExec) {
+    group = 'benchmark'
+    description = 'Benchmarks JOML and scalar fixed slope position/normal transforms.'
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.oliver.erydon.client.model.FixedSlopeRotationAudit'
+    maxHeapSize = '1G'
+
+    doFirst {
+        def outputFile = providers.gradleProperty('erydon.slopeBenchmarkOutput')
+                .map { file(it) }
+                .getOrElse(layout.buildDirectory.file('benchmark-results/fixed-slope-rotation.csv').get().asFile)
+        def iterations = providers.gradleProperty('erydon.slopeBenchmarkIterations').getOrElse('500000')
+        def warmup = providers.gradleProperty('erydon.slopeBenchmarkWarmup').getOrElse('100000')
+        args = [
+                '--benchmark',
+                '--output', outputFile.absolutePath,
+                '--iterations', iterations,
+                '--warmup', warmup
+        ]
+    }
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('verifyDiagonalWallRefresh')
+    dependsOn tasks.named('verifyFixedSlopeRotation')
+    dependsOn tasks.named('verifyHorizontalUvLock')
+    dependsOn tasks.named('verifyGothicArchCtmGeometry')
+    dependsOn tasks.named('verifyModernArchCtmGeometry')
+}

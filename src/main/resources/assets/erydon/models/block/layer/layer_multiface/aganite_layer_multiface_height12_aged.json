@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/layer/layer_multiface/parent/height12",
+  "textures": {
+    "texture": "erydon:block/aganite_block_aged"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "erydon:block/laurentium_ashlar_block"
+  }
+}

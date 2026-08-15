@@ -1,0 +1,586 @@
+tasks.register('auditErydonHighStateBlocks') {
+    group = 'verification'
+    description = 'Writes a read-only ERYDON high-state block audit report.'
+
+    doLast {
+        def projectRoot = project.projectDir
+        def reportDir = layout.buildDirectory.dir('reports').get().asFile
+        reportDir.mkdirs()
+
+        def reportFile = new File(reportDir, 'erydon_high_state_blocks.txt')
+        def generatedAt = new Date().format("yyyy-MM-dd HH:mm:ss Z")
+        def javaRoot = file('src/main/java/com/oliver/erydon')
+        def blockRoot = file('src/main/java/com/oliver/erydon/block')
+        def blockstatesRoot = file('src/main/resources/assets/erydon/blockstates')
+
+        def relPath = { File f ->
+            projectRoot.toPath().relativize(f.toPath()).toString().replace(File.separator, '/')
+        }
+        def filesUnder = { File root, Closure<Boolean> keep ->
+            def result = []
+            if (root.exists()) {
+                root.eachFileRecurse(groovy.io.FileType.FILES) { file ->
+                    if (keep(file)) {
+                        result << file
+                    }
+                }
+            }
+            result.sort { relPath(it) }
+        }
+        def stripAged = { String id ->
+            if (id.startsWith('aged_')) {
+                return id.substring('aged_'.length())
+            }
+            def infix = id.indexOf('_aged_')
+            if (infix >= 0) {
+                return id.substring(0, infix) + '_' + id.substring(infix + '_aged_'.length())
+            }
+            id.endsWith('_aged') ? id.substring(0, id.length() - '_aged'.length()) : id
+        }
+        def shortList = { Collection values, int limit = 3 ->
+            if (values == null || values.isEmpty()) {
+                return '-'
+            }
+            def sorted = values.toList().sort()
+            def shown = sorted.take(limit).join(', ')
+            sorted.size() > limit ? "${shown} +${sorted.size() - limit} more" : shown
+        }
+        def readSource = { String relativePath ->
+            def sourceFile = new File(javaRoot, relativePath)
+            sourceFile.exists() ? sourceFile.getText('UTF-8') : ''
+        }
+        def enumBody = { String source, String enumName ->
+            def marker = source.indexOf("enum ${enumName}")
+            if (marker < 0) {
+                return null
+            }
+            def open = source.indexOf('{', marker)
+            if (open < 0) {
+                return null
+            }
+            int depth = 0
+            boolean inString = false
+            boolean escaping = false
+            for (int i = open; i < source.length(); i++) {
+                char ch = source.charAt(i)
+                if (inString) {
+                    if (escaping) {
+                        escaping = false
+                    } else if (ch == '\\' as char) {
+                        escaping = true
+                    } else if (ch == '"' as char) {
+                        inString = false
+                    }
+                    continue
+                }
+                if (ch == '"' as char) {
+                    inString = true
+                    continue
+                }
+                if (ch == '{' as char) {
+                    depth++
+                } else if (ch == '}' as char) {
+                    depth--
+                    if (depth == 0) {
+                        return source.substring(open + 1, i)
+                    }
+                }
+            }
+            null
+        }
+        def enumConstants = { String source, String enumName ->
+            def body = enumBody(source, enumName)
+            if (body == null) {
+                return []
+            }
+            body = body.replaceAll(/(?s)\/\*.*?\*\//, '')
+            body = body.readLines().collect { line ->
+                def idx = line.indexOf('//')
+                idx >= 0 ? line.substring(0, idx) : line
+            }.join('\n')
+
+            def beforeSemicolon = body
+            int semicolon = -1
+            int parenDepth = 0
+            boolean inString = false
+            boolean escaping = false
+            for (int i = 0; i < body.length(); i++) {
+                char ch = body.charAt(i)
+                if (inString) {
+                    if (escaping) {
+                        escaping = false
+                    } else if (ch == '\\' as char) {
+                        escaping = true
+                    } else if (ch == '"' as char) {
+                        inString = false
+                    }
+                    continue
+                }
+                if (ch == '"' as char) {
+                    inString = true
+                    continue
+                }
+                if (ch == '(' as char) {
+                    parenDepth++
+                } else if (ch == ')' as char) {
+                    parenDepth--
+                } else if (ch == ';' as char && parenDepth == 0) {
+                    semicolon = i
+                    break
+                }
+            }
+            if (semicolon >= 0) {
+                beforeSemicolon = body.substring(0, semicolon)
+            }
+
+            def parts = []
+            def current = new StringBuilder()
+            parenDepth = 0
+            inString = false
+            escaping = false
+            for (int i = 0; i < beforeSemicolon.length(); i++) {
+                char ch = beforeSemicolon.charAt(i)
+                if (inString) {
+                    current.append(ch)
+                    if (escaping) {
+                        escaping = false
+                    } else if (ch == '\\' as char) {
+                        escaping = true
+                    } else if (ch == '"' as char) {
+                        inString = false
+                    }
+                    continue
+                }
+                if (ch == '"' as char) {
+                    inString = true
+                    current.append(ch)
+                    continue
+                }
+                if (ch == '(' as char) {
+                    parenDepth++
+                } else if (ch == ')' as char) {
+                    parenDepth--
+                }
+                if (ch == ',' as char && parenDepth == 0) {
+                    parts << current.toString()
+                    current.setLength(0)
+                } else {
+                    current.append(ch)
+                }
+            }
+            parts << current.toString()
+
+            parts.collect { part ->
+                def matcher = part.trim() =~ /^([A-Z][A-Z0-9_]*)\b/
+                matcher.find() ? matcher.group(1) : null
+            }.findAll { it != null }
+        }
+        def enumCount = { String sourcePath, String enumName, int fallback ->
+            def constants = enumConstants(readSource(sourcePath), enumName)
+            constants.isEmpty() ? fallback : constants.size()
+        }
+
+        def counts = [
+                archArrangement: enumCount('block/ArchRomanesqueBlock.java', 'Arrangement', 48),
+                frenchPiece: enumCount('block/WindowFrenchGeorgianBlock.java', 'Piece', 10),
+                archWindowPiece: enumCount('block/WindowArchBlock.java', 'Piece', 9),
+                surroundSection: enumCount('block/SurroundBlock.java', 'Section', 35),
+                ceilingHidden: enumCount('block/CeilingBlock.java', 'CeilingHiddenState', 82),
+                ceilingLight: enumCount('block/CeilingBlock.java', 'CeilingLight', 3),
+                ceilingFinish: enumCount('block/CeilingBlock.java', 'CeilingFinish', 2),
+                coverSize: enumCount('block/CoverBlock.java', 'CoverSize', 2),
+                coverFinish: enumCount('block/CoverBlock.java', 'CoverFinish', 2),
+                coverLight: enumCount('block/CoverBlock.java', 'CoverLight', 3),
+                coverExt: enumCount('block/CoverBlock.java', 'CoverExt', 16),
+                lightFrame: enumCount('block/LightBlock.java', 'Frame', 2),
+                lightPart: enumCount('block/LightBlock.java', 'Part', 4),
+                lightBracket: enumCount('block/LightBlock.java', 'Bracket', 4),
+                lightStyle: enumCount('block/LightBlock.java', 'Style', 2),
+                pendantBody: enumCount('block/LightPendantBlock.java', 'Body', 2),
+                pendantPart: enumCount('block/LightPendantBlock.java', 'Part', 4),
+                columnPart: enumCount('block/ColumnBlock.java', 'ColumnPart', 4),
+                columnCapital: enumCount('block/ColumnBlock.java', 'CapitalStyle', 2),
+                columnBase: enumCount('block/ColumnBlock.java', 'BaseStyle', 2),
+                corniceShape: enumCount('block/CorniceBlock.java', 'CorniceShape', 3),
+                chimneyPart: enumCount('block/ChimneyBlock.java', 'ChimneyPart', 3),
+                postAxis: enumCount('block/PostBlock.java', 'AxisMode', 3),
+                spiralPart: enumCount('block/StairsSpiralLargeBlock.java', 'Part', 4)
+        ]
+
+        def highStateReferenceThreshold = 128
+
+        def worldEditSource = readSource('mixin/compat/worldedit/WorldEditBlockStateMixin.java')
+        def worldEditMatcher = worldEditSource =~ /Integer\.getInteger\("erydon\.worldedit\.max_full_states",\s*(\d+)/
+        def worldEditMaxStates = worldEditMatcher.find() ? worldEditMatcher.group(1).toInteger() : 128
+        def mixinsJson = file('src/main/resources/erydon.mixins.json')
+        def worldEditMixinRegistered = mixinsJson.exists() && mixinsJson.text.contains('compat.worldedit.WorldEditBlockStateMixin')
+
+        def blockstateFiles = filesUnder(blockstatesRoot) { it.name.endsWith('.json') }
+        def blockIds = blockstateFiles.collect { file ->
+            file.name.substring(0, file.name.length() - '.json'.length())
+        }.sort()
+
+        def ctmRoots = [
+                [label: 'core', root: file('src/main/resources')],
+                [label: '16xLite', root: file('run-dev/resourcepacks/erydon-rp-16x-lite')],
+                [label: '64xPBR', root: file('run-dev/resourcepacks/erydon-rp-64x-pbr')]
+        ]
+        def ctmMatchesByBlock = new TreeMap<String, Set<String>>()
+        def ctmExamplesByBlock = new TreeMap<String, Set<String>>()
+        def ctmPropertyCountByRoot = new TreeMap<String, Integer>()
+        def parseCtmMatchBlocks = { String raw ->
+            if (raw == null || raw.trim().isEmpty()) {
+                return []
+            }
+            raw.split(/\s+/).collect { token ->
+                def clean = token.trim()
+                if (clean.isEmpty()) {
+                    return null
+                }
+                if (clean.startsWith('minecraft:')) {
+                    return null
+                }
+                if (clean.startsWith('erydon:')) {
+                    return clean.substring('erydon:'.length())
+                }
+                clean.contains(':') ? null : clean
+            }.findAll { it != null && !it.contains('=') && !it.contains('*') }
+        }
+        ctmRoots.each { entry ->
+            def props = filesUnder(entry.root) { file ->
+                def rel = entry.root.exists() ? entry.root.toPath().relativize(file.toPath()).toString().replace(File.separator, '/') : ''
+                file.name.endsWith('.properties') && (rel.contains('/optifine/ctm/') || rel.contains('/mcpatcher/ctm/'))
+            }
+            ctmPropertyCountByRoot[entry.label] = props.size()
+            props.each { file ->
+                def properties = new Properties()
+                try {
+                    file.withInputStream { input -> properties.load(input) }
+                } catch (Exception ignored) {
+                    return
+                }
+                parseCtmMatchBlocks(properties.getProperty('matchBlocks')).each { blockId ->
+                    ctmMatchesByBlock.computeIfAbsent(blockId) { new TreeSet<String>() }.add(entry.label)
+                    ctmExamplesByBlock.computeIfAbsent(blockId) { new TreeSet<String>() }.add("${entry.label}:${entry.root.toPath().relativize(file.toPath()).toString().replace(File.separator, '/')}")
+                }
+            }
+        }
+
+        def kindFor = { String id ->
+            def base = stripAged(id)
+            if (base.startsWith('cover_')) return 'CoverBlock'
+            if (base == 'light_pendant') return 'LightPendantBlock'
+            if (base == 'light_pendant_halo') return 'LightPendantHaloBlock'
+            if (base.endsWith('_wall_georgian')) return 'DiagonalWallBlock'
+            if (base.contains('_ceiling_coffered_')) return 'CeilingBlock'
+            if (base.endsWith('_layer_multiface')) return 'LayerMultifaceBlock'
+            if (base.endsWith('_light_modern')) return 'LightBlock'
+            if (base.endsWith('_light_wall')) return 'WallLightBlock'
+            if (base.endsWith('_window_french_georgian')) return 'WindowFrenchGeorgianBlock'
+            if (base.endsWith('_window_arch')) return 'WindowArchBlock'
+            if (base.endsWith('_arch_romanesque')) return 'ArchRomanesqueBlock'
+            if (base.endsWith('_arch_modern')) return 'ArchRomanesqueBlock'
+            if (base.endsWith('_arch_gothic')) return 'ArchRomanesqueBlock'
+            if (base.endsWith('_alcove_georgian') || base.endsWith('_alcove_gothic')) return 'AlcoveBlock'
+            if (base.endsWith('_surround_georgian')) return 'SurroundBlock'
+            if (base.endsWith('_surround_guilloche')) return 'HandedSurroundBlock'
+            if (base.endsWith('_surround_gothic_ornate')) return 'HandedSurroundBlock'
+            if (base.endsWith('_surround_modern')) return 'ModernSurroundBlock'
+            if (base.endsWith('_column_square') || base.endsWith('_column_circular') || base.endsWith('_column_gothic')) return 'ColumnBlock'
+            if (base.endsWith('_cornice_modern') || base.endsWith('_cornice_georgian') || base.endsWith('_cornice_guilloche') || base.endsWith('_cornice_gothic')) return 'CorniceBlock'
+            if (base.endsWith('_chimney_circular')) return 'ChimneyBlock'
+            if (base.endsWith('_brazier')) return 'BrazierBlock'
+            if (base.endsWith('_oil_burner')) return 'OilBurnerBlock'
+            if (base.endsWith('_glazing_framed')) return 'GlazingFramedBlock'
+            if (base.endsWith('_glazing_slope')) return 'GlazingSlopeBlock'
+            if (base.endsWith('_glazing_slope_shallow')) return 'GlazingShallowSlopeBlock'
+            if (base.endsWith('_glazing_slope_vertical')) return 'GlazingVerticalSlopeBlock'
+            if (base.endsWith('_slope_vertical_shallow_broad')) return 'SlopeVerticalShallowBroadBlock'
+            if (base.endsWith('_slope_vertical_shallow_narrow')) return 'SlopeVerticalShallowNarrowBlock'
+            if (base.endsWith('_slope_vertical')) return 'SlopeVerticalBlock'
+            if (base.endsWith('_slope_shallow_lower') || base.endsWith('_slope_shallow_upper')) return 'ShallowSlopeBlock'
+            if (base.endsWith('_slope_steep_lower') || base.endsWith('_slope_steep_upper')) return 'SlopeSteepBlock'
+            if (base.endsWith('_slope')) return 'SlopeBlock'
+            if (base.endsWith('_stairs_spiral_large')) return 'StairsSpiralLargeBlock'
+            if (base.endsWith('_stairs_shallow_bottom') || base.endsWith('_stairs_shallow_top')) return 'ShallowStairsBlockBase'
+            if (base.endsWith('_stairs')) return 'StairsBlock'
+            if (base.endsWith('_wall')) return 'WallBlock'
+            if (base.endsWith('_slab')) return 'SlabBlock'
+            if (base.endsWith('_horizontal_slice')) return 'HorizontalSliceBlock'
+            if (base.endsWith('_vertical_slice')) return 'VerticalSliceBlock'
+            if (base.endsWith('_layer_vertical')) return 'LayerVerticalBlock'
+            if (base.endsWith('_layer')) return 'LayerBlock'
+            if (base.endsWith('_post')) return 'PostBlock'
+            if (base.endsWith('_pane')) return 'PaneBlock'
+            'Block'
+        }
+
+        def stateInfoForKind = { String kind ->
+            switch (kind) {
+                case 'DiagonalWallBlock':
+                    return [states: 2 * 3 * 3 * 3 * 3 * 2 * 2 * 2 * 2 * 2,
+                            properties: 'up(2) * four wall sides(3^4) * four diagonal joins(2^4) * waterlogged(2)']
+                case 'CoverBlock':
+                    return [states: 6 * counts.coverSize * counts.coverFinish * counts.coverLight * 2 * counts.coverExt,
+                            properties: "attach(6) * size(${counts.coverSize}) * finish(${counts.coverFinish}) * light(${counts.coverLight}) * waterlogged(2) * ext(${counts.coverExt})"]
+                case 'CeilingBlock':
+                    return [states: 2 * counts.ceilingLight * counts.ceilingFinish * counts.ceilingHidden,
+                            properties: "waterlogged(2) * light(${counts.ceilingLight}) * finish(${counts.ceilingFinish}) * hidden attachment mask(${counts.ceilingHidden})"]
+                case 'LayerMultifaceBlock':
+                    return [states: 8 * 2 * 2 * 2 * 2 * 2 * 2 * 2,
+                            properties: 'layers(8) * waterlogged(2) * six covered faces(2^6)']
+                case 'LightBlock':
+                    return [states: 4 * counts.lightFrame * counts.lightPart * counts.lightBracket * counts.lightStyle * 2,
+                            properties: "facing(4) * frame(${counts.lightFrame}) * part(${counts.lightPart}) * bracket(${counts.lightBracket}) * style(${counts.lightStyle}) * lit(2)"]
+                case 'WallLightBlock':
+                    return [states: 4 * counts.lightFrame * counts.lightStyle * 2,
+                            properties: "facing(4) * frame(${counts.lightFrame}) * style(${counts.lightStyle}) * lit(2)"]
+                case 'ArchRomanesqueBlock':
+                    return [states: 4 * counts.archArrangement * 3 * 2,
+                            properties: "facing(4) * arrangement(${counts.archArrangement}) * width(3) * waterlogged(2)"]
+                case 'WindowFrenchGeorgianBlock':
+                    return [states: 4 * 2 * 2 * counts.frenchPiece * 2,
+                            properties: "facing(4) * open(2) * hinge(2) * piece(${counts.frenchPiece}) * sill(2)"]
+                case 'WindowArchBlock':
+                    return [states: 4 * 2 * counts.archWindowPiece * 2,
+                            properties: "facing(4) * open(2) * piece(${counts.archWindowPiece}) * sill(2)"]
+                case 'SurroundBlock':
+                case 'HandedSurroundBlock':
+                case 'ModernSurroundBlock':
+                    return [states: 4 * counts.surroundSection,
+                            properties: "facing(4) * section(${counts.surroundSection})"]
+                case 'WallBlock':
+                    return [states: 2 * 3 * 3 * 3 * 3 * 2,
+                            properties: 'up(2) * four wall sides(3^4) * waterlogged(2)']
+                case 'GlazingFramedBlock':
+                    return [states: 2 * 2 * 2 * 2 * 2 * 2 * 2,
+                            properties: 'waterlogged(2) * six faces(2^6)']
+                case 'ColumnBlock':
+                    return [states: counts.columnPart * counts.columnCapital * counts.columnBase,
+                            properties: "part(${counts.columnPart}) * capital(${counts.columnCapital}) * base(${counts.columnBase})"]
+                case 'CorniceBlock':
+                    return [states: 4 * counts.corniceShape,
+                            properties: "facing(4) * shape(${counts.corniceShape})"]
+                case 'ChimneyBlock':
+                    return [states: counts.chimneyPart,
+                            properties: "part(${counts.chimneyPart})"]
+                case 'LightPendantBlock':
+                    return [states: counts.lightFrame * counts.pendantBody * counts.pendantPart * 2,
+                            properties: "frame(${counts.lightFrame}) * body(${counts.pendantBody}) * part(${counts.pendantPart}) * lit(2)"]
+                case 'LightPendantHaloBlock':
+                    return [states: 2, properties: 'lit(2)']
+                case 'LayerBlock':
+                    return [states: 8 * 2 * 2, properties: 'layers(8) * waterlogged(2) * top(2)']
+                case 'LayerVerticalBlock':
+                    return [states: 8 * 2 * 4, properties: 'layers(8) * waterlogged(2) * facing(4)']
+                case 'VerticalSliceBlock':
+                    return [states: 8 * 2 * 4, properties: 'layers(8) * waterlogged(2) * facing(4)']
+                case 'HorizontalSliceBlock':
+                    return [states: 8 * 2 * 4 * 2, properties: 'layers(8) * waterlogged(2) * facing(4) * top(2)']
+                case 'PostBlock':
+                    return [states: 8 * 2 * counts.postAxis, properties: "layers(8) * waterlogged(2) * axis(${counts.postAxis})"]
+                case 'SlopeBlock':
+                case 'ShallowSlopeBlock':
+                case 'SlopeSteepBlock':
+                    return [states: 4 * 5 * 2 * 2, properties: 'facing(4) * shape(5) * half(2) * waterlogged(2)']
+                case 'SlopeVerticalBlock':
+                    return [states: 4 * 2, properties: 'facing(4) * waterlogged(2)']
+                case 'SlopeVerticalShallowBroadBlock':
+                case 'SlopeVerticalShallowNarrowBlock':
+                    return [states: 4 * 2 * 2, properties: 'facing(4) * hand(2) * waterlogged(2)']
+                case 'GlazingSlopeBlock':
+                case 'GlazingShallowSlopeBlock':
+                    return [states: 4 * 5 * 2 * 2, properties: 'facing(4) * shape(5) * half(2) * waterlogged(2)']
+                case 'GlazingVerticalSlopeBlock':
+                    return [states: 4 * 2, properties: 'facing(4) * waterlogged(2)']
+                case 'StairsSpiralLargeBlock':
+                    return [states: 4 * counts.spiralPart * 2, properties: "facing(4) * part(${counts.spiralPart}) * cap(2)"]
+                case 'StairsBlock':
+                case 'ShallowStairsBlockBase':
+                    return [states: 4 * 2 * 5 * 2, properties: 'facing(4) * half(2) * shape(5) * waterlogged(2)']
+                case 'SlabBlock':
+                    return [states: 3 * 2, properties: 'type(3) * waterlogged(2)']
+                case 'PaneBlock':
+                    return [states: 2 * 2 * 2 * 2 * 2, properties: 'four side connections(2^4) * waterlogged(2)']
+                default:
+                    return [states: 1, properties: 'no custom blockstate properties detected by audit']
+            }
+        }
+
+        def dynamicFamilyFor = { String kind ->
+            switch (kind) {
+                case 'SlopeBlock':
+                case 'ShallowSlopeBlock':
+                case 'SlopeSteepBlock':
+                case 'SlopeVerticalBlock':
+                case 'SlopeVerticalShallowBroadBlock':
+                case 'SlopeVerticalShallowNarrowBlock':
+                    return 'yes: slope baked model'
+                case 'ArchRomanesqueBlock':
+                    return 'yes: Romanesque arch baked model'
+                case 'CeilingBlock':
+                    return 'yes: coffered ceiling baked model'
+                case 'ColumnBlock':
+                    return 'yes: column baked model'
+                case 'CorniceBlock':
+                    return 'yes: cornice baked model'
+                case 'CoverBlock':
+                    return 'yes: cover baked model'
+                case 'SurroundBlock':
+                case 'HandedSurroundBlock':
+                case 'ModernSurroundBlock':
+                    return 'yes: surround baked model'
+                case 'WindowArchBlock':
+                    return 'yes: arch window baked model'
+                case 'WindowFrenchGeorgianBlock':
+                    return 'yes: French Georgian window baked model'
+                default:
+                    return 'no'
+            }
+        }
+        def isSlopeKind = { String kind ->
+            kind in ['SlopeBlock', 'ShallowSlopeBlock', 'SlopeSteepBlock', 'SlopeVerticalBlock',
+                     'SlopeVerticalShallowBroadBlock', 'SlopeVerticalShallowNarrowBlock',
+                     'GlazingSlopeBlock', 'GlazingShallowSlopeBlock', 'GlazingVerticalSlopeBlock']
+        }
+        def continuityResult = { String id, String kind, int states ->
+            def matches = ctmMatchesByBlock[id] ?: Collections.emptySet()
+            if (matches.isEmpty()) {
+                return 'not targeted'
+            }
+            isSlopeKind(kind) ? 'Continuity eligible; ERYDON slope model wraps after Continuity' : 'Continuity eligible'
+        }
+
+        def rows = blockIds.collect { id ->
+            def kind = kindFor(id)
+            def info = stateInfoForKind(kind)
+            [
+                    id: id,
+                    kind: kind,
+                    states: info.states as int,
+                    properties: info.properties,
+                    ctm: ctmMatchesByBlock[id] ?: new TreeSet<String>(),
+                    ctmExamples: ctmExamplesByBlock[id] ?: new TreeSet<String>(),
+                    dynamic: dynamicFamilyFor(kind)
+            ]
+        }
+        rows.each { row ->
+            row.continuity = continuityResult(row.id, row.kind, row.states)
+            row.worldEdit = (worldEditMixinRegistered && row.states > worldEditMaxStates)
+                    ? "yes: slim map over ${worldEditMaxStates}"
+                    : 'no'
+        }
+        rows = rows.sort { a, b ->
+            def cmp = b.states <=> a.states
+            cmp != 0 ? cmp : a.id <=> b.id
+        }
+
+        def highRows = rows.findAll { it.states > highStateReferenceThreshold }
+        def worldEditRows = rows.findAll { it.worldEdit.startsWith('yes:') }
+        def ctmRows = rows.findAll { !it.ctm.isEmpty() }
+        def dynamicRows = rows.findAll { it.dynamic.startsWith('yes:') }
+        def kindCounts = new TreeMap<String, Map>()
+        rows.each { row ->
+            def summary = kindCounts.computeIfAbsent(row.kind) { [blocks: 0, maxStates: 0] }
+            summary.blocks = summary.blocks + 1
+            summary.maxStates = Math.max(summary.maxStates as int, row.states as int)
+        }
+
+        def lines = []
+        lines << 'ERYDON high-state block audit'
+        lines << "Generated: ${generatedAt}"
+        lines << 'Scope: read-only source/resource scan; no assets, block IDs, blockstates, tags, models, or resource packs changed.'
+        lines << ''
+        lines << 'Quick summary'
+        lines << "- blockstate ids scanned: ${rows.size()}"
+        lines << "- blocks over ${highStateReferenceThreshold} states: ${highRows.size()}"
+        lines << "- highest static state count: ${rows.isEmpty() ? 0 : rows.first().states}"
+        lines << "- blocks with explicit ERYDON CTM matchBlocks: ${ctmRows.size()}"
+        lines << "- blocks with dynamic/custom baked model families: ${dynamicRows.size()}"
+        lines << "- WorldEdit slim-state mixin registered: ${worldEditMixinRegistered ? 'yes' : 'no'}; default threshold ${worldEditMaxStates}"
+        lines << "- Continuity handling: native full blockstate model map; no ERYDON mode or max-state cap"
+        lines << "- CTM property files scanned: ${ctmPropertyCountByRoot.collect { key, value -> "${key}=${value}" }.join(', ')}"
+        lines << ''
+        lines << 'Reading notes'
+        lines << '- Counts are static estimates from ERYDON source/property definitions, not a game launch.'
+        lines << '- Continuity result reflects ERYDON no longer replacing Continuity blockstate scoping or applying a max-state cap.'
+        lines << '- WorldEdit slim-state mapping is global for ERYDON blocks over the threshold, not a handwritten per-block list.'
+        lines << ''
+        lines << 'High-state family snapshot'
+        lines << String.format(Locale.ROOT, '%-32s | %7s | %10s', 'kind', 'blocks', 'max states')
+        lines << '-' * 56
+        kindCounts.collect { kind, summary -> [kind: kind, blocks: summary.blocks, maxStates: summary.maxStates] }
+                .sort { a, b ->
+                    def cmp = b.maxStates <=> a.maxStates
+                    cmp != 0 ? cmp : b.blocks <=> a.blocks
+                }
+                .findAll { it.maxStates > highStateReferenceThreshold }
+                .take(12)
+                .each { summary ->
+                    lines << String.format(Locale.ROOT, '%-32s | %7d | %10d', summary.kind, summary.blocks, summary.maxStates)
+                }
+        lines << ''
+        lines << 'Spot-check examples'
+        ['aganite_slope', 'aganite_arch_romanesque', 'aganite_window_french_georgian', 'aganite_ashlar_wall_georgian'].each { id ->
+            def row = rows.find { it.id == id }
+            if (row != null) {
+                lines << "- ${id}: ${row.states} states; ${row.kind}; ${row.continuity}; ${row.dynamic}; ${row.worldEdit}"
+            } else {
+                lines << "- ${id}: not found"
+            }
+        }
+        lines << ''
+        lines << 'Top 100 state counts'
+        lines << String.format(Locale.ROOT, '%-4s | %-64s | %7s | %-28s | %-18s | %-30s | %-34s | %-24s',
+                'rank', 'block id', 'states', 'kind', 'CTM', 'Continuity default', 'dynamic baked rendering', 'WorldEdit')
+        lines << '-' * 231
+        rows.take(100).eachWithIndex { row, index ->
+            lines << String.format(Locale.ROOT, '%-4d | %-64s | %7d | %-28s | %-18s | %-30s | %-34s | %-24s',
+                    index + 1,
+                    row.id.take(64),
+                    row.states,
+                    row.kind.take(28),
+                    shortList(row.ctm, 2).take(18),
+                    row.continuity.take(30),
+                    row.dynamic.take(34),
+                    row.worldEdit.take(24))
+        }
+        lines << ''
+        lines << "All blocks over ${highStateReferenceThreshold} states"
+        lines << String.format(Locale.ROOT, '%-64s | %7s | %-28s | %s',
+                'block id', 'states', 'kind', 'property multiplier')
+        lines << '-' * 136
+        highRows.each { row ->
+            lines << String.format(Locale.ROOT, '%-64s | %7d | %-28s | %s',
+                    row.id.take(64),
+                    row.states,
+                    row.kind.take(28),
+                    row.properties)
+        }
+        lines << ''
+        lines << 'State family summary'
+        lines << String.format(Locale.ROOT, '%-32s | %7s | %10s', 'kind', 'blocks', 'max states')
+        lines << '-' * 56
+        kindCounts.each { kind, summary ->
+            lines << String.format(Locale.ROOT, '%-32s | %7d | %10d', kind, summary.blocks, summary.maxStates)
+        }
+        lines << ''
+        lines << 'CTM matched high-state blocks'
+        def highCtmRows = highRows.findAll { !it.ctm.isEmpty() }
+        if (highCtmRows.isEmpty()) {
+            lines << '- none'
+        } else {
+            highCtmRows.each { row ->
+                lines << "- ${row.id}: ${shortList(row.ctm, 3)}; ${row.continuity}; examples ${shortList(row.ctmExamples, 2)}"
+            }
+        }
+        lines << 'Enum/property counts used'
+        counts.keySet().sort().each { key ->
+            lines << "- ${key}: ${counts[key]}"
+        }
+
+        reportFile.text = lines.join(System.lineSeparator()) + System.lineSeparator()
+        logger.lifecycle("ERYDON high-state block audit written to ${reportFile}")
+        logger.lifecycle("Blocks scanned: ${rows.size()}; over ${highStateReferenceThreshold} states: ${highRows.size()}; highest: ${rows.isEmpty() ? 0 : rows.first().states}")
+    }
+}

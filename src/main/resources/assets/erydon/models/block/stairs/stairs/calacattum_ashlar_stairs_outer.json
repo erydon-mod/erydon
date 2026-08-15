@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/outer_stairs",
+  "textures": {
+    "side": "erydon:block/calacattum_ashlar_block",
+    "top": "erydon:block/calacattum_ashlar_block",
+    "bottom": "erydon:block/calacattum_ashlar_block"
+  }
+}

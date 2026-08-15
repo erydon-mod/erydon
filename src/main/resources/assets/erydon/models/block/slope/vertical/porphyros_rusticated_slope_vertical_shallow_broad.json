@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/porphyros_rusticated_slope_vertical_shallow_broad_lh",
+  "textures": {
+    "stone": "erydon:block/porphyros_rusticated_block",
+    "particle": "erydon:block/porphyros_rusticated_block"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/chrysonyx_rock_slope_vertical_shallow_narrow_lh",
+  "textures": {
+    "stone": "erydon:block/chrysonyx_rock_block",
+    "particle": "erydon:block/chrysonyx_rock_block"
+  }
+}

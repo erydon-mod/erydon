@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "facing=north,half=bottom,waterlogged=false": { "model": "erydon:block/glazing/slope/glazing_framed_crystal_slope", "y": 180, "uvlock": true },
+    "facing=north,half=bottom,waterlogged=true": { "model": "erydon:block/glazing/slope/glazing_framed_crystal_slope", "y": 180, "uvlock": true },
+    "facing=east,half=bottom,waterlogged=false": { "model": "erydon:block/glazing/slope/glazing_framed_crystal_slope", "y": 270, "uvlock": true },
+    "facing=east,half=bottom,waterlogged=true": { "model": "erydon:block/glazing/slope/glazing_framed_crystal_slope", "y": 270, "uvlock": true },
+    "facing=south,half=bottom,waterlogged=false": { "model": "erydon:block/glazing/slope/glazing_framed_crystal_slope", "y": 0, "uvlock": true },
+    "facing=south,half=bottom,waterlogged=true": { "model": "erydon:block/glazing/slope/glazing_framed_crystal_slope", "y": 0, "uvlock": true },
+    "facing=west,half=bottom,waterlogged=false": { "model": "erydon:block/glazing/slope/glazing_framed_crystal_slope", "y": 90, "uvlock": true },
+    "facing=west,half=bottom,waterlogged=true": { "model": "erydon:block/glazing/slope/glazing_framed_crystal_slope", "y": 90, "uvlock": true },
+    "facing=north,half=top,waterlogged=false": { "model": "erydon:block/glazing/slope/glazing_framed_crystal_slope", "y": 180, "x": 180, "uvlock": true },
+    "facing=north,half=top,waterlogged=true": { "model": "erydon:block/glazing/slope/glazing_framed_crystal_slope", "y": 180, "x": 180, "uvlock": true },
+    "facing=east,half=top,waterlogged=false": { "model": "erydon:block/glazing/slope/glazing_framed_crystal_slope", "y": 270, "x": 180, "uvlock": true },
+    "facing=east,half=top,waterlogged=true": { "model": "erydon:block/glazing/slope/glazing_framed_crystal_slope", "y": 270, "x": 180, "uvlock": true },
+    "facing=south,half=top,waterlogged=false": { "model": "erydon:block/glazing/slope/glazing_framed_crystal_slope", "y": 0, "x": 180, "uvlock": true },
+    "facing=south,half=top,waterlogged=true": { "model": "erydon:block/glazing/slope/glazing_framed_crystal_slope", "y": 0, "x": 180, "uvlock": true },
+    "facing=west,half=top,waterlogged=false": { "model": "erydon:block/glazing/slope/glazing_framed_crystal_slope", "y": 90, "x": 180, "uvlock": true },
+    "facing=west,half=top,waterlogged=true": { "model": "erydon:block/glazing/slope/glazing_framed_crystal_slope", "y": 90, "x": 180, "uvlock": true }
+  }
+}

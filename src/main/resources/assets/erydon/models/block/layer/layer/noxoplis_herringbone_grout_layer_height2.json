@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/layer/layer/layer_height2",
+  "textures": {
+    "all": "erydon:block/noxoplis_herringbone_grout_block",
+    "particle": "erydon:block/noxoplis_herringbone_grout_block"
+  }
+}

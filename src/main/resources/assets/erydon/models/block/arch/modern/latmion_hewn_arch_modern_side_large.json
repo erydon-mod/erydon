@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/arch/modern/arch_modern_side_large",
+  "textures": {
+    "stone": "erydon:block/latmion_hewn_block"
+  }
+}

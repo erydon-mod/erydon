@@ -1,0 +1,7 @@
+﻿{
+    "parent":  "erydon:block/column/gothic/column_gothic_plinth",
+    "textures":  {
+                     "stone":  "erydon:block/nerium_block_aged",
+                     "particle":  "erydon:block/nerium_block_aged"
+                 }
+}

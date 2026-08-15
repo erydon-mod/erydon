@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/surround/guilloche/surround_guilloche_shaft_lh",
+  "textures": {
+    "particle": "erydon:block/etruscus_block_aged",
+    "0": "erydon:block/etruscus_block_aged",
+    "1": "erydon:block/etruscus_block_aged",
+    "texture": "erydon:block/etruscus_block_aged",
+    "stone": "erydon:block/etruscus_block_aged"
+  }
+}

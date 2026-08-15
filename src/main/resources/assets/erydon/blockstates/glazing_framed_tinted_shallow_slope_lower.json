@@ -1,0 +1,445 @@
+{
+    "variants":  {
+                     "half=top,shape=inner_left,facing=north,waterlogged=false":  {
+                                                                                      "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_inner",
+                                                                                      "y":  90,
+                                                                                      "uvlock":  true,
+                                                                                      "x":  180
+                                                                                  },
+                     "half=top,shape=inner_left,facing=north,waterlogged=true":  {
+                                                                                     "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_inner",
+                                                                                     "y":  90,
+                                                                                     "uvlock":  true,
+                                                                                     "x":  180
+                                                                                 },
+                     "half=top,shape=inner_left,facing=east,waterlogged=false":  {
+                                                                                     "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_inner",
+                                                                                     "y":  180,
+                                                                                     "uvlock":  true,
+                                                                                     "x":  180
+                                                                                 },
+                     "half=top,shape=inner_left,facing=east,waterlogged=true":  {
+                                                                                    "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_inner",
+                                                                                    "y":  180,
+                                                                                    "uvlock":  true,
+                                                                                    "x":  180
+                                                                                },
+                     "half=top,shape=inner_left,facing=south,waterlogged=false":  {
+                                                                                      "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_inner",
+                                                                                      "y":  270,
+                                                                                      "uvlock":  true,
+                                                                                      "x":  180
+                                                                                  },
+                     "half=top,shape=inner_left,facing=south,waterlogged=true":  {
+                                                                                     "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_inner",
+                                                                                     "y":  270,
+                                                                                     "uvlock":  true,
+                                                                                     "x":  180
+                                                                                 },
+                     "half=top,shape=inner_left,facing=west,waterlogged=false":  {
+                                                                                     "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_inner",
+                                                                                     "y":  0,
+                                                                                     "uvlock":  true,
+                                                                                     "x":  180
+                                                                                 },
+                     "half=top,shape=inner_left,facing=west,waterlogged=true":  {
+                                                                                    "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_inner",
+                                                                                    "y":  0,
+                                                                                    "uvlock":  true,
+                                                                                    "x":  180
+                                                                                },
+                     "half=top,shape=inner_right,facing=north,waterlogged=false":  {
+                                                                                       "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_inner",
+                                                                                       "y":  180,
+                                                                                       "uvlock":  true,
+                                                                                       "x":  180
+                                                                                   },
+                     "half=top,shape=inner_right,facing=north,waterlogged=true":  {
+                                                                                      "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_inner",
+                                                                                      "y":  180,
+                                                                                      "uvlock":  true,
+                                                                                      "x":  180
+                                                                                  },
+                     "half=top,shape=inner_right,facing=east,waterlogged=false":  {
+                                                                                      "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_inner",
+                                                                                      "y":  270,
+                                                                                      "uvlock":  true,
+                                                                                      "x":  180
+                                                                                  },
+                     "half=top,shape=inner_right,facing=east,waterlogged=true":  {
+                                                                                     "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_inner",
+                                                                                     "y":  270,
+                                                                                     "uvlock":  true,
+                                                                                     "x":  180
+                                                                                 },
+                     "half=top,shape=inner_right,facing=south,waterlogged=false":  {
+                                                                                       "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_inner",
+                                                                                       "y":  0,
+                                                                                       "uvlock":  true,
+                                                                                       "x":  180
+                                                                                   },
+                     "half=top,shape=inner_right,facing=south,waterlogged=true":  {
+                                                                                      "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_inner",
+                                                                                      "y":  0,
+                                                                                      "uvlock":  true,
+                                                                                      "x":  180
+                                                                                  },
+                     "half=top,shape=inner_right,facing=west,waterlogged=false":  {
+                                                                                      "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_inner",
+                                                                                      "y":  90,
+                                                                                      "uvlock":  true,
+                                                                                      "x":  180
+                                                                                  },
+                     "half=top,shape=inner_right,facing=west,waterlogged=true":  {
+                                                                                     "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_inner",
+                                                                                     "y":  90,
+                                                                                     "uvlock":  true,
+                                                                                     "x":  180
+                                                                                 },
+                     "half=top,shape=outer_left,facing=north,waterlogged=false":  {
+                                                                                      "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_outer",
+                                                                                      "y":  0,
+                                                                                      "uvlock":  true,
+                                                                                      "x":  180
+                                                                                  },
+                     "half=top,shape=outer_left,facing=north,waterlogged=true":  {
+                                                                                     "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_outer",
+                                                                                     "y":  0,
+                                                                                     "uvlock":  true,
+                                                                                     "x":  180
+                                                                                 },
+                     "half=top,shape=outer_left,facing=east,waterlogged=false":  {
+                                                                                     "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_outer",
+                                                                                     "y":  90,
+                                                                                     "uvlock":  true,
+                                                                                     "x":  180
+                                                                                 },
+                     "half=top,shape=outer_left,facing=east,waterlogged=true":  {
+                                                                                    "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_outer",
+                                                                                    "y":  90,
+                                                                                    "uvlock":  true,
+                                                                                    "x":  180
+                                                                                },
+                     "half=top,shape=outer_left,facing=south,waterlogged=false":  {
+                                                                                      "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_outer",
+                                                                                      "y":  180,
+                                                                                      "uvlock":  true,
+                                                                                      "x":  180
+                                                                                  },
+                     "half=top,shape=outer_left,facing=south,waterlogged=true":  {
+                                                                                     "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_outer",
+                                                                                     "y":  180,
+                                                                                     "uvlock":  true,
+                                                                                     "x":  180
+                                                                                 },
+                     "half=top,shape=outer_left,facing=west,waterlogged=false":  {
+                                                                                     "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_outer",
+                                                                                     "y":  270,
+                                                                                     "uvlock":  true,
+                                                                                     "x":  180
+                                                                                 },
+                     "half=top,shape=outer_left,facing=west,waterlogged=true":  {
+                                                                                    "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_outer",
+                                                                                    "y":  270,
+                                                                                    "uvlock":  true,
+                                                                                    "x":  180
+                                                                                },
+                     "half=top,shape=outer_right,facing=north,waterlogged=false":  {
+                                                                                       "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_outer",
+                                                                                       "y":  90,
+                                                                                       "uvlock":  true,
+                                                                                       "x":  180
+                                                                                   },
+                     "half=top,shape=outer_right,facing=north,waterlogged=true":  {
+                                                                                      "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_outer",
+                                                                                      "y":  90,
+                                                                                      "uvlock":  true,
+                                                                                      "x":  180
+                                                                                  },
+                     "half=top,shape=outer_right,facing=east,waterlogged=false":  {
+                                                                                      "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_outer",
+                                                                                      "y":  180,
+                                                                                      "uvlock":  true,
+                                                                                      "x":  180
+                                                                                  },
+                     "half=top,shape=outer_right,facing=east,waterlogged=true":  {
+                                                                                     "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_outer",
+                                                                                     "y":  180,
+                                                                                     "uvlock":  true,
+                                                                                     "x":  180
+                                                                                 },
+                     "half=top,shape=outer_right,facing=south,waterlogged=false":  {
+                                                                                       "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_outer",
+                                                                                       "y":  270,
+                                                                                       "uvlock":  true,
+                                                                                       "x":  180
+                                                                                   },
+                     "half=top,shape=outer_right,facing=south,waterlogged=true":  {
+                                                                                      "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_outer",
+                                                                                      "y":  270,
+                                                                                      "uvlock":  true,
+                                                                                      "x":  180
+                                                                                  },
+                     "half=top,shape=outer_right,facing=west,waterlogged=false":  {
+                                                                                      "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_outer",
+                                                                                      "y":  0,
+                                                                                      "uvlock":  true,
+                                                                                      "x":  180
+                                                                                  },
+                     "half=top,shape=outer_right,facing=west,waterlogged=true":  {
+                                                                                     "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_outer",
+                                                                                     "y":  0,
+                                                                                     "uvlock":  true,
+                                                                                     "x":  180
+                                                                                 },
+                     "half=top,shape=straight,facing=north,waterlogged=false":  {
+                                                                                    "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower",
+                                                                                    "y":  180,
+                                                                                    "uvlock":  true,
+                                                                                    "x":  180
+                                                                                },
+                     "half=top,shape=straight,facing=north,waterlogged=true":  {
+                                                                                   "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower",
+                                                                                   "y":  180,
+                                                                                   "uvlock":  true,
+                                                                                   "x":  180
+                                                                               },
+                     "half=top,shape=straight,facing=east,waterlogged=false":  {
+                                                                                   "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower",
+                                                                                   "y":  270,
+                                                                                   "uvlock":  true,
+                                                                                   "x":  180
+                                                                               },
+                     "half=top,shape=straight,facing=east,waterlogged=true":  {
+                                                                                  "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower",
+                                                                                  "y":  270,
+                                                                                  "uvlock":  true,
+                                                                                  "x":  180
+                                                                              },
+                     "half=top,shape=straight,facing=south,waterlogged=false":  {
+                                                                                    "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower",
+                                                                                    "y":  0,
+                                                                                    "uvlock":  true,
+                                                                                    "x":  180
+                                                                                },
+                     "half=top,shape=straight,facing=south,waterlogged=true":  {
+                                                                                   "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower",
+                                                                                   "y":  0,
+                                                                                   "uvlock":  true,
+                                                                                   "x":  180
+                                                                               },
+                     "half=top,shape=straight,facing=west,waterlogged=false":  {
+                                                                                   "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower",
+                                                                                   "y":  90,
+                                                                                   "uvlock":  true,
+                                                                                   "x":  180
+                                                                               },
+                     "half=top,shape=straight,facing=west,waterlogged=true":  {
+                                                                                  "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower",
+                                                                                  "y":  90,
+                                                                                  "uvlock":  true,
+                                                                                  "x":  180
+                                                                              },
+                     "half=bottom,shape=inner_left,facing=north,waterlogged=false":  {
+                                                                                         "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_inner",
+                                                                                         "y":  180,
+                                                                                         "uvlock":  true
+                                                                                     },
+                     "half=bottom,shape=inner_left,facing=north,waterlogged=true":  {
+                                                                                        "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_inner",
+                                                                                        "y":  180,
+                                                                                        "uvlock":  true
+                                                                                    },
+                     "half=bottom,shape=inner_left,facing=east,waterlogged=false":  {
+                                                                                        "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_inner",
+                                                                                        "y":  270,
+                                                                                        "uvlock":  true
+                                                                                    },
+                     "half=bottom,shape=inner_left,facing=east,waterlogged=true":  {
+                                                                                       "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_inner",
+                                                                                       "y":  270,
+                                                                                       "uvlock":  true
+                                                                                   },
+                     "half=bottom,shape=inner_left,facing=south,waterlogged=false":  {
+                                                                                         "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_inner",
+                                                                                         "y":  0,
+                                                                                         "uvlock":  true
+                                                                                     },
+                     "half=bottom,shape=inner_left,facing=south,waterlogged=true":  {
+                                                                                        "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_inner",
+                                                                                        "y":  0,
+                                                                                        "uvlock":  true
+                                                                                    },
+                     "half=bottom,shape=inner_left,facing=west,waterlogged=false":  {
+                                                                                        "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_inner",
+                                                                                        "y":  90,
+                                                                                        "uvlock":  true
+                                                                                    },
+                     "half=bottom,shape=inner_left,facing=west,waterlogged=true":  {
+                                                                                       "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_inner",
+                                                                                       "y":  90,
+                                                                                       "uvlock":  true
+                                                                                   },
+                     "half=bottom,shape=inner_right,facing=north,waterlogged=false":  {
+                                                                                          "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_inner",
+                                                                                          "y":  270,
+                                                                                          "uvlock":  true
+                                                                                      },
+                     "half=bottom,shape=inner_right,facing=north,waterlogged=true":  {
+                                                                                         "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_inner",
+                                                                                         "y":  270,
+                                                                                         "uvlock":  true
+                                                                                     },
+                     "half=bottom,shape=inner_right,facing=east,waterlogged=false":  {
+                                                                                         "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_inner",
+                                                                                         "y":  0,
+                                                                                         "uvlock":  true
+                                                                                     },
+                     "half=bottom,shape=inner_right,facing=east,waterlogged=true":  {
+                                                                                        "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_inner",
+                                                                                        "y":  0,
+                                                                                        "uvlock":  true
+                                                                                    },
+                     "half=bottom,shape=inner_right,facing=south,waterlogged=false":  {
+                                                                                          "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_inner",
+                                                                                          "y":  90,
+                                                                                          "uvlock":  true
+                                                                                      },
+                     "half=bottom,shape=inner_right,facing=south,waterlogged=true":  {
+                                                                                         "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_inner",
+                                                                                         "y":  90,
+                                                                                         "uvlock":  true
+                                                                                     },
+                     "half=bottom,shape=inner_right,facing=west,waterlogged=false":  {
+                                                                                         "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_inner",
+                                                                                         "y":  180,
+                                                                                         "uvlock":  true
+                                                                                     },
+                     "half=bottom,shape=inner_right,facing=west,waterlogged=true":  {
+                                                                                        "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_inner",
+                                                                                        "y":  180,
+                                                                                        "uvlock":  true
+                                                                                    },
+                     "half=bottom,shape=outer_left,facing=north,waterlogged=false":  {
+                                                                                         "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_outer",
+                                                                                         "y":  90,
+                                                                                         "uvlock":  true
+                                                                                     },
+                     "half=bottom,shape=outer_left,facing=north,waterlogged=true":  {
+                                                                                        "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_outer",
+                                                                                        "y":  90,
+                                                                                        "uvlock":  true
+                                                                                    },
+                     "half=bottom,shape=outer_left,facing=east,waterlogged=false":  {
+                                                                                        "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_outer",
+                                                                                        "y":  180,
+                                                                                        "uvlock":  true
+                                                                                    },
+                     "half=bottom,shape=outer_left,facing=east,waterlogged=true":  {
+                                                                                       "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_outer",
+                                                                                       "y":  180,
+                                                                                       "uvlock":  true
+                                                                                   },
+                     "half=bottom,shape=outer_left,facing=south,waterlogged=false":  {
+                                                                                         "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_outer",
+                                                                                         "y":  270,
+                                                                                         "uvlock":  true
+                                                                                     },
+                     "half=bottom,shape=outer_left,facing=south,waterlogged=true":  {
+                                                                                        "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_outer",
+                                                                                        "y":  270,
+                                                                                        "uvlock":  true
+                                                                                    },
+                     "half=bottom,shape=outer_left,facing=west,waterlogged=false":  {
+                                                                                        "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_outer",
+                                                                                        "y":  0,
+                                                                                        "uvlock":  true
+                                                                                    },
+                     "half=bottom,shape=outer_left,facing=west,waterlogged=true":  {
+                                                                                       "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_outer",
+                                                                                       "y":  0,
+                                                                                       "uvlock":  true
+                                                                                   },
+                     "half=bottom,shape=outer_right,facing=north,waterlogged=false":  {
+                                                                                          "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_outer",
+                                                                                          "y":  180,
+                                                                                          "uvlock":  true
+                                                                                      },
+                     "half=bottom,shape=outer_right,facing=north,waterlogged=true":  {
+                                                                                         "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_outer",
+                                                                                         "y":  180,
+                                                                                         "uvlock":  true
+                                                                                     },
+                     "half=bottom,shape=outer_right,facing=east,waterlogged=false":  {
+                                                                                         "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_outer",
+                                                                                         "y":  270,
+                                                                                         "uvlock":  true
+                                                                                     },
+                     "half=bottom,shape=outer_right,facing=east,waterlogged=true":  {
+                                                                                        "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_outer",
+                                                                                        "y":  270,
+                                                                                        "uvlock":  true
+                                                                                    },
+                     "half=bottom,shape=outer_right,facing=south,waterlogged=false":  {
+                                                                                          "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_outer",
+                                                                                          "y":  0,
+                                                                                          "uvlock":  true
+                                                                                      },
+                     "half=bottom,shape=outer_right,facing=south,waterlogged=true":  {
+                                                                                         "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_outer",
+                                                                                         "y":  0,
+                                                                                         "uvlock":  true
+                                                                                     },
+                     "half=bottom,shape=outer_right,facing=west,waterlogged=false":  {
+                                                                                         "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_outer",
+                                                                                         "y":  90,
+                                                                                         "uvlock":  true
+                                                                                     },
+                     "half=bottom,shape=outer_right,facing=west,waterlogged=true":  {
+                                                                                        "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower_outer",
+                                                                                        "y":  90,
+                                                                                        "uvlock":  true
+                                                                                    },
+                     "half=bottom,shape=straight,facing=north,waterlogged=false":  {
+                                                                                       "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower",
+                                                                                       "y":  180,
+                                                                                       "uvlock":  true
+                                                                                   },
+                     "half=bottom,shape=straight,facing=north,waterlogged=true":  {
+                                                                                      "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower",
+                                                                                      "y":  180,
+                                                                                      "uvlock":  true
+                                                                                  },
+                     "half=bottom,shape=straight,facing=east,waterlogged=false":  {
+                                                                                      "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower",
+                                                                                      "y":  270,
+                                                                                      "uvlock":  true
+                                                                                  },
+                     "half=bottom,shape=straight,facing=east,waterlogged=true":  {
+                                                                                     "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower",
+                                                                                     "y":  270,
+                                                                                     "uvlock":  true
+                                                                                 },
+                     "half=bottom,shape=straight,facing=south,waterlogged=false":  {
+                                                                                       "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower",
+                                                                                       "y":  0,
+                                                                                       "uvlock":  true
+                                                                                   },
+                     "half=bottom,shape=straight,facing=south,waterlogged=true":  {
+                                                                                      "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower",
+                                                                                      "y":  0,
+                                                                                      "uvlock":  true
+                                                                                  },
+                     "half=bottom,shape=straight,facing=west,waterlogged=false":  {
+                                                                                      "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower",
+                                                                                      "y":  90,
+                                                                                      "uvlock":  true
+                                                                                  },
+                     "half=bottom,shape=straight,facing=west,waterlogged=true":  {
+                                                                                     "model":  "erydon:block/glazing/shallow_slope/glazing_framed_tinted_shallow_slope_lower",
+                                                                                     "y":  90,
+                                                                                     "uvlock":  true
+                                                                                 }
+                 }
+}
+

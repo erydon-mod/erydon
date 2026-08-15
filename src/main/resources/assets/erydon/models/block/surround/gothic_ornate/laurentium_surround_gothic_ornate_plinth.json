@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/surround/gothic_ornate/surround_gothic_ornate_plinth",
+  "textures": {
+    "particle": "erydon:block/laurentium_block",
+    "0": "erydon:block/laurentium_block",
+    "1": "erydon:block/laurentium_block",
+    "texture": "erydon:block/laurentium_block",
+    "stone": "erydon:block/laurentium_block"
+  }
+}

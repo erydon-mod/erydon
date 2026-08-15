@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/aterzon_hewn_slope_vertical_shallow_broad_lh",
+  "textures": {
+    "stone": "erydon:block/aterzon_hewn_block",
+    "particle": "erydon:block/aterzon_hewn_block"
+  }
+}

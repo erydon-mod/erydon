@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/solistra_rock_slope_vertical_shallow_narrow_lh",
+  "textures": {
+    "stone": "erydon:block/solistra_rock_block",
+    "particle": "erydon:block/solistra_rock_block"
+  }
+}

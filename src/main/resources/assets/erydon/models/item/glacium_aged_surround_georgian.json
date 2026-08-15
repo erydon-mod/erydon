@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:item/surround_georgian_icon",
+  "textures": {
+    "stone": "erydon:block/glacium_block_aged"
+  }
+}

@@ -1,0 +1,6 @@
+{
+    "parent":  "erydon:block/internal/wrapped/aganite_rusticated_slope_vertical_shallow_narrow",
+    "textures":  {
+                     "texture":  "erydon:block/aganite_rusticated_block"
+                 }
+}

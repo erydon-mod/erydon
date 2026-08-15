@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/wall/georgian/wall_georgian_side_diagonal",
+  "textures": {
+    "wall": "erydon:block/gelastrum_etruscus_weave_grout_block",
+    "particle": "erydon:block/gelastrum_etruscus_weave_grout_block"
+  }
+}

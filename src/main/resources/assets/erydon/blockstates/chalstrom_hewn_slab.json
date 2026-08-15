@@ -1,0 +1,14 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "erydon:block/slab/chalstrom_hewn_slab"
+    },
+    "type=top": {
+      "model": "erydon:block/slab/chalstrom_hewn_slab_top"
+    },
+    "type=double": {
+      "model": "erydon:block/block/chalstrom_hewn_block"
+    }
+  }
+}
+

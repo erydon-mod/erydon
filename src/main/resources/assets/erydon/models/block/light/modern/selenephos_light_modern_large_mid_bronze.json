@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/light/modern/light_modern_large_mid",
+  "textures": {
+    "0": "erydon:block/selenephos_block",
+    "particle": "erydon:block/selenephos_block"
+  }
+}

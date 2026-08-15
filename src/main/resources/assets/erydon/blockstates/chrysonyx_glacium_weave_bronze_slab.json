@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "erydon:block/slab/chrysonyx_glacium_weave_bronze_slab"
+    },
+    "type=top": {
+      "model": "erydon:block/slab/chrysonyx_glacium_weave_bronze_slab_top"
+    },
+    "type=double": {
+      "model": "erydon:block/block/chrysonyx_glacium_weave_bronze_block"
+    }
+  }
+}

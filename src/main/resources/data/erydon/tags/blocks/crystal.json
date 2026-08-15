@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    "erydon:glazing_crystal",
+    "erydon:glazing_crystal_block",
+    "erydon:glazing_crystal_layer_vertical",
+    "erydon:glazing_framed_crystal_shallow_slope_lower",
+    "erydon:glazing_framed_crystal_shallow_slope_upper",
+    "erydon:glazing_framed_crystal",
+    "erydon:glazing_framed_crystal_slope",
+    "erydon:glazing_framed_crystal_slope_vertical"
+  ]
+}

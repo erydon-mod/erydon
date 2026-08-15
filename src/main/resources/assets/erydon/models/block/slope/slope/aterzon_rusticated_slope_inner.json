@@ -1,0 +1,9 @@
+{
+  "parent": "erydon:block/slope/slope/slope_inner",
+  "textures": {
+    "stone": "erydon:block/aterzon_rusticated_block",
+    "particle": "#stone"
+  }
+}
+
+

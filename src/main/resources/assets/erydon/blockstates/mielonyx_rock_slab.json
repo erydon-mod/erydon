@@ -1,0 +1,14 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "erydon:block/slab/mielonyx_rock_slab"
+    },
+    "type=top": {
+      "model": "erydon:block/slab/mielonyx_rock_slab_top"
+    },
+    "type=double": {
+      "model": "erydon:block/block/mielonyx_rock_block"
+    }
+  }
+}
+

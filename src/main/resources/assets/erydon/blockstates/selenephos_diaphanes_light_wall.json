@@ -1,0 +1,180 @@
+{
+    "multipart":  [
+                      {
+                          "when":  {
+                                       "facing":  "north",
+                                       "frame":  "bronze",
+                                       "style":  "single"
+                                   },
+                          "apply":  {
+                                        "model":  "erydon:block/light/wall/selenephos_diaphanes_light_wall_bronze",
+                                        "y":  0
+                                    }
+                      },
+                      {
+                          "when":  {
+                                       "facing":  "north",
+                                       "frame":  "bronze",
+                                       "style":  "double"
+                                   },
+                          "apply":  {
+                                        "model":  "erydon:block/light/wall/selenephos_diaphanes_light_wall_double_bronze",
+                                        "y":  0
+                                    }
+                      },
+                      {
+                          "when":  {
+                                       "facing":  "north",
+                                       "frame":  "silver",
+                                       "style":  "single"
+                                   },
+                          "apply":  {
+                                        "model":  "erydon:block/light/wall/selenephos_diaphanes_light_wall_silver",
+                                        "y":  0
+                                    }
+                      },
+                      {
+                          "when":  {
+                                       "facing":  "north",
+                                       "frame":  "silver",
+                                       "style":  "double"
+                                   },
+                          "apply":  {
+                                        "model":  "erydon:block/light/wall/selenephos_diaphanes_light_wall_double_silver",
+                                        "y":  0
+                                    }
+                      },
+                      {
+                          "when":  {
+                                       "facing":  "east",
+                                       "frame":  "bronze",
+                                       "style":  "single"
+                                   },
+                          "apply":  {
+                                        "model":  "erydon:block/light/wall/selenephos_diaphanes_light_wall_bronze",
+                                        "y":  90
+                                    }
+                      },
+                      {
+                          "when":  {
+                                       "facing":  "east",
+                                       "frame":  "bronze",
+                                       "style":  "double"
+                                   },
+                          "apply":  {
+                                        "model":  "erydon:block/light/wall/selenephos_diaphanes_light_wall_double_bronze",
+                                        "y":  90
+                                    }
+                      },
+                      {
+                          "when":  {
+                                       "facing":  "east",
+                                       "frame":  "silver",
+                                       "style":  "single"
+                                   },
+                          "apply":  {
+                                        "model":  "erydon:block/light/wall/selenephos_diaphanes_light_wall_silver",
+                                        "y":  90
+                                    }
+                      },
+                      {
+                          "when":  {
+                                       "facing":  "east",
+                                       "frame":  "silver",
+                                       "style":  "double"
+                                   },
+                          "apply":  {
+                                        "model":  "erydon:block/light/wall/selenephos_diaphanes_light_wall_double_silver",
+                                        "y":  90
+                                    }
+                      },
+                      {
+                          "when":  {
+                                       "facing":  "south",
+                                       "frame":  "bronze",
+                                       "style":  "single"
+                                   },
+                          "apply":  {
+                                        "model":  "erydon:block/light/wall/selenephos_diaphanes_light_wall_bronze",
+                                        "y":  180
+                                    }
+                      },
+                      {
+                          "when":  {
+                                       "facing":  "south",
+                                       "frame":  "bronze",
+                                       "style":  "double"
+                                   },
+                          "apply":  {
+                                        "model":  "erydon:block/light/wall/selenephos_diaphanes_light_wall_double_bronze",
+                                        "y":  180
+                                    }
+                      },
+                      {
+                          "when":  {
+                                       "facing":  "south",
+                                       "frame":  "silver",
+                                       "style":  "single"
+                                   },
+                          "apply":  {
+                                        "model":  "erydon:block/light/wall/selenephos_diaphanes_light_wall_silver",
+                                        "y":  180
+                                    }
+                      },
+                      {
+                          "when":  {
+                                       "facing":  "south",
+                                       "frame":  "silver",
+                                       "style":  "double"
+                                   },
+                          "apply":  {
+                                        "model":  "erydon:block/light/wall/selenephos_diaphanes_light_wall_double_silver",
+                                        "y":  180
+                                    }
+                      },
+                      {
+                          "when":  {
+                                       "facing":  "west",
+                                       "frame":  "bronze",
+                                       "style":  "single"
+                                   },
+                          "apply":  {
+                                        "model":  "erydon:block/light/wall/selenephos_diaphanes_light_wall_bronze",
+                                        "y":  270
+                                    }
+                      },
+                      {
+                          "when":  {
+                                       "facing":  "west",
+                                       "frame":  "bronze",
+                                       "style":  "double"
+                                   },
+                          "apply":  {
+                                        "model":  "erydon:block/light/wall/selenephos_diaphanes_light_wall_double_bronze",
+                                        "y":  270
+                                    }
+                      },
+                      {
+                          "when":  {
+                                       "facing":  "west",
+                                       "frame":  "silver",
+                                       "style":  "single"
+                                   },
+                          "apply":  {
+                                        "model":  "erydon:block/light/wall/selenephos_diaphanes_light_wall_silver",
+                                        "y":  270
+                                    }
+                      },
+                      {
+                          "when":  {
+                                       "facing":  "west",
+                                       "frame":  "silver",
+                                       "style":  "double"
+                                   },
+                          "apply":  {
+                                        "model":  "erydon:block/light/wall/selenephos_diaphanes_light_wall_double_silver",
+                                        "y":  270
+                                    }
+                      }
+                  ]
+}

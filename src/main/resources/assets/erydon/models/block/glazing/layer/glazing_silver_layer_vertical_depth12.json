@@ -1,0 +1,47 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "erydon:block/glazing_silver",
+    "pane": "erydon:block/glazing_silver",
+    "edge": "erydon:block/glazing_silver_edge"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        12
+      ],
+      "faces": {
+        "north": {
+          "texture": "#pane",
+          "cullface": "north"
+        },
+        "east": {
+          "texture": "#edge",
+          "cullface": "east"
+        },
+        "south": {
+          "texture": "#pane"
+        },
+        "west": {
+          "texture": "#edge",
+          "cullface": "west"
+        },
+        "up": {
+          "texture": "#edge",
+          "cullface": "up"
+        },
+        "down": {
+          "texture": "#edge",
+          "cullface": "down"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "parent": "minecraft:block/template_glass_pane_post",
+  "textures": {
+    "pane": "erydon:block/gelastrum_diaphanes_block",
+    "edge": "erydon:block/gelastrum_diaphanes_block"
+  }
+}
+
+
+

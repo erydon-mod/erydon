@@ -1,0 +1,11 @@
+{
+  "parent": "minecraft:block/snow_height8",
+  "textures": {
+    "texture": "erydon:block/mielonyx_diaphanes_block",
+    "particle": "erydon:block/mielonyx_diaphanes_block"
+  }
+}
+
+
+
+

@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "erydon:block/internal/wrapped/kylorion_hewn_arch_romanesque"
+      }
+    }
+  ]
+}

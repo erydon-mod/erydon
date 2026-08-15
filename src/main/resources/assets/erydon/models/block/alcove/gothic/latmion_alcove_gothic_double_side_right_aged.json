@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/alcove/gothic/alcove_gothic_double_side_right",
+    "textures":  {
+                     "stone":  "erydon:block/latmion_block_aged",
+                     "particle":  "erydon:block/latmion_block_aged"
+                 }
+}

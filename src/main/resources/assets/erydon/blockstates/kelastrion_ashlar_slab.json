@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "erydon:block/slab/kelastrion_ashlar_slab"
+    },
+    "type=top": {
+      "model": "erydon:block/slab/kelastrion_ashlar_slab_top"
+    },
+    "type=double": {
+      "model": "erydon:block/block/kelastrion_ashlar_block"
+    }
+  }
+}

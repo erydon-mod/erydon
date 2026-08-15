@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/snow_height14",
+  "textures": {
+    "texture": "erydon:block/psamatheon_ashlar_block",
+    "particle": "erydon:block/psamatheon_ashlar_block"
+  }
+}

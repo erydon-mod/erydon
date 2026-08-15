@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/mielonyx_ashlar_layer_vertical"
+                                    }
+                      }
+                  ]
+}

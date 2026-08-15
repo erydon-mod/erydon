@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/steep/slope_steep_upper_inner",
+  "textures": {
+    "stone": "erydon:block/borealis_herringbone_bronze_block",
+    "particle": "#stone"
+  }
+}

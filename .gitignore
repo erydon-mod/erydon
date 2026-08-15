@@ -1,0 +1,75 @@
+# Gradle and build output
+.gradle/
+.verification-cache/
+build/
+out/
+classes/
+
+# IntelliJ and editor state
+.idea/
+*.iml
+.aiassistant/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Minecraft development runtime
+run/
+run-dev/
+runclient_errors/
+logs/
+crash-reports/
+saves/
+screenshots/
+shaderpacks/
+resourcepacks/
+mods/
+mods_disabled/
+options.txt
+usercache.json
+
+# Runtime diagnostics and profiling
+*.log
+*.log.gz
+*.jfr
+*.hprof
+*.heapdump
+*.sparkprofile
+*.nps
+hs_err_pid*
+replay_pid*
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# JavaScript tooling
+node_modules/
+
+# Local secrets and machine configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Downloaded or packaged binaries
+*.jar
+*.zip
+*.exe
+*.dll
+!gradle/wrapper/gradle-wrapper.jar
+!libs/continuity-3.0.0+1.20.1.jar
+
+# Operating-system files
+.DS_Store
+Thumbs.db
+Desktop.ini

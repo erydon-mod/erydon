@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "erydon:block/slab/hesperion_hewn_slab"
+    },
+    "type=top": {
+      "model": "erydon:block/slab/hesperion_hewn_slab_top"
+    },
+    "type=double": {
+      "model": "erydon:block/block/hesperion_hewn_block"
+    }
+  }
+}

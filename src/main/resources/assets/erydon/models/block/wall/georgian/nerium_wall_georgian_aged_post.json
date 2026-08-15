@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/wall/georgian/wall_georgian_post",
+  "textures": {
+    "wall": "erydon:block/nerium_block_aged",
+    "particle": "erydon:block/nerium_block_aged"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/chrysonyx_glacium_weave_grout_slope_vertical_shallow_narrow_lh",
+  "textures": {
+    "stone": "erydon:block/chrysonyx_glacium_weave_grout_block",
+    "particle": "erydon:block/chrysonyx_glacium_weave_grout_block"
+  }
+}

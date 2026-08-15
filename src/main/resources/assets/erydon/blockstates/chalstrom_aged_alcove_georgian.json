@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "erydon:block/internal/wrapped/chalstrom_aged_alcove_georgian"
+      }
+    }
+  ]
+}

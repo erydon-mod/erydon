@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/arch/modern/arch_modern_side_medium_upper",
+  "textures": {
+    "stone": "erydon:block/psamatheon_rusticated_block"
+  }
+}

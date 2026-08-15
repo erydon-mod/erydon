@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/solistra_slope_shallow_lower_aged"
+                                    }
+                      }
+                  ]
+}

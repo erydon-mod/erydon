@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/alcove/georgian/alcove_georgian_base",
+  "textures": {
+    "stone": "erydon:block/porphyros_block",
+    "particle": "erydon:block/porphyros_block"
+  }
+}

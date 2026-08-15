@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "erydon:block/slab/psamatheon_slab_aged"
+    },
+    "type=top": {
+      "model": "erydon:block/slab/psamatheon_slab_top_aged"
+    },
+    "type=double": {
+      "model": "erydon:block/block/psamatheon_block_aged"
+    }
+  }
+}

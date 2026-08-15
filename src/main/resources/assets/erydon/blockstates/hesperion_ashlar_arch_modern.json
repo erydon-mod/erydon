@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "erydon:block/internal/wrapped/hesperion_ashlar_arch_modern"
+      }
+    }
+  ]
+}

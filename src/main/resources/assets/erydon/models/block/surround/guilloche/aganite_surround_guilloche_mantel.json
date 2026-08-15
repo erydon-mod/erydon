@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/surround/guilloche/surround_guilloche_mantel",
+  "textures": {
+    "particle": "erydon:block/aganite_block",
+    "0": "erydon:block/aganite_block",
+    "1": "erydon:block/aganite_block",
+    "texture": "erydon:block/aganite_block",
+    "stone": "erydon:block/aganite_block"
+  }
+}

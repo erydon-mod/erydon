@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "erydon:block/internal/wrapped/noxoplis_aged_arch_gothic"
+      }
+    }
+  ]
+}

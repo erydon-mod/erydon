@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/chalstrom_calacattum_weave_grout_slope_shallow_lower"
+                                    }
+                      }
+                  ]
+}

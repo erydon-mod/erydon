@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/layer/layer_multiface/parent/top_height10",
+  "textures": {
+    "texture": "erydon:block/psamatheon_block"
+  }
+}

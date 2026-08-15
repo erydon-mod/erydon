@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/arch/gothic/arch_gothic_top_large",
+  "textures": {
+    "stone": "erydon:block/striatus_rock_block"
+  }
+}

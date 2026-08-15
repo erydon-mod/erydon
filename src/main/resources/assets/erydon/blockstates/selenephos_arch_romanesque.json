@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "erydon:block/internal/wrapped/selenephos_arch_romanesque"
+      }
+    }
+  ]
+}

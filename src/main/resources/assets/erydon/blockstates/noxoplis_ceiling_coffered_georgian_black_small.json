@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "erydon:block/internal/wrapped/noxoplis_ceiling_coffered_georgian_black_small"
+      }
+    }
+  ]
+}

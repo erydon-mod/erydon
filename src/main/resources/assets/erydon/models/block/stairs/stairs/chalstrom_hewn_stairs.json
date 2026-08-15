@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/stairs",
+  "textures": {
+    "side": "erydon:block/chalstrom_hewn_block",
+    "top": "erydon:block/chalstrom_hewn_block",
+    "bottom": "erydon:block/chalstrom_hewn_block"
+  }
+}

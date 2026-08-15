@@ -1,0 +1,6 @@
+{
+    "parent": "erydon:block/arch/gothic/arch_gothic_icon",
+    "textures": {
+        "stone": "erydon:block/selenephos_rock_block"
+    }
+}

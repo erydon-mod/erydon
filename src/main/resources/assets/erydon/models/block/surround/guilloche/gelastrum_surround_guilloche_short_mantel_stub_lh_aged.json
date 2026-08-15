@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/surround/guilloche/surround_guilloche_short_mantel_stub_lh",
+  "textures": {
+    "particle": "erydon:block/gelastrum_block_aged",
+    "0": "erydon:block/gelastrum_block_aged",
+    "1": "erydon:block/gelastrum_block_aged",
+    "texture": "erydon:block/gelastrum_block_aged",
+    "stone": "erydon:block/gelastrum_block_aged"
+  }
+}

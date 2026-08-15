@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/layer/slice_post/slice_post_horizontal_size14",
+  "textures": {
+    "texture": "erydon:block/etruscus_block_aged",
+    "particle": "erydon:block/etruscus_block_aged"
+  }
+}

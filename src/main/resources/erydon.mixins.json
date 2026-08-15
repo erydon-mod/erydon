@@ -1,0 +1,27 @@
+{
+  "required": false,
+  "minVersion": "0.8",
+  "package": "com.oliver.erydon.mixin",
+  "plugin": "com.oliver.erydon.mixin.ErydonMixinPlugin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "BlockItemMixin",
+    "WorldMixin",
+    "compat.axiom.SmearBuilderToolMixin",
+    "compat.worldedit.WorldEditBlockStateAccessor",
+    "compat.worldedit.WorldEditBlockStateMixin"
+  ],
+  "client": [
+    "client.BakedQuadFactoryMixin",
+    "client.ContinuityCtmTransformProbeMixin",
+    "client.ContinuityReservedSpriteWarningMixin",
+    "client.FluidRendererMixin",
+    "client.compat.axiom.BlockListEntryMixin",
+    "client.compat.rei.ReiIdentifierArgumentTypeMixin",
+    "client.compat.rei.ReiTextArgumentTypeMixin",
+    "client.indium.TerrainRenderContextMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/imperium_rock_slope_vertical_shallow_narrow_lh",
+  "textures": {
+    "stone": "erydon:block/imperium_rock_block",
+    "particle": "erydon:block/imperium_rock_block"
+  }
+}

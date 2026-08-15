@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/alcove/gothic/alcove_gothic_base",
+  "textures": {
+    "stone": "erydon:block/gelastrum_hewn_block",
+    "particle": "erydon:block/gelastrum_hewn_block"
+  }
+}

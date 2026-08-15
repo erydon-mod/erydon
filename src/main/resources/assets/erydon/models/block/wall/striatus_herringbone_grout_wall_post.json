@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/template_wall_post",
+  "textures": {
+    "wall": "erydon:block/striatus_herringbone_grout_block"
+  }
+}

@@ -1,0 +1,88 @@
+{
+	"format_version": "1.9.0",
+	"credit": "Made with Blockbench",
+	"elements": [
+		{
+			"from": [0, 0, 0],
+			"to": [8, 8, 1],
+			"color": 3,
+			"faces": {
+				"north": {"texture": "#stone", "cullface": "north"},
+				"east": {"texture": "#stone"},
+				"south": {"texture": "#stone"},
+				"west": {"texture": "#stone", "cullface": "west"},
+				"up": {"texture": "#stone"},
+				"down": {"texture": "#stone", "cullface": "down"}
+			}
+		},
+		{
+			"from": [0, 6, 1],
+			"to": [8, 8, 4],
+			"rotation": {"angle": 0, "axis": "y", "origin": [0, 0, 1]},
+			"color": 3,
+			"faces": {
+				"east": {"texture": "#stone"},
+				"south": {"texture": "#stone"},
+				"west": {"texture": "#stone", "cullface": "west"},
+				"up": {"texture": "#stone"},
+				"down": {"texture": "#stone"}
+			}
+		},
+		{
+			"from": [0, 4, 1],
+			"to": [4, 6, 3],
+			"rotation": {"angle": 0, "axis": "y", "origin": [0, -2, 1]},
+			"color": 3,
+			"faces": {
+				"south": {"texture": "#stone"},
+				"west": {"texture": "#stone", "cullface": "west"},
+				"down": {"texture": "#stone"}
+			}
+		},
+		{
+			"from": [0, 2, 1],
+			"to": [4, 4, 2],
+			"rotation": {"angle": 0, "axis": "y", "origin": [0, -4, 1]},
+			"color": 3,
+			"faces": {
+				"south": {"texture": "#stone"},
+				"west": {"texture": "#stone", "cullface": "west"},
+				"down": {"texture": "#stone"}
+			}
+		},
+		{
+			"from": [6, 0, 1],
+			"to": [8, 6, 4],
+			"rotation": {"angle": 0, "axis": "y", "origin": [0, 0, 1]},
+			"color": 3,
+			"faces": {
+				"east": {"texture": "#stone"},
+				"south": {"texture": "#stone"},
+				"west": {"texture": "#stone"},
+				"down": {"texture": "#stone", "cullface": "down"}
+			}
+		},
+		{
+			"from": [4, 0, 1],
+			"to": [6, 6, 3],
+			"rotation": {"angle": 0, "axis": "y", "origin": [-2, 0, 1]},
+			"color": 3,
+			"faces": {
+				"south": {"texture": "#stone"},
+				"west": {"texture": "#stone"},
+				"down": {"texture": "#stone", "cullface": "down"}
+			}
+		},
+		{
+			"from": [2, 0, 1],
+			"to": [4, 2, 2],
+			"rotation": {"angle": 0, "axis": "y", "origin": [-4, 0, 1]},
+			"color": 3,
+			"faces": {
+				"south": {"texture": "#stone"},
+				"west": {"texture": "#stone"},
+				"down": {"texture": "#stone", "cullface": "down"}
+			}
+		}
+	]
+}

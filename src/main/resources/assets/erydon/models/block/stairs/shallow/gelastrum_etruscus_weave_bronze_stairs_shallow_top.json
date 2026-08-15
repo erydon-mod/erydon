@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/stairs/shallow/shallow_stairs_top",
+    "textures":  {
+                     "all":  "erydon:block/gelastrum_etruscus_weave_bronze_block",
+                     "particle":  "#all"
+                 }
+}

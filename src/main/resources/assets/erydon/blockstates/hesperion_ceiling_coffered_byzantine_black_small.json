@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "erydon:block/internal/wrapped/hesperion_ceiling_coffered_guilloche_black_small"
+      }
+    }
+  ]
+}

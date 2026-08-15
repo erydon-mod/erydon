@@ -1,0 +1,8 @@
+{
+  "parent": "erydon:block/window/french_georgian/window_french_georgian_sill_lh",
+  "textures": {
+    "stone": "erydon:block/latmion_block_aged",
+    "pane": "erydon:block/glazing_bronze",
+    "lead": "erydon:block/lead_black"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/porphyros_rock_slope_vertical_shallow_narrow_lh",
+  "textures": {
+    "stone": "erydon:block/porphyros_rock_block",
+    "particle": "erydon:block/porphyros_rock_block"
+  }
+}

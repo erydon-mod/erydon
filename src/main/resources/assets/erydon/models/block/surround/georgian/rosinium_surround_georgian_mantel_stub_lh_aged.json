@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/surround/georgian/surround_georgian_mantel_stub_lh",
+  "textures": {
+    "stone": "erydon:block/rosinium_block_aged",
+    "particle": "#stone"
+  }
+}

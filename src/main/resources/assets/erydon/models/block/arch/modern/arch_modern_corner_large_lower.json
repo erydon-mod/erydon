@@ -1,0 +1,31 @@
+{
+	"format_version": "1.9.0",
+	"credit": "Made with Blockbench",
+	"textures": {
+		"particle": "#stone"
+	},
+	"elements": [
+		{
+			"from": [11.92665, 5.9137, 0],
+			"to": [15.98889, 14.05094, 16],
+			"rotation": {"angle": 22.5, "axis": "z", "origin": [1.499, 8.64856, 8]},
+			"faces": {
+				"north": {"texture": "#stone", "cullface": "north"},
+				"east": {"texture": "#stone"},
+				"south": {"texture": "#stone", "cullface": "south"},
+				"west": {"texture": "#stone"},
+				"up": {"texture": "#stone", "cullface": "up"},
+				"down": {"texture": "#stone"}
+			}
+		}
+	],
+	"groups": [
+		{
+			"name": "arch_romanesque_corner_large_lower",
+			"origin": [-8, 5.293, 8],
+			"scope": 0,
+			"color": 0,
+			"children": [0]
+		}
+	]
+}

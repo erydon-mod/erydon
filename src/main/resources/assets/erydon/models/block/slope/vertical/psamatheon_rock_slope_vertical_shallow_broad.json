@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/psamatheon_rock_slope_vertical_shallow_broad_lh",
+  "textures": {
+    "stone": "erydon:block/psamatheon_rock_block",
+    "particle": "erydon:block/psamatheon_rock_block"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "erydon:block/internal/wrapped/calacattum_ceiling_coffered_georgian_black_small"
+      }
+    }
+  ]
+}

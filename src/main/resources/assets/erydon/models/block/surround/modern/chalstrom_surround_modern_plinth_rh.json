@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/surround/modern/surround_modern_plinth_rh",
+  "textures": {
+    "particle": "erydon:block/chalstrom_block",
+    "0": "erydon:block/chalstrom_block",
+    "1": "erydon:block/chalstrom_block",
+    "texture": "erydon:block/chalstrom_block",
+    "stone": "erydon:block/chalstrom_block"
+  }
+}

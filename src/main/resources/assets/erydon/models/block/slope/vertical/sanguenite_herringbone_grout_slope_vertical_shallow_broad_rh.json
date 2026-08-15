@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/slope_vertical_shallow_broad_rh",
+  "textures": {
+    "stone": "erydon:block/sanguenite_herringbone_grout_block",
+    "particle": "erydon:block/sanguenite_herringbone_grout_block"
+  }
+}

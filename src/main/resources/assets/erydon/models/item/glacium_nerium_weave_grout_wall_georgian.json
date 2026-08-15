@@ -1,0 +1,7 @@
+{
+    "parent": "erydon:block/wall/georgian/wall_georgian_icon",
+    "textures": {
+        "wall": "erydon:block/glacium_nerium_weave_grout_block",
+        "particle": "erydon:block/glacium_nerium_weave_grout_block"
+    }
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/column/circular/column_circular_capital_narrow",
+  "textures": {
+    "stone": "erydon:block/porphyros_block",
+    "particle": "erydon:block/porphyros_block"
+  }
+}

@@ -1,0 +1,262 @@
+{
+  "format_version": "1.21.11",
+  "credit": "Made for ERYDON; 3-wide Gothic alcove elliptical side wall",
+  "textures": {
+    "particle": "erydon:block/aganite_block",
+    "stone": "erydon:block/aganite_block"
+  },
+  "elements": [
+    {
+      "name": "gothic_triple_side_11",
+      "from": [
+        -0.7243,
+        0,
+        1.84946
+      ],
+      "to": [
+        3.36123,
+        16,
+        1.92946
+      ],
+      "rotation": {
+        "angle": -17.26899,
+        "axis": "y",
+        "origin": [
+          1.31846,
+          8,
+          1.88946
+        ]
+      },
+      "faces": {
+        "south": {
+          "texture": "#stone",
+          "erydon_uv_offset": [
+            0.644089937210083,
+            0
+          ]
+        }
+      }
+    },
+    {
+      "name": "gothic_triple_side_12",
+      "from": [
+        2.70127,
+        0,
+        3.13061
+      ],
+      "to": [
+        6.59272,
+        16,
+        3.21061
+      ],
+      "rotation": {
+        "angle": -25.0234,
+        "axis": "y",
+        "origin": [
+          4.647,
+          8,
+          3.17061
+        ]
+      },
+      "faces": {
+        "south": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "gothic_triple_side_13",
+      "from": [
+        5.76212,
+        0,
+        4.77763
+      ],
+      "to": [
+        9.42039,
+        16,
+        4.85763
+      ],
+      "rotation": {
+        "angle": -33.69007,
+        "axis": "y",
+        "origin": [
+          7.59125,
+          8,
+          4.81763
+        ]
+      },
+      "faces": {
+        "south": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "gothic_triple_side_14",
+      "from": [
+        8.3572,
+        0,
+        6.74047
+      ],
+      "to": [
+        11.76637,
+        16,
+        6.82047
+      ],
+      "rotation": {
+        "angle": -43.59434,
+        "axis": "y",
+        "origin": [
+          10.06178,
+          8,
+          6.78047
+        ]
+      },
+      "faces": {
+        "south": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "gothic_triple_side_15",
+      "from": [
+        10.39651,
+        0,
+        8.95949
+      ],
+      "to": [
+        13.57051,
+        16,
+        9.03949
+      ],
+      "rotation": {
+        "x": 0,
+        "y": -55.02869,
+        "z": 0,
+        "origin": [
+          11.98351,
+          8,
+          8.99949
+        ]
+      },
+      "faces": {
+        "south": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "gothic_triple_side_16",
+      "from": [
+        11.80429,
+        0,
+        11.36727
+      ],
+      "to": [
+        14.79181,
+        16,
+        11.44727
+      ],
+      "rotation": {
+        "x": 0,
+        "y": -68.10363,
+        "z": 0,
+        "origin": [
+          13.29805,
+          8,
+          11.40727
+        ]
+      },
+      "faces": {
+        "south": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "gothic_triple_side_17",
+      "from": [
+        12.52377,
+        0,
+        13.89065
+      ],
+      "to": [
+        15.40715,
+        16,
+        13.97065
+      ],
+      "rotation": {
+        "x": 0,
+        "y": -82.52363,
+        "z": 0,
+        "origin": [
+          13.96546,
+          8,
+          13.93065
+        ]
+      },
+      "faces": {
+        "south": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "outer_jamb_right",
+      "from": [
+        13.89936,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "rotation": {
+        "angle": 0,
+        "axis": "y",
+        "origin": [
+          16,
+          0,
+          0
+        ]
+      },
+      "color": 9,
+      "faces": {
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        }
+      }
+    }
+  ],
+  "groups": [
+    {
+      "name": "gothic_triple_side_right",
+      "origin": [
+        8,
+        8,
+        8
+      ],
+      "scope": 0,
+      "color": 0,
+      "children": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ]
+    },
+    7
+  ]
+}

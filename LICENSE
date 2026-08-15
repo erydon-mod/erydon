@@ -1,0 +1,31 @@
+ERYDON LICENCE MAP
+
+Copyright (c) 2026 Oliver
+
+This repository uses different licences for code, ERYDON-owned assets, and
+third-party components. A licence applying to one category does not replace or
+restrict the licence applying to another category.
+
+1. ERYDON code
+
+   ERYDON-owned Java, Gradle, Python, configuration, test, and documentation
+   code is licensed under the MIT License in LICENSE-CODE.md.
+
+2. ERYDON-owned assets
+
+   ERYDON-owned textures, models, sounds, data-pack resources, authoring models,
+   and test asset fixtures are licensed under Creative Commons
+   Attribution-ShareAlike 4.0 International. Scope and attribution instructions
+   are in LICENSE-ASSETS.md. The complete legal code is in
+   LICENSES/CC-BY-SA-4.0.txt.
+
+3. Third-party components
+
+   Third-party components remain under their original licences. They are not
+   relicensed under MIT or CC BY-SA 4.0. See THIRD_PARTY_NOTICES.md,
+   ASSET_PROVENANCE.md, and LICENSES/.
+
+In particular, nothing in ERYDON's code or asset terms limits any right granted
+for Continuity under LGPL-3.0-only, including lawful replacement, modification,
+debugging, or reverse engineering for debugging a modified LGPL component.
+

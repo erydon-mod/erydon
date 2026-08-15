@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/layer/slice_vertical/slice_vertical_size8",
+  "textures": {
+    "texture": "erydon:block/portorium_block_aged",
+    "particle": "erydon:block/portorium_block_aged"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/snow_height4",
+  "textures": {
+    "texture": "erydon:block/rosinium_sanguenite_weave_grout_block",
+    "particle": "erydon:block/rosinium_sanguenite_weave_grout_block"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/aganite_rock_slope_vertical_shallow_broad_lh",
+  "textures": {
+    "stone": "erydon:block/aganite_rock_block",
+    "particle": "erydon:block/aganite_rock_block"
+  }
+}

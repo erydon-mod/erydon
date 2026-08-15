@@ -1,0 +1,11 @@
+{
+  "parent": "erydon:block/light/modern/light_modern_large_diaphanes",
+  "textures": {
+    "stone": "erydon:block/borealis_diaphanes_block",
+    "edge": "erydon:block/borealis_diaphanes_block",
+    "metal": "erydon:block/cover_silver_gloss"
+  }
+}
+
+
+

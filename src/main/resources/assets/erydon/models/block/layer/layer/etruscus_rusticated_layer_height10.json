@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/snow_height10",
+  "textures": {
+    "texture": "erydon:block/etruscus_rusticated_block",
+    "particle": "erydon:block/etruscus_rusticated_block"
+  }
+}

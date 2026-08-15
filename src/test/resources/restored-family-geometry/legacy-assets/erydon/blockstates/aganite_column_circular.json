@@ -1,0 +1,62 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "part": "plinth"
+      },
+      "apply": {
+        "model": "erydon:block/column/circular/aganite_column_circular_plinth",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "part": "base",
+        "base": "full"
+      },
+      "apply": {
+        "model": "erydon:block/column/circular/aganite_column_circular_base",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "part": "base",
+        "base": "narrow"
+      },
+      "apply": {
+        "model": "erydon:block/column/circular/aganite_column_circular_base_narrow",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "part": "pillar"
+      },
+      "apply": {
+        "model": "erydon:block/column/circular/aganite_column_circular_pillar",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "part": "capital",
+        "capital": "georgian"
+      },
+      "apply": {
+        "model": "erydon:block/column/circular/aganite_column_circular_capital",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "part": "capital",
+        "capital": "guilloche"
+      },
+      "apply": {
+        "model": "erydon:block/column/circular/aganite_column_circular_capital_guilloche",
+        "uvlock": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "erydon:block/slab/noxoplis_slab_aged"
+    },
+    "type=top": {
+      "model": "erydon:block/slab/noxoplis_slab_top_aged"
+    },
+    "type=double": {
+      "model": "erydon:block/block/noxoplis_block_aged"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "erydon:block/glazing/framed/glazing_framed",
+  "textures": {
+    "glass": "erydon:block/glazing_bronze",
+    "lead": "erydon:block/lead_black",
+    "particle": "erydon:block/glazing_bronze"
+  }
+}

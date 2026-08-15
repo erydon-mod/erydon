@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/snow_height10",
+  "textures": {
+    "texture": "erydon:block/striatus_ashlar_block",
+    "particle": "erydon:block/striatus_ashlar_block"
+  }
+}

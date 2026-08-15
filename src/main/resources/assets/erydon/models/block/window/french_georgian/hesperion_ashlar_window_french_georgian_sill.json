@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/window/french_georgian/window_french_georgian_sill",
+  "textures": {
+    "stone": "erydon:block/hesperion_ashlar_block"
+  }
+}

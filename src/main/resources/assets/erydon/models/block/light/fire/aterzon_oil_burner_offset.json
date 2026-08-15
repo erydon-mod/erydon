@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/light/fire/oil_burner_offset",
+  "textures": {
+    "stone": "erydon:block/aterzon_block"
+  }
+}

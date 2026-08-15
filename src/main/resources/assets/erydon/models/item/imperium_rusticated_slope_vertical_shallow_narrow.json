@@ -1,0 +1,6 @@
+{
+    "parent":  "erydon:block/internal/wrapped/imperium_rusticated_slope_vertical_shallow_narrow",
+    "textures":  {
+                     "texture":  "erydon:block/imperium_rusticated_block"
+                 }
+}

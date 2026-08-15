@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "erydon:block/internal/wrapped/nerium_hewn_arch_modern"
+      }
+    }
+  ]
+}

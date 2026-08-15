@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/surround/guilloche/surround_guilloche_plinth",
+  "textures": {
+    "particle": "erydon:block/chalstrom_block",
+    "0": "erydon:block/chalstrom_block",
+    "1": "erydon:block/chalstrom_block",
+    "texture": "erydon:block/chalstrom_block",
+    "stone": "erydon:block/chalstrom_block"
+  }
+}

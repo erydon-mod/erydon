@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "erydon:block/slab/gelastrum_diaphanes_slab"
+    },
+    "type=top": {
+      "model": "erydon:block/slab/gelastrum_diaphanes_slab_top"
+    },
+    "type=double": {
+      "model": "erydon:block/glazing/block/gelastrum_diaphanes_block"
+    }
+  }
+}
+
+
+

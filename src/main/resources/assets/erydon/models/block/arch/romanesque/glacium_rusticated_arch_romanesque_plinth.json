@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/arch/romanesque/arch_romanesque_plinth",
+  "textures": {
+    "stone": "erydon:block/glacium_rusticated_block"
+  }
+}
+

@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/wall/georgian/wall_georgian",
+    "textures":  {
+                     "wall":  "erydon:block/chalstrom_ashlar_block",
+                     "particle":  "erydon:block/chalstrom_ashlar_block"
+                 }
+}

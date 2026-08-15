@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "erydon:block/internal/wrapped/psamatheon_arch_romanesque"
+      }
+    }
+  ]
+}

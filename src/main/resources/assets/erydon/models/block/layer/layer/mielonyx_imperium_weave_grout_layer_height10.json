@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/snow_height10",
+  "textures": {
+    "texture": "erydon:block/mielonyx_imperium_weave_grout_block",
+    "particle": "erydon:block/mielonyx_imperium_weave_grout_block"
+  }
+}

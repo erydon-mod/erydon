@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/column/circular/column_circular_plinth",
+  "textures": {
+    "stone": "erydon:block/latmion_block",
+    "particle": "erydon:block/latmion_block"
+  }
+}

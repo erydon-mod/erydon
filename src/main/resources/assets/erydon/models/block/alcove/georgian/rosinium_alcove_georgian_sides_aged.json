@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/alcove/georgian/alcove_georgian_sides",
+  "textures": {
+    "stone": "erydon:block/rosinium_block_aged",
+    "particle": "erydon:block/rosinium_block_aged"
+  }
+}

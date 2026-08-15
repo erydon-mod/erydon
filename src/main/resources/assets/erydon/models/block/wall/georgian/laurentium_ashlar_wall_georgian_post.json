@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/wall/georgian/wall_georgian_post",
+    "textures":  {
+                     "wall":  "erydon:block/laurentium_ashlar_block",
+                     "particle":  "erydon:block/laurentium_ashlar_block"
+                 }
+}

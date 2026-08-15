@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/surround/guilloche/surround_guilloche_hearth_stub_rh",
+  "textures": {
+    "particle": "erydon:block/glacium_block",
+    "0": "erydon:block/glacium_block",
+    "1": "erydon:block/glacium_block",
+    "texture": "erydon:block/glacium_block",
+    "stone": "erydon:block/glacium_block"
+  }
+}

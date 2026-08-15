@@ -1,0 +1,22 @@
+{
+  "replace": false,
+  "values": [
+    "#erydon:arch",
+    "#erydon:block",
+    "#erydon:chimney",
+    "#erydon:column",
+    "#erydon:horizontal_slice",
+    "#erydon:post",
+    "#erydon:slab",
+    "#erydon:slope",
+    "#erydon:slope_shallow",
+    "#erydon:slope_steep",
+    "#erydon:slope_vertical",
+    "#erydon:slope_vertical_shallow",
+    "#erydon:stairs",
+    "#erydon:stairs_shallow",
+    "#erydon:stairs_spiral_large",
+    "#erydon:vertical_slice",
+    "#erydon:wall"
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "parent": "erydon:block/chimney/circular/chimney_circular_small",
+  "textures": {
+    "stone": "erydon:block/solistra_block",
+    "particle": "erydon:block/solistra_block"
+  }
+}
+
+

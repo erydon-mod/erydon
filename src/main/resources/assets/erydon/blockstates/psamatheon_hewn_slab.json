@@ -1,0 +1,14 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "erydon:block/slab/psamatheon_hewn_slab"
+    },
+    "type=top": {
+      "model": "erydon:block/slab/psamatheon_hewn_slab_top"
+    },
+    "type=double": {
+      "model": "erydon:block/block/psamatheon_hewn_block"
+    }
+  }
+}
+

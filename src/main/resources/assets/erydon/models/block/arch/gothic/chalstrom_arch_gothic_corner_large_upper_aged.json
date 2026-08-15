@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/arch/gothic/arch_gothic_corner_large_upper",
+  "textures": {
+    "stone": "erydon:block/chalstrom_block_aged"
+  }
+}

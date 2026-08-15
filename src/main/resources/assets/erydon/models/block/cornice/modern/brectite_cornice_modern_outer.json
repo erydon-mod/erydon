@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/cornice/modern/cornice_modern_outer",
+    "textures":  {
+                     "all":  "erydon:block/brectite_block",
+                     "particle":  "#all"
+                 }
+}

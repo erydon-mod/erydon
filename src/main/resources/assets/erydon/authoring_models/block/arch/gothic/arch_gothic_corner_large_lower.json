@@ -1,0 +1,147 @@
+{
+  "format_version": "1.21.11",
+  "credit": "Made with Blockbench",
+  "textures": {
+    "particle": "erydon:block/aganite_block",
+    "stone": "erydon:block/aganite_block"
+  },
+  "elements": [
+    {
+      "name": "inner_dome_panel_120",
+      "from": [
+        -0.30475,
+        9.93382,
+        11.6554
+      ],
+      "to": [
+        15.68525,
+        12.02272,
+        16.345
+      ],
+      "rotation": {
+        "x": -76.52669,
+        "y": -90,
+        "z": 0,
+        "origin": [
+          13.69025,
+          10.54557,
+          14.0002
+        ]
+      },
+      "faces": {
+        "east": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      },
+      "color": 6
+    },
+    {
+      "name": "inner_dome_panel_104",
+      "from": [
+        -1.9,
+        13.59767,
+        11.6558
+      ],
+      "to": [
+        14.09,
+        17.04436,
+        16.3454
+      ],
+      "rotation": {
+        "x": -58.23106,
+        "y": -90,
+        "z": 0,
+        "origin": [
+          12.095,
+          14.20942,
+          14.0006
+        ]
+      },
+      "faces": {
+        "east": {
+          "texture": "#stone",
+          "erydon_uv_offset": [
+            0,
+            1.6954994201660156
+          ]
+        },
+        "west": {
+          "texture": "#stone",
+          "erydon_uv_offset": [
+            0,
+            1.6954994201660156
+          ]
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      },
+      "color": 6
+    },
+    {
+      "from": [
+        12.52145,
+        15.02024,
+        0.001
+      ],
+      "to": [
+        13.63776,
+        28.94126,
+        15.999
+      ],
+      "rotation": {
+        "angle": 0,
+        "axis": "y",
+        "origin": [
+          -7.11705,
+          23.59571,
+          8.0
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      },
+      "color": 6
+    }
+  ],
+  "groups": [
+    {
+      "name": "arch_gothic_corner_large_lower",
+      "origin": [
+        8,
+        8,
+        8
+      ],
+      "scope": 0,
+      "color": 6,
+      "children": [
+        0,
+        1,
+        2
+      ]
+    }
+  ]
+}

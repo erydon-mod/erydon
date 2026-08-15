@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/surround/modern/surround_modern_short_mantel",
+  "textures": {
+    "particle": "erydon:block/noxoplis_block",
+    "0": "erydon:block/noxoplis_block",
+    "1": "erydon:block/noxoplis_block",
+    "texture": "erydon:block/noxoplis_block",
+    "stone": "erydon:block/noxoplis_block"
+  }
+}

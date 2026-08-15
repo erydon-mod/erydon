@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/alcove/georgian/alcove_georgian_icon",
+  "textures": {
+    "stone": "erydon:block/mielonyx_rock_block",
+    "particle": "erydon:block/mielonyx_rock_block"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "format_version": "1.21.11",
+  "credit": "Made with Blockbench",
+  "elements": [
+    {
+      "name": "base",
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        0.6415,
+        16
+      ],
+      "faces": {
+        "south": {
+          "texture": "#missing"
+        },
+        "up": {
+          "texture": "#missing"
+        },
+        "down": {
+          "texture": "#missing"
+        }
+      }
+    }
+  ]
+}

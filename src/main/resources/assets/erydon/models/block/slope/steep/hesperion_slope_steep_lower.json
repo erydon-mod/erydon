@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/steep/slope_steep_lower_stright",
+  "textures": {
+    "stone": "erydon:block/hesperion_block",
+    "particle": "#stone"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/surround/georgian/surround_georgian_short_jamb",
+  "textures": {
+    "stone": "erydon:block/kylorion_block_aged",
+    "particle": "#stone"
+  }
+}

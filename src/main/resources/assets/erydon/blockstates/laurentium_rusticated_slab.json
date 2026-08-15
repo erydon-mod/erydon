@@ -1,0 +1,14 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "erydon:block/slab/laurentium_rusticated_slab"
+    },
+    "type=top": {
+      "model": "erydon:block/slab/laurentium_rusticated_slab_top"
+    },
+    "type=double": {
+      "model": "erydon:block/block/laurentium_rusticated_block"
+    }
+  }
+}
+

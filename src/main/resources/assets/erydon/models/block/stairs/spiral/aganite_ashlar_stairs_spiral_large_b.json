@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/stairs/spiral/stairs_spiral_large_b",
+  "textures": {
+    "stone": "erydon:block/aganite_ashlar_block",
+    "particle": "erydon:block/aganite_ashlar_block"
+  }
+}

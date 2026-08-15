@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/surround/guilloche/surround_guilloche_plinth_lh",
+  "textures": {
+    "particle": "erydon:block/rosinium_block",
+    "0": "erydon:block/rosinium_block",
+    "1": "erydon:block/rosinium_block",
+    "texture": "erydon:block/rosinium_block",
+    "stone": "erydon:block/rosinium_block"
+  }
+}

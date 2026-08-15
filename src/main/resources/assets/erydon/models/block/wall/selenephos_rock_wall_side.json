@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/template_wall_side",
+  "textures": {
+    "wall": "erydon:block/selenephos_rock_block",
+    "particle": "erydon:block/selenephos_rock_block"
+  }
+}

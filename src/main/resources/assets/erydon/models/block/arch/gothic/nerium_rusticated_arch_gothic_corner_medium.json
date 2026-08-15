@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/arch/gothic/arch_gothic_corner_medium",
+  "textures": {
+    "stone": "erydon:block/nerium_rusticated_block"
+  }
+}

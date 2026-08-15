@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/template_wall_side_tall",
+  "textures": {
+    "wall": "erydon:block/sanguenite_hewn_block",
+    "particle": "erydon:block/sanguenite_hewn_block"
+  }
+}

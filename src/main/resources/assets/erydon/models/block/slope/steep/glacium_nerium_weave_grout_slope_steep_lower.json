@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/steep/slope_steep_lower_stright",
+  "textures": {
+    "stone": "erydon:block/glacium_nerium_weave_grout_block",
+    "particle": "#stone"
+  }
+}

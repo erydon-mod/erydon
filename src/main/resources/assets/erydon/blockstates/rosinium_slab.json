@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "erydon:block/slab/rosinium_slab"
+    },
+    "type=top": {
+      "model": "erydon:block/slab/rosinium_slab_top"
+    },
+    "type=double": {
+      "model": "erydon:block/block/rosinium_block"
+    }
+  }
+}

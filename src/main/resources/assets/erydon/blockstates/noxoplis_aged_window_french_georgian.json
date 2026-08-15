@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "erydon:block/internal/wrapped/noxoplis_window_french_georgian_aged"
+      }
+    }
+  ]
+}

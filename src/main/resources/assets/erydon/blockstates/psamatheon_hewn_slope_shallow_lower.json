@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/psamatheon_hewn_slope_shallow_lower"
+                                    }
+                      }
+                  ]
+}

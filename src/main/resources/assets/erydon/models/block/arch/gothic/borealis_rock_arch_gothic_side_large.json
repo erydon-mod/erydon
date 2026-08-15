@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/arch/gothic/arch_gothic_side_large",
+  "textures": {
+    "stone": "erydon:block/borealis_rock_block"
+  }
+}

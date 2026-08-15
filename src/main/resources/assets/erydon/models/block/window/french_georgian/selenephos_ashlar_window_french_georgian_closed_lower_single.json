@@ -1,0 +1,8 @@
+{
+  "parent": "erydon:block/window/french_georgian/window_french_georgian_closed_lower_single",
+  "textures": {
+    "stone": "erydon:block/selenephos_ashlar_block",
+    "pane": "erydon:block/glazing_silver",
+    "lead": "erydon:block/lead_black"
+  }
+}

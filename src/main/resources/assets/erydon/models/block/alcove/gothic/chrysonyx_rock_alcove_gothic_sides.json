@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/alcove/gothic/alcove_gothic_sides",
+  "textures": {
+    "stone": "erydon:block/chrysonyx_rock_block",
+    "particle": "erydon:block/chrysonyx_rock_block"
+  }
+}

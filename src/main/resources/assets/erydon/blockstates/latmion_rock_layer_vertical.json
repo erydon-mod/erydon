@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/latmion_rock_layer_vertical"
+                                    }
+                      }
+                  ]
+}

@@ -1,0 +1,6 @@
+{
+    "parent":  "erydon:block/internal/wrapped/mielonyx_herringbone_bronze_slope_vertical_shallow_narrow",
+    "textures":  {
+                     "texture":  "erydon:block/mielonyx_herringbone_bronze_block"
+                 }
+}

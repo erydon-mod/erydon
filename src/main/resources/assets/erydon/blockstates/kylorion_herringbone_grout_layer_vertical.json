@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/kylorion_herringbone_grout_layer_vertical"
+                                    }
+                      }
+                  ]
+}

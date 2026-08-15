@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/outer_stairs",
+  "textures": {
+    "side": "erydon:block/borealis_block_aged",
+    "top": "erydon:block/borealis_block_aged",
+    "bottom": "erydon:block/borealis_block_aged"
+  }
+}

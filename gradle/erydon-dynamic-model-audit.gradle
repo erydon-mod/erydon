@@ -1,0 +1,688 @@
+tasks.register('auditErydonDynamicModels') {
+    group = 'verification'
+    description = 'Writes a read-only ERYDON dynamic model/plugin audit report.'
+
+    doLast {
+        def projectRoot = project.projectDir
+        def reportDir = layout.buildDirectory.dir('reports').get().asFile
+        reportDir.mkdirs()
+
+        def reportFile = new File(reportDir, 'erydon_dynamic_model_audit.txt')
+        def generatedAt = new Date().format("yyyy-MM-dd HH:mm:ss Z")
+        def slurper = new groovy.json.JsonSlurper()
+        def parseFailures = []
+
+        def relPath = { File f ->
+            projectRoot.toPath().relativize(f.toPath()).toString().replace(File.separator, '/')
+        }
+        def filesUnder = { File root, Closure<Boolean> keep ->
+            def result = []
+            if (root.exists()) {
+                root.eachFileRecurse(groovy.io.FileType.FILES) { file ->
+                    if (keep(file)) {
+                        result << file
+                    }
+                }
+            }
+            result.sort { relPath(it) }
+        }
+        def parseJson = { File file ->
+            try {
+                slurper.parse(file)
+            } catch (Exception exception) {
+                parseFailures << "${relPath(file)} :: ${exception.message}"
+                null
+            }
+        }
+        def collectStringValuesByKey
+        collectStringValuesByKey = { Object node, String wantedKey, List<String> out ->
+            if (node instanceof Map) {
+                node.each { key, value ->
+                    if (key.toString() == wantedKey && value instanceof CharSequence) {
+                        out << value.toString()
+                    }
+                    collectStringValuesByKey(value, wantedKey, out)
+                }
+            } else if (node instanceof Iterable) {
+                node.each { value ->
+                    collectStringValuesByKey(value, wantedKey, out)
+                }
+            }
+        }
+        def shortList = { Collection values, int limit = 4 ->
+            if (values == null || values.isEmpty()) {
+                return '-'
+            }
+            def sorted = values.toList().sort()
+            def shown = sorted.take(limit).join(', ')
+            sorted.size() > limit ? "${shown} +${sorted.size() - limit} more" : shown
+        }
+
+        def resourcesRoot = file('src/main/resources')
+        def blockstatesRoot = file('src/main/resources/assets/erydon/blockstates')
+        def blockModelsRoot = file('src/main/resources/assets/erydon/models/block')
+        def itemModelsRoot = file('src/main/resources/assets/erydon/models/item')
+        def javaModelRoot = file('src/main/java/com/oliver/erydon/client/model')
+
+        def blockstateFiles = filesUnder(blockstatesRoot) { it.name.endsWith('.json') }
+        def blockModelFiles = filesUnder(blockModelsRoot) { it.name.endsWith('.json') }
+        def itemModelFiles = filesUnder(itemModelsRoot) { it.name.endsWith('.json') }
+        def blockIds = blockstateFiles.collect { file -> file.name.substring(0, file.name.length() - '.json'.length()) }.sort()
+        def blockModelRelSet = blockModelFiles.collect { relPath(it) } as Set
+
+        def modelRelFromPath = { String modelPath ->
+            'src/main/resources/assets/erydon/models/' + modelPath + '.json'
+        }
+        def modelPathFromRel = { String rel ->
+            rel.substring('src/main/resources/assets/erydon/models/'.length(), rel.length() - '.json'.length())
+        }
+        def normalizeModelRef = { String raw ->
+            if (raw == null) {
+                return null
+            }
+            def value = raw.trim()
+            if (!value.startsWith('erydon:')) {
+                return null
+            }
+            def idPath = value.substring('erydon:'.length())
+            idPath.startsWith('block/') ? idPath : null
+        }
+        def isAged = { String blockPath ->
+            blockPath == 'aged'
+                    || blockPath.startsWith('aged_')
+                    || blockPath.contains('_aged_')
+                    || blockPath.endsWith('_aged')
+        }
+        def stripAged = { String blockPath ->
+            if (blockPath == 'aged') {
+                return ''
+            }
+            if (blockPath.startsWith('aged_')) {
+                return blockPath.substring('aged_'.length())
+            }
+            def infix = blockPath.indexOf('_aged_')
+            if (infix >= 0) {
+                return blockPath.substring(0, infix) + '_' + blockPath.substring(infix + '_aged_'.length())
+            }
+            blockPath.endsWith('_aged')
+                    ? blockPath.substring(0, blockPath.length() - '_aged'.length())
+                    : blockPath
+        }
+        def withAged = { String basePath, String suffix, boolean aged ->
+            basePath + '_' + suffix + (aged ? '_aged' : '')
+        }
+
+        def sourceText = { String name ->
+            def sourceFile = new File(javaModelRoot, name)
+            sourceFile.exists() ? sourceFile.getText('UTF-8') : ''
+        }
+        def stringArray = { String source, String variableName ->
+            def quotedName = java.util.regex.Pattern.quote(variableName)
+            def matcher = source =~ /(?s)\b${quotedName}\s*=\s*\{(.*?)\};/
+            if (!matcher.find()) {
+                matcher = source =~ /(?s)\b${quotedName}\s*=\s*List\.of\s*\((.*?)\);/
+                if (!matcher.find()) {
+                    return []
+                }
+            }
+            def values = []
+            def body = matcher.group(1)
+            def valueMatcher = body =~ /"([^"]+)"/
+            valueMatcher.each { match -> values << match[1] }
+            values
+        }
+        def emitItemMode = { Collection sourceNames ->
+            def modes = []
+            sourceNames.each { sourceName ->
+                def source = sourceText(sourceName)
+                def matcher = source =~ /(?s)public void emitItemQuads\s*\(.*?\)\s*\{(.*?)\n\s*\}/
+                if (!matcher.find()) {
+                    modes << 'unknown'
+                    return
+                }
+                def body = matcher.group(1).replaceAll(/\s+/, ' ').trim()
+                modes << (body == 'context.fallbackConsumer().accept(wrapped);' ? 'fallback-only' : 'custom')
+            }
+            modes.unique().sort().join('+')
+        }
+
+        def archSuffixes = stringArray(sourceText('ArchRomanesqueBakedModel.java'), 'MODEL_SUFFIXES')
+        def modernArchSuffixes = stringArray(sourceText('ArchRomanesqueBakedModel.java'), 'MODERN_MODEL_SUFFIXES')
+        def gothicArchSuffixes = stringArray(sourceText('ArchRomanesqueBakedModel.java'), 'GOTHIC_MODEL_SUFFIXES')
+        def windowFrenchSuffixes = stringArray(sourceText('WindowFrenchGeorgianBakedModel.java'), 'MODEL_SUFFIXES')
+        def windowArchSuffixes = stringArray(sourceText('WindowArchBakedModel.java'), 'MODEL_SUFFIXES')
+        def columnSuffixes = stringArray(sourceText('ColumnBakedModel.java'), 'MODEL_SUFFIXES')
+        def gothicColumnSuffixes = ['plinth', 'base', 'pillar', 'capital']
+        def surroundGeorgianSuffixes = stringArray(sourceText('SurroundBakedModel.java'), 'GEORGIAN_MODEL_SUFFIXES')
+        def surroundHandedSuffixes = stringArray(sourceText('SurroundBakedModel.java'), 'HANDED_MODEL_SUFFIXES')
+        def alcoveSuffixes = stringArray(sourceText('AlcoveBakedModel.java'), 'BASE_MODEL_SUFFIXES')
+        alcoveSuffixes.addAll(stringArray(sourceText('AlcoveBakedModel.java'), 'TRIPLE_MODEL_SUFFIXES'))
+
+        def slopeFamily = { String path ->
+            if (path == null || path.startsWith('block/slope/')) {
+                return null
+            }
+            def blockPath = path.startsWith('block/internal/wrapped/') ? path.substring('block/internal/wrapped/'.length()) : path
+            if (blockPath.startsWith('glazing_')) {
+                return null
+            }
+            if (blockPath.contains('_slope_vertical_shallow_broad')) {
+                return 'vertical shallow broad'
+            }
+            if (blockPath.contains('_slope_vertical_shallow_narrow')) {
+                return 'vertical shallow narrow'
+            }
+            if (blockPath.contains('_slope_vertical') && !blockPath.contains('_slope_vertical_shallow_')) {
+                return 'vertical'
+            }
+            if (blockPath.contains('_slope_shallow_lower')) {
+                return 'shallow lower'
+            }
+            if (blockPath.contains('_slope_shallow_upper')) {
+                return 'shallow upper'
+            }
+            if (blockPath.contains('_slope_steep_lower')) {
+                return 'steep lower'
+            }
+            if (blockPath.contains('_slope_steep_upper')) {
+                return 'steep upper'
+            }
+            if (blockPath.endsWith('_slope') || blockPath.endsWith('_slope_aged')) {
+                return 'standard'
+            }
+            null
+        }
+        def styleForSurround = { String blockPath ->
+            if (blockPath.contains('_surround_georgian')) {
+                return 'georgian'
+            }
+            if (blockPath.contains('_surround_guilloche')) {
+                return 'guilloche'
+            }
+            if (blockPath.contains('_surround_gothic_ornate')) {
+                return 'gothic_ornate'
+            }
+            if (blockPath.contains('_surround_modern')) {
+                return 'modern'
+            }
+            null
+        }
+        def styleForCornice = { String blockPath ->
+            if (blockPath.contains('cornice_georgian')) {
+                return 'georgian'
+            }
+            if (blockPath.contains('cornice_guilloche')) {
+                return 'guilloche'
+            }
+            if (blockPath.contains('cornice_modern')) {
+                return 'modern'
+            }
+            if (blockPath.contains('cornice_gothic')) {
+                return 'gothic'
+            }
+            null
+        }
+        def styleForCeiling = { String blockPath ->
+            if (blockPath.contains('ceiling_coffered_georgian_')) {
+                return 'georgian'
+            }
+            if (blockPath.contains('ceiling_coffered_guilloche_')) {
+                return 'guilloche'
+            }
+            if (blockPath.contains('ceiling_coffered_modern_')) {
+                return 'modern'
+            }
+            null
+        }
+        def genericCeilingPath = { String blockPath ->
+            int index = blockPath.indexOf('ceiling_coffered_')
+            index >= 0 ? blockPath.substring(index) : blockPath
+        }
+        def materialPrefix = { String blockPath ->
+            int index = blockPath.indexOf('ceiling_coffered_')
+            if (index <= 0) {
+                return ''
+            }
+            def prefix = blockPath.substring(0, index)
+            prefix.endsWith('_') ? prefix.substring(0, prefix.length() - 1) : prefix
+        }
+        def isLayerVertical = { String blockId -> blockId.contains('layer_vertical') && !blockId.contains('slope') }
+        def layerVerticalModelRoot = { String basePath ->
+            basePath.startsWith('glazing_') || basePath.contains('_diaphanes_')
+                    ? 'block/glazing/layer/'
+                    : 'block/layer/layer/'
+        }
+
+        def blockstateRefsByBlock = new TreeMap<String, Set<String>>()
+        blockstateFiles.each { file ->
+            def blockId = file.name.substring(0, file.name.length() - '.json'.length())
+            def json = parseJson(file)
+            def refs = []
+            collectStringValuesByKey(json, 'model', refs)
+            blockstateRefsByBlock[blockId] = refs.collect { normalizeModelRef(it) }.findAll { it != null } as TreeSet
+        }
+
+        def itemParentByItem = new TreeMap<String, String>()
+        itemModelFiles.each { file ->
+            def itemId = file.name.substring(0, file.name.length() - '.json'.length())
+            def json = parseJson(file)
+            def parents = []
+            collectStringValuesByKey(json, 'parent', parents)
+            itemParentByItem[itemId] = parents.isEmpty() ? null : parents[0]
+        }
+
+        def clientSource = file('src/main/java/com/oliver/erydon/ErydonClient.java').getText('UTF-8')
+        def registeredPlugins = new TreeSet<String>()
+        def registeredMatcher = clientSource =~ /ModelLoadingPlugin\.register\(new\s+([A-Za-z0-9_]+)\(\)\)/
+        registeredMatcher.each { match -> registeredPlugins << match[1] }
+        def preparableRegisteredMatcher = clientSource =~ /PreparableModelLoadingPlugin\.register\([^,]+,\s*new\s+([A-Za-z0-9_]+)\(\)\)/
+        preparableRegisteredMatcher.each { match -> registeredPlugins << match[1] }
+        def allPluginSources = filesUnder(javaModelRoot) { it.name.endsWith('ModelLoadingPlugin.java') }.collect { it.name.substring(0, it.name.length() - '.java'.length()) }.sort()
+        def unregisteredPluginSources = allPluginSources.findAll { !registeredPlugins.contains(it) }
+
+        def familySpecs = [
+                [
+                        key: 'slope',
+                        label: 'Slopes',
+                        plugin: 'ErydonSlopeModelLoadingPlugin',
+                        bakedSources: ['SlopeBakedModel.java', 'ShallowSlopeBakedModel.java', 'SlopeSteepBakedModel.java', 'SlopeVerticalBakedModel.java'],
+                        matches: { String blockId -> slopeFamily(blockId) != null },
+                        folderMatches: { String path -> path.startsWith('block/slope/') || path.startsWith('block/internal/wrapped/') && slopeFamily(path) != null },
+                        familyParent: { String parent -> parent != null && parent.startsWith('erydon:block/slope/') },
+                        expectedModels: { String blockId -> [] },
+                        note: 'No active addModels call; slope geometry/items are custom-rendered from lightweight wrapped anchors.'
+                ],
+                [
+                        key: 'arch_romanesque',
+                        label: 'Romanesque arches',
+                        plugin: 'ErydonFamilyModelLoadingPlugin',
+                        bakedSources: ['ArchRomanesqueBakedModel.java'],
+                        matches: { String blockId -> blockId.contains('_arch_romanesque') },
+                        folderMatches: { String path -> path.startsWith('block/arch/romanesque/') },
+                        familyParent: { String parent -> parent != null && parent.startsWith('erydon:block/arch/') },
+                        expectedModels: { String blockId ->
+                            def aged = isAged(blockId)
+                            def base = stripAged(blockId)
+                            archSuffixes.collect { suffix -> 'block/arch/romanesque/' + withAged(base, suffix, aged) }
+                        },
+                        note: 'Placed blockstates are wrapped anchors; component models are still used to compose placed arches.'
+                ],
+                [
+                        key: 'arch_modern',
+                        label: 'Modern arches',
+                        plugin: 'ErydonFamilyModelLoadingPlugin',
+                        bakedSources: ['ArchRomanesqueBakedModel.java'],
+                        matches: { String blockId -> blockId.contains('_arch_modern') },
+                        folderMatches: { String path -> path.startsWith('block/arch/modern/') },
+                        familyParent: { String parent -> parent != null && parent.startsWith('erydon:block/arch/') },
+                        expectedModels: { String blockId ->
+                            def aged = isAged(blockId)
+                            def base = stripAged(blockId)
+                            modernArchSuffixes.collect { suffix -> 'block/arch/modern/' + withAged(base, suffix, aged) }
+                        },
+                        note: 'Placed blockstates are wrapped anchors; component models are still used to compose placed arches.'
+                ],
+                [
+                        key: 'arch_gothic',
+                        label: 'Gothic arches',
+                        plugin: 'ErydonFamilyModelLoadingPlugin',
+                        bakedSources: ['ArchRomanesqueBakedModel.java'],
+                        matches: { String blockId -> blockId.contains('_arch_gothic') },
+                        folderMatches: { String path -> path.startsWith('block/arch/gothic/') },
+                        familyParent: { String parent -> parent != null && parent.startsWith('erydon:block/arch/gothic/') },
+                        expectedModels: { String blockId ->
+                            def aged = isAged(blockId)
+                            def base = stripAged(blockId)
+                            gothicArchSuffixes.collect { suffix -> 'block/arch/gothic/' + withAged(base, suffix, aged) }
+                        },
+                        note: 'Placed blockstates are wrapped anchors; components and item icons are supplied through the raw 1.21-style authoring loader.'
+                ],
+                [
+                        key: 'window_french_georgian',
+                        label: 'French Georgian windows',
+                        plugin: 'ErydonFamilyModelLoadingPlugin',
+                        bakedSources: ['WindowFrenchGeorgianBakedModel.java'],
+                        matches: { String blockId -> blockId.contains('_window_french_georgian') },
+                        folderMatches: { String path -> path.startsWith('block/window/french_georgian/') },
+                        familyParent: { String parent -> parent != null && parent.startsWith('erydon:block/window/french_georgian/') },
+                        expectedModels: { String blockId ->
+                            def aged = isAged(blockId)
+                            def base = stripAged(blockId)
+                            windowFrenchSuffixes.collect { suffix -> 'block/window/french_georgian/' + withAged(base, suffix, aged) }
+                        },
+                        note: 'Item rendering falls back to the wrapped parent, so item parents are still important.'
+                ],
+                [
+                        key: 'window_arch',
+                        label: 'Arch windows',
+                        plugin: 'ErydonFamilyModelLoadingPlugin',
+                        bakedSources: ['WindowArchBakedModel.java'],
+                        matches: { String blockId -> blockId.contains('_window_arch') },
+                        folderMatches: { String path -> path.startsWith('block/window/arch/') },
+                        familyParent: { String parent -> parent != null && parent.startsWith('erydon:block/window/arch/') },
+                        expectedModels: { String blockId ->
+                            def aged = isAged(blockId)
+                            def base = stripAged(blockId)
+                            windowArchSuffixes.collect { suffix -> 'block/window/arch/' + withAged(base, suffix, aged) }
+                        },
+                        note: 'Item rendering falls back to the wrapped parent, so item parents are still important.'
+                ],
+                [
+                        key: 'alcove',
+                        label: 'Alcoves',
+                        plugin: 'ErydonFamilyModelLoadingPlugin',
+                        bakedSources: ['AlcoveBakedModel.java'],
+                        matches: { String blockId -> blockId.contains('_alcove_georgian') || blockId.contains('_alcove_gothic') },
+                        folderMatches: { String path -> path.startsWith('block/alcove/georgian/') || path.startsWith('block/alcove/gothic/') },
+                        familyParent: { String parent -> parent != null && (parent.startsWith('erydon:block/alcove/georgian/') || parent.startsWith('erydon:block/alcove/gothic/')) },
+                        expectedModels: { String blockId ->
+                            def aged = isAged(blockId)
+                            def base = stripAged(blockId)
+                            def style = base.contains('_alcove_gothic') ? 'gothic' : 'georgian'
+                            alcoveSuffixes.collect { suffix -> "block/alcove/${style}/" + withAged(base, suffix, aged) }
+                        },
+                        note: 'Placed blockstates are wrapped anchors; component and icon models are supplied through the raw 1.21-style authoring loader.'
+                ],
+                [
+                        key: 'surround',
+                        label: 'Surrounds',
+                        plugin: 'ErydonFamilyModelLoadingPlugin',
+                        bakedSources: ['SurroundBakedModel.java'],
+                        matches: { String blockId -> styleForSurround(blockId) != null },
+                        folderMatches: { String path -> path.startsWith('block/surround/') },
+                        familyParent: { String parent -> parent != null && parent.startsWith('erydon:block/surround/') },
+                        expectedModels: { String blockId ->
+                            def aged = isAged(blockId)
+                            def base = stripAged(blockId)
+                            def style = styleForSurround(base)
+                            def suffixes = style == 'georgian' ? surroundGeorgianSuffixes : surroundHandedSuffixes
+                            suffixes.collect { suffix -> "block/surround/${style}/" + withAged(base, suffix, aged) }
+                        },
+                        note: 'Georgian surrounds intentionally skip handed pieces at runtime.'
+                ],
+                [
+                        key: 'ceiling_coffered',
+                        label: 'Coffered ceilings',
+                        plugin: 'ErydonFamilyModelLoadingPlugin',
+                        bakedSources: ['CeilingCofferedBakedModel.java'],
+                        matches: { String blockId -> styleForCeiling(blockId) != null },
+                        folderMatches: { String path -> path.startsWith('block/ceiling/coffered/') },
+                        familyParent: { String parent -> parent != null && parent.startsWith('erydon:block/ceiling/') },
+                        expectedModels: { String blockId ->
+                            def style = styleForCeiling(blockId)
+                            def ids = []
+                            ['matte', 'gloss'].each { finish ->
+                                ids << "block/ceiling/coffered/${style}/${blockId}_${finish}"
+                                ids << "block/ceiling/coffered/${style}/${genericCeilingPath(blockId)}_${finish}_stem"
+                                ids << "block/ceiling/coffered/${style}/${genericCeilingPath(blockId)}_${finish}_stem_outer"
+                            }
+                            def prefix = materialPrefix(blockId)
+                            if (prefix) {
+                                def outer = style == 'modern' ? 'outer' : 'outer_corner'
+                                ids << "block/cornice/${style}/${prefix}_cornice_${style}_straight"
+                                ids << "block/cornice/${style}/${prefix}_cornice_${style}_${outer}"
+                            }
+                            ids
+                        },
+                        note: 'Extra models include ceiling panels/stems plus reused cornice pieces.'
+                ],
+                [
+                        key: 'layer_vertical',
+                        label: 'Vertical layers',
+                        plugin: 'ErydonFamilyModelLoadingPlugin',
+                        bakedSources: ['LayerVerticalBakedModel.java'],
+                        matches: { String blockId -> isLayerVertical(blockId) },
+                        folderMatches: { String path ->
+                            (path.startsWith('block/layer/layer/') || path.startsWith('block/glazing/layer/'))
+                                    && path.contains('layer_vertical')
+                        },
+                        familyParent: { String parent ->
+                            parent != null
+                                    && (parent.startsWith('erydon:block/layer/layer/')
+                                    || parent.startsWith('erydon:block/glazing/layer/'))
+                        },
+                        expectedModels: { String blockId ->
+                            def aged = isAged(blockId)
+                            def base = stripAged(blockId)
+                            def root = layerVerticalModelRoot(base)
+                            (1..8).collect { layers -> "${root}${base}_depth${layers * 2}${aged ? '_aged' : ''}" }
+                        },
+                        note: 'Placed blockstates are wrapped anchors; item rendering falls back to the wrapped parent.'
+                ],
+                [
+                        key: 'column',
+                        label: 'Columns',
+                        plugin: 'ErydonFamilyModelLoadingPlugin',
+                        bakedSources: ['ColumnBakedModel.java'],
+                        matches: { String blockId -> blockId.contains('column_circular') || blockId.contains('column_gothic') || blockId.contains('column_square') },
+                        folderMatches: { String path -> path.startsWith('block/column/') },
+                        familyParent: { String parent -> parent != null && parent.startsWith('erydon:block/column/') },
+                        expectedModels: { String blockId ->
+                            def aged = isAged(blockId)
+                            def base = stripAged(blockId)
+                            def style = base.contains('column_gothic')
+                                    ? 'gothic'
+                                    : (base.contains('column_circular') ? 'circular' : 'square')
+                            def suffixes = style == 'gothic'
+                                    ? gothicColumnSuffixes
+                                    : (style == 'circular'
+                                    ? columnSuffixes
+                                    : columnSuffixes.findAll { suffix -> suffix != 'capital_narrow' })
+                            suffixes.collect { suffix -> "block/column/${style}/" + withAged(base, suffix, aged) }
+                        },
+                        note: 'Item rendering falls back to the wrapped parent.'
+                ],
+                [
+                        key: 'cornice',
+                        label: 'Cornices',
+                        plugin: 'ErydonFamilyModelLoadingPlugin',
+                        bakedSources: ['CorniceBakedModel.java'],
+                        matches: { String blockId -> styleForCornice(blockId) != null },
+                        folderMatches: { String path -> path.startsWith('block/cornice/') },
+                        familyParent: { String parent -> parent != null && parent.startsWith('erydon:block/cornice/') },
+                        expectedModels: { String blockId ->
+                            def aged = isAged(blockId)
+                            def base = stripAged(blockId)
+                            def style = styleForCornice(base)
+                            def suffixes = style == 'modern' ? ['straight', 'inner', 'outer'] : ['straight', 'outer_corner']
+                            suffixes.collect { suffix -> "block/cornice/${style}/" + withAged(base, suffix, aged) }
+                        },
+                        note: 'Cornice pieces are also reused by coffered ceilings.'
+                ],
+                [
+                        key: 'cover',
+                        label: 'Covers',
+                        plugin: 'CoverModelLoadingPlugin',
+                        bakedSources: ['CoverBakedModel.java'],
+                        matches: { String blockId -> ['cover_white', 'cover_black', 'cover_bronze', 'cover_silver'].contains(blockId) },
+                        folderMatches: { String path -> path.startsWith('block/cover/cover/') },
+                        familyParent: { String parent -> parent != null && parent.startsWith('erydon:block/cover/') },
+                        expectedModels: { String blockId -> [] },
+                        note: 'No addModels call; plugin wraps the existing cover JSON to keep smooth lighting.'
+                ]
+        ]
+
+        def modelPathsInResources = blockModelFiles.collect { modelPathFromRel(relPath(it)) } as TreeSet
+        def familyRows = []
+        def totalExpectedRaw = 0
+        def totalRequestedRaw = 0
+        def totalRequestedUnique = new TreeSet<String>()
+        def totalMissingRequested = new TreeSet<String>()
+        def totalDuplicatesPrevented = 0
+        def totalWrappedBlockstates = 0
+
+        familySpecs.each { spec ->
+            def blocks = blockIds.findAll { spec.matches(it) }.sort()
+            def items = itemParentByItem.keySet().findAll { spec.matches(it) }.sort()
+            def expectedRaw = []
+            blocks.each { blockId ->
+                spec.expectedModels(blockId).each { modelPath ->
+                    expectedRaw << modelPath.toString()
+                }
+            }
+            def expectedUnique = expectedRaw as TreeSet<String>
+            def pluginSource = sourceText(spec.plugin + '.java')
+            def dedupesExtraModels = pluginSource.contains('new LinkedHashSet') || pluginSource.contains('Set<Identifier>')
+            def skipsCorniceExtraModels = spec.key == 'ceiling_coffered' && pluginSource.contains('isCorniceModel')
+            def requestedCandidates = skipsCorniceExtraModels
+                    ? expectedRaw.findAll { modelPath -> !modelPath.startsWith('block/cornice/') }
+                    : expectedRaw
+            def requestedModels = dedupesExtraModels ? (requestedCandidates as TreeSet<String>).toList() : requestedCandidates
+            def requestedUnique = requestedModels as TreeSet<String>
+            def requestedPresent = requestedUnique.findAll { modelPath -> blockModelRelSet.contains(modelRelFromPath(modelPath)) }
+            def requestedMissing = requestedUnique.findAll { modelPath -> !blockModelRelSet.contains(modelRelFromPath(modelPath)) }
+            def folderModels = modelPathsInResources.findAll { spec.folderMatches(it) }
+            def folderOther = folderModels.findAll { !expectedUnique.contains(it) }
+
+            def blockstateWrapped = blocks.count { blockId ->
+                (blockstateRefsByBlock[blockId] ?: []).contains("block/internal/wrapped/${blockId}")
+            }
+            def blockstateFamily = blocks.count { blockId ->
+                (blockstateRefsByBlock[blockId] ?: []).any { modelPath -> spec.familyParent("erydon:${modelPath}") }
+            }
+            def blockstateOther = blocks.count { blockId ->
+                def refs = blockstateRefsByBlock[blockId] ?: []
+                !refs.isEmpty()
+                        && !refs.contains("block/internal/wrapped/${blockId}")
+                        && !refs.any { modelPath -> spec.familyParent("erydon:${modelPath}") }
+            }
+            def itemWrapped = items.count { itemId ->
+                def parent = itemParentByItem[itemId]
+                parent != null && parent.startsWith('erydon:block/internal/wrapped/')
+            }
+            def itemOldSlope = items.count { itemId ->
+                def parent = itemParentByItem[itemId]
+                parent != null && parent.startsWith('erydon:block/slope/')
+            }
+            def itemFamily = items.count { itemId -> spec.familyParent(itemParentByItem[itemId]) }
+            def itemOther = items.count { itemId ->
+                def parent = itemParentByItem[itemId]
+                parent != null && !parent.startsWith('erydon:block/internal/wrapped/') && !parent.startsWith('erydon:block/slope/') && !spec.familyParent(parent)
+            }
+            def itemNoParent = items.count { itemId -> itemParentByItem[itemId] == null }
+
+            totalExpectedRaw += expectedRaw.size()
+            totalRequestedRaw += requestedModels.size()
+            totalRequestedUnique.addAll(requestedUnique)
+            totalMissingRequested.addAll(requestedMissing)
+            totalDuplicatesPrevented += expectedRaw.size() - requestedModels.size()
+            totalWrappedBlockstates += blockstateWrapped
+
+            familyRows << [
+                    key: spec.key,
+                    label: spec.label,
+                    plugin: spec.plugin,
+                    registered: registeredPlugins.contains(spec.plugin),
+                    blocks: blocks,
+                    items: items,
+                    blockstateWrapped: blockstateWrapped,
+                    blockstateFamily: blockstateFamily,
+                    blockstateOther: blockstateOther,
+                    itemWrapped: itemWrapped,
+                    itemOldSlope: itemOldSlope,
+                    itemFamily: itemFamily,
+                    itemOther: itemOther,
+                    itemNoParent: itemNoParent,
+                    rawCandidateExtraModels: expectedRaw.size(),
+                    requestedExtraModels: requestedModels.size(),
+                    requestedUniqueExtraModels: requestedUnique.size(),
+                    requestedPresent: requestedPresent.size(),
+                    requestedMissing: requestedMissing,
+                    duplicateExtraModelAdds: requestedModels.size() - requestedUnique.size(),
+                    duplicatesPrevented: expectedRaw.size() - requestedModels.size(),
+                    dedupesExtraModels: dedupesExtraModels,
+                    skipsCorniceExtraModels: skipsCorniceExtraModels,
+                    folderModels: folderModels,
+                    folderOther: folderOther,
+                    itemMode: emitItemMode(spec.bakedSources),
+                    note: spec.note
+            ]
+        }
+
+        def slopeSubfamilies = new TreeMap<String, Integer>()
+        blockIds.findAll { slopeFamily(it) != null }.each { blockId ->
+            def family = slopeFamily(blockId)
+            slopeSubfamilies[family] = (slopeSubfamilies[family] ?: 0) + 1
+        }
+        def oldSlopeTreeFiles = modelPathsInResources.findAll { it.startsWith('block/slope/') }
+        def oldSlopeRefsInBlockstates = blockstateRefsByBlock.values().sum { refs -> refs.count { it.startsWith('block/slope/') } } ?: 0
+        def oldSlopeItemParents = itemParentByItem.values().count { it != null && it.startsWith('erydon:block/slope/') }
+        def fallbackOnlyFamilies = familyRows.findAll { it.itemMode == 'fallback-only' }.collect { it.label }
+        def customItemFamilies = familyRows.findAll { it.itemMode.contains('custom') }.collect { it.label }
+
+        def lines = []
+        lines << 'ERYDON Dynamic Model Audit'
+        lines << "Generated: ${generatedAt}"
+        lines << 'Mode: read-only audit; no assets, models, blockstates, tags, or resource packs are changed by this task.'
+        lines << ''
+        lines << 'Short read'
+        lines << "- Registered active dynamic plugins: ${registeredPlugins.size()}"
+        lines << "- Unregistered legacy plugin source files: ${unregisteredPluginSources.isEmpty() ? 'none' : unregisteredPluginSources.join(', ')}"
+        lines << "- Dynamic family block IDs scanned: ${familyRows.sum { it.blocks.size() } ?: 0}"
+        lines << "- Placed dynamic blockstates using internal/wrapped anchors: ${totalWrappedBlockstates}"
+        lines << "- Explicit extraModels requested by active non-slope plugins: raw candidates ${totalExpectedRaw}, actual requested ${totalRequestedRaw}, unique requested ${totalRequestedUnique.size()}, missing ${totalMissingRequested.size()}"
+        lines << "- Duplicate/shared addModels calls avoided: ${totalDuplicatesPrevented}; remaining duplicate requested IDs across families: ${totalRequestedRaw - totalRequestedUnique.size()}"
+        lines << "- Families with fallback-only item rendering: ${shortList(fallbackOnlyFamilies, 9)}"
+        lines << "- Families with custom item rendering: ${shortList(customItemFamilies, 9)}"
+        lines << ''
+        lines << 'Interpretation'
+        lines << '- The blockstate optimisation is visible here: most dynamic placed blocks now point at internal/wrapped anchors.'
+        lines << '- Non-slope extraModels are probably live rendering inputs, not obvious deletion targets.'
+        lines << '- The safer E work is to find item/delegate anchors and duplicated addModels registrations before any model cleanup.'
+        lines << '- Slopes remain separate: the active slope plugin has no addModels call and uses custom item/world rendering.'
+        lines << ''
+        lines << 'Family summary'
+        lines << 'family | plugin registered | block IDs | wrapped blockstates | direct/old blockstates | item models | item wrapped | item family/heavy | item other | raw extraModels | requested extraModels | unique requested | present | missing | duplicate adds | duplicate/shared avoided | folder models not explicit extraModels | item mode'
+        familyRows.each { row ->
+            lines << "${row.label} | ${row.registered} | ${row.blocks.size()} | ${row.blockstateWrapped} | ${row.blockstateFamily} | ${row.items.size()} | ${row.itemWrapped} | ${row.itemFamily + row.itemOldSlope} | ${row.itemOther + row.itemNoParent} | ${row.rawCandidateExtraModels} | ${row.requestedExtraModels} | ${row.requestedUniqueExtraModels} | ${row.requestedPresent} | ${row.requestedMissing.size()} | ${row.duplicateExtraModelAdds} | ${row.duplicatesPrevented} | ${row.folderOther.size()} | ${row.itemMode}"
+        }
+        lines << ''
+        lines << 'Slope split'
+        slopeSubfamilies.each { key, value ->
+            lines << "${key}: ${value}"
+        }
+        lines << "old block/slope model files present: ${oldSlopeTreeFiles.size()}"
+        lines << "old block/slope refs in placed blockstates: ${oldSlopeRefsInBlockstates}"
+        lines << "old block/slope item parents: ${oldSlopeItemParents}"
+        lines << ''
+        lines << 'Plugin registration'
+        lines << "registered: ${registeredPlugins.join(', ')}"
+        lines << "unregistered source files: ${unregisteredPluginSources.isEmpty() ? '-' : unregisteredPluginSources.join(', ')}"
+        lines << ''
+        lines << 'Family details'
+        familyRows.each { row ->
+            lines << ''
+            lines << row.label
+            lines << "plugin: ${row.plugin} (registered=${row.registered})"
+            lines << "block IDs: ${row.blocks.size()} (${shortList(row.blocks)})"
+            lines << "item models: ${row.items.size()} (${shortList(row.items)})"
+            lines << "blockstate refs: wrapped=${row.blockstateWrapped}, direct/old=${row.blockstateFamily}, other=${row.blockstateOther}"
+            lines << "item parents: wrapped=${row.itemWrapped}, family/heavy=${row.itemFamily + row.itemOldSlope}, other/no-parent=${row.itemOther + row.itemNoParent}"
+            lines << "extraModels: rawCandidates=${row.rawCandidateExtraModels}, requested=${row.requestedExtraModels}, uniqueRequested=${row.requestedUniqueExtraModels}, present=${row.requestedPresent}, missing=${row.requestedMissing.size()}, duplicateAdds=${row.duplicateExtraModelAdds}, duplicateOrSharedAvoided=${row.duplicatesPrevented}, pluginDedupes=${row.dedupesExtraModels}, pluginSkipsSharedCornices=${row.skipsCorniceExtraModels}"
+            lines << "folder models not explicitly added by this plugin: ${row.folderOther.size()} (${shortList(row.folderOther)})"
+            lines << "item rendering mode: ${row.itemMode}"
+            lines << "note: ${row.note}"
+            if (!row.requestedMissing.isEmpty()) {
+                lines << "missing expected examples: ${shortList(row.requestedMissing)}"
+            }
+        }
+        lines << ''
+        lines << 'Spot checks'
+        ['aganite_slope', 'aganite_arch_romanesque', 'aganite_arch_modern', 'aganite_arch_gothic', 'aganite_window_french_georgian', 'aganite_column_square', 'aganite_cornice_georgian'].each { blockId ->
+            def family = familyRows.find { row -> row.blocks.contains(blockId) }
+            if (family == null) {
+                lines << "${blockId}: not found"
+                return
+            }
+            lines << "${blockId}: family=${family.label}; blockstateModels=${shortList(blockstateRefsByBlock[blockId] ?: [])}; itemParent=${itemParentByItem[blockId] ?: '-'}"
+        }
+        lines << ''
+        lines << 'Warnings'
+        lines << "JSON parse warnings: ${parseFailures.size()}"
+        parseFailures.take(50).each { lines << it }
+
+        reportFile.text = lines.join(System.lineSeparator()) + System.lineSeparator()
+        logger.lifecycle("ERYDON dynamic model audit written to ${reportFile}")
+        logger.lifecycle("ERYDON dynamic model audit summary: plugins=${registeredPlugins.size()}, families=${familyRows.size()}, explicitExtraModelsRaw=${totalExpectedRaw}, explicitExtraModelsRequested=${totalRequestedRaw}, explicitExtraModelsUnique=${totalRequestedUnique.size()}, missing=${totalMissingRequested.size()}")
+    }
+}

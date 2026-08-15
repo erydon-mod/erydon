@@ -1,0 +1,7 @@
+{
+  "textures": {
+    "particle": "#stone",
+    "stone": "erydon:block/latmion_block_aged"
+  },
+  "elements": []
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/column/circular/column_circular_capital",
+  "textures": {
+    "stone": "erydon:block/portorium_block_aged",
+    "particle": "erydon:block/portorium_block_aged"
+  }
+}

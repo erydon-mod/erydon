@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/alcove/georgian/alcove_georgian_triple_side_center",
+    "textures":  {
+                     "stone":  "erydon:block/striatus_block_aged",
+                     "particle":  "erydon:block/striatus_block_aged"
+                 }
+}

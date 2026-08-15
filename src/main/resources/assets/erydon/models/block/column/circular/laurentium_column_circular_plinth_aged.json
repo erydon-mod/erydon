@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/column/circular/column_circular_plinth",
+  "textures": {
+    "stone": "erydon:block/laurentium_block_aged",
+    "particle": "erydon:block/laurentium_block_aged"
+  }
+}

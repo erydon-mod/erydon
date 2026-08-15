@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/slope/slope",
+  "textures": {
+    "stone": "erydon:block/aganite_herringbone_grout_block",
+    "particle": "#stone"
+  }
+}

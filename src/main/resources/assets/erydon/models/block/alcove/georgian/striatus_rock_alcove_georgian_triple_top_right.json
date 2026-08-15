@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/alcove/georgian/alcove_georgian_triple_top_right",
+    "textures":  {
+                     "stone":  "erydon:block/striatus_rock_block",
+                     "particle":  "erydon:block/striatus_rock_block"
+                 }
+}

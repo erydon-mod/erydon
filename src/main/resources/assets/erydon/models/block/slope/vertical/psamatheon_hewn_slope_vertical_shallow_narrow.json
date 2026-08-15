@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/psamatheon_hewn_slope_vertical_shallow_narrow_lh",
+  "textures": {
+    "stone": "erydon:block/psamatheon_hewn_block",
+    "particle": "erydon:block/psamatheon_hewn_block"
+  }
+}

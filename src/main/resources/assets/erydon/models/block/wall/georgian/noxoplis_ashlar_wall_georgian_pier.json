@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/wall/georgian/wall_georgian_pier",
+  "textures": {
+    "wall": "erydon:block/noxoplis_ashlar_block",
+    "particle": "erydon:block/noxoplis_ashlar_block"
+  }
+}

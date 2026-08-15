@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/column/square/aganite_column_square_base_aged",
+  "textures": {
+    "all": "erydon:block/aganite_block_aged"
+  }
+}

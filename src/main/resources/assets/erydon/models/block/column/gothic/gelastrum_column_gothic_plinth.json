@@ -1,0 +1,7 @@
+﻿{
+    "parent":  "erydon:block/column/gothic/column_gothic_plinth",
+    "textures":  {
+                     "stone":  "erydon:block/gelastrum_block",
+                     "particle":  "erydon:block/gelastrum_block"
+                 }
+}

@@ -1,0 +1,1098 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "open": "false",
+        "piece": "upper_single",
+        "facing": "north"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_closed_upper_single"
+      }
+    },
+    {
+      "when": {
+        "open": "false",
+        "piece": "upper_single",
+        "facing": "east"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_closed_upper_single",
+        "y": 90,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "false",
+        "piece": "upper_single",
+        "facing": "south"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_closed_upper_single",
+        "y": 180,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "false",
+        "piece": "upper_single",
+        "facing": "west"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_closed_upper_single",
+        "y": 270,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "false",
+        "piece": "lower_single",
+        "facing": "north"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_closed_lower_single"
+      }
+    },
+    {
+      "when": {
+        "open": "false",
+        "piece": "lower_single",
+        "facing": "east"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_closed_lower_single",
+        "y": 90,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "false",
+        "piece": "lower_single",
+        "facing": "south"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_closed_lower_single",
+        "y": 180,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "false",
+        "piece": "lower_single",
+        "facing": "west"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_closed_lower_single",
+        "y": 270,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "false",
+        "piece": "upper_multi_lh",
+        "facing": "north"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_closed_upper_multi_lh"
+      }
+    },
+    {
+      "when": {
+        "open": "false",
+        "piece": "upper_multi_lh",
+        "facing": "east"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_closed_upper_multi_lh",
+        "y": 90,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "false",
+        "piece": "upper_multi_lh",
+        "facing": "south"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_closed_upper_multi_lh",
+        "y": 180,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "false",
+        "piece": "upper_multi_lh",
+        "facing": "west"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_closed_upper_multi_lh",
+        "y": 270,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "false",
+        "piece": "upper_multi_mid",
+        "facing": "north"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_closed_upper_multi_mid"
+      }
+    },
+    {
+      "when": {
+        "open": "false",
+        "piece": "upper_multi_mid",
+        "facing": "east"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_closed_upper_multi_mid",
+        "y": 90,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "false",
+        "piece": "upper_multi_mid",
+        "facing": "south"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_closed_upper_multi_mid",
+        "y": 180,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "false",
+        "piece": "upper_multi_mid",
+        "facing": "west"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_closed_upper_multi_mid",
+        "y": 270,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "false",
+        "piece": "upper_multi_rh",
+        "facing": "north"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_closed_upper_multi_rh"
+      }
+    },
+    {
+      "when": {
+        "open": "false",
+        "piece": "upper_multi_rh",
+        "facing": "east"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_closed_upper_multi_rh",
+        "y": 90,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "false",
+        "piece": "upper_multi_rh",
+        "facing": "south"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_closed_upper_multi_rh",
+        "y": 180,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "false",
+        "piece": "upper_multi_rh",
+        "facing": "west"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_closed_upper_multi_rh",
+        "y": 270,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "false",
+        "piece": "lower_multi_lh",
+        "facing": "north"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_closed_lower_multi_lh"
+      }
+    },
+    {
+      "when": {
+        "open": "false",
+        "piece": "lower_multi_lh",
+        "facing": "east"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_closed_lower_multi_lh",
+        "y": 90,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "false",
+        "piece": "lower_multi_lh",
+        "facing": "south"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_closed_lower_multi_lh",
+        "y": 180,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "false",
+        "piece": "lower_multi_lh",
+        "facing": "west"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_closed_lower_multi_lh",
+        "y": 270,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "false",
+        "piece": "lower_multi_mid",
+        "facing": "north"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_closed_lower_multi_mid"
+      }
+    },
+    {
+      "when": {
+        "open": "false",
+        "piece": "lower_multi_mid",
+        "facing": "east"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_closed_lower_multi_mid",
+        "y": 90,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "false",
+        "piece": "lower_multi_mid",
+        "facing": "south"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_closed_lower_multi_mid",
+        "y": 180,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "false",
+        "piece": "lower_multi_mid",
+        "facing": "west"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_closed_lower_multi_mid",
+        "y": 270,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "false",
+        "piece": "lower_multi_rh",
+        "facing": "north"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_closed_lower_multi_rh"
+      }
+    },
+    {
+      "when": {
+        "open": "false",
+        "piece": "lower_multi_rh",
+        "facing": "east"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_closed_lower_multi_rh",
+        "y": 90,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "false",
+        "piece": "lower_multi_rh",
+        "facing": "south"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_closed_lower_multi_rh",
+        "y": 180,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "false",
+        "piece": "lower_multi_rh",
+        "facing": "west"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_closed_lower_multi_rh",
+        "y": 270,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "upper_single",
+        "hinge": "left",
+        "facing": "north"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_open_upper_single_lh"
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "upper_single",
+        "hinge": "left",
+        "facing": "east"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_open_upper_single_lh",
+        "y": 90,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "upper_single",
+        "hinge": "left",
+        "facing": "south"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_open_upper_single_lh",
+        "y": 180,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "upper_single",
+        "hinge": "left",
+        "facing": "west"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_open_upper_single_lh",
+        "y": 270,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "upper_single",
+        "hinge": "right",
+        "facing": "north"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_open_upper_single_rh"
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "upper_single",
+        "hinge": "right",
+        "facing": "east"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_open_upper_single_rh",
+        "y": 90,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "upper_single",
+        "hinge": "right",
+        "facing": "south"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_open_upper_single_rh",
+        "y": 180,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "upper_single",
+        "hinge": "right",
+        "facing": "west"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_open_upper_single_rh",
+        "y": 270,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "lower_single",
+        "hinge": "left",
+        "facing": "north"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_open_lower_single_lh"
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "lower_single",
+        "hinge": "left",
+        "facing": "east"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_open_lower_single_lh",
+        "y": 90,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "lower_single",
+        "hinge": "left",
+        "facing": "south"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_open_lower_single_lh",
+        "y": 180,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "lower_single",
+        "hinge": "left",
+        "facing": "west"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_open_lower_single_lh",
+        "y": 270,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "lower_single",
+        "hinge": "right",
+        "facing": "north"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_open_lower_single_rh"
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "lower_single",
+        "hinge": "right",
+        "facing": "east"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_open_lower_single_rh",
+        "y": 90,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "lower_single",
+        "hinge": "right",
+        "facing": "south"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_open_lower_single_rh",
+        "y": 180,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "lower_single",
+        "hinge": "right",
+        "facing": "west"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_open_lower_single_rh",
+        "y": 270,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "upper_multi_lh",
+        "facing": "north"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_open_upper_multi_lh"
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "upper_multi_lh",
+        "facing": "east"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_open_upper_multi_lh",
+        "y": 90,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "upper_multi_lh",
+        "facing": "south"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_open_upper_multi_lh",
+        "y": 180,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "upper_multi_lh",
+        "facing": "west"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_open_upper_multi_lh",
+        "y": 270,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "upper_multi_mid",
+        "facing": "north"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_open_upper_multi_mid"
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "upper_multi_mid",
+        "facing": "east"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_open_upper_multi_mid",
+        "y": 90,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "upper_multi_mid",
+        "facing": "south"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_open_upper_multi_mid",
+        "y": 180,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "upper_multi_mid",
+        "facing": "west"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_open_upper_multi_mid",
+        "y": 270,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "upper_multi_rh",
+        "facing": "north"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_open_upper_multi_rh"
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "upper_multi_rh",
+        "facing": "east"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_open_upper_multi_rh",
+        "y": 90,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "upper_multi_rh",
+        "facing": "south"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_open_upper_multi_rh",
+        "y": 180,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "upper_multi_rh",
+        "facing": "west"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_open_upper_multi_rh",
+        "y": 270,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "lower_multi_lh",
+        "facing": "north"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_open_lower_multi_lh"
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "lower_multi_lh",
+        "facing": "east"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_open_lower_multi_lh",
+        "y": 90,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "lower_multi_lh",
+        "facing": "south"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_open_lower_multi_lh",
+        "y": 180,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "lower_multi_lh",
+        "facing": "west"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_open_lower_multi_lh",
+        "y": 270,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "lower_multi_rh",
+        "facing": "north"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_open_lower_multi_rh"
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "lower_multi_rh",
+        "facing": "east"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_open_lower_multi_rh",
+        "y": 90,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "lower_multi_rh",
+        "facing": "south"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_open_lower_multi_rh",
+        "y": 180,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "lower_multi_rh",
+        "facing": "west"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_open_lower_multi_rh",
+        "y": 270,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "lower_multi_mid",
+        "facing": "north"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_empty"
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "lower_multi_mid",
+        "facing": "east"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_empty",
+        "y": 90,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "lower_multi_mid",
+        "facing": "south"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_empty",
+        "y": 180,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "piece": "lower_multi_mid",
+        "facing": "west"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_empty",
+        "y": 270,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "sill": "true",
+        "piece": "lower_single",
+        "hinge": "left",
+        "facing": "north"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_sill_lh"
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "sill": "true",
+        "piece": "lower_single",
+        "hinge": "right",
+        "facing": "north"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_sill_rh"
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "sill": "true",
+        "piece": "lower_multi_lh",
+        "facing": "north"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_sill_lh"
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "sill": "true",
+        "piece": "lower_multi_rh",
+        "facing": "north"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_sill_rh"
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "sill": "true",
+        "piece": "lower_single",
+        "hinge": "left",
+        "facing": "east"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_sill_lh",
+        "y": 90,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "sill": "true",
+        "piece": "lower_single",
+        "hinge": "right",
+        "facing": "east"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_sill_rh",
+        "y": 90,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "sill": "true",
+        "piece": "lower_multi_lh",
+        "facing": "east"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_sill_lh",
+        "y": 90,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "sill": "true",
+        "piece": "lower_multi_rh",
+        "facing": "east"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_sill_rh",
+        "y": 90,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "sill": "true",
+        "piece": "lower_single",
+        "hinge": "left",
+        "facing": "south"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_sill_lh",
+        "y": 180,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "sill": "true",
+        "piece": "lower_single",
+        "hinge": "right",
+        "facing": "south"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_sill_rh",
+        "y": 180,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "sill": "true",
+        "piece": "lower_multi_lh",
+        "facing": "south"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_sill_lh",
+        "y": 180,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "sill": "true",
+        "piece": "lower_multi_rh",
+        "facing": "south"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_sill_rh",
+        "y": 180,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "sill": "true",
+        "piece": "lower_single",
+        "hinge": "left",
+        "facing": "west"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_sill_lh",
+        "y": 270,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "sill": "true",
+        "piece": "lower_single",
+        "hinge": "right",
+        "facing": "west"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_sill_rh",
+        "y": 270,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "sill": "true",
+        "piece": "lower_multi_lh",
+        "facing": "west"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_sill_lh",
+        "y": 270,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "open": "true",
+        "sill": "true",
+        "piece": "lower_multi_rh",
+        "facing": "west"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_sill_rh",
+        "y": 270,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "sill": "true",
+        "facing": "north"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_sill"
+      }
+    },
+    {
+      "when": {
+        "sill": "true",
+        "facing": "east"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_sill",
+        "y": 90,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "sill": "true",
+        "facing": "south"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_sill",
+        "y": 180,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "sill": "true",
+        "facing": "west"
+      },
+      "apply": {
+        "model": "erydon:block/window/french_georgian/aganite_window_french_georgian_sill",
+        "y": 270,
+        "uvlock": true
+      }
+    }
+  ]
+}

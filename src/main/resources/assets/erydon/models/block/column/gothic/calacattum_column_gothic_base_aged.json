@@ -1,0 +1,7 @@
+﻿{
+    "parent":  "erydon:block/column/gothic/column_gothic_base",
+    "textures":  {
+                     "stone":  "erydon:block/calacattum_block_aged",
+                     "particle":  "erydon:block/calacattum_block_aged"
+                 }
+}

@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "erydon:block/internal/wrapped/chrysonyx_cornice_georgian_aged"
+      }
+    }
+  ]
+}

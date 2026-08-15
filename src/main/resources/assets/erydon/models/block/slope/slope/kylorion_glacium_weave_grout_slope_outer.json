@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/slope/slope_outer",
+  "textures": {
+    "stone": "erydon:block/kylorion_glacium_weave_grout_block",
+    "particle": "#stone"
+  }
+}

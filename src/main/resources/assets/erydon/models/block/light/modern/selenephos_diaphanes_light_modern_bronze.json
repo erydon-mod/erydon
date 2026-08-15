@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/light/modern/light_modern_diaphanes",
+  "textures": {
+    "stone": "erydon:block/selenephos_diaphanes_block",
+    "edge": "erydon:block/selenephos_diaphanes_block",
+    "metal": "erydon:block/cover_bronze_gloss"
+  }
+}
+
+

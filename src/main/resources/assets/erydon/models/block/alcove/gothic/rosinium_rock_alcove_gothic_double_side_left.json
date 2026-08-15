@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/alcove/gothic/alcove_gothic_double_side_left",
+    "textures":  {
+                     "stone":  "erydon:block/rosinium_rock_block",
+                     "particle":  "erydon:block/rosinium_rock_block"
+                 }
+}

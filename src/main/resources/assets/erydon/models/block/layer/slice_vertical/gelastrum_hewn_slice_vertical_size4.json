@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/layer/slice_vertical/slice_vertical_size4",
+  "textures": {
+    "texture": "erydon:block/gelastrum_hewn_block",
+    "particle": "erydon:block/gelastrum_hewn_block"
+  }
+}

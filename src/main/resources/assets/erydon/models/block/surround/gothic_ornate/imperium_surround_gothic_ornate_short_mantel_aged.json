@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/surround/gothic_ornate/surround_gothic_ornate_short_mantel",
+  "textures": {
+    "particle": "erydon:block/imperium_block_aged",
+    "0": "erydon:block/imperium_block_aged",
+    "1": "erydon:block/imperium_block_aged",
+    "texture": "erydon:block/imperium_block_aged",
+    "stone": "erydon:block/imperium_block_aged"
+  }
+}

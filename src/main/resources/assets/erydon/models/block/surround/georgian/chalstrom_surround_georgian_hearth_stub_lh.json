@@ -1,0 +1,8 @@
+{
+  "parent": "erydon:block/surround/georgian/surround_georgian_hearth_stub_lh",
+  "textures": {
+  "stone": "erydon:block/chalstrom_block",
+  "particle": "#stone"
+}
+
+}

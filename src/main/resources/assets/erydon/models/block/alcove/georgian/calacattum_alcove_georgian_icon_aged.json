@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/alcove/georgian/alcove_georgian_icon",
+  "textures": {
+    "stone": "erydon:block/calacattum_block_aged",
+    "particle": "erydon:block/calacattum_block_aged"
+  }
+}

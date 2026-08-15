@@ -1,0 +1,10 @@
+{
+  "parent": "minecraft:block/template_glass_pane_noside",
+  "textures": {
+    "pane": "erydon:block/mielonyx_diaphanes_block",
+    "edge": "erydon:block/mielonyx_diaphanes_block"
+  }
+}
+
+
+

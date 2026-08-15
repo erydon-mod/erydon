@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/layer/slice_horizontal/slice_horizontal_bottom_size4",
+  "textures": {
+    "texture": "erydon:block/porphyros_rusticated_block",
+    "particle": "erydon:block/porphyros_rusticated_block"
+  }
+}

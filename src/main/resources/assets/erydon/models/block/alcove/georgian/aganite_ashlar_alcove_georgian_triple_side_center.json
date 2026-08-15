@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/alcove/georgian/alcove_georgian_triple_side_center",
+    "textures":  {
+                     "stone":  "erydon:block/aganite_ashlar_block",
+                     "particle":  "erydon:block/aganite_ashlar_block"
+                 }
+}

@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/selenephos_ashlar_slope_shallow_upper"
+                                    }
+                      }
+                  ]
+}

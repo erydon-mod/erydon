@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/surround/guilloche/surround_guilloche_mantel_stub_rh",
+  "textures": {
+    "particle": "erydon:block/selenephos_block",
+    "0": "erydon:block/selenephos_block",
+    "1": "erydon:block/selenephos_block",
+    "texture": "erydon:block/selenephos_block",
+    "stone": "erydon:block/selenephos_block"
+  }
+}

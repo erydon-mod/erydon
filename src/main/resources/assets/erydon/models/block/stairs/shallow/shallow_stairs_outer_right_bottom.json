@@ -1,0 +1,242 @@
+{
+    "parent":  "minecraft:block/block",
+    "ambientocclusion":  true,
+    "elements":  [
+                     {
+                         "from":  [
+                                      0,
+                                      0,
+                                      0
+                                  ],
+                         "to":  [
+                                    16,
+                                    4,
+                                    16
+                                ],
+                         "faces":  {
+                                       "north":  {
+                                                     "texture":  "#underside",
+                                                     "uv":  [
+                                                                0,
+                                                                12,
+                                                                16,
+                                                                16
+                                                            ],
+                                                     "cullface":  "north"
+                                                 },
+                                       "east":  {
+                                                    "texture":  "#underside",
+                                                    "uv":  [
+                                                               0,
+                                                               12,
+                                                               16,
+                                                               16
+                                                           ],
+                                                    "cullface":  "east"
+                                                },
+                                       "south":  {
+                                                     "texture":  "#underside",
+                                                     "uv":  [
+                                                                0,
+                                                                12,
+                                                                16,
+                                                                16
+                                                            ],
+                                                     "cullface":  "south"
+                                                 },
+                                       "west":  {
+                                                    "texture":  "#underside",
+                                                    "uv":  [
+                                                               0,
+                                                               12,
+                                                               16,
+                                                               16
+                                                           ],
+                                                    "cullface":  "west"
+                                                },
+                                       "up":  {
+                                                  "texture":  "#all"
+                                              },
+                                       "down":  {
+                                                    "texture":  "#all",
+                                                    "cullface":  "down"
+                                                }
+                                   }
+                     },
+                     {
+                         "from":  [
+                                      0,
+                                      4,
+                                      8
+                                  ],
+                         "to":  [
+                                    8,
+                                    8,
+                                    16
+                                ],
+                         "faces":  {
+                                       "north":  {
+                                                     "texture":  "#all",
+                                                     "uv":  [
+                                                                0,
+                                                                12,
+                                                                16,
+                                                                16
+                                                            ]
+                                                 },
+                                       "east":  {
+                                                    "texture":  "#all",
+                                                    "uv":  [
+                                                               0,
+                                                               12,
+                                                               16,
+                                                               16
+                                                           ]
+                                                },
+                                       "south":  {
+                                                     "texture":  "#all",
+                                                     "uv":  [
+                                                                0,
+                                                                12,
+                                                                16,
+                                                                16
+                                                            ],
+                                                     "cullface":  "south"
+                                                 },
+                                       "west":  {
+                                                    "texture":  "#all",
+                                                    "uv":  [
+                                                               0,
+                                                               12,
+                                                               16,
+                                                               16
+                                                           ],
+                                                    "cullface":  "west"
+                                                },
+                                       "up":  {
+                                                  "texture":  "#all"
+                                              },
+                                       "down":  {
+                                                    "texture":  "#all"
+                                                }
+                                   }
+                     },
+                     {
+                         "from":  [
+                                      0,
+                                      -4,
+                                      0
+                                  ],
+                         "to":  [
+                                    8,
+                                    0,
+                                    8
+                                ],
+                         "faces":  {
+                                       "north":  {
+                                                     "texture":  "#underside",
+                                                     "uv":  [
+                                                                0,
+                                                                8,
+                                                                16,
+                                                                12
+                                                            ],
+                                                     "cullface":  "north"
+                                                 },
+                                       "east":  {
+                                                    "texture":  "#underside",
+                                                    "uv":  [
+                                                               0,
+                                                               8,
+                                                               16,
+                                                               12
+                                                           ]
+                                                },
+                                       "south":  {
+                                                     "texture":  "#underside",
+                                                     "uv":  [
+                                                                0,
+                                                                8,
+                                                                16,
+                                                                12
+                                                            ]
+                                                 },
+                                       "west":  {
+                                                    "texture":  "#underside",
+                                                    "uv":  [
+                                                               0,
+                                                               8,
+                                                               16,
+                                                               12
+                                                           ],
+                                                    "cullface":  "west"
+                                                },
+                                       "up":  {
+                                                  "texture":  "#all"
+                                              },
+                                       "down":  {
+                                                    "texture":  "#all"
+                                                }
+                                   }
+                     },
+                     {
+                         "from":  [
+                                      8,
+                                      -4,
+                                      0
+                                  ],
+                         "to":  [
+                                    16,
+                                    0,
+                                    16
+                                ],
+                         "faces":  {
+                                       "north":  {
+                                                     "texture":  "#underside",
+                                                     "uv":  [
+                                                                0,
+                                                                8,
+                                                                16,
+                                                                12
+                                                            ],
+                                                     "cullface":  "north"
+                                                 },
+                                       "east":  {
+                                                    "texture":  "#underside",
+                                                    "uv":  [
+                                                               0,
+                                                               8,
+                                                               16,
+                                                               12
+                                                           ],
+                                                    "cullface":  "east"
+                                                },
+                                       "south":  {
+                                                     "texture":  "#underside",
+                                                     "uv":  [
+                                                                0,
+                                                                8,
+                                                                16,
+                                                                12
+                                                            ],
+                                                     "cullface":  "south"
+                                                 },
+                                       "west":  {
+                                                    "texture":  "#underside",
+                                                    "uv":  [
+                                                               0,
+                                                               8,
+                                                               16,
+                                                               12
+                                                           ]
+                                                },
+                                       "up":  {
+                                                  "texture":  "#all"
+                                              },
+                                       "down":  {
+                                                    "texture":  "#all"
+                                                }
+                                   }
+                     }
+                 ]
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/alcove/gothic/alcove_gothic_base",
+  "textures": {
+    "stone": "erydon:block/brectite_ashlar_block",
+    "particle": "erydon:block/brectite_ashlar_block"
+  }
+}

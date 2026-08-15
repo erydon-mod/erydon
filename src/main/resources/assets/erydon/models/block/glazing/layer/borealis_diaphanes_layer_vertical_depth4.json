@@ -1,0 +1,50 @@
+{
+    "parent":  "minecraft:block/block",
+    "textures":  {
+                     "particle":  "erydon:block/borealis_diaphanes_block",
+                     "pane":  "erydon:block/borealis_diaphanes_block",
+                     "edge":  "erydon:block/borealis_diaphanes_block"
+                 },
+    "elements":  [
+                     {
+                         "from":  [
+                                      0,
+                                      0,
+                                      0
+                                  ],
+                         "to":  [
+                                    16,
+                                    16,
+                                    4
+                                ],
+                         "faces":  {
+                                       "north":  {
+                                                                                                          "texture":  "#pane",
+                                                     "cullface":  "north"
+                                                 },
+                                       "east":  {
+                                                                                                        "texture":  "#edge",
+                                                    "cullface":  "east"
+                                                },
+                                       "south":  {
+                                                                                                          "texture":  "#pane"
+                                                 },
+                                       "west":  {
+                                                                                                        "texture":  "#edge",
+                                                    "cullface":  "west"
+                                                },
+                                       "up":  {
+                                                                                                    "texture":  "#edge",
+                                                  "cullface":  "up"
+                                              },
+                                       "down":  {
+                                                                                                        "texture":  "#edge",
+                                                    "cullface":  "down"
+                                                }
+                                   }
+                     }
+                 ]
+}
+
+
+

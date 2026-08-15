@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/stairs/shallow/shallow_stairs_inner_top",
+    "textures":  {
+                     "all":  "erydon:block/kylorion_ashlar_block",
+                     "particle":  "#all"
+                 }
+}

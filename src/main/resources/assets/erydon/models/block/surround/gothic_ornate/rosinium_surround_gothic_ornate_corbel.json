@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/surround/gothic_ornate/surround_gothic_ornate_corbel",
+  "textures": {
+    "particle": "erydon:block/rosinium_block",
+    "0": "erydon:block/rosinium_block",
+    "1": "erydon:block/rosinium_block",
+    "texture": "erydon:block/rosinium_block",
+    "stone": "erydon:block/rosinium_block"
+  }
+}

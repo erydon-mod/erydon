@@ -1,0 +1,6 @@
+{
+    "parent":  "erydon:block/internal/wrapped/solistra_rusticated_slope_vertical_shallow_narrow",
+    "textures":  {
+                     "texture":  "erydon:block/solistra_rusticated_block"
+                 }
+}

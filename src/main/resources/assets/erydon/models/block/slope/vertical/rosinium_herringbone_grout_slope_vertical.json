@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/slope_vertical",
+  "textures": {
+    "stone": "erydon:block/rosinium_herringbone_grout_block",
+    "particle": "#stone"
+  }
+}

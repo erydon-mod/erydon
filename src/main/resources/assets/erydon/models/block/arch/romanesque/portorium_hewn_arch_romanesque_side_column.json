@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/arch/romanesque/arch_romanesque_side_column",
+  "textures": {
+    "stone": "erydon:block/portorium_hewn_block"
+  }
+}
+

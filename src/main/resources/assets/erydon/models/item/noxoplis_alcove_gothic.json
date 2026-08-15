@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/alcove/gothic/alcove_gothic_icon",
+  "textures": {
+    "stone": "erydon:block/noxoplis_block",
+    "particle": "erydon:block/noxoplis_block"
+  }
+}

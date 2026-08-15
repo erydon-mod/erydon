@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/nerium_ashlar_slope_steep_upper"
+                                    }
+                      }
+                  ]
+}

@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/alcove/gothic/alcove_gothic_double_top_right",
+    "textures":  {
+                     "stone":  "erydon:block/chalstrom_block_aged",
+                     "particle":  "erydon:block/chalstrom_block_aged"
+                 }
+}

@@ -1,0 +1,7 @@
+﻿{
+    "parent":  "erydon:block/column/gothic/column_gothic_pillar",
+    "textures":  {
+                     "stone":  "erydon:block/kelastrion_block_aged",
+                     "particle":  "erydon:block/kelastrion_block_aged"
+                 }
+}

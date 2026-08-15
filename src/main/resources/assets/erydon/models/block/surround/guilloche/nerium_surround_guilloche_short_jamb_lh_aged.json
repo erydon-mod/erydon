@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/surround/guilloche/surround_guilloche_short_jamb_lh",
+  "textures": {
+    "particle": "erydon:block/nerium_block_aged",
+    "0": "erydon:block/nerium_block_aged",
+    "1": "erydon:block/nerium_block_aged",
+    "texture": "erydon:block/nerium_block_aged",
+    "stone": "erydon:block/nerium_block_aged"
+  }
+}

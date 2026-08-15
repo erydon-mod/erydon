@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/column/square/column_square_pillar_shared",
+  "textures": {
+    "particle": "erydon:block/calacattum_block",
+    "stone": "erydon:block/calacattum_block"
+  }
+}

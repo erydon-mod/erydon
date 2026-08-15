@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/brectite_herringbone_bronze_slope_shallow_lower"
+                                    }
+                      }
+                  ]
+}

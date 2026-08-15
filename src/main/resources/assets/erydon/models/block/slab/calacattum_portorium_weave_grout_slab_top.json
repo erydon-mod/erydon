@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab_top",
+  "textures": {
+    "bottom": "erydon:block/calacattum_portorium_weave_grout_block",
+    "top": "erydon:block/calacattum_portorium_weave_grout_block",
+    "side": "erydon:block/calacattum_portorium_weave_grout_block"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {
+    "bottom": "erydon:block/rosinium_block_aged",
+    "top": "erydon:block/rosinium_block_aged",
+    "side": "erydon:block/rosinium_block_aged"
+  }
+}

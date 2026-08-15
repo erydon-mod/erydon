@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/shallow/slope_shallow_lower_inner",
+  "textures": {
+    "stone": "erydon:block/aganite_block_aged",
+    "particle": "#stone"
+  }
+}

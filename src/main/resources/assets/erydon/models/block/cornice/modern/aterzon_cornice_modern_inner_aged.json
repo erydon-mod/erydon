@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/cornice/modern/cornice_modern_inner",
+    "textures":  {
+                     "all":  "erydon:block/aterzon_block_aged",
+                     "particle":  "#all"
+                 }
+}

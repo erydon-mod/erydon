@@ -1,0 +1,6 @@
+{
+    "parent":  "erydon:block/internal/wrapped/kelastrion_rusticated_slope_vertical_shallow_narrow",
+    "textures":  {
+                     "texture":  "erydon:block/kelastrion_rusticated_block"
+                 }
+}

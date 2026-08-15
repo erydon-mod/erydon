@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "erydon:block/slab/borealis_herringbone_grout_slab"
+    },
+    "type=top": {
+      "model": "erydon:block/slab/borealis_herringbone_grout_slab_top"
+    },
+    "type=double": {
+      "model": "erydon:block/block/borealis_herringbone_grout_block"
+    }
+  }
+}

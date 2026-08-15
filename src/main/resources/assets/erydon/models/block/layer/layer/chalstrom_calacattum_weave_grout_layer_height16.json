@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/block/calacattum_portorium_weave_bronze_block",
+  "textures": {
+    "texture": "erydon:block/chalstrom_calacattum_weave_grout_block",
+    "particle": "erydon:block/chalstrom_calacattum_weave_grout_block"
+  }
+}

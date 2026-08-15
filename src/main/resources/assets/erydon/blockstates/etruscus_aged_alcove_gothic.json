@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "erydon:block/internal/wrapped/etruscus_aged_alcove_gothic"
+      }
+    }
+  ]
+}

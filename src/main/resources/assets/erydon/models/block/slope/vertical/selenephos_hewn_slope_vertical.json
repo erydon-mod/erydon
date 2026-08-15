@@ -1,0 +1,9 @@
+{
+  "parent": "erydon:block/slope/vertical/slope_vertical",
+  "textures": {
+    "stone": "erydon:block/selenephos_hewn_block",
+    "particle": "#stone"
+  }
+}
+
+

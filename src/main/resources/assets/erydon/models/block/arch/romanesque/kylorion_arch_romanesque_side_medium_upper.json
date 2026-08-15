@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/arch/romanesque/arch_romanesque_side_medium_upper",
+  "textures": {
+    "stone": "erydon:block/kylorion_block"
+  }
+}
+

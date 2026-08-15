@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/cornice/guilloche/cornice_guilloche_straight",
+  "textures": {
+    "stone": "erydon:block/noxoplis_block_aged",
+    "particle": "erydon:block/noxoplis_block_aged"
+  }
+}

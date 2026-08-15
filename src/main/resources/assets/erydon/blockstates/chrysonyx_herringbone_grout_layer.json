@@ -1,0 +1,100 @@
+{
+  "variants": {
+    "layers=1,waterlogged=false,top=false": {
+      "model": "erydon:block/layer/layer/chrysonyx_herringbone_grout_layer_height2"
+    },
+    "layers=1,waterlogged=false,top=true": {
+      "model": "erydon:block/layer/layer/chrysonyx_herringbone_grout_layer_top_height2"
+    },
+    "layers=1,waterlogged=true,top=false": {
+      "model": "erydon:block/layer/layer/chrysonyx_herringbone_grout_layer_height2"
+    },
+    "layers=1,waterlogged=true,top=true": {
+      "model": "erydon:block/layer/layer/chrysonyx_herringbone_grout_layer_top_height2"
+    },
+    "layers=2,waterlogged=false,top=false": {
+      "model": "erydon:block/layer/layer/chrysonyx_herringbone_grout_layer_height4"
+    },
+    "layers=2,waterlogged=false,top=true": {
+      "model": "erydon:block/layer/layer/chrysonyx_herringbone_grout_layer_top_height4"
+    },
+    "layers=2,waterlogged=true,top=false": {
+      "model": "erydon:block/layer/layer/chrysonyx_herringbone_grout_layer_height4"
+    },
+    "layers=2,waterlogged=true,top=true": {
+      "model": "erydon:block/layer/layer/chrysonyx_herringbone_grout_layer_top_height4"
+    },
+    "layers=3,waterlogged=false,top=false": {
+      "model": "erydon:block/layer/layer/chrysonyx_herringbone_grout_layer_height6"
+    },
+    "layers=3,waterlogged=false,top=true": {
+      "model": "erydon:block/layer/layer/chrysonyx_herringbone_grout_layer_top_height6"
+    },
+    "layers=3,waterlogged=true,top=false": {
+      "model": "erydon:block/layer/layer/chrysonyx_herringbone_grout_layer_height6"
+    },
+    "layers=3,waterlogged=true,top=true": {
+      "model": "erydon:block/layer/layer/chrysonyx_herringbone_grout_layer_top_height6"
+    },
+    "layers=4,waterlogged=false,top=false": {
+      "model": "erydon:block/layer/layer/chrysonyx_herringbone_grout_layer_height8"
+    },
+    "layers=4,waterlogged=false,top=true": {
+      "model": "erydon:block/layer/layer/chrysonyx_herringbone_grout_layer_top_height8"
+    },
+    "layers=4,waterlogged=true,top=false": {
+      "model": "erydon:block/layer/layer/chrysonyx_herringbone_grout_layer_height8"
+    },
+    "layers=4,waterlogged=true,top=true": {
+      "model": "erydon:block/layer/layer/chrysonyx_herringbone_grout_layer_top_height8"
+    },
+    "layers=5,waterlogged=false,top=false": {
+      "model": "erydon:block/layer/layer/chrysonyx_herringbone_grout_layer_height10"
+    },
+    "layers=5,waterlogged=false,top=true": {
+      "model": "erydon:block/layer/layer/chrysonyx_herringbone_grout_layer_top_height10"
+    },
+    "layers=5,waterlogged=true,top=false": {
+      "model": "erydon:block/layer/layer/chrysonyx_herringbone_grout_layer_height10"
+    },
+    "layers=5,waterlogged=true,top=true": {
+      "model": "erydon:block/layer/layer/chrysonyx_herringbone_grout_layer_top_height10"
+    },
+    "layers=6,waterlogged=false,top=false": {
+      "model": "erydon:block/layer/layer/chrysonyx_herringbone_grout_layer_height12"
+    },
+    "layers=6,waterlogged=false,top=true": {
+      "model": "erydon:block/layer/layer/chrysonyx_herringbone_grout_layer_top_height12"
+    },
+    "layers=6,waterlogged=true,top=false": {
+      "model": "erydon:block/layer/layer/chrysonyx_herringbone_grout_layer_height12"
+    },
+    "layers=6,waterlogged=true,top=true": {
+      "model": "erydon:block/layer/layer/chrysonyx_herringbone_grout_layer_top_height12"
+    },
+    "layers=7,waterlogged=false,top=false": {
+      "model": "erydon:block/layer/layer/chrysonyx_herringbone_grout_layer_height14"
+    },
+    "layers=7,waterlogged=false,top=true": {
+      "model": "erydon:block/layer/layer/chrysonyx_herringbone_grout_layer_top_height14"
+    },
+    "layers=7,waterlogged=true,top=false": {
+      "model": "erydon:block/layer/layer/chrysonyx_herringbone_grout_layer_height14"
+    },
+    "layers=7,waterlogged=true,top=true": {
+      "model": "erydon:block/layer/layer/chrysonyx_herringbone_grout_layer_top_height14"
+    },
+    "layers=8,waterlogged=false,top=false": {
+      "model": "erydon:block/layer/layer/chrysonyx_herringbone_grout_layer_height16"
+    },
+    "layers=8,waterlogged=false,top=true": {
+      "model": "erydon:block/layer/layer/chrysonyx_herringbone_grout_layer_top_height16"
+    },
+    "layers=8,waterlogged=true,top=false": {
+      "model": "erydon:block/layer/layer/chrysonyx_herringbone_grout_layer_height16"
+    },
+    "layers=8,waterlogged=true,top=true": {
+      "model": "erydon:block/layer/layer/chrysonyx_herringbone_grout_layer_top_height16"
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "textures": {
+    "stone": "erydon:block/aganite_block"
+  },
+  "elements": [
+    {
+      "name": "first",
+      "from": [4, 4, 4],
+      "to": [12, 12, 8],
+      "rotation": {
+        "origin": [8, 8, 8],
+        "axis": "y",
+        "angle": 22.5,
+        "rescale": true
+      },
+      "faces": {
+        "north": {"texture": "#stone", "rotation": 90}
+      }
+    },
+    {
+      "name": "second",
+      "from": [4, 4, 4],
+      "to": [12, 12, 8],
+      "rotation": {
+        "origin": [8, 8, 8],
+        "axis": "y",
+        "angle": 22.5,
+        "rescale": true
+      },
+      "faces": {
+        "north": {"texture": "#stone", "rotation": 90}
+      }
+    }
+  ]
+}

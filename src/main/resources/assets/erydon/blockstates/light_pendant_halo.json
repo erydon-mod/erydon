@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "lit=false": {
+      "model": "erydon:block/light_pendant_halo"
+    },
+    "lit=true": {
+      "model": "erydon:block/light_pendant_halo"
+    }
+  }
+}

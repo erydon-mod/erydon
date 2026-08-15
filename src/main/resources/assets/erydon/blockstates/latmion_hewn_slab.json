@@ -1,0 +1,14 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "erydon:block/slab/latmion_hewn_slab"
+    },
+    "type=top": {
+      "model": "erydon:block/slab/latmion_hewn_slab_top"
+    },
+    "type=double": {
+      "model": "erydon:block/block/latmion_hewn_block"
+    }
+  }
+}
+

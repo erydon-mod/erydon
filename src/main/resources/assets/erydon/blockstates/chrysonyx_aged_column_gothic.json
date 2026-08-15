@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/chrysonyx_aged_column_gothic"
+                                    }
+                      }
+                  ]
+}

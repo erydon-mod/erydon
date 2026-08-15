@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "id": "erydon",
+  "version": "${version}",
+  "name": "ERYDON",
+  "description": "Decorative architectural blocks with luxury stone, marble, connected textures, lighting, and classical and modern building details.",
+  "authors": [
+    "Oliver"
+  ],
+  "contact": {
+    "homepage": "https://erydon.co.uk",
+    "sources": "https://github.com/erydon-mod/erydon",
+    "issues": "https://github.com/erydon-mod/erydon/issues"
+  },
+  "license": [
+    "MIT",
+    "CC-BY-SA-4.0"
+  ],
+  "environment": "*",
+  "icon": "assets/erydon/icon.png",
+  "custom": {
+    "erydon:texture_alias_resolver": 1,
+    "erydon:family_compatibility_generation": 2
+  },
+
+  "entrypoints": {
+    "main": [
+      "com.oliver.erydon.Erydon"
+    ],
+    "client": [
+      "com.oliver.erydon.ErydonClient"
+    ],
+    "modmenu": [
+      "com.oliver.erydon.client.config.ErydonModMenuIntegration"
+    ],
+    "rei_client": [
+      "com.oliver.erydon.compat.rei.ErydonReiClientPlugin"
+    ],
+    "emi": [
+      "com.oliver.erydon.compat.emi.ErydonEmiPlugin"
+    ]
+  },
+
+  "depends": {
+    "fabricloader": ">=0.16.10",
+    "fabric-api": ">=0.92.11+1.20.1",
+    "minecraft": "1.20.1",
+    "java": ">=17"
+  },
+  "mixins": [
+    "erydon.mixins.json",
+    "erydon-texture-alias.mixins.json"
+  ],
+
+  "recommends": {
+    "sodium": "*",
+    "indium": "*",
+    "roughlyenoughitems": "*",
+    "jei": "*"
+  },
+  "suggests": {
+    "modmenu": "*",
+    "emi": "*",
+    "axiom": "*"
+  }
+
+}

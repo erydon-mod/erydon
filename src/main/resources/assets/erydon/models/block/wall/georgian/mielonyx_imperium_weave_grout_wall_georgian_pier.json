@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/wall/georgian/wall_georgian_pier",
+  "textures": {
+    "wall": "erydon:block/mielonyx_imperium_weave_grout_block",
+    "particle": "erydon:block/mielonyx_imperium_weave_grout_block"
+  }
+}

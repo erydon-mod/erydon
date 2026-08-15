@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/layer/layer_multiface/parent/vertical_depth14",
+  "textures": {
+    "texture": "erydon:block/etruscus_block"
+  }
+}

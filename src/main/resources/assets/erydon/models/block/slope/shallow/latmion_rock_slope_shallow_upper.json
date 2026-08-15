@@ -1,0 +1,8 @@
+{
+  "parent": "erydon:block/slope/shallow/slope_shallow_upper",
+  "textures": {
+    "stone": "erydon:block/latmion_rock_block",
+    "particle": "#stone"
+  }
+}
+

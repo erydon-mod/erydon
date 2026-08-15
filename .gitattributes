@@ -1,0 +1,16 @@
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.ico binary
+*.jar binary
+*.zip binary
+*.gz binary
+*.dat binary
+*.mca binary
+
+# Continuity/OptiFine property files are byte-sensitive. Preserve their
+# existing mixed line endings and never apply Git text conversion.
+/src/main/resources/**/*.properties binary
+/run-dev/resourcepacks/**/*.properties binary

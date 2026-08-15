@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/alcove/georgian/alcove_georgian_sides",
+  "textures": {
+    "stone": "erydon:block/noxoplis_block",
+    "particle": "erydon:block/noxoplis_block"
+  }
+}

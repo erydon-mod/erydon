@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/column/circular/selenephos_column_circular_base",
+  "textures": {
+    "all": "erydon:block/selenephos_block"
+  }
+}

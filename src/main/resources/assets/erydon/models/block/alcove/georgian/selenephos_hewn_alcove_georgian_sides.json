@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/alcove/georgian/alcove_georgian_sides",
+  "textures": {
+    "stone": "erydon:block/selenephos_hewn_block",
+    "particle": "erydon:block/selenephos_hewn_block"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/template_wall_side_tall",
+  "textures": {
+    "wall": "erydon:block/latmion_block_aged",
+    "particle": "erydon:block/latmion_block_aged"
+  }
+}

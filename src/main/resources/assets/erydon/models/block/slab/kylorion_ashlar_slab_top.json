@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab_top",
+  "textures": {
+    "bottom": "erydon:block/kylorion_ashlar_block",
+    "top": "erydon:block/kylorion_ashlar_block",
+    "side": "erydon:block/kylorion_ashlar_block"
+  }
+}

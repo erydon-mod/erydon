@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/cornice/guilloche/cornice_guilloche_straight",
+  "textures": {
+    "stone": "erydon:block/mielonyx_block",
+    "particle": "erydon:block/mielonyx_block"
+  }
+}

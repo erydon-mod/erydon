@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/layer/slice_vertical/slice_vertical_size8",
+  "textures": {
+    "texture": "erydon:block/chrysonyx_glacium_weave_grout_block",
+    "particle": "erydon:block/chrysonyx_glacium_weave_grout_block"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/template_wall_side",
+  "textures": {
+    "wall": "erydon:block/borealis_hewn_block",
+    "particle": "erydon:block/borealis_hewn_block"
+  }
+}

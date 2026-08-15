@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "erydon:block/rosinium_sanguenite_weave_grout_block"
+  }
+}

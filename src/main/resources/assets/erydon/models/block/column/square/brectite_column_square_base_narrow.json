@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/column/square/column_square_base_narrow_shared",
+  "textures": {
+    "particle": "erydon:block/brectite_block",
+    "stone": "erydon:block/brectite_block"
+  }
+}

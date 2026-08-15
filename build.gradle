@@ -1,0 +1,699 @@
+plugins {
+    id 'fabric-loom' version '1.6.12'
+    id 'maven-publish'
+}
+
+group = maven_group
+version = mod_version
+def familyCompatibilityGeneration = providers
+        .gradleProperty('family_compatibility_generation')
+        .map { it.toInteger() }
+        .get()
+if (familyCompatibilityGeneration < 1) {
+    throw new GradleException('family_compatibility_generation must be positive')
+}
+base { archivesName = "${archives_base_name}-compat${familyCompatibilityGeneration}" }
+
+def textureDedupeEnabled = providers.gradleProperty('textureDedupe')
+        .map { it.toBoolean() }
+        .getOrElse(true)
+def textureDedupePython = providers.gradleProperty('textureDedupePython')
+        .getOrElse('python')
+def textureDedupeTool = file('tools/texture_dedupe.py')
+def textureDedupeTests = file('tools/test_texture_dedupe.py')
+def textureDedupeConfig = file('config/texture-dedupe-native.json')
+def textureDedupeSourceId = 'erydon-native-mc1.20.1'
+def textureDedupeReportDir = layout.buildDirectory.dir('reports/texture-dedupe')
+def textureDedupeInventoryJson = textureDedupeReportDir.map {
+    it.file('inventory.json')
+}
+def textureDedupeInventoryCsv = textureDedupeReportDir.map {
+    it.file('inventory.csv')
+}
+def textureDedupePlan = textureDedupeReportDir.map {
+    it.file('native-plan.json')
+}
+def idMigrationTool = file('tools/id_migration.py')
+def idMigrationManifest = file('src/main/resources/data/erydon/id_migration.tsv')
+def idMigrationReport = layout.buildDirectory.file('reports/id-migration/source-audit.json')
+
+def continuityJar = file('libs/continuity-3.0.0+1.20.1.jar')
+if (!continuityJar.exists()) {
+    throw new GradleException("Missing Continuity jar: ${continuityJar}")
+}
+
+repositories {
+    maven { url = 'https://maven.fabricmc.net/' }
+    maven { url = 'https://maven.shedaniel.me/' }
+    maven { url = 'https://maven.terraformersmc.com/releases/' }
+    maven { url = 'https://maven.blamejared.com' }
+    maven { url = 'https://api.modrinth.com/maven' }
+    maven { url = 'https://maven.enginehub.org/repo/' }
+    mavenCentral()
+}
+
+// Pin LWJGL to MC 1.20.1’s version so Sodium/Iris don’t complain
+configurations.configureEach {
+    resolutionStrategy.eachDependency { d ->
+        if (d.requested.group == 'org.lwjgl') d.useVersion '3.3.1'
+    }
+}
+
+dependencies {
+    // Core
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    mappings  "net.fabricmc:yarn:${yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
+
+
+    // Dev runtime mods
+    modCompileOnly "maven.modrinth:sodium:mc1.20.1-0.5.13-fabric"
+    modCompileOnly "maven.modrinth:indium:1.0.36+mc1.20.1"
+    modCompileOnly "maven.modrinth:iris:1.7.6+1.20.1"
+    modRuntimeOnly "maven.modrinth:sodium:mc1.20.1-0.5.13-fabric"
+    modRuntimeOnly "maven.modrinth:indium:1.0.36+mc1.20.1"
+    modRuntimeOnly "maven.modrinth:iris:1.7.6+1.20.1"
+    modLocalRuntime files(continuityJar)
+    modCompileOnly "com.terraformersmc:modmenu:7.2.2"
+    modRuntimeOnly "com.terraformersmc:modmenu:7.2.2" // optional
+    modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:12.1.785"
+    modCompileOnly("mezz.jei:jei-1.20.1-fabric:15.16.2.73") {
+        transitive = false
+    }
+    modCompileOnly "dev.emi:emi-fabric:${emi_version}:api"
+    testImplementation "org.junit.jupiter:junit-jupiter:5.10.2"
+
+    // Required for Iris to parse shaderpacks
+    runtimeOnly "org.anarres:jcpp:1.4.14"
+    runtimeOnly "org.antlr:antlr4-runtime:4.13.1"
+    runtimeOnly "io.github.douira:glsl-transformer:2.0.1"
+
+    // Optional compat surface for post-WorldEdit repair hooks
+    modCompileOnly "com.sk89q.worldedit:worldedit-fabric-mc1.20:7.2.15"
+}
+
+
+loom {
+    runs {
+        client {
+            programArgs '--gameDir', file('run-dev').absolutePath
+            def clientMaxHeap = providers.gradleProperty('erydon.client.maxHeap').getOrElse('24G')
+            def runtimeReport = layout.buildDirectory.file('reports/erydon-model-performance-runtime.json').get().asFile.absolutePath
+            vmArgs "-Xms6G", "-Xmx${clientMaxHeap}", "-XshowSettings:vm"
+            vmArgs "-Derydon.model_performance.runtime_report=${runtimeReport}"
+            if (providers.gradleProperty('erydon.debug.loadProfile').map { it.toBoolean() }.getOrElse(false)) {
+                vmArgs "-Derydon.debug.load_profile=true", "-Derydon.debug.model_reload=true"
+            }
+            if (providers.gradleProperty('erydon.debug.disableRawModelLoader').map { it.toBoolean() }.getOrElse(false)) {
+                vmArgs "-Derydon.debug.disable_raw_model_loader=true"
+            }
+        }
+    }
+}
+
+tasks.named('remapJar') {
+    nestedJars.from continuityJar
+    addNestedDependencies = true
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 17
+    options.encoding = 'UTF-8'
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+}
+
+tasks.register('validateSteepSlopeGeometry', JavaExec) {
+    group = 'verification'
+    description = 'Checks generated steep-slope corner geometry and UV consistency.'
+    dependsOn tasks.named('classes')
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.oliver.erydon.client.model.SteepSlopeGeometryAudit'
+}
+
+tasks.register('validateSlopeWorldUvs', JavaExec) {
+    group = 'verification'
+    description = 'Checks standard-world CTM projection, joins, and stretch for every non-steep slope family.'
+    dependsOn tasks.named('classes')
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.oliver.erydon.client.model.SlopeWorldUvAudit'
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('validateSteepSlopeGeometry')
+    dependsOn tasks.named('validateSlopeWorldUvs')
+}
+
+tasks.register('textureDedupeInventory', Exec) {
+    group = 'texture deduplication'
+    description = 'Inventories canonical native PNG resources without changing the source tree.'
+    onlyIf { textureDedupeEnabled }
+    inputs.file(textureDedupeTool)
+    inputs.file(textureDedupeConfig)
+    inputs.files(fileTree('src/main/resources') {
+        include '**/*.json'
+        include '**/*.png'
+        include '**/*.png.mcmeta'
+        include '**/*.properties'
+        include '**/*.mtl'
+        include '**/*.obj'
+        include '**/*.txt'
+    })
+    outputs.files(textureDedupeInventoryJson, textureDedupeInventoryCsv)
+    doFirst {
+        textureDedupeReportDir.get().asFile.mkdirs()
+        commandLine textureDedupePython,
+                textureDedupeTool,
+                'inventory',
+                '--config', textureDedupeConfig,
+                '--json-out', textureDedupeInventoryJson.get().asFile,
+                '--csv-out', textureDedupeInventoryCsv.get().asFile
+    }
+}
+
+tasks.register('textureDedupePlan', Exec) {
+    group = 'texture deduplication'
+    description = 'Generates an exact-byte, source-scoped native texture alias plan.'
+    onlyIf { textureDedupeEnabled }
+    dependsOn tasks.named('textureDedupeInventory')
+    inputs.file(textureDedupeTool)
+    inputs.file(textureDedupeConfig)
+    inputs.file(textureDedupeInventoryJson)
+    outputs.file(textureDedupePlan)
+    doFirst {
+        textureDedupeReportDir.get().asFile.mkdirs()
+        commandLine textureDedupePython,
+                textureDedupeTool,
+                'plan',
+                '--config', textureDedupeConfig,
+                '--inventory', textureDedupeInventoryJson.get().asFile,
+                '--source', textureDedupeSourceId,
+                '--output', textureDedupePlan.get().asFile
+    }
+}
+
+tasks.register('testTextureDedupeTool', Exec) {
+    group = 'verification'
+    description = 'Runs deterministic tests for inventory, planning, application, validation and comparison.'
+    inputs.files(textureDedupeTool, textureDedupeTests)
+    commandLine textureDedupePython,
+            '-m', 'unittest', 'tools/test_texture_dedupe.py', '-v'
+}
+
+tasks.register('auditErydonIdMigration', Exec) {
+    group = 'verification'
+    description = 'Checks the approved ID map, canonical resources, translations, and Quatrefoil coverage.'
+    inputs.files(idMigrationTool, idMigrationManifest)
+    inputs.files(fileTree('src/main/resources/assets/erydon/blockstates') { include '*.json' })
+    inputs.files(fileTree('src/main/resources/assets/erydon/models/item') { include '*.json' })
+    inputs.files(fileTree('src/main/resources/assets/erydon/lang') { include '*.json' })
+    inputs.files(fileTree('src/main/resources/data') { include '**/*.json' })
+    inputs.file(file('src/main/resources/assets/erydon/shaders/block.properties'))
+    outputs.file(idMigrationReport)
+    doFirst {
+        idMigrationReport.get().asFile.parentFile.mkdirs()
+        commandLine textureDedupePython,
+                idMigrationTool,
+                'audit',
+                '--manifest', idMigrationManifest,
+                '--repo', projectDir,
+                '--report', idMigrationReport.get().asFile
+    }
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('auditErydonIdMigration')
+}
+
+tasks.withType(ProcessResources).configureEach {
+    filteringCharset = 'UTF-8'
+    inputs.property('modVersion', project.version.toString())
+    inputs.property('familyCompatibilityGeneration', familyCompatibilityGeneration)
+    exclude('**/*.class', '**/*.jar', '**/*.zip')
+    filesMatching('fabric.mod.json') {
+        expand('version': project.version)
+    }
+}
+
+tasks.named('processResources') {
+    inputs.property('textureDedupeEnabled', textureDedupeEnabled)
+    if (textureDedupeEnabled) {
+        dependsOn tasks.named('textureDedupePlan')
+        inputs.files(textureDedupeTool, textureDedupeConfig, textureDedupePlan)
+    }
+    doFirst {
+        project.delete(fileTree(destinationDir) {
+            include 'assets/*/texture_aliases/**'
+            include 'assets/*/texture_blobs/**'
+        })
+    }
+    doLast {
+        if (!textureDedupeEnabled) {
+            return
+        }
+        project.exec {
+            commandLine textureDedupePython,
+                    textureDedupeTool,
+                    'apply',
+                    '--config', textureDedupePlan.get().asFile,
+                    '--stage-root', destinationDir,
+                    '--report-out', textureDedupeReportDir.get().file('apply.json').asFile
+        }.assertNormalExitValue()
+        project.exec {
+            commandLine textureDedupePython,
+                    textureDedupeTool,
+                    'validate',
+                    '--config', textureDedupePlan.get().asFile,
+                    '--stage-root', destinationDir,
+                    '--report-out', textureDedupeReportDir.get().file('validate.json').asFile
+        }.assertNormalExitValue()
+    }
+}
+
+tasks.register('validateTextureAliases', Exec) {
+    group = 'verification'
+    description = 'Revalidates generated native alias manifests and canonical blobs.'
+    dependsOn tasks.named('processResources')
+    onlyIf { textureDedupeEnabled }
+    inputs.files(textureDedupeTool, textureDedupePlan)
+    inputs.dir(layout.buildDirectory.dir('resources/main'))
+    outputs.file(textureDedupeReportDir.map { it.file('validate-explicit.json') })
+    doFirst {
+        commandLine textureDedupePython,
+                textureDedupeTool,
+                'validate',
+                '--config', textureDedupePlan.get().asFile,
+                '--stage-root', layout.buildDirectory.dir('resources/main').get().asFile,
+                '--report-out', textureDedupeReportDir.get().file('validate-explicit.json').asFile
+    }
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('testTextureDedupeTool')
+    if (textureDedupeEnabled) {
+        dependsOn tasks.named('validateTextureAliases')
+    }
+}
+
+tasks.withType(Jar).configureEach {
+    zip64 = true
+    duplicatesStrategy = DuplicatesStrategy.FAIL
+    from('LICENSE') {
+        rename { "${it}_${project.base.archivesName.get()}" }
+    }
+    from('LICENSE-CODE.md') {
+        into 'META-INF/licenses'
+        rename { 'ERYDON-MIT.txt' }
+    }
+    from('LICENSE-ASSETS.md') {
+        into 'META-INF/licenses'
+        rename { 'ERYDON-ASSETS-CC-BY-SA-4.0.md' }
+    }
+}
+
+tasks.register('auditErydonJar') {
+    group = 'verification'
+    description = 'Verifies release metadata and writes focused Continuity CTM and smooth slope checks.'
+    dependsOn tasks.named('remapJar')
+
+    doLast {
+        def jarFile = tasks.named('remapJar').get().archiveFile.get().asFile
+        def reportDir = layout.buildDirectory.dir('reports').get().asFile
+        def reportFile = new File(reportDir, 'erydon-jar-audit.txt')
+        reportDir.mkdirs()
+
+        def yesNo = { value -> value ? 'yes' : 'no' }
+        def zip = new java.util.zip.ZipFile(jarFile)
+        try {
+            def entries = zip.entries().toList()
+            def entryNames = entries.collect { it.name }
+            def readText = { entry ->
+                zip.getInputStream(entry).withCloseable { input ->
+                    input.getText('UTF-8')
+                }
+            }
+            def fabricModEntry = zip.getEntry('fabric.mod.json')
+            if (fabricModEntry == null) {
+                throw new GradleException("Built jar is missing fabric.mod.json: ${jarFile}")
+            }
+            def fabricMetadata = new groovy.json.JsonSlurper().parseText(readText(fabricModEntry))
+            def projectVersion = project.version.toString()
+            def embeddedVersion = fabricMetadata.version?.toString()
+            def expectedJarName = "${project.base.archivesName.get()}-${projectVersion}.jar"
+            def dependencies = fabricMetadata.depends instanceof Map ? fabricMetadata.depends : [:]
+            def configuredMixins = fabricMetadata.mixins instanceof List ? fabricMetadata.mixins : []
+            def customMetadata = fabricMetadata.custom instanceof Map ? fabricMetadata.custom : [:]
+            def requiredDependencies = [
+                    'fabricloader': '>=0.16.10',
+                    'fabric-api'  : '>=0.92.11+1.20.1',
+                    'minecraft'   : minecraft_version.toString(),
+                    'java'        : '>=17'
+            ]
+            def metadataErrors = []
+            if (jarFile.name != expectedJarName) {
+                metadataErrors.add("jar filename '${jarFile.name}' does not match '${expectedJarName}'")
+            }
+            if (embeddedVersion != projectVersion) {
+                metadataErrors.add("embedded version '${embeddedVersion}' does not match project version '${projectVersion}'")
+            }
+            if (customMetadata['erydon:texture_alias_resolver'] != 1) {
+                metadataErrors.add("texture alias resolver capability is missing or not version 1")
+            }
+            if (customMetadata['erydon:family_compatibility_generation'] != familyCompatibilityGeneration) {
+                metadataErrors.add("family compatibility generation is missing or not ${familyCompatibilityGeneration}")
+            }
+            if (!configuredMixins.contains('erydon-texture-alias.mixins.json')) {
+                metadataErrors.add("required texture alias mixin config is missing")
+            }
+            requiredDependencies.each { key, expected ->
+                if (!dependencies.containsKey(key)) {
+                    metadataErrors.add("required dependency '${key}' is missing")
+                } else if (dependencies[key]?.toString() != expected) {
+                    metadataErrors.add("dependency '${key}' is '${dependencies[key]}' instead of '${expected}'")
+                }
+            }
+            def countJsonContaining = { prefix, nameNeedle, textNeedle ->
+                entries.count { entry ->
+                    def name = entry.name
+                    name.startsWith(prefix)
+                            && (nameNeedle == null || name.contains(nameNeedle))
+                            && name.endsWith('.json')
+                            && readText(entry).contains(textNeedle)
+                }
+            }
+
+            def ctmEntries = entries.findAll { entry ->
+                entry.name.endsWith('.properties')
+                        && (entry.name.contains('/optifine/ctm/') || entry.name.contains('/mcpatcher/ctm/'))
+            }
+            def ctmEntriesWithUtf8Bom = ctmEntries.findAll { entry ->
+                zip.getInputStream(entry).withCloseable { input ->
+                    input.read() == 0xef && input.read() == 0xbb && input.read() == 0xbf
+                }
+            }.collect { it.name }.sort()
+            def ctmMethods = new TreeMap<String, Integer>()
+            ctmEntries.each { entry ->
+                def properties = new Properties()
+                zip.getInputStream(entry).withCloseable { input ->
+                    properties.load(input)
+                }
+                def method = properties.getProperty('method', '').trim()
+                if (!method.isEmpty()) {
+                    ctmMethods[method] = (ctmMethods[method] ?: 0) + 1
+                }
+            }
+
+            def sha256Bytes = { byte[] bytes ->
+                java.util.HexFormat.of().formatHex(
+                        java.security.MessageDigest.getInstance('SHA-256').digest(bytes)
+                )
+            }
+            def sourceResourceRoot = file('src/main/resources').toPath()
+            def sourceProperties = new TreeMap<String, String>()
+            fileTree('src/main/resources') {
+                include '**/*.properties'
+            }.files.each { sourceFile ->
+                def relative = sourceResourceRoot.relativize(sourceFile.toPath())
+                        .toString()
+                        .replace('\\', '/')
+                sourceProperties[relative] = sha256Bytes(sourceFile.bytes)
+            }
+            def jarProperties = new TreeMap<String, String>()
+            entries.findAll { it.name.endsWith('.properties') }.each { entry ->
+                jarProperties[entry.name] = zip.getInputStream(entry).withCloseable {
+                    sha256Bytes(it.readAllBytes())
+                }
+            }
+            def propertiesSetHash = { Map<String, String> values ->
+                def canonical = values.collect { key, value -> "${key}=${value}\n" }
+                        .join('')
+                        .getBytes('UTF-8')
+                sha256Bytes(canonical)
+            }
+            def sourcePropertiesHash = propertiesSetHash(sourceProperties)
+            def jarPropertiesHash = propertiesSetHash(jarProperties)
+            if (sourceProperties != jarProperties) {
+                metadataErrors.add("packaged .properties set or bytes differ from canonical source")
+            }
+
+            def aliasManifestEntries = entries.findAll {
+                it.name ==~ /assets\/[^\/]+\/texture_aliases\/v1\.json/
+            }
+            def aliasCount = aliasManifestEntries.sum { entry ->
+                def manifest = new groovy.json.JsonSlurper().parseText(readText(entry))
+                manifest.aliases instanceof List ? manifest.aliases.size() : 0
+            } ?: 0
+            def blobCount = entries.count {
+                it.name ==~ /assets\/[^\/]+\/texture_blobs\/[0-9a-f]{64}\.png/
+            }
+            def archivePngCount = entries.count {
+                it.name.startsWith('assets/') && it.name.endsWith('.png')
+            }
+            def sourcePngCount = fileTree('src/main/resources') {
+                include 'assets/**/*.png'
+            }.files.size()
+            def logicalPngCount = archivePngCount - blobCount + aliasCount
+            if (textureDedupeEnabled) {
+                if (aliasManifestEntries.isEmpty() || aliasCount == 0 || blobCount == 0) {
+                    metadataErrors.add("deduplicated build has no usable texture alias manifest")
+                }
+                if (logicalPngCount != sourcePngCount) {
+                    metadataErrors.add("deduplicated logical PNG count ${logicalPngCount} differs from source ${sourcePngCount}")
+                }
+            } else {
+                if (!aliasManifestEntries.isEmpty() || blobCount != 0) {
+                    metadataErrors.add("physical fallback unexpectedly contains texture aliases")
+                }
+                if (archivePngCount != sourcePngCount) {
+                    metadataErrors.add("physical fallback PNG count ${archivePngCount} differs from source ${sourcePngCount}")
+                }
+            }
+
+            def sourceFiles = fileTree('src/main/java') { include '**/*.java' }.files
+            def sourceTexts = sourceFiles.collectEntries { [(it): it.getText('UTF-8')] }
+            def allSource = sourceTexts.values().join('\n')
+            def mixinsSource = file('src/main/resources/erydon.mixins.json').text
+            def classifierSource = file('src/main/java/com/oliver/erydon/client/model/ErydonSlopeModelClassifier.java').text
+            def ctmServiceSource = file('src/main/java/com/oliver/erydon/client/model/ErydonCtmService.java').text
+
+            def lines = [
+                    "jar filename: ${jarFile.name}",
+                    "Gradle project version: ${projectVersion}",
+                    "embedded fabric.mod.json version: ${embeddedVersion}",
+                    "texture deduplication enabled: ${yesNo(textureDedupeEnabled)}",
+                    "texture alias manifests: ${aliasManifestEntries.size()}",
+                    "texture aliases: ${aliasCount}",
+                    "canonical texture blobs: ${blobCount}",
+                    "physical PNG files: ${archivePngCount}",
+                    "logical PNG files: ${logicalPngCount}",
+                    "canonical source PNG files: ${sourcePngCount}",
+                    ".properties files: ${jarProperties.size()}",
+                    ".properties exact set/hash: ${jarPropertiesHash}",
+                    ".properties matches source byte-for-byte: ${yesNo(sourceProperties == jarProperties)}",
+                    "required dependencies: ${requiredDependencies.collect { key, value -> "${key}=${dependencies[key]}" }.join(', ')}",
+                    "release metadata consistent: ${yesNo(metadataErrors.isEmpty())}",
+                    "nested Continuity jar present: ${yesNo(entryNames.any { it == 'META-INF/jars/continuity-3.0.0+1.20.1.jar' })}",
+                    "CTM property files found: ${ctmEntries.size()}",
+                    "CTM property files with UTF-8 BOM: ${ctmEntriesWithUtf8Bom.size()}",
+                    "CTM methods found: ${ctmMethods.collect { key, value -> "${key}=${value}" }.join(', ')}",
+                    "slope item old stepped parent refs: ${countJsonContaining('assets/erydon/models/item/', 'slope', 'erydon:block/slope/')}",
+                    "placed slope blockstate old tree refs: ${countJsonContaining('assets/erydon/blockstates/', 'slope', 'erydon:block/slope/')}",
+                    "active old slope tree refs: ${entries.count { entry -> entry.name.endsWith('.json') && !entry.name.startsWith('assets/erydon/models/block/slope/') && readText(entry).contains('erydon:block/slope/') }}",
+                    "internal wrapped slope models: ${entryNames.count { it.startsWith('assets/erydon/models/block/internal/wrapped/') && it.contains('slope') && it.endsWith('.json') }}",
+                    "glazing slope paths classified: ${yesNo(classifierSource.contains('isGlazingPath') && classifierSource.contains('return Family.NONE;'))}",
+                    "Continuity gate mixin removed from source: ${yesNo(!allSource.contains('ModelWrappingHandlerMixin') && !allSource.contains('createBlockStateModelIdMap'))}",
+                    "Continuity mixin removed from mixin config: ${yesNo(!mixinsSource.contains('compat.continuity'))}",
+                    "ArdaGrass mixin removed from source/config: ${yesNo(!allSource.contains('ArdaGrassBakedModel') && !mixinsSource.contains('ardagrass'))}",
+                    "hard-coded Conquest grass IDs absent: ${yesNo(!allSource.contains('clover_covered_grass') && !allSource.contains('taiga_grass'))}",
+                    "Continuity global config overrides absent: ${yesNo(!allSource.contains('erydon.continuity.mode') && !allSource.contains('erydon.continuity.max_ctm_states') && !allSource.contains('erydon.continuity.disable_global_emissive'))}",
+                    "ErydonCtmService still handles smooth slope CTM: ${yesNo(ctmServiceSource.contains('slopeCtmSetName') && ctmServiceSource.contains('resolveSlopeRepeatSprite'))}"
+            ]
+
+            reportFile.text = lines.join(System.lineSeparator()) + System.lineSeparator()
+            logger.lifecycle("ERYDON jar audit written to ${reportFile}")
+            lines.each { logger.lifecycle(it) }
+            if (!ctmEntriesWithUtf8Bom.isEmpty()) {
+                throw new GradleException("CTM property files must not start with a UTF-8 BOM. First affected file: ${ctmEntriesWithUtf8Bom.first()}")
+            }
+            if (!metadataErrors.isEmpty()) {
+                throw new GradleException("ERYDON release metadata verification failed: ${metadataErrors.join('; ')}")
+            }
+        } finally {
+            zip.close()
+        }
+    }
+}
+
+tasks.register('verifyTextureDedupeBuilds') {
+    group = 'verification'
+    description = 'Builds physical and deduplicated JARs, then proves alias-aware equality and measures savings.'
+    inputs.files(textureDedupeTool, textureDedupeTests, textureDedupeConfig)
+
+    doLast {
+        def jarName = "${project.base.archivesName.get()}-${project.version}.jar"
+        def builtJar = file("build/libs/${jarName}")
+        def temporaryRoot = java.nio.file.Files.createTempDirectory(
+                'erydon-texture-dedupe-'
+        ).toFile()
+        def temporaryBaseline = new File(temporaryRoot, "baseline-${jarName}")
+
+        try {
+            project.exec {
+                commandLine 'cmd', '/c', file('gradlew.bat').absolutePath,
+                        '-PtextureDedupe=false',
+                        'clean', 'remapJar', 'auditErydonJar',
+                        '--no-daemon', '--console=plain'
+            }.assertNormalExitValue()
+            if (!builtJar.isFile()) {
+                throw new GradleException("Physical fallback JAR was not built: ${builtJar}")
+            }
+            java.nio.file.Files.copy(
+                    builtJar.toPath(),
+                    temporaryBaseline.toPath(),
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING
+            )
+
+            project.exec {
+                commandLine 'cmd', '/c', file('gradlew.bat').absolutePath,
+                        '-PtextureDedupe=true',
+                        'clean', 'remapJar', 'auditErydonJar',
+                        '--no-daemon', '--console=plain'
+            }.assertNormalExitValue()
+            if (!builtJar.isFile()) {
+                throw new GradleException("Deduplicated JAR was not built: ${builtJar}")
+            }
+
+            def comparisonRoot = file('build/reports/texture-dedupe/comparison')
+            comparisonRoot.mkdirs()
+            def retainedBaseline = new File(comparisonRoot, "baseline-${jarName}")
+            def retainedDeduplicated = new File(
+                    comparisonRoot,
+                    "deduplicated-${jarName}"
+            )
+            java.nio.file.Files.copy(
+                    temporaryBaseline.toPath(),
+                    retainedBaseline.toPath(),
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING
+            )
+            java.nio.file.Files.copy(
+                    builtJar.toPath(),
+                    retainedDeduplicated.toPath(),
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING
+            )
+
+            def comparisonReport = new File(
+                    comparisonRoot,
+                    'jar-alias-aware.json'
+            )
+            project.exec {
+                commandLine textureDedupePython,
+                        textureDedupeTool,
+                        'compare',
+                        retainedBaseline,
+                        retainedDeduplicated,
+                        '--output', comparisonReport
+            }.assertNormalExitValue()
+
+            def metricsReport = new File(comparisonRoot, 'jar-metrics.json')
+            project.exec {
+                commandLine textureDedupePython,
+                        textureDedupeTool,
+                        'metrics',
+                        retainedBaseline,
+                        retainedDeduplicated,
+                        '--output', metricsReport
+            }.assertNormalExitValue()
+
+            def comparison = new groovy.json.JsonSlurper().parse(comparisonReport)
+            if (comparison.equal != true) {
+                throw new GradleException(
+                        "Physical and deduplicated JARs are not alias-aware equal; "
+                                + "see ${comparisonReport}"
+                )
+            }
+
+            long baselineBytes = retainedBaseline.length()
+            long deduplicatedBytes = retainedDeduplicated.length()
+            long savedBytes = baselineBytes - deduplicatedBytes
+            if (savedBytes <= 0) {
+                throw new GradleException(
+                        "Deduplicated JAR is not strictly smaller "
+                                + "(${baselineBytes} -> ${deduplicatedBytes})"
+                )
+            }
+            if (savedBytes < 4_500_000L) {
+                throw new GradleException(
+                        "Deduplicated JAR saved only ${savedBytes} bytes; "
+                                + "investigate the unexpected drop below 4.5 MB"
+                )
+            }
+            logger.lifecycle(
+                    "Texture deduplication verified: {} -> {} bytes (saved {})",
+                    baselineBytes,
+                    deduplicatedBytes,
+                    savedBytes
+            )
+            logger.lifecycle("Alias-aware comparison: ${comparisonReport}")
+            logger.lifecycle("Texture metrics: ${metricsReport}")
+        } finally {
+            if (temporaryRoot.toPath().startsWith(
+                    java.nio.file.Path.of(System.getProperty('java.io.tmpdir'))
+                            .toAbsolutePath()
+                            .normalize()
+            )) {
+                temporaryRoot.deleteDir()
+            }
+        }
+    }
+}
+
+tasks.named('build') {
+    finalizedBy tasks.named('auditErydonJar')
+}
+
+tasks.register('verifyGeorgianShowcaseStructure', JavaExec) {
+    group = 'verification'
+    description = 'Checks the packaged Georgian block-type showcase structure.'
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.oliver.erydon.command.GeorgianShowcaseStructureAudit'
+    args file('src/main/resources/data/erydon/structures/showcase/blocktypes/georgian.nbt').absolutePath
+}
+
+tasks.register('verifyAlcoveRunPartition', JavaExec) {
+    group = 'verification'
+    description = 'Checks Gothic/Georgian alcove run partitioning and facing-local left/right mapping.'
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.oliver.erydon.block.AlcoveRunPartitionAudit'
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('verifyGeorgianShowcaseStructure')
+    dependsOn tasks.named('verifyAlcoveRunPartition')
+}
+
+apply from: 'gradle/erydon-asset-audit.gradle'
+apply from: 'gradle/erydon-state-audit.gradle'
+apply from: 'gradle/erydon-dynamic-model-audit.gradle'
+apply from: 'gradle/erydon-ctm-path-audit.gradle'
+apply from: 'gradle/erydon-ctm-isolation.gradle'
+apply from: 'gradle/erydon-model-performance.gradle'
+apply from: 'gradle/erydon-restored-family-geometry.gradle'
+apply from: 'gradle/erydon-hotpath-benchmark.gradle'
+apply from: 'gradle/erydon-model-geometry-safety.gradle'
+apply from: 'gradle/erydon-modmenu-audit.gradle'
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            groupId = project.group
+            artifactId = project.base.archivesName.get()
+            version = project.version
+        }
+    }
+}

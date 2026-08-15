@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/layer/slice_post/slice_post_horizontal_size14",
+  "textures": {
+    "texture": "erydon:block/rosinium_herringbone_grout_block",
+    "particle": "erydon:block/rosinium_herringbone_grout_block"
+  }
+}

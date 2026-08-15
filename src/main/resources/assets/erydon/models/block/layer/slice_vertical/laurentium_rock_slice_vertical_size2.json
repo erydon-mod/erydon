@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/layer/slice_vertical/slice_vertical_size2",
+  "textures": {
+    "texture": "erydon:block/laurentium_rock_block",
+    "particle": "erydon:block/laurentium_rock_block"
+  }
+}

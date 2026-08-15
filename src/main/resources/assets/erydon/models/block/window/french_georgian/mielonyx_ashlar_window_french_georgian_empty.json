@@ -1,0 +1,7 @@
+{
+  "textures": {
+    "particle": "#stone",
+    "stone": "erydon:block/mielonyx_ashlar_block"
+  },
+  "elements": []
+}

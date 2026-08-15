@@ -1,0 +1,6 @@
+{
+    "parent":  "erydon:block/internal/wrapped/laurentium_calacattum_weave_grout_slope_vertical_shallow_narrow",
+    "textures":  {
+                     "texture":  "erydon:block/laurentium_calacattum_weave_grout_block"
+                 }
+}

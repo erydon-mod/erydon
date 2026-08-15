@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/slab_top",
+  "textures": {
+    "bottom": "erydon:block/porphyros_rusticated_block",
+    "top": "erydon:block/porphyros_rusticated_block",
+    "side": "erydon:block/porphyros_rusticated_block"
+  }
+}
+

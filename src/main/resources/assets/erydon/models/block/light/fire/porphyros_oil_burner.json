@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/light/fire/oil_burner",
+  "textures": {
+    "stone": "erydon:block/porphyros_block"
+  }
+}

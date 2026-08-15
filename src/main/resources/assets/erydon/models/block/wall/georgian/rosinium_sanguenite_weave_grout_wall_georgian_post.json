@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/wall/georgian/wall_georgian_post",
+    "textures":  {
+                     "wall":  "erydon:block/rosinium_sanguenite_weave_grout_block",
+                     "particle":  "erydon:block/rosinium_sanguenite_weave_grout_block"
+                 }
+}

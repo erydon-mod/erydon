@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {
+    "bottom": "erydon:block/chalstrom_rock_block",
+    "top": "erydon:block/chalstrom_rock_block",
+    "side": "erydon:block/chalstrom_rock_block"
+  }
+}

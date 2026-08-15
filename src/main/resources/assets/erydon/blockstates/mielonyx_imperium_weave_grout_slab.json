@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "erydon:block/slab/mielonyx_imperium_weave_grout_slab"
+    },
+    "type=top": {
+      "model": "erydon:block/slab/mielonyx_imperium_weave_grout_slab_top"
+    },
+    "type=double": {
+      "model": "erydon:block/block/mielonyx_imperium_weave_grout_block"
+    }
+  }
+}

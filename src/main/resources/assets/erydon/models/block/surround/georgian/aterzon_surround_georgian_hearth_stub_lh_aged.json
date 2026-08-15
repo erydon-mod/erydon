@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/surround/georgian/surround_georgian_hearth_stub_lh",
+  "textures": {
+    "stone": "erydon:block/aterzon_block_aged",
+    "particle": "#stone"
+  }
+}

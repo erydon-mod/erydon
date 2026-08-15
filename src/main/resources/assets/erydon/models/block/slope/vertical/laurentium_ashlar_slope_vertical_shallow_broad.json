@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/laurentium_ashlar_slope_vertical_shallow_broad_lh",
+  "textures": {
+    "stone": "erydon:block/laurentium_ashlar_block",
+    "particle": "erydon:block/laurentium_ashlar_block"
+  }
+}

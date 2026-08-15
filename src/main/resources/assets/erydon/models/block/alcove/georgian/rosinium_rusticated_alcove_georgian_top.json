@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/alcove/georgian/alcove_georgian_top",
+  "textures": {
+    "stone": "erydon:block/rosinium_rusticated_block",
+    "particle": "erydon:block/rosinium_rusticated_block"
+  }
+}

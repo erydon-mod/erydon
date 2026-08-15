@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/surround/gothic_ornate/surround_gothic_ornate_short_mantel",
+  "textures": {
+    "particle": "erydon:block/sanguenite_block",
+    "0": "erydon:block/sanguenite_block",
+    "1": "erydon:block/sanguenite_block",
+    "texture": "erydon:block/sanguenite_block",
+    "stone": "erydon:block/sanguenite_block"
+  }
+}

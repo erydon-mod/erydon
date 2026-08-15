@@ -1,0 +1,204 @@
+{
+    "variants":  {
+                     "facing=north,shape=straight,waterlogged=false":  {
+                                                                           "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_top_aged",
+                                                                           "y":  180,
+                                                                           "uvlock":  true
+                                                                       },
+                     "facing=north,shape=straight,waterlogged=true":  {
+                                                                          "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_top_aged",
+                                                                          "y":  180,
+                                                                          "uvlock":  true
+                                                                      },
+                     "facing=east,shape=straight,waterlogged=false":  {
+                                                                          "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_top_aged",
+                                                                          "y":  270,
+                                                                          "uvlock":  true
+                                                                      },
+                     "facing=east,shape=straight,waterlogged=true":  {
+                                                                         "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_top_aged",
+                                                                         "y":  270,
+                                                                         "uvlock":  true
+                                                                     },
+                     "facing=south,shape=straight,waterlogged=false":  {
+                                                                           "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_top_aged",
+                                                                           "y":  0,
+                                                                           "uvlock":  true
+                                                                       },
+                     "facing=south,shape=straight,waterlogged=true":  {
+                                                                          "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_top_aged",
+                                                                          "y":  0,
+                                                                          "uvlock":  true
+                                                                      },
+                     "facing=west,shape=straight,waterlogged=false":  {
+                                                                          "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_top_aged",
+                                                                          "y":  90,
+                                                                          "uvlock":  true
+                                                                      },
+                     "facing=west,shape=straight,waterlogged=true":  {
+                                                                         "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_top_aged",
+                                                                         "y":  90,
+                                                                         "uvlock":  true
+                                                                     },
+                     "facing=north,shape=inner_left,waterlogged=false":  {
+                                                                             "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_inner_top_aged",
+                                                                             "y":  90,
+                                                                             "uvlock":  true
+                                                                         },
+                     "facing=north,shape=inner_left,waterlogged=true":  {
+                                                                            "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_inner_top_aged",
+                                                                            "y":  90,
+                                                                            "uvlock":  true
+                                                                        },
+                     "facing=east,shape=inner_left,waterlogged=false":  {
+                                                                            "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_inner_top_aged",
+                                                                            "y":  180,
+                                                                            "uvlock":  true
+                                                                        },
+                     "facing=east,shape=inner_left,waterlogged=true":  {
+                                                                           "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_inner_top_aged",
+                                                                           "y":  180,
+                                                                           "uvlock":  true
+                                                                       },
+                     "facing=south,shape=inner_left,waterlogged=false":  {
+                                                                             "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_inner_top_aged",
+                                                                             "y":  270,
+                                                                             "uvlock":  true
+                                                                         },
+                     "facing=south,shape=inner_left,waterlogged=true":  {
+                                                                            "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_inner_top_aged",
+                                                                            "y":  270,
+                                                                            "uvlock":  true
+                                                                        },
+                     "facing=west,shape=inner_left,waterlogged=false":  {
+                                                                            "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_inner_top_aged",
+                                                                            "y":  0,
+                                                                            "uvlock":  true
+                                                                        },
+                     "facing=west,shape=inner_left,waterlogged=true":  {
+                                                                           "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_inner_top_aged",
+                                                                           "y":  0,
+                                                                           "uvlock":  true
+                                                                       },
+                     "facing=north,shape=inner_right,waterlogged=false":  {
+                                                                              "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_inner_right_top_aged",
+                                                                              "y":  270,
+                                                                              "uvlock":  true
+                                                                          },
+                     "facing=north,shape=inner_right,waterlogged=true":  {
+                                                                             "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_inner_right_top_aged",
+                                                                             "y":  270,
+                                                                             "uvlock":  true
+                                                                         },
+                     "facing=east,shape=inner_right,waterlogged=false":  {
+                                                                             "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_inner_right_top_aged",
+                                                                             "y":  0,
+                                                                             "uvlock":  true
+                                                                         },
+                     "facing=east,shape=inner_right,waterlogged=true":  {
+                                                                            "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_inner_right_top_aged",
+                                                                            "y":  0,
+                                                                            "uvlock":  true
+                                                                        },
+                     "facing=south,shape=inner_right,waterlogged=false":  {
+                                                                              "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_inner_right_top_aged",
+                                                                              "y":  90,
+                                                                              "uvlock":  true
+                                                                          },
+                     "facing=south,shape=inner_right,waterlogged=true":  {
+                                                                             "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_inner_right_top_aged",
+                                                                             "y":  90,
+                                                                             "uvlock":  true
+                                                                         },
+                     "facing=west,shape=inner_right,waterlogged=false":  {
+                                                                             "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_inner_right_top_aged",
+                                                                             "y":  180,
+                                                                             "uvlock":  true
+                                                                         },
+                     "facing=west,shape=inner_right,waterlogged=true":  {
+                                                                            "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_inner_right_top_aged",
+                                                                            "y":  180,
+                                                                            "uvlock":  true
+                                                                        },
+                     "facing=north,shape=outer_left,waterlogged=false":  {
+                                                                             "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_outer_top_aged",
+                                                                             "y":  90,
+                                                                             "uvlock":  true
+                                                                         },
+                     "facing=north,shape=outer_left,waterlogged=true":  {
+                                                                            "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_outer_top_aged",
+                                                                            "y":  90,
+                                                                            "uvlock":  true
+                                                                        },
+                     "facing=east,shape=outer_left,waterlogged=false":  {
+                                                                            "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_outer_top_aged",
+                                                                            "y":  180,
+                                                                            "uvlock":  true
+                                                                        },
+                     "facing=east,shape=outer_left,waterlogged=true":  {
+                                                                           "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_outer_top_aged",
+                                                                           "y":  180,
+                                                                           "uvlock":  true
+                                                                       },
+                     "facing=south,shape=outer_left,waterlogged=false":  {
+                                                                             "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_outer_top_aged",
+                                                                             "y":  270,
+                                                                             "uvlock":  true
+                                                                         },
+                     "facing=south,shape=outer_left,waterlogged=true":  {
+                                                                            "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_outer_top_aged",
+                                                                            "y":  270,
+                                                                            "uvlock":  true
+                                                                        },
+                     "facing=west,shape=outer_left,waterlogged=false":  {
+                                                                            "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_outer_top_aged",
+                                                                            "y":  0,
+                                                                            "uvlock":  true
+                                                                        },
+                     "facing=west,shape=outer_left,waterlogged=true":  {
+                                                                           "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_outer_top_aged",
+                                                                           "y":  0,
+                                                                           "uvlock":  true
+                                                                       },
+                     "facing=north,shape=outer_right,waterlogged=false":  {
+                                                                              "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_outer_right_top_aged",
+                                                                              "y":  270,
+                                                                              "uvlock":  true
+                                                                          },
+                     "facing=north,shape=outer_right,waterlogged=true":  {
+                                                                             "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_outer_right_top_aged",
+                                                                             "y":  270,
+                                                                             "uvlock":  true
+                                                                         },
+                     "facing=east,shape=outer_right,waterlogged=false":  {
+                                                                             "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_outer_right_top_aged",
+                                                                             "y":  0,
+                                                                             "uvlock":  true
+                                                                         },
+                     "facing=east,shape=outer_right,waterlogged=true":  {
+                                                                            "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_outer_right_top_aged",
+                                                                            "y":  0,
+                                                                            "uvlock":  true
+                                                                        },
+                     "facing=south,shape=outer_right,waterlogged=false":  {
+                                                                              "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_outer_right_top_aged",
+                                                                              "y":  90,
+                                                                              "uvlock":  true
+                                                                          },
+                     "facing=south,shape=outer_right,waterlogged=true":  {
+                                                                             "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_outer_right_top_aged",
+                                                                             "y":  90,
+                                                                             "uvlock":  true
+                                                                         },
+                     "facing=west,shape=outer_right,waterlogged=false":  {
+                                                                             "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_outer_right_top_aged",
+                                                                             "y":  180,
+                                                                             "uvlock":  true
+                                                                         },
+                     "facing=west,shape=outer_right,waterlogged=true":  {
+                                                                            "model":  "erydon:block/stairs/shallow/imperium_stairs_shallow_outer_right_top_aged",
+                                                                            "y":  180,
+                                                                            "uvlock":  true
+                                                                        }
+                 }
+}

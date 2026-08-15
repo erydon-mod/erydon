@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/light/fire/brazier",
+  "textures": {
+    "stone": "erydon:block/glacium_block"
+  }
+}

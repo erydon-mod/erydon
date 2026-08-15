@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/arch/gothic/arch_gothic_side_small",
+  "textures": {
+    "stone": "erydon:block/mielonyx_rusticated_block"
+  }
+}

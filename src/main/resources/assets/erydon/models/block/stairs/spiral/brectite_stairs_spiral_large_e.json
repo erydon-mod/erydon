@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/stairs/spiral/stairs_spiral_large_e",
+  "textures": {
+    "stone": "erydon:block/brectite_block",
+    "particle": "erydon:block/brectite_block"
+  }
+}

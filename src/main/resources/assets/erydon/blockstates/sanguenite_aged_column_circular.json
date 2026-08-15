@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "erydon:block/internal/wrapped/sanguenite_column_circular_aged"
+      }
+    }
+  ]
+}

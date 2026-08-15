@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "erydon:block/internal/wrapped/chalstrom_window_french_georgian"
+      }
+    }
+  ]
+}

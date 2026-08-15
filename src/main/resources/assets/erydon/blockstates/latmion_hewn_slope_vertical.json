@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/latmion_hewn_slope_vertical"
+                                    }
+                      }
+                  ]
+}

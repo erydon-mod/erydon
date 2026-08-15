@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/wall/georgian/wall_georgian_post",
+    "textures":  {
+                     "wall":  "erydon:block/kelastrion_block",
+                     "particle":  "erydon:block/kelastrion_block"
+                 }
+}

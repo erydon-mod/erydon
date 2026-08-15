@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/calacattum_herringbone_bronze_slope_vertical_shallow_narrow_lh",
+  "textures": {
+    "stone": "erydon:block/calacattum_herringbone_bronze_block",
+    "particle": "erydon:block/calacattum_herringbone_bronze_block"
+  }
+}

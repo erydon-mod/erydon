@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/alcove/gothic/alcove_gothic_triple_side_center",
+    "textures":  {
+                     "stone":  "erydon:block/selenephos_ashlar_block",
+                     "particle":  "erydon:block/selenephos_ashlar_block"
+                 }
+}

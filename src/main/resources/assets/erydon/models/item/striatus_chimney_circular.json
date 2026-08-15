@@ -1,0 +1,8 @@
+{
+  "parent": "erydon:block/chimney/circular/chimney_circular_small",
+  "textures": {
+    "stone": "erydon:block/striatus_block",
+    "particle": "erydon:block/striatus_block"
+  }
+}
+

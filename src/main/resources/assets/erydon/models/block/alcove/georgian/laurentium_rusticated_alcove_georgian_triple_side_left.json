@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/alcove/georgian/alcove_georgian_triple_side_left",
+    "textures":  {
+                     "stone":  "erydon:block/laurentium_rusticated_block",
+                     "particle":  "erydon:block/laurentium_rusticated_block"
+                 }
+}

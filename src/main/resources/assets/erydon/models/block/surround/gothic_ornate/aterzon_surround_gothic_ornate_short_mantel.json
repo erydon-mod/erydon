@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/surround/gothic_ornate/surround_gothic_ornate_short_mantel",
+  "textures": {
+    "particle": "erydon:block/aterzon_block",
+    "0": "erydon:block/aterzon_block",
+    "1": "erydon:block/aterzon_block",
+    "texture": "erydon:block/aterzon_block",
+    "stone": "erydon:block/aterzon_block"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/outer_stairs",
+  "textures": {
+    "side": "erydon:block/striatus_block",
+    "top": "erydon:block/striatus_block",
+    "bottom": "erydon:block/striatus_block"
+  }
+}

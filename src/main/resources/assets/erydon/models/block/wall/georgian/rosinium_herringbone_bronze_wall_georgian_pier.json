@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/wall/georgian/wall_georgian_pier",
+  "textures": {
+    "wall": "erydon:block/rosinium_herringbone_bronze_block",
+    "particle": "erydon:block/rosinium_herringbone_bronze_block"
+  }
+}

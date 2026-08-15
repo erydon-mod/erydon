@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/calacattum_rock_slope_vertical_shallow_narrow_lh",
+  "textures": {
+    "stone": "erydon:block/calacattum_rock_block",
+    "particle": "erydon:block/calacattum_rock_block"
+  }
+}

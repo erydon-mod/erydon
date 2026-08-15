@@ -1,0 +1,8 @@
+{
+  "parent": "erydon:block/cornice/georgian/cornice_georgian_outer_corner",
+  "textures": {
+    "stone": "erydon:block/solistra_block_aged",
+    "particle": "erydon:block/solistra_block_aged"
+  }
+}
+

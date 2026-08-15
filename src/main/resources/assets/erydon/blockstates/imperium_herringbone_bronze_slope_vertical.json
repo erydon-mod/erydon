@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/imperium_herringbone_bronze_slope_vertical"
+                                    }
+                      }
+                  ]
+}

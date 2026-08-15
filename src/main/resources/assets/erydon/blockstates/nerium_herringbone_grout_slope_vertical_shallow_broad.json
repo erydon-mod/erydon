@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/nerium_herringbone_grout_slope_vertical_shallow_broad"
+                                    }
+                      }
+                  ]
+}

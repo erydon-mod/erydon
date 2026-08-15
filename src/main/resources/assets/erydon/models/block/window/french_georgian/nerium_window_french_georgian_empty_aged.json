@@ -1,0 +1,7 @@
+{
+  "textures": {
+    "particle": "#stone",
+    "stone": "erydon:block/nerium_block_aged"
+  },
+  "elements": []
+}

@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/arch/gothic/arch_gothic_side_medium",
+  "textures": {
+    "stone": "erydon:block/aterzon_hewn_block"
+  }
+}

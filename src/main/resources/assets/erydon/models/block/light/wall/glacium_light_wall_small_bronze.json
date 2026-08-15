@@ -1,0 +1,8 @@
+{
+  "parent": "erydon:block/light/wall/light_wall_small",
+  "textures": {
+    "shade": "erydon:block/glacium_block",
+    "metal": "erydon:block/cover_bronze_gloss",
+    "glass": "erydon:block/cover_bronze_gloss"
+  }
+}

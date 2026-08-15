@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "erydon:block/internal/wrapped/nerium_cornice_guilloche_aged"
+      }
+    }
+  ]
+}

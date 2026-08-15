@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/layer/layer/layer_top_height16",
+  "textures": {
+    "all": "erydon:block/latmion_herringbone_grout_block",
+    "particle": "erydon:block/latmion_herringbone_grout_block"
+  }
+}

@@ -1,0 +1,494 @@
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+
+import java.nio.charset.StandardCharsets
+import java.util.regex.Pattern
+import java.util.zip.ZipFile
+
+def expectedModMenuEntrypoint = 'com.oliver.erydon.client.config.ErydonModMenuIntegration'
+def expectedModMenuVersion = '7.2.2'
+def expectedLicenses = ['MIT', 'CC-BY-SA-4.0']
+def languageCodes = ['en_us', 'de_de', 'es_es']
+def expectedContact = [
+        homepage: 'https://erydon.co.uk',
+        issues  : 'https://github.com/erydon-mod/erydon/issues',
+        sources : 'https://github.com/erydon-mod/erydon'
+]
+def requiredStaticResources = [
+        'assets/erydon/icon.png',
+        'assets/erydon/textures/gui/glacium_config_background.png',
+        'assets/erydon/textures/gui/nerium_control_background.png',
+        'assets/erydon/textures/gui/slider_handle_slim.png',
+        'assets/erydon/font/cinzel.json',
+        'assets/erydon/font/cinzel.ttf'
+]
+def requiredConfigClasses = [
+        'ErydonConfigScreen',
+        'ErydonConfigUi',
+        'ErydonHelpConfigScreen',
+        'ErydonInspirationConfigScreen',
+        'ErydonLightBlocksConfigScreen',
+        'ErydonModMenuIntegration',
+        'ErydonRecalcCommandConfigScreen',
+        'ErydonServerConfigScreen',
+        'ErydonTextureGalleryScreen',
+        'ErydonTooltipConfigScreen'
+].collect { "com/oliver/erydon/client/config/${it}.class".toString() }
+requiredConfigClasses.addAll([
+        'com/oliver/erydon/ErydonConfig.class',
+        'com/oliver/erydon/client/ErydonConfigNetworkingClient.class',
+        'com/oliver/erydon/network/ErydonConfigNetworking.class'
+])
+
+def requireAudit = { boolean condition, String message ->
+    if (!condition) {
+        throw new GradleException("ERYDON Mod Menu audit failed: ${message}")
+    }
+}
+
+def parseJsonMap = { String raw, String label ->
+    def parsed
+    try {
+        parsed = new JsonSlurper().parseText(raw)
+    } catch (Exception exception) {
+        throw new GradleException("ERYDON Mod Menu audit failed: ${label} is not valid JSON", exception)
+    }
+    requireAudit(parsed instanceof Map, "${label} must contain a JSON object")
+    parsed as Map
+}
+
+def parseLanguage = { String raw, String label ->
+    Map parsed = parseJsonMap(raw, label)
+    def keyMatcher = Pattern.compile('(?m)^\\s*"([^"]+)"\\s*:').matcher(raw)
+    def rawKeys = []
+    while (keyMatcher.find()) {
+        rawKeys.add(keyMatcher.group(1))
+    }
+    def duplicateKeys = rawKeys.countBy { it }.findAll { key, count -> count > 1 }.keySet().sort()
+    requireAudit(duplicateKeys.isEmpty(), "${label} has duplicate keys: ${duplicateKeys}")
+    requireAudit(parsed.size() == rawKeys.size(), "${label} key extraction disagrees with parsed JSON")
+    parsed
+}
+
+def extractStringArray = { String source, String fieldName ->
+    def matcher = Pattern.compile(
+            '(?s)\\b' + Pattern.quote(fieldName) + '\\s*=\\s*(.*?);'
+    ).matcher(source)
+    requireAudit(matcher.find(), "could not read ${fieldName} from ErydonTextureGalleryScreen")
+    def values = []
+    def valueMatcher = Pattern.compile('"([^"]+)"').matcher(matcher.group(1))
+    while (valueMatcher.find()) {
+        values.add(valueMatcher.group(1))
+    }
+    requireAudit(!values.isEmpty(), "${fieldName} must not be empty")
+    values
+}
+
+def extractIntArray = { String source, String fieldName ->
+    def matcher = Pattern.compile(
+            '(?s)\\b' + Pattern.quote(fieldName) + '\\s*=\\s*(.*?);'
+    ).matcher(source)
+    requireAudit(matcher.find(), "could not read ${fieldName} from ErydonTextureGalleryScreen")
+    def values = []
+    def valueMatcher = Pattern.compile('-?\\d+').matcher(matcher.group(1))
+    while (valueMatcher.find()) {
+        values.add(Integer.parseInt(valueMatcher.group()))
+    }
+    requireAudit(!values.isEmpty(), "${fieldName} must not be empty")
+    values
+}
+
+def gallerySpec = {
+    File gallerySource = file('src/main/java/com/oliver/erydon/client/config/ErydonTextureGalleryScreen.java')
+    requireAudit(gallerySource.isFile(), "missing gallery source ${gallerySource}")
+    String source = gallerySource.getText('UTF-8')
+    List<String> materials = extractStringArray(source, 'MATERIALS')
+    List<String> diaphanesMaterials = extractStringArray(source, 'DIAPHANES_MATERIALS')
+    List<String> weaveFolders = extractStringArray(source, 'WEAVE_FOLDERS')
+    List<Integer> previewTiles = extractIntArray(source, 'CTM_PREVIEW_TILES')
+    requireAudit(materials.toSet().size() == materials.size(), 'MATERIALS contains duplicate gallery entries')
+    requireAudit(diaphanesMaterials.toSet().size() == diaphanesMaterials.size(), 'DIAPHANES_MATERIALS contains duplicate entries')
+    requireAudit(materials.containsAll(diaphanesMaterials), 'DIAPHANES_MATERIALS contains an unknown material')
+    requireAudit(weaveFolders.toSet().size() == weaveFolders.size(), 'WEAVE_FOLDERS contains duplicate entries')
+    requireAudit(previewTiles.size() == 9 && previewTiles.toSet().size() == previewTiles.size(),
+            'CTM_PREVIEW_TILES must contain nine unique entries for the 3x3 preview')
+    def folders = new TreeSet<String>()
+    def standardSuffixes = ['', '_aged', '_ashlar', '_herringbone_bronze', '_herringbone_grout', '_hewn', '_rusticated']
+    materials.each { material ->
+        standardSuffixes.each { suffix -> folders.add(material + suffix) }
+    }
+    diaphanesMaterials.each { material -> folders.add(material + '_diaphanes') }
+    folders.addAll(weaveFolders)
+    [materials: materials, folders: folders.toList(), tiles: previewTiles]
+}
+
+def galleryResourceEntries = { Map spec ->
+    def entries = []
+    spec.folders.each { folder ->
+        spec.tiles.each { tile ->
+            entries.add("assets/minecraft/textures/optifine/ctm/${folder}/${tile}.png".toString())
+        }
+    }
+    entries
+}
+
+def allRequiredResourceEntries = { Map spec ->
+    (requiredStaticResources
+            + languageCodes.collect { "assets/erydon/lang/${it}.json".toString() }
+            + galleryResourceEntries(spec)).toSet().sort()
+}
+
+def validateMetadata = { Map metadata, String label ->
+    requireAudit(metadata.id == 'erydon', "${label} has unexpected mod id '${metadata.id}'")
+    requireAudit(metadata.description instanceof String && metadata.description.trim().length() >= 40,
+            "${label} needs a meaningful description")
+    requireAudit(metadata.authors instanceof List && !metadata.authors.isEmpty(), "${label} needs at least one author")
+    requireAudit(metadata.license == expectedLicenses,
+            "${label} must declare the ${expectedLicenses.join(' and ')} licences")
+    requireAudit(metadata.icon == 'assets/erydon/icon.png', "${label} has an unexpected icon path")
+
+    Map contact = metadata.contact instanceof Map ? metadata.contact as Map : [:]
+    expectedContact.each { key, expected ->
+        requireAudit(contact[key] == expected, "${label} contact.${key} is '${contact[key]}' instead of '${expected}'")
+    }
+    Map entrypoints = metadata.entrypoints instanceof Map ? metadata.entrypoints as Map : [:]
+    requireAudit(entrypoints.modmenu == [expectedModMenuEntrypoint],
+            "${label} must expose only ${expectedModMenuEntrypoint} as its Mod Menu entrypoint")
+    Map depends = metadata.depends instanceof Map ? metadata.depends as Map : [:]
+    Map recommends = metadata.recommends instanceof Map ? metadata.recommends as Map : [:]
+    Map suggests = metadata.suggests instanceof Map ? metadata.suggests as Map : [:]
+    requireAudit(!depends.containsKey('modmenu'), "${label} must not require Mod Menu")
+    requireAudit(!recommends.containsKey('modmenu'), "${label} must not warn when optional Mod Menu is absent")
+    requireAudit(suggests.modmenu == '*', "${label} must list optional Mod Menu under suggests")
+}
+
+def validateLanguages = { Map<String, Map> languages, Map spec, String label ->
+    requireAudit((languages.keySet() as Set) == (languageCodes as Set), "${label} did not supply all supported languages")
+    Set<String> referenceKeys = languages.en_us.keySet().collect { it.toString() }.toSet()
+    languageCodes.each { code ->
+        Set<String> keys = languages[code].keySet().collect { it.toString() }.toSet()
+        def missing = (referenceKeys - keys).toList().sort()
+        def extra = (keys - referenceKeys).toList().sort()
+        requireAudit(missing.isEmpty() && extra.isEmpty(),
+                "${label} ${code} key parity differs from en_us; missing=${missing}, extra=${extra}")
+    }
+    def placeholderPattern = Pattern.compile('(?<!%)%(?:\\d+\\$)?[a-zA-Z]')
+    def countPlaceholders = { Object value ->
+        def placeholderMatcher = placeholderPattern.matcher(value.toString())
+        int count = 0
+        while (placeholderMatcher.find()) {
+            count++
+        }
+        count
+    }
+    referenceKeys.each { key ->
+        int expectedPlaceholders = countPlaceholders(languages.en_us[key])
+        languageCodes.findAll { it != 'en_us' }.each { code ->
+            int actualPlaceholders = countPlaceholders(languages[code][key])
+            requireAudit(actualPlaceholders == expectedPlaceholders,
+                    "${label} ${code} key ${key} has ${actualPlaceholders} placeholders; en_us has ${expectedPlaceholders}")
+        }
+    }
+
+    def requiredKeys = new TreeSet<String>([
+            'screen.erydon.inspiration.reward',
+            'text.erydon.or',
+            'text.erydon.coming_soon',
+            'text.erydon.scrollbar',
+            'text.erydon.scrollbar.description',
+            'option.erydon.gallery.variant.base',
+            'option.erydon.gallery.variant.aged',
+            'option.erydon.gallery.variant.ashlar',
+            'option.erydon.gallery.variant.herringbone_bronze',
+            'option.erydon.gallery.variant.herringbone_grout',
+            'option.erydon.gallery.variant.hewn',
+            'option.erydon.gallery.variant.rusticated',
+            'option.erydon.gallery.variant.diaphanes',
+            'option.erydon.gallery.variant.weave_bronze',
+            'option.erydon.gallery.variant.weave_grout',
+            'message.erydon_family.resource_packs.notice',
+            'message.erydon_family.resource_packs.modrinth',
+            'message.erydon_family.resource_packs.curseforge',
+            'message.erydon_family.resource_packs.open_modrinth',
+            'message.erydon_family.resource_packs.open_curseforge',
+            'message.erydon.config.status.local',
+            'message.erydon.config.status.local_saved',
+            'message.erydon.config.status.waiting_for_server',
+            'message.erydon.config.status.synced_editable',
+            'message.erydon.config.status.synced_read_only',
+            'message.erydon.config.status.saving',
+            'message.erydon.config.status.saved',
+            'message.erydon.config.status.permission_denied',
+            'message.erydon.config.status.save_failed',
+            'message.erydon.config.status.server_unsupported',
+            'message.erydon.config.status.invalid_response',
+            'message.erydon.config.status.rate_limited',
+            'message.erydon.config.status.timed_out',
+            'command.erydon.recalc.scope.chunk',
+            'command.erydon.recalc.scope.radius',
+            'command.erydon.recalc.radius_too_large',
+            'command.erydon.recalc.queued',
+            'command.erydon.recalc.progress',
+            'command.erydon.recalc.queue_full',
+            'command.erydon.recalc.already_queued',
+            'command.erydon.recalc.cancel_none',
+            'command.erydon.recalc.cancelled',
+            'command.erydon.recalc.summary',
+            'command.erydon.recalc.summary_with_skipped',
+            'command.erydon.recalc.summary_with_reasons'
+    ])
+    spec.materials.each { material ->
+        requiredKeys.add("option.erydon.gallery.${material}.description".toString())
+    }
+
+    def translationMatcher = Pattern.compile('Text\\.translatable\\(\\s*"([^"]+)"(?!\\s*\\+)')
+    def customKeyLiteralMatcher = Pattern.compile('"((?:screen|section|button|option|text|message|command)\\.erydon\\.[^"]+)"(?!\\s*\\+)')
+    fileTree('src/main/java') { include '**/*.java' }.files.each { sourceFile ->
+        String source = sourceFile.getText('UTF-8')
+        def matcher = translationMatcher.matcher(source)
+        while (matcher.find()) {
+            String key = matcher.group(1)
+            if ((key.contains('.erydon.') || key.startsWith('erydon.')) && !key.endsWith('.')) {
+                requiredKeys.add(key)
+            }
+        }
+        def literalMatcher = customKeyLiteralMatcher.matcher(source)
+        while (literalMatcher.find()) {
+            String key = literalMatcher.group(1)
+            if (!key.endsWith('.')) {
+                requiredKeys.add(key)
+            }
+        }
+    }
+
+    languageCodes.each { code ->
+        def missing = requiredKeys.findAll { !languages[code].containsKey(it) }
+        def blank = requiredKeys.findAll { languages[code].containsKey(it) && languages[code][it].toString().trim().isEmpty() }
+        requireAudit(missing.isEmpty(), "${label} ${code} is missing used keys: ${missing}")
+        requireAudit(blank.isEmpty(), "${label} ${code} has blank used values: ${blank}")
+        requireAudit(!languages[code].containsKey('screen.erydon.inspiration.submit_prefix'),
+                "${label} ${code} still contains obsolete screen.erydon.inspiration.submit_prefix")
+    }
+}
+
+tasks.register('auditErydonModMenuSources') {
+    group = 'verification'
+    description = 'Checks Mod Menu optionality, metadata, translations, and source preview resources without launching Minecraft.'
+
+    doLast {
+        Map spec = gallerySpec()
+        File metadataFile = file('src/main/resources/fabric.mod.json')
+        Map metadata = parseJsonMap(metadataFile.getText('UTF-8'), metadataFile.path)
+        validateMetadata(metadata, metadataFile.path)
+
+        File licenseFile = file('LICENSE')
+        requireAudit(licenseFile.isFile(), 'missing root LICENSE')
+        String licenseText = licenseFile.getText('UTF-8')
+        requireAudit(licenseText.startsWith('ERYDON LICENCE MAP'),
+                'root LICENSE is not the expected public licence map')
+        requireAudit(licenseText.contains('LICENSE-CODE.md') && licenseText.contains('LICENSE-ASSETS.md'),
+                'root LICENSE does not map the code and asset terms')
+
+        def expectedResources = allRequiredResourceEntries(spec)
+        def missingResources = expectedResources.findAll { !file("src/main/resources/${it}").isFile() }
+        requireAudit(missingResources.isEmpty(), "missing source config/gallery resources: ${missingResources.take(10)}")
+
+        Map<String, Map> languages = [:]
+        languageCodes.each { code ->
+            File languageFile = file("src/main/resources/assets/erydon/lang/${code}.json")
+            languages[code] = parseLanguage(languageFile.getText('UTF-8'), languageFile.path)
+        }
+        validateLanguages(languages, spec, 'source languages')
+
+        File packNoticeFile = file('src/main/java/com/oliver/erydon/client/CollectionResourcePackNotice.java')
+        String packNoticeSource = packNoticeFile.getText('UTF-8')
+        [
+                'ClientPlayConnectionEvents.JOIN',
+                'https://modrinth.com/user/ERYDON',
+                'https://www.curseforge.com/members/erydon/projects',
+                'message.erydon_family.resource_packs.modrinth',
+                'message.erydon_family.resource_packs.curseforge',
+                'client.player.sendMessage(message, false)'
+        ].each { marker ->
+            requireAudit(packNoticeSource.contains(marker),
+                    "resource-pack join notice is missing contract marker: ${marker}")
+        }
+        requireAudit(!packNoticeSource.contains('SHOWN_THIS_LAUNCH'),
+                'resource-pack join notice must appear on every connection')
+        requireAudit(!packNoticeSource.contains('COLLECTION_MARKER_ID'),
+                'resource-pack join notice must not disappear when a Collection pack is active')
+
+        File integrationFile = file('src/main/java/com/oliver/erydon/client/config/ErydonModMenuIntegration.java')
+        String integrationSource = integrationFile.getText('UTF-8')
+        requireAudit(integrationSource.contains('implements ModMenuApi'), 'integration class must implement ModMenuApi')
+        requireAudit(integrationSource.contains('ErydonConfigScreen::new'), 'integration must return the ERYDON config screen factory')
+        def apiReferenceFiles = fileTree('src/main/java') { include '**/*.java' }.files.findAll {
+            it.getText('UTF-8').contains('com.terraformersmc.modmenu')
+        }.collect { it.canonicalFile }.toSet()
+        requireAudit(apiReferenceFiles == ([integrationFile.canonicalFile] as Set),
+                "Mod Menu API references escaped the optional integration boundary: ${apiReferenceFiles}")
+        def integrationNameReferences = fileTree('src/main/java') { include '**/*.java' }.files.findAll {
+            it.canonicalFile != integrationFile.canonicalFile && it.getText('UTF-8').contains('ErydonModMenuIntegration')
+        }
+        requireAudit(integrationNameReferences.isEmpty(),
+                "common code directly references the optional integration class: ${integrationNameReferences}")
+
+        File uiFile = file('src/main/java/com/oliver/erydon/client/config/ErydonConfigUi.java')
+        String uiSource = uiFile.getText('UTF-8')
+        [
+                'enum StatusTone',
+                'enum Style',
+                'drawStatusStrip(',
+                'drawReadableScaledText(',
+                'FORM_PANEL_HEIGHT',
+                'PANEL_CENTER_SOURCE_WIDTH',
+                'CONTROL_OVERLAY'
+        ].each { marker ->
+            requireAudit(uiSource.contains(marker), "shared config UI is missing style contract marker: ${marker}")
+        }
+        requireAudit(uiSource.count('drawPanelRow(') >= 4,
+                'panel header, body, and footer must share the same horizontal texture slices')
+
+        File configScreenFile = file('src/main/java/com/oliver/erydon/client/config/ErydonConfigScreen.java')
+        String configScreenSource = configScreenFile.getText('UTF-8')
+        requireAudit(configScreenSource.contains('section.erydon.config.settings'),
+                'main config screen must retain the Settings section')
+        requireAudit(configScreenSource.contains('section.erydon.config.explore'),
+                'main config screen must retain the Explore section')
+        requireAudit(configScreenSource.contains('.withStyle(ErydonConfigUi.Button.Style.QUIET)'),
+                'main config screen Back action must retain quiet styling')
+
+        ['ErydonTextureGalleryScreen.java', 'ErydonInspirationConfigScreen.java'].each { screenName ->
+            File screenFile = file("src/main/java/com/oliver/erydon/client/config/${screenName}")
+            requireAudit(screenFile.getText('UTF-8').contains('MAX_PANEL_WIDTH = 480'),
+                    "${screenName} must retain the wider responsive panel")
+        }
+        File galleryScreenFile = file('src/main/java/com/oliver/erydon/client/config/ErydonTextureGalleryScreen.java')
+        String galleryScreenSource = galleryScreenFile.getText('UTF-8')
+        ['COMPACT_LAYOUT_WIDTH = 340', 'MIN_COMPACT_ENTRY_HEIGHT = 104', 'viewportCapacity'].each { marker ->
+            requireAudit(galleryScreenSource.contains(marker),
+                    "texture gallery is missing compact-layout contract marker: ${marker}")
+        }
+        requireAudit(galleryScreenSource.contains('.withStyle(ErydonConfigUi.Button.Style.QUIET)'),
+                'texture gallery selectors must retain readable quiet styling')
+
+        [
+                'ErydonTooltipConfigScreen.java',
+                'ErydonRecalcCommandConfigScreen.java'
+        ].each { screenName ->
+            File screenFile = file("src/main/java/com/oliver/erydon/client/config/${screenName}")
+            requireAudit(screenFile.getText('UTF-8').contains('FORM_PANEL_HEIGHT'),
+                    "${screenName} must reserve a dedicated status row")
+        }
+
+        def compileDependencies = configurations.modCompileOnly.dependencies.findAll {
+            it.group == 'com.terraformersmc' && it.name == 'modmenu'
+        }
+        def runtimeDependencies = configurations.modRuntimeOnly.dependencies.findAll {
+            it.group == 'com.terraformersmc' && it.name == 'modmenu'
+        }
+        requireAudit(compileDependencies.size() == 1 && compileDependencies.first().version == expectedModMenuVersion,
+                "modCompileOnly must use Mod Menu ${expectedModMenuVersion}")
+        requireAudit(runtimeDependencies.size() == 1 && runtimeDependencies.first().version == expectedModMenuVersion,
+                "modRuntimeOnly must use Mod Menu ${expectedModMenuVersion}")
+        ['modImplementation', 'include'].each { configurationName ->
+            def configuration = configurations.findByName(configurationName)
+            if (configuration != null) {
+                def bundled = configuration.dependencies.findAll { it.group == 'com.terraformersmc' && it.name == 'modmenu' }
+                requireAudit(bundled.isEmpty(), "${configurationName} must not bundle optional Mod Menu")
+            }
+        }
+
+        logger.lifecycle("ERYDON Mod Menu source audit: languages=${languageCodes.size()}, keys=${languages.en_us.size()}, galleryFolders=${spec.folders.size()}, galleryTiles=${galleryResourceEntries(spec).size()}")
+    }
+}
+
+tasks.register('auditErydonModMenuJar') {
+    group = 'verification'
+    description = 'Checks the remapped JAR contains the complete optional Mod Menu integration and no bundled Mod Menu code.'
+    dependsOn tasks.named('remapJar')
+
+    doLast {
+        Map spec = gallerySpec()
+        File jarFile = tasks.named('remapJar').get().archiveFile.get().asFile
+        ZipFile zip = new ZipFile(jarFile)
+        try {
+            def entries = zip.entries().toList()
+            Set<String> entryNames = entries.collect { it.name }.toSet()
+            def readEntryText = { String entryName ->
+                def entry = zip.getEntry(entryName)
+                requireAudit(entry != null, "${jarFile.name} is missing ${entryName}")
+                zip.getInputStream(entry).withCloseable { input -> input.getText('UTF-8') }
+            }
+
+            Map metadata = parseJsonMap(readEntryText('fabric.mod.json'), "${jarFile.name}!/fabric.mod.json")
+            validateMetadata(metadata, "${jarFile.name}!/fabric.mod.json")
+
+            def expectedResources = allRequiredResourceEntries(spec)
+            def missingResources = expectedResources.findAll { !entryNames.contains(it) }
+            requireAudit(missingResources.isEmpty(), "${jarFile.name} is missing config/gallery resources: ${missingResources.take(10)}")
+            requiredConfigClasses.each { classEntry ->
+                requireAudit(entryNames.contains(classEntry), "${jarFile.name} is missing ${classEntry}")
+            }
+            String packagedLicense = "LICENSE_${project.base.archivesName.get()}"
+            requireAudit(entryNames.contains(packagedLicense), "${jarFile.name} is missing ${packagedLicense}")
+
+            Map<String, Map> languages = [:]
+            languageCodes.each { code ->
+                String entryName = "assets/erydon/lang/${code}.json"
+                languages[code] = parseLanguage(readEntryText(entryName), "${jarFile.name}!/${entryName}")
+            }
+            validateLanguages(languages, spec, 'packaged languages')
+
+            def nestedModMenuJars = entryNames.findAll {
+                it.toLowerCase(Locale.ROOT).startsWith('meta-inf/jars/')
+                        && it.toLowerCase(Locale.ROOT).contains('modmenu')
+                        && it.toLowerCase(Locale.ROOT).endsWith('.jar')
+            }.sort()
+            requireAudit(nestedModMenuJars.isEmpty(), "optional Mod Menu was nested: ${nestedModMenuJars}")
+            def bundledModMenuClasses = entryNames.findAll { it.startsWith('com/terraformersmc/modmenu/') }.sort()
+            requireAudit(bundledModMenuClasses.isEmpty(), "Mod Menu classes were bundled: ${bundledModMenuClasses.take(10)}")
+
+            def compiledApiReferences = []
+            entries.findAll { it.name.startsWith('com/oliver/erydon/') && it.name.endsWith('.class') }.each { entry ->
+                byte[] bytes = zip.getInputStream(entry).withCloseable { input -> input.readAllBytes() }
+                String bytecodeText = new String(bytes, StandardCharsets.ISO_8859_1)
+                if (bytecodeText.contains('com/terraformersmc/modmenu')) {
+                    compiledApiReferences.add(entry.name)
+                }
+            }
+            requireAudit(compiledApiReferences == ['com/oliver/erydon/client/config/ErydonModMenuIntegration.class'],
+                    "packaged Mod Menu references escaped the integration class: ${compiledApiReferences}")
+
+            File reportDir = layout.buildDirectory.dir('reports').get().asFile
+            reportDir.mkdirs()
+            File reportFile = new File(reportDir, 'erydon-modmenu-audit.json')
+            Map report = [
+                    jar                    : jarFile.name,
+                    modVersion             : metadata.version,
+                    modMenuVersion         : expectedModMenuVersion,
+                    modMenuEntrypoint      : expectedModMenuEntrypoint,
+                    optionalMetadata       : 'suggests',
+                    bundledModMenuJars     : nestedModMenuJars.size(),
+                    bundledModMenuClasses  : bundledModMenuClasses.size(),
+                    supportedLanguages     : languageCodes,
+                    translationKeysPerLang : languages.en_us.size(),
+                    configResourcesChecked : expectedResources.size(),
+                    galleryFolders         : spec.folders.size(),
+                    galleryTilesChecked    : galleryResourceEntries(spec).size()
+            ]
+            reportFile.setText(JsonOutput.prettyPrint(JsonOutput.toJson(report)) + System.lineSeparator(), 'UTF-8')
+            logger.lifecycle("ERYDON Mod Menu JAR audit written to ${reportFile}")
+        } finally {
+            zip.close()
+        }
+    }
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('auditErydonModMenuSources')
+}
+
+tasks.named('auditErydonJar') {
+    dependsOn tasks.named('auditErydonModMenuJar')
+}

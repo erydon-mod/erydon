@@ -1,0 +1,6 @@
+{
+    "parent":  "erydon:block/surround/gothic_ornate/surround_gothic_ornate_icon",
+    "textures":  {
+                     "particle":  "#stone"
+                 }
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/column/circular/column_circular_base",
+  "textures": {
+    "stone": "erydon:block/solistra_block_aged",
+    "particle": "erydon:block/solistra_block_aged"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "elements": [
+    {
+      "from": [0, 0, 0],
+      "to": [4, 4, 0],
+      "faces": {
+        "north": {"texture": "#stone"},
+        "south": {"texture": "#stone"}
+      }
+    },
+    {
+      "from": [0, 0, 0],
+      "to": [4, 4, 0],
+      "faces": {
+        "north": {"texture": "#stone"},
+        "south": {"texture": "#stone"}
+      }
+    }
+  ]
+}

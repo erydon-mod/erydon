@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/layer/layer_multiface/parent/top_height4",
+  "textures": {
+    "texture": "erydon:block/imperium_herringbone_grout_block"
+  }
+}

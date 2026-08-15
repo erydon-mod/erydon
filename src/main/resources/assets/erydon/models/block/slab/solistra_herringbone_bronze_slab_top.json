@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab_top",
+  "textures": {
+    "bottom": "erydon:block/solistra_herringbone_bronze_block",
+    "top": "erydon:block/solistra_herringbone_bronze_block",
+    "side": "erydon:block/solistra_herringbone_bronze_block"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/layer/slice_horizontal/slice_horizontal_bottom_size14",
+  "textures": {
+    "texture": "erydon:block/chrysonyx_block",
+    "particle": "erydon:block/chrysonyx_block"
+  }
+}

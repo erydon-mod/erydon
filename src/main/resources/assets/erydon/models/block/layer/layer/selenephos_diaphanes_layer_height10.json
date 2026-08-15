@@ -1,0 +1,10 @@
+{
+  "parent": "minecraft:block/snow_height10",
+  "textures": {
+    "texture": "erydon:block/selenephos_diaphanes_block",
+    "particle": "erydon:block/selenephos_diaphanes_block"
+  }
+}
+
+
+

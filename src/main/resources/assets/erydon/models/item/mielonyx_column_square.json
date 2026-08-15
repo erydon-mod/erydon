@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/column/square/mielonyx_column_square_base",
+  "textures": {
+    "all": "erydon:block/mielonyx_block"
+  }
+}

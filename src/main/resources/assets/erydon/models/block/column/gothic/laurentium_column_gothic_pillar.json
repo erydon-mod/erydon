@@ -1,0 +1,7 @@
+﻿{
+    "parent":  "erydon:block/column/gothic/column_gothic_pillar",
+    "textures":  {
+                     "stone":  "erydon:block/laurentium_block",
+                     "particle":  "erydon:block/laurentium_block"
+                 }
+}

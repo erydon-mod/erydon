@@ -1,0 +1,8 @@
+{
+  "parent": "erydon:block/slope/slope/slope_outer",
+  "textures": {
+    "stone": "erydon:block/portorium_rusticated_block",
+    "particle": "#stone"
+  }
+}
+

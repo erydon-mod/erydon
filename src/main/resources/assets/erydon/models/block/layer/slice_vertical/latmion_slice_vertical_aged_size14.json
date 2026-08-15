@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/layer/slice_vertical/slice_vertical_size14",
+  "textures": {
+    "texture": "erydon:block/latmion_block_aged",
+    "particle": "erydon:block/latmion_block_aged"
+  }
+}

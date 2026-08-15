@@ -1,0 +1,253 @@
+{
+  "format_version": "1.21.11",
+  "credit": "Made with Blockbench",
+  "textures": {
+    "particle": "erydon:block/aganite_block",
+    "stone": "erydon:block/aganite_block"
+  },
+  "elements": [
+    {
+      "name": "inner_dome_panel_024",
+      "from": [
+        -0.84639,
+        10.7616,
+        11.6578
+      ],
+      "to": [
+        15.14361,
+        15.20796,
+        16.3474
+      ],
+      "rotation": {
+        "x": -32.53158,
+        "y": -90,
+        "z": 0,
+        "origin": [
+          13.14861,
+          11.37334,
+          14.0026
+        ]
+      },
+      "faces": {
+        "east": {
+          "texture": "#stone",
+          "erydon_uv_offset": [
+            -1.1876220703125,
+            0
+          ]
+        },
+        "west": {
+          "texture": "#stone",
+          "erydon_uv_offset": [
+            1.1876220703125,
+            0
+          ]
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      },
+      "color": 2
+    },
+    {
+      "name": "inner_dome_panel_008",
+      "from": [
+        -4.26386,
+        12.86497,
+        11.6582
+      ],
+      "to": [
+        11.72614,
+        14.93894,
+        16.3478
+      ],
+      "rotation": {
+        "x": -30.75633,
+        "y": -90,
+        "z": 0,
+        "origin": [
+          9.73114,
+          13.47672,
+          14.003
+        ]
+      },
+      "faces": {
+        "east": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      },
+      "color": 2
+    },
+    {
+      "from": [
+        7.98806,
+        13.93398,
+        0.0
+      ],
+      "to": [
+        11.76002,
+        16.00795,
+        16.0
+      ],
+      "rotation": {
+        "angle": 0,
+        "axis": "y",
+        "origin": [
+          18.77694,
+          7.2059,
+          7.9375
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        }
+      },
+      "color": 2
+    },
+    {
+      "name": "inner_dome_panel_024_mirrored",
+      "from": [
+        -11.14361,
+        10.7616,
+        -0.3474
+      ],
+      "to": [
+        4.84639,
+        15.20796,
+        4.3422
+      ],
+      "rotation": {
+        "x": -32.53158,
+        "y": 90.0,
+        "z": 0,
+        "origin": [
+          2.85139,
+          11.37334,
+          1.9974
+        ]
+      },
+      "faces": {
+        "east": {
+          "texture": "#stone",
+          "erydon_uv_offset": [
+            -1.1876220703125,
+            0
+          ]
+        },
+        "west": {
+          "texture": "#stone",
+          "erydon_uv_offset": [
+            1.1876215934753418,
+            0
+          ]
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      },
+      "color": 5
+    },
+    {
+      "name": "inner_dome_panel_008_mirrored",
+      "from": [
+        -7.72614,
+        12.86497,
+        -0.3478
+      ],
+      "to": [
+        8.26386,
+        14.93894,
+        4.3418
+      ],
+      "rotation": {
+        "x": -30.75633,
+        "y": 90.0,
+        "z": 0,
+        "origin": [
+          6.26886,
+          13.47672,
+          1.997
+        ]
+      },
+      "faces": {
+        "east": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      },
+      "color": 5
+    },
+    {
+      "from": [
+        4.23998,
+        13.93398,
+        0.001
+      ],
+      "to": [
+        8.01194,
+        16.00695,
+        15.999
+      ],
+      "rotation": {
+        "angle": 0,
+        "axis": "y",
+        "origin": [
+          -2.77694,
+          7.2059,
+          8.0625
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        }
+      },
+      "name": "element_mirrored",
+      "color": 5
+    }
+  ],
+  "groups": [
+    {
+      "name": "arch_gothic_top_large",
+      "origin": [
+        8,
+        8,
+        8
+      ],
+      "scope": 0,
+      "color": 2,
+      "children": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/alcove/georgian/alcove_georgian_sides",
+  "textures": {
+    "stone": "erydon:block/laurentium_ashlar_block",
+    "particle": "erydon:block/laurentium_ashlar_block"
+  }
+}

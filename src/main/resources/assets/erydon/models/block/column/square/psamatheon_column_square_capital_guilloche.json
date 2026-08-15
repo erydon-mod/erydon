@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/column/square/column_square_capital_guilloche",
+  "textures": {
+    "particle": "erydon:block/psamatheon_block",
+    "stone": "erydon:block/psamatheon_block"
+  }
+}

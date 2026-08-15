@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/surround/modern/surround_modern_corbel_rh",
+  "textures": {
+    "particle": "erydon:block/aterzon_block",
+    "0": "erydon:block/aterzon_block",
+    "1": "erydon:block/aterzon_block",
+    "texture": "erydon:block/aterzon_block",
+    "stone": "erydon:block/aterzon_block"
+  }
+}

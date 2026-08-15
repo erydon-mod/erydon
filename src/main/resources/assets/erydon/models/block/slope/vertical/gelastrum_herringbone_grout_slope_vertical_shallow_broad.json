@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/gelastrum_herringbone_grout_slope_vertical_shallow_broad_lh",
+  "textures": {
+    "stone": "erydon:block/gelastrum_herringbone_grout_block",
+    "particle": "erydon:block/gelastrum_herringbone_grout_block"
+  }
+}

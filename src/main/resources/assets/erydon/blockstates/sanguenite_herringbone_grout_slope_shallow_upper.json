@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/sanguenite_herringbone_grout_slope_shallow_upper"
+                                    }
+                      }
+                  ]
+}

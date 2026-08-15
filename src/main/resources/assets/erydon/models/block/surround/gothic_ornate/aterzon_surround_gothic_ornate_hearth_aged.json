@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/surround/gothic_ornate/surround_gothic_ornate_hearth",
+  "textures": {
+    "particle": "erydon:block/aterzon_block_aged",
+    "0": "erydon:block/aterzon_block_aged",
+    "1": "erydon:block/aterzon_block_aged",
+    "texture": "erydon:block/aterzon_block_aged",
+    "stone": "erydon:block/aterzon_block_aged"
+  }
+}

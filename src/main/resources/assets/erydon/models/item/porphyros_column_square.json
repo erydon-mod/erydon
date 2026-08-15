@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/column/square/porphyros_column_square_base",
+  "textures": {
+    "all": "erydon:block/porphyros_block"
+  }
+}

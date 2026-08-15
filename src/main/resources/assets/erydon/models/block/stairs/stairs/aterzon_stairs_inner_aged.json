@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/inner_stairs",
+  "textures": {
+    "side": "erydon:block/aterzon_block_aged",
+    "top": "erydon:block/aterzon_block_aged",
+    "bottom": "erydon:block/aterzon_block_aged"
+  }
+}

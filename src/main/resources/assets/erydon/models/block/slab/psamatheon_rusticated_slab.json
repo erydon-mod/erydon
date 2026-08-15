@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {
+    "bottom": "erydon:block/psamatheon_rusticated_block",
+    "top": "erydon:block/psamatheon_rusticated_block",
+    "side": "erydon:block/psamatheon_rusticated_block"
+  }
+}

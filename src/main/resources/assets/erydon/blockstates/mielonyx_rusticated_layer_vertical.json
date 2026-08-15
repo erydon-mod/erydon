@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/mielonyx_rusticated_layer_vertical"
+                                    }
+                      }
+                  ]
+}

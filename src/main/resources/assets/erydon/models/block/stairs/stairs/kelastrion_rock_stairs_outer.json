@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/outer_stairs",
+  "textures": {
+    "side": "erydon:block/kelastrion_rock_block",
+    "top": "erydon:block/kelastrion_rock_block",
+    "bottom": "erydon:block/kelastrion_rock_block"
+  }
+}

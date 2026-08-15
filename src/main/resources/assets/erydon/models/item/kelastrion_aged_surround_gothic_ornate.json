@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:item/surround_gothic_ornate_icon",
+  "textures": {
+    "stone": "erydon:block/kelastrion_block_aged"
+  }
+}

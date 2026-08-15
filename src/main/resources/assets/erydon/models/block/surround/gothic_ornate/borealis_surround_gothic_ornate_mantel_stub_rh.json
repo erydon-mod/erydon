@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/surround/gothic_ornate/surround_gothic_ornate_mantel_stub_rh",
+  "textures": {
+    "particle": "erydon:block/borealis_block",
+    "0": "erydon:block/borealis_block",
+    "1": "erydon:block/borealis_block",
+    "texture": "erydon:block/borealis_block",
+    "stone": "erydon:block/borealis_block"
+  }
+}

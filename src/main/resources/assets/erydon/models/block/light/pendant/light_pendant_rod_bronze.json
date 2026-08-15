@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/light/pendant/light_pendant_rod",
+  "textures": {
+    "metal": "erydon:block/cover_bronze_gloss"
+  }
+}

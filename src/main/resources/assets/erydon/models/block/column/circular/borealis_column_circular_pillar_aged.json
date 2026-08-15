@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/column/circular/column_circular_pillar",
+  "textures": {
+    "stone": "erydon:block/borealis_block_aged",
+    "particle": "erydon:block/borealis_block_aged"
+  }
+}

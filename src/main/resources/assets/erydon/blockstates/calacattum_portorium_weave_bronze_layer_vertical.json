@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/calacattum_portorium_weave_bronze_layer_vertical"
+                                    }
+                      }
+                  ]
+}

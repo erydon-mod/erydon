@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/column/circular/column_circular_capital_guilloche",
+  "textures": {
+    "stone": "erydon:block/latmion_block_aged",
+    "particle": "erydon:block/latmion_block_aged"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/surround/guilloche/surround_guilloche_corbel_lh",
+  "textures": {
+    "particle": "erydon:block/portorium_block",
+    "0": "erydon:block/portorium_block",
+    "1": "erydon:block/portorium_block",
+    "texture": "erydon:block/portorium_block",
+    "stone": "erydon:block/portorium_block"
+  }
+}

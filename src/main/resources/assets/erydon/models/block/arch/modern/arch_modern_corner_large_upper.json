@@ -1,0 +1,62 @@
+{
+	"format_version": "1.9.0",
+	"credit": "Made with Blockbench",
+	"textures": {
+		"particle": "#stone"
+	},
+	"elements": [
+		{
+			"from": [5.59364, 1.87474, 0],
+			"to": [9.65588, 10.01198, 16],
+			"rotation": {"angle": 45, "axis": "z", "origin": [7.62476, 5.94336, 8]},
+			"faces": {
+				"north": {"texture": "#stone", "cullface": "north"},
+				"east": {"texture": "#stone"},
+				"south": {"texture": "#stone", "cullface": "south"},
+				"west": {"texture": "#stone"},
+				"up": {"texture": "#stone"},
+				"down": {"texture": "#stone"}
+			}
+		},
+		{
+			"from": [0, 10.51216, 0.002],
+			"to": [12.176, 16, 15.998],
+			"rotation": {"angle": 0, "axis": "y", "origin": [6.04168, 7.76446, 8]},
+			"faces": {
+				"north": {"texture": "#stone"},
+				"east": {"texture": "#stone"},
+				"south": {"texture": "#stone"},
+				"west": {"texture": "#stone", "cullface": "west"},
+				"up": {"texture": "#stone", "cullface": "up"}
+			}
+		},
+		{
+			"from": [9.06042, 1.628, 0.001],
+			"to": [12.17776, 10.52448, 15.999],
+			"rotation": {"angle": 0, "axis": "y", "origin": [6.04168, 7.76446, 8]},
+			"faces": {
+				"north": {"texture": "#stone"},
+				"east": {"texture": "#stone"},
+				"south": {"texture": "#stone"}
+			}
+		},
+		{
+			"from": [3.28458, 7.39482, 0.001],
+			"to": [9.06042, 10.51216, 15.999],
+			"rotation": {"angle": 0, "axis": "y", "origin": [6.04168, 7.76446, 8]},
+			"faces": {
+				"north": {"texture": "#stone"},
+				"south": {"texture": "#stone"}
+			}
+		}
+	],
+	"groups": [
+		{
+			"name": "arch_romanesque_corner_large_upper",
+			"origin": [8, 12.51945, 8],
+			"scope": 0,
+			"color": 0,
+			"children": [0, 1, 2, 3]
+		}
+	]
+}

@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {
+    "bottom": "erydon:block/selenephos_rusticated_block",
+    "top": "erydon:block/selenephos_rusticated_block",
+    "side": "erydon:block/selenephos_rusticated_block"
+  }
+}
+

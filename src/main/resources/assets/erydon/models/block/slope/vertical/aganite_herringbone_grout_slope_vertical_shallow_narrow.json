@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/aganite_herringbone_grout_slope_vertical_shallow_narrow_lh",
+  "textures": {
+    "stone": "erydon:block/aganite_herringbone_grout_block",
+    "particle": "erydon:block/aganite_herringbone_grout_block"
+  }
+}

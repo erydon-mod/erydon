@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "erydon:block/slab/solistra_etruscus_weave_bronze_slab"
+    },
+    "type=top": {
+      "model": "erydon:block/slab/solistra_etruscus_weave_bronze_slab_top"
+    },
+    "type=double": {
+      "model": "erydon:block/block/solistra_etruscus_weave_bronze_block"
+    }
+  }
+}

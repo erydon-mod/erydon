@@ -1,0 +1,6 @@
+{
+    "parent":  "erydon:block/internal/wrapped/hesperion_hewn_slope_vertical_shallow_narrow",
+    "textures":  {
+                     "texture":  "erydon:block/hesperion_hewn_block"
+                 }
+}

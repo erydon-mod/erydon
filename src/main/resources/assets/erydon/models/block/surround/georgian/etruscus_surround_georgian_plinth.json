@@ -1,0 +1,8 @@
+{
+  "parent": "erydon:block/surround/georgian/surround_georgian_plinth",
+  "textures": {
+  "stone": "erydon:block/etruscus_block",
+  "particle": "#stone"
+}
+
+}

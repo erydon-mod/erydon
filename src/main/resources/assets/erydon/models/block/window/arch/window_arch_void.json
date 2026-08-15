@@ -1,0 +1,9 @@
+{
+  "textures": {
+    "particle": "#stone",
+    "stone": "block/missing",
+    "pane": "block/missing",
+    "lead": "block/missing"
+  },
+  "elements": []
+}

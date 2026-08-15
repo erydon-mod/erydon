@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "#erydon:cornice",
+    "#erydon:cover",
+    "#erydon:surround",
+    "#erydon:wall",
+    "#erydon:window"
+  ]
+}

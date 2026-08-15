@@ -1,0 +1,9 @@
+{
+  "parent": "erydon:block/chimney/circular/chimney_circular_large_lower",
+  "textures": {
+    "stone": "erydon:block/nerium_block",
+    "particle": "erydon:block/nerium_block"
+  }
+}
+
+

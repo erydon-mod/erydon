@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/wall_inventory",
+  "textures": {
+    "wall": "erydon:block/rosinium_sanguenite_weave_grout_block"
+  }
+}

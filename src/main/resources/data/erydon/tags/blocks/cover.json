@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "erydon:cover_black",
+    "erydon:cover_bronze",
+    "erydon:cover_silver",
+    "erydon:cover_white"
+  ]
+}

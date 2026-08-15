@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/arch/romanesque/arch_romanesque_top_large",
+  "textures": {
+    "stone": "erydon:block/porphyros_ashlar_block"
+  }
+}
+

@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/surround/modern/surround_modern_shaft_lh",
+  "textures": {
+    "particle": "erydon:block/porphyros_block_aged",
+    "0": "erydon:block/porphyros_block_aged",
+    "1": "erydon:block/porphyros_block_aged",
+    "texture": "erydon:block/porphyros_block_aged",
+    "stone": "erydon:block/porphyros_block_aged"
+  }
+}

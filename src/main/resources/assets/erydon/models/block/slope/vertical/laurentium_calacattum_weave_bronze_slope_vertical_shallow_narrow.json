@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/laurentium_calacattum_weave_bronze_slope_vertical_shallow_narrow_lh",
+  "textures": {
+    "stone": "erydon:block/laurentium_calacattum_weave_bronze_block",
+    "particle": "erydon:block/laurentium_calacattum_weave_bronze_block"
+  }
+}

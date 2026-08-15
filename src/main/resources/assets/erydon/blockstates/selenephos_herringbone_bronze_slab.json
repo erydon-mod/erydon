@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "erydon:block/slab/selenephos_herringbone_bronze_slab"
+    },
+    "type=top": {
+      "model": "erydon:block/slab/selenephos_herringbone_bronze_slab_top"
+    },
+    "type=double": {
+      "model": "erydon:block/block/selenephos_herringbone_bronze_block"
+    }
+  }
+}

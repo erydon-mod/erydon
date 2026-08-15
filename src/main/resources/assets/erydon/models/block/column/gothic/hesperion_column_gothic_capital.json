@@ -1,0 +1,7 @@
+﻿{
+    "parent":  "erydon:block/column/gothic/column_gothic_capital",
+    "textures":  {
+                     "stone":  "erydon:block/hesperion_block",
+                     "particle":  "erydon:block/hesperion_block"
+                 }
+}

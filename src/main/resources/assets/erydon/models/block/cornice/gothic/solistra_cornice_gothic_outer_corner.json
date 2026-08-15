@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/cornice/gothic/cornice_gothic_outer_corner",
+  "textures": {
+    "stone": "erydon:block/solistra_block",
+    "particle": "erydon:block/solistra_block"
+  }
+}

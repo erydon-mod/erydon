@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "erydon:block/internal/wrapped/etruscus_ashlar_window_french_georgian"
+      }
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "part=small": {
+      "model": "erydon:block/chimney/circular/borealis_chimney_circular_aged_small"
+    },
+    "part=large_lower": {
+      "model": "erydon:block/chimney/circular/borealis_chimney_circular_aged_large_lower"
+    },
+    "part=large_upper": {
+      "model": "erydon:block/chimney/circular/borealis_chimney_circular_aged_large_upper"
+    }
+  }
+}

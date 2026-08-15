@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/surround/gothic_ornate/surround_gothic_ornate_corbel",
+  "textures": {
+    "particle": "erydon:block/solistra_block_aged",
+    "0": "erydon:block/solistra_block_aged",
+    "1": "erydon:block/solistra_block_aged",
+    "texture": "erydon:block/solistra_block_aged",
+    "stone": "erydon:block/solistra_block_aged"
+  }
+}

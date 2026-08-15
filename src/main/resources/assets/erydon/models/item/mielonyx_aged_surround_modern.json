@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:item/surround_modern_icon",
+  "textures": {
+    "stone": "erydon:block/mielonyx_block_aged"
+  }
+}

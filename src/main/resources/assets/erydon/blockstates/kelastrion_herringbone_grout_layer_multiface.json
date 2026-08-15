@@ -1,0 +1,516 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "north": "true",
+        "layers": "1"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_vertical_depth2",
+        "uvlock": true,
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "north": "true",
+        "layers": "2"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_vertical_depth4",
+        "uvlock": true,
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "north": "true",
+        "layers": "3"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_vertical_depth6",
+        "uvlock": true,
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "north": "true",
+        "layers": "4"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_vertical_depth8",
+        "uvlock": true,
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "north": "true",
+        "layers": "5"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_vertical_depth10",
+        "uvlock": true,
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "north": "true",
+        "layers": "6"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_vertical_depth12",
+        "uvlock": true,
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "north": "true",
+        "layers": "7"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_vertical_depth14",
+        "uvlock": true,
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "north": "true",
+        "layers": "8"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_vertical_depth16",
+        "uvlock": true,
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "east": "true",
+        "layers": "1"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_vertical_depth2",
+        "uvlock": true,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "east": "true",
+        "layers": "2"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_vertical_depth4",
+        "uvlock": true,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "east": "true",
+        "layers": "3"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_vertical_depth6",
+        "uvlock": true,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "east": "true",
+        "layers": "4"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_vertical_depth8",
+        "uvlock": true,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "east": "true",
+        "layers": "5"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_vertical_depth10",
+        "uvlock": true,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "east": "true",
+        "layers": "6"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_vertical_depth12",
+        "uvlock": true,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "east": "true",
+        "layers": "7"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_vertical_depth14",
+        "uvlock": true,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "east": "true",
+        "layers": "8"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_vertical_depth16",
+        "uvlock": true,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "south": "true",
+        "layers": "1"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_vertical_depth2",
+        "uvlock": true,
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "south": "true",
+        "layers": "2"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_vertical_depth4",
+        "uvlock": true,
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "south": "true",
+        "layers": "3"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_vertical_depth6",
+        "uvlock": true,
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "south": "true",
+        "layers": "4"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_vertical_depth8",
+        "uvlock": true,
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "south": "true",
+        "layers": "5"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_vertical_depth10",
+        "uvlock": true,
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "south": "true",
+        "layers": "6"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_vertical_depth12",
+        "uvlock": true,
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "south": "true",
+        "layers": "7"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_vertical_depth14",
+        "uvlock": true,
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "south": "true",
+        "layers": "8"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_vertical_depth16",
+        "uvlock": true,
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "west": "true",
+        "layers": "1"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_vertical_depth2",
+        "uvlock": true,
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "west": "true",
+        "layers": "2"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_vertical_depth4",
+        "uvlock": true,
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "west": "true",
+        "layers": "3"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_vertical_depth6",
+        "uvlock": true,
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "west": "true",
+        "layers": "4"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_vertical_depth8",
+        "uvlock": true,
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "west": "true",
+        "layers": "5"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_vertical_depth10",
+        "uvlock": true,
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "west": "true",
+        "layers": "6"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_vertical_depth12",
+        "uvlock": true,
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "west": "true",
+        "layers": "7"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_vertical_depth14",
+        "uvlock": true,
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "west": "true",
+        "layers": "8"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_vertical_depth16",
+        "uvlock": true,
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "down": "true",
+        "layers": "1"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_height2",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "up": "true",
+        "layers": "1"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_top_height2",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "down": "true",
+        "layers": "2"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_height4",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "up": "true",
+        "layers": "2"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_top_height4",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "down": "true",
+        "layers": "3"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_height6",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "up": "true",
+        "layers": "3"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_top_height6",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "down": "true",
+        "layers": "4"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_height8",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "up": "true",
+        "layers": "4"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_top_height8",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "down": "true",
+        "layers": "5"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_height10",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "up": "true",
+        "layers": "5"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_top_height10",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "down": "true",
+        "layers": "6"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_height12",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "up": "true",
+        "layers": "6"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_top_height12",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "down": "true",
+        "layers": "7"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_height14",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "up": "true",
+        "layers": "7"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_top_height14",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "down": "true",
+        "layers": "8"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_height16",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "up": "true",
+        "layers": "8"
+      },
+      "apply": {
+        "model": "erydon:block/layer/layer_multiface/kelastrion_herringbone_grout_layer_multiface_top_height16",
+        "uvlock": true
+      }
+    }
+  ]
+}

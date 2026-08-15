@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/template_wall_post",
+  "textures": {
+    "wall": "erydon:block/laurentium_rusticated_block",
+    "particle": "erydon:block/laurentium_rusticated_block"
+  }
+}

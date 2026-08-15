@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "erydon:block/internal/wrapped/aterzon_rusticated_alcove_georgian"
+      }
+    }
+  ]
+}

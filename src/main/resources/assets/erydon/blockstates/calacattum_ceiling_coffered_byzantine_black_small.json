@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "erydon:block/internal/wrapped/calacattum_ceiling_coffered_guilloche_black_small"
+      }
+    }
+  ]
+}

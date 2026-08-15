@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "#erydon:diaphanes",
+    "#erydon:glazing",
+    "erydon:glazing_framed_tinted_slope",
+    "erydon:glazing_framed_silver_slope",
+    "erydon:glazing_framed_crystal_slope",
+    "erydon:glazing_framed_bronze_slope",
+    "erydon:glazing_framed_tinted_slope_vertical",
+    "erydon:glazing_framed_silver_slope_vertical",
+    "erydon:glazing_framed_crystal_slope_vertical",
+    "erydon:glazing_framed_bronze_slope_vertical"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "erydon:block/glazing/shallow_slope/glazing_slope_shallow_upper_inner",
+  "textures": {
+    "glass": "erydon:block/glazing_tinted",
+    "lead": "erydon:block/lead_black",
+    "particle": "erydon:block/glazing_tinted"
+  }
+}

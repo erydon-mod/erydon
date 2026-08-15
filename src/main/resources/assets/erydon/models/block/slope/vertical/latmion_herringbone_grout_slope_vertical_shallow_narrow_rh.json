@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/slope_vertical_shallow_narrow_rh",
+  "textures": {
+    "stone": "erydon:block/latmion_herringbone_grout_block",
+    "particle": "erydon:block/latmion_herringbone_grout_block"
+  }
+}

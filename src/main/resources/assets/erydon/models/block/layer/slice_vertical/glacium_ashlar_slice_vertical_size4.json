@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/layer/slice_vertical/slice_vertical_size4",
+  "textures": {
+    "texture": "erydon:block/glacium_ashlar_block",
+    "particle": "erydon:block/glacium_ashlar_block"
+  }
+}

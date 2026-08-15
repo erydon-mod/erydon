@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/snow_height6",
+  "textures": {
+    "texture": "erydon:block/portorium_block",
+    "particle": "erydon:block/portorium_block"
+  }
+}

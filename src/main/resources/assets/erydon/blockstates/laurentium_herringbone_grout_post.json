@@ -1,0 +1,97 @@
+{
+  "variants": {
+    "axis=x,layers=1": {
+      "model": "erydon:block/layer/slice_post/laurentium_herringbone_grout_slice_post_horizontal_size2",
+      "uvlock": true,
+      "y": 90
+    },
+    "axis=x,layers=2": {
+      "model": "erydon:block/layer/slice_post/laurentium_herringbone_grout_slice_post_horizontal_size4",
+      "uvlock": true,
+      "y": 90
+    },
+    "axis=x,layers=3": {
+      "model": "erydon:block/layer/slice_post/laurentium_herringbone_grout_slice_post_horizontal_size6",
+      "uvlock": true,
+      "y": 90
+    },
+    "axis=x,layers=4": {
+      "model": "erydon:block/layer/slice_post/laurentium_herringbone_grout_slice_post_horizontal_size8",
+      "uvlock": true,
+      "y": 90
+    },
+    "axis=x,layers=5": {
+      "model": "erydon:block/layer/slice_post/laurentium_herringbone_grout_slice_post_horizontal_size10",
+      "uvlock": true,
+      "y": 90
+    },
+    "axis=x,layers=6": {
+      "model": "erydon:block/layer/slice_post/laurentium_herringbone_grout_slice_post_horizontal_size12",
+      "uvlock": true,
+      "y": 90
+    },
+    "axis=x,layers=7": {
+      "model": "erydon:block/layer/slice_post/laurentium_herringbone_grout_slice_post_horizontal_size14",
+      "uvlock": true,
+      "y": 90
+    },
+    "axis=x,layers=8": {
+      "model": "erydon:block/block/laurentium_herringbone_grout_block"
+    },
+    "axis=y,layers=1": {
+      "model": "erydon:block/layer/slice_post/laurentium_herringbone_grout_slice_post_horizontal_size2",
+      "x": 90
+    },
+    "axis=y,layers=2": {
+      "model": "erydon:block/layer/slice_post/laurentium_herringbone_grout_slice_post_horizontal_size4",
+      "x": 90
+    },
+    "axis=y,layers=3": {
+      "model": "erydon:block/layer/slice_post/laurentium_herringbone_grout_slice_post_horizontal_size6",
+      "x": 90
+    },
+    "axis=y,layers=4": {
+      "model": "erydon:block/layer/slice_post/laurentium_herringbone_grout_slice_post_horizontal_size8",
+      "x": 90
+    },
+    "axis=y,layers=5": {
+      "model": "erydon:block/layer/slice_post/laurentium_herringbone_grout_slice_post_horizontal_size10",
+      "x": 90
+    },
+    "axis=y,layers=6": {
+      "model": "erydon:block/layer/slice_post/laurentium_herringbone_grout_slice_post_horizontal_size12",
+      "x": 90
+    },
+    "axis=y,layers=7": {
+      "model": "erydon:block/layer/slice_post/laurentium_herringbone_grout_slice_post_horizontal_size14",
+      "x": 90
+    },
+    "axis=y,layers=8": {
+      "model": "erydon:block/block/laurentium_herringbone_grout_block"
+    },
+    "axis=z,layers=1": {
+      "model": "erydon:block/layer/slice_post/laurentium_herringbone_grout_slice_post_horizontal_size2"
+    },
+    "axis=z,layers=2": {
+      "model": "erydon:block/layer/slice_post/laurentium_herringbone_grout_slice_post_horizontal_size4"
+    },
+    "axis=z,layers=3": {
+      "model": "erydon:block/layer/slice_post/laurentium_herringbone_grout_slice_post_horizontal_size6"
+    },
+    "axis=z,layers=4": {
+      "model": "erydon:block/layer/slice_post/laurentium_herringbone_grout_slice_post_horizontal_size8"
+    },
+    "axis=z,layers=5": {
+      "model": "erydon:block/layer/slice_post/laurentium_herringbone_grout_slice_post_horizontal_size10"
+    },
+    "axis=z,layers=6": {
+      "model": "erydon:block/layer/slice_post/laurentium_herringbone_grout_slice_post_horizontal_size12"
+    },
+    "axis=z,layers=7": {
+      "model": "erydon:block/layer/slice_post/laurentium_herringbone_grout_slice_post_horizontal_size14"
+    },
+    "axis=z,layers=8": {
+      "model": "erydon:block/block/laurentium_herringbone_grout_block"
+    }
+  }
+}

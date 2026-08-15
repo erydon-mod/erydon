@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "erydon:block/slab/striatus_slab"
+    },
+    "type=top": {
+      "model": "erydon:block/slab/striatus_slab_top"
+    },
+    "type=double": {
+      "model": "erydon:block/block/striatus_block"
+    }
+  }
+}

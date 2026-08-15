@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/column/square/brectite_column_square_base_aged",
+  "textures": {
+    "all": "erydon:block/brectite_block_aged"
+  }
+}

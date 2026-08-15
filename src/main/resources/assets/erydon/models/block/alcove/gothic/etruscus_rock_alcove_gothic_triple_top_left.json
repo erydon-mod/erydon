@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/alcove/gothic/alcove_gothic_triple_top_left",
+    "textures":  {
+                     "stone":  "erydon:block/etruscus_rock_block",
+                     "particle":  "erydon:block/etruscus_rock_block"
+                 }
+}

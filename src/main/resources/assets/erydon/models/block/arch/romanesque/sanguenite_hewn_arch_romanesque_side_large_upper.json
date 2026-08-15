@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/arch/romanesque/arch_romanesque_side_large_upper",
+  "textures": {
+    "stone": "erydon:block/sanguenite_hewn_block"
+  }
+}
+

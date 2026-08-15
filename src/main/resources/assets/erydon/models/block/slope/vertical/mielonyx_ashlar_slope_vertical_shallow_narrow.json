@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/mielonyx_ashlar_slope_vertical_shallow_narrow_lh",
+  "textures": {
+    "stone": "erydon:block/mielonyx_ashlar_block",
+    "particle": "erydon:block/mielonyx_ashlar_block"
+  }
+}

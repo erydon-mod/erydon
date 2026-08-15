@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/kylorion_glacium_weave_bronze_layer_vertical"
+                                    }
+                      }
+                  ]
+}

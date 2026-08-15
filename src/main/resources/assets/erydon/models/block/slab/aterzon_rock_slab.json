@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {
+    "bottom": "erydon:block/aterzon_rock_block",
+    "top": "erydon:block/aterzon_rock_block",
+    "side": "erydon:block/aterzon_rock_block"
+  }
+}
+

@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "erydon:block/slab/gelastrum_etruscus_weave_grout_slab"
+    },
+    "type=top": {
+      "model": "erydon:block/slab/gelastrum_etruscus_weave_grout_slab_top"
+    },
+    "type=double": {
+      "model": "erydon:block/block/gelastrum_etruscus_weave_grout_block"
+    }
+  }
+}

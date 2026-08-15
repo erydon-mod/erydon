@@ -1,0 +1,310 @@
+import groovy.json.JsonOutput
+
+import java.nio.charset.StandardCharsets
+import java.util.zip.ZipFile
+
+def ctmPathAudit = { List<Map<String, Object>> propertyResources,
+                     Set<String> resourcePaths,
+                     String inputKind ->
+    def resolveToken
+    resolveToken = { String propertyEntry, String token, Set<String> availablePaths = resourcePaths ->
+        def resourceMatcher = propertyEntry =~ /^assets\/([^\/]+)\/(.+)$/
+        if (!resourceMatcher.matches()) {
+            throw new GradleException("Invalid CTM property resource path: ${propertyEntry}")
+        }
+        String propertyNamespace = resourceMatcher.group(1)
+        String propertyPath = resourceMatcher.group(2)
+        int lastSlash = propertyPath.lastIndexOf('/')
+        String propertyDirectory = lastSlash >= 0 ? propertyPath.substring(0, lastSlash + 1) : ''
+
+        if (token.endsWith('<skip>') || token.endsWith('<skip>.png')
+                || token.endsWith('<default>') || token.endsWith('<default>.png')) {
+            return []
+        }
+
+        String[] rangeParts = token.split('-', 2)
+        if (rangeParts.length == 2) {
+            try {
+                int first = Integer.parseInt(rangeParts[0])
+                int last = Integer.parseInt(rangeParts[1])
+                if (first <= last) {
+                    return (first..last).collect { value ->
+                        String path = "${propertyDirectory}${value}.png"
+                        String resourcePath = "assets/${propertyNamespace}/${path}"
+                        [
+                                token                   : token,
+                                namespace               : propertyNamespace,
+                                parsedPath              : path,
+                                resolvedResource        : resourcePath,
+                                exists                  : availablePaths.contains(resourcePath),
+                                texturePrefixedResource : "assets/${propertyNamespace}/textures/${path}",
+                                texturePrefixedExists   : availablePaths.contains("assets/${propertyNamespace}/textures/${path}"),
+                                rangeElement            : value
+                        ]
+                    }
+                }
+                return []
+            } catch (NumberFormatException ignored) {
+                // Continuity falls through to normal path parsing for non-numeric dash tokens.
+            }
+        }
+
+        String namespace = null
+        String path
+        int colon = token.indexOf(':')
+        if (colon >= 0) {
+            namespace = token.substring(0, colon)
+            path = token.substring(colon + 1)
+        } else {
+            path = token
+        }
+
+        if (!path.endsWith('.png')) {
+            path += '.png'
+        }
+
+        if (namespace == null) {
+            if (path.startsWith('assets/minecraft/')) {
+                path = path.substring('assets/minecraft/'.length())
+            } else if (path.startsWith('./')) {
+                path = propertyDirectory + path.substring(2)
+            } else if (path.startsWith('~/')) {
+                path = 'optifine/' + path.substring(2)
+            } else if (path.startsWith('/')) {
+                path = 'optifine/' + path.substring(1)
+            }
+
+            if (!path.startsWith('textures/') && !path.startsWith('optifine/')) {
+                path = propertyDirectory + path
+            }
+            if (path.startsWith('optifine/')) {
+                namespace = propertyNamespace
+            }
+        } else if (!path.contains('/')) {
+            path = 'textures/block/' + path
+        } else if (!path.startsWith('textures/') && !path.startsWith('optifine/')) {
+            path = 'textures/' + path
+        }
+
+        if (namespace == null || namespace.isEmpty()) {
+            namespace = 'minecraft'
+        }
+
+        String resourcePath = "assets/${namespace}/${path}"
+        String texturePrefixedPath = path.startsWith('textures/') ? path : "textures/${path}"
+        String texturePrefixedResource = "assets/${namespace}/${texturePrefixedPath}"
+        [[
+                token                   : token,
+                namespace               : namespace,
+                parsedPath              : path,
+                resolvedResource        : resourcePath,
+                exists                  : availablePaths.contains(resourcePath),
+                texturePrefixedResource : texturePrefixedResource,
+                texturePrefixedExists   : availablePaths.contains(texturePrefixedResource),
+                rangeElement            : null
+        ]]
+    }
+
+    def lineNumberForTiles = { byte[] bytes ->
+        String text = new String(bytes, StandardCharsets.ISO_8859_1)
+        List<String> lines = text.split(/\r?\n/, -1) as List<String>
+        int index = lines.findIndexOf { line -> line ==~ /^\s*tiles(?:\s*[=:]|\s+).*/ }
+        index >= 0 ? index + 1 : null
+    }
+
+    def references = []
+    def propertiesWithoutTiles = []
+    propertyResources.sort { it.entry as String }.each { item ->
+        String entry = item.entry as String
+        byte[] bytes = item.bytes as byte[]
+        def properties = new Properties()
+        new ByteArrayInputStream(bytes).withCloseable { input -> properties.load(input) }
+        String tilesValue = properties.getProperty('tiles')
+        if (tilesValue == null) {
+            propertiesWithoutTiles << entry
+            return
+        }
+
+        Integer line = lineNumberForTiles(bytes)
+        String[] tokens = tilesValue.trim().split('[ ,]')
+        tokens.findAll { !it.isEmpty() }.eachWithIndex { token, tokenIndex ->
+            resolveToken(entry, token).each { resolved ->
+                references << ([
+                        file       : entry,
+                        line       : line,
+                        property   : 'tiles',
+                        tokenIndex : tokenIndex,
+                        tilesValue : tilesValue
+                ] + resolved)
+            }
+        }
+    }
+
+    def fixtureChecks = []
+    def fixtureResources = [
+            'assets/minecraft/textures/optifine/ctm/fixture/texture_rooted.png',
+            'assets/minecraft/optifine/ctm/fixture/0.png',
+            'assets/minecraft/optifine/ctm/fixture/1.png',
+            'assets/fixture/textures/optifine/ctm/namespaced.png',
+            'assets/fixture/optifine/ctm/raw/valid.png'
+    ] as Set<String>
+    String fixtureProperty = 'assets/minecraft/optifine/ctm/fixture/rule.properties'
+    def fixtureCheck = { String label, boolean passed, String detail ->
+        fixtureChecks << [label: label, passed: passed, detail: detail]
+    }
+
+    def rooted = resolveToken(fixtureProperty, 'textures/optifine/ctm/fixture/texture_rooted', fixtureResources).first()
+    fixtureCheck('texture-rooted tile resolves', rooted.exists,
+            "${rooted.resolvedResource} exists")
+
+    def broken = resolveToken(fixtureProperty, 'optifine/ctm/fixture/texture_rooted', fixtureResources).first()
+    fixtureCheck('raw optifine path does not alias the texture root',
+            !broken.exists && broken.texturePrefixedExists,
+            "${broken.resolvedResource} is missing while ${broken.texturePrefixedResource} exists")
+
+    def range = resolveToken(fixtureProperty, '0-1', fixtureResources)
+    fixtureCheck('relative numeric range resolves beside the properties file',
+            range.size() == 2 && range.every { it.exists },
+            range.collect { it.resolvedResource }.join(', '))
+
+    def namespaced = resolveToken(fixtureProperty, 'fixture:textures/optifine/ctm/namespaced', fixtureResources).first()
+    fixtureCheck('namespace-qualified texture resolves', namespaced.exists,
+            "${namespaced.resolvedResource} exists")
+
+    def raw = resolveToken(fixtureProperty, 'fixture:optifine/ctm/raw/valid', fixtureResources).first()
+    fixtureCheck('valid raw non-textures resource remains valid', raw.exists && !raw.texturePrefixedExists,
+            "${raw.resolvedResource} exists and needs no rewrite")
+
+    def specials = resolveToken(fixtureProperty, '<skip>', fixtureResources) + resolveToken(fixtureProperty, '<default>', fixtureResources)
+    fixtureCheck('special sprite tokens require no resource', specials.isEmpty(),
+            '<skip> and <default> are preserved')
+
+    def missing = references.findAll { !it.exists }
+    def repairCandidates = missing.findAll { it.texturePrefixedExists }
+    def brokenOptifineCtm = repairCandidates.findAll {
+        (it.parsedPath as String).startsWith('optifine/ctm/')
+    }
+
+    def uniqueReferences = references.collect { "${it.namespace}:${it.parsedPath}" }.toSet()
+    def uniqueMissing = missing.collect { "${it.namespace}:${it.parsedPath}" }.toSet()
+    def uniqueRepairCandidates = repairCandidates.collect { "${it.namespace}:${it.parsedPath}" }.toSet()
+    def report = [
+            schemaVersion : 1,
+            inputKind    : inputKind,
+            resolverOracle: [
+                    implementation : 'Continuity 3.0.0+1.20.1 BaseCtmProperties.parseTiles/resolveTiles',
+                    textureRooted  : 'textures/<path> resolves through the normal block atlas',
+                    rawRedirect    : 'non-textures paths resolve through ResourceRedirectHandler at the raw resource path',
+                    tokenSplit     : '[ ,]',
+                    rangeHandling  : 'inclusive numeric ranges resolve relative to the CTM properties directory'
+            ],
+            fixtureChecks : fixtureChecks,
+            summary       : [
+                    propertyFiles             : propertyResources.size(),
+                    propertiesWithoutTiles    : propertiesWithoutTiles.size(),
+                    tileReferences            : references.size(),
+                    uniqueResolvedIdentifiers : uniqueReferences.size(),
+                    missingReferences         : missing.size(),
+                    uniqueMissingIdentifiers  : uniqueMissing.size(),
+                    repairCandidateReferences : repairCandidates.size(),
+                    uniqueRepairCandidates    : uniqueRepairCandidates.size(),
+                    brokenOptifineCtmReferences: brokenOptifineCtm.size(),
+                    affectedFiles             : brokenOptifineCtm.collect { it.file }.toSet().size()
+            ],
+            propertiesWithoutTiles: propertiesWithoutTiles,
+            missingReferences: missing,
+            repairCandidates: repairCandidates
+    ]
+    report
+}
+
+def writeCtmPathReport = { File output, Map report ->
+    output.parentFile.mkdirs()
+    output.setText(JsonOutput.prettyPrint(JsonOutput.toJson(report)) + System.lineSeparator(), 'UTF-8')
+}
+
+def assertCtmPathReport = { Map report, boolean allowMissing, File output ->
+    def failedFixtures = report.fixtureChecks.findAll { !it.passed }
+    if (!failedFixtures.isEmpty()) {
+        throw new GradleException("CTM path resolver fixtures failed: ${failedFixtures.collect { it.label }.join(', ')}")
+    }
+    int missing = report.summary.missingReferences as int
+    if (missing > 0 && !allowMissing) {
+        def first = report.missingReferences.first()
+        throw new GradleException("CTM tile path validation found ${missing} missing references. First: ${first.file}:${first.line} token '${first.token}' -> ${first.resolvedResource}. Report: ${output}")
+    }
+}
+
+tasks.register('validateCtmTilePaths') {
+    group = 'verification'
+    description = 'Validates source CTM tile paths using Continuity 3.0.0+1.20.1 path semantics.'
+
+    doLast {
+        File resourcesRoot = file('src/main/resources')
+        def allResources = fileTree(resourcesRoot).files.findAll { it.isFile() }
+        Set<String> resourcePaths = allResources.collect { file ->
+            resourcesRoot.toPath().relativize(file.toPath()).toString().replace(File.separator, '/')
+        }.toSet()
+        def properties = allResources.findAll { file ->
+            String relative = resourcesRoot.toPath().relativize(file.toPath()).toString().replace(File.separator, '/')
+            file.name.endsWith('.properties')
+                    && (relative.contains('/optifine/ctm/') || relative.contains('/mcpatcher/ctm/'))
+        }.collect { file ->
+            [
+                    entry: resourcesRoot.toPath().relativize(file.toPath()).toString().replace(File.separator, '/'),
+                    bytes: file.bytes
+            ]
+        }
+
+        Map report = ctmPathAudit(properties, resourcePaths, 'source')
+        File output = providers.gradleProperty('erydon.ctmPathAudit.sourceOutput')
+                .map { file(it) }
+                .getOrElse(layout.buildDirectory.file('reports/ctm-path-audit/source.json').get().asFile)
+        writeCtmPathReport(output, report)
+        logger.lifecycle("ERYDON source CTM path audit: files=${report.summary.propertyFiles}, refs=${report.summary.tileReferences}, missing=${report.summary.missingReferences}, repairCandidates=${report.summary.repairCandidateReferences}")
+        assertCtmPathReport(report,
+                providers.gradleProperty('erydon.ctmPathAudit.allowMissing').map { it.toBoolean() }.getOrElse(false),
+                output)
+    }
+}
+
+tasks.register('auditCtmTilePathsJar') {
+    group = 'verification'
+    description = 'Validates CTM tile paths in the remapped ERYDON JAR using Continuity 3.0.0+1.20.1 path semantics.'
+    dependsOn tasks.named('remapJar')
+
+    doLast {
+        File jarFile = tasks.named('remapJar').get().archiveFile.get().asFile
+        ZipFile zip = new ZipFile(jarFile)
+        try {
+            def entries = zip.entries().toList().findAll { !it.directory }
+            Set<String> resourcePaths = entries.collect { it.name }.toSet()
+            def properties = entries.findAll { entry ->
+                entry.name.endsWith('.properties')
+                        && (entry.name.contains('/optifine/ctm/') || entry.name.contains('/mcpatcher/ctm/'))
+            }.collect { entry ->
+                [entry: entry.name, bytes: zip.getInputStream(entry).withCloseable { it.bytes }]
+            }
+
+            Map report = ctmPathAudit(properties, resourcePaths, 'jar')
+            File output = providers.gradleProperty('erydon.ctmPathAudit.jarOutput')
+                    .map { file(it) }
+                    .getOrElse(layout.buildDirectory.file('reports/ctm-path-audit/jar.json').get().asFile)
+            writeCtmPathReport(output, report)
+            logger.lifecycle("ERYDON JAR CTM path audit: files=${report.summary.propertyFiles}, refs=${report.summary.tileReferences}, missing=${report.summary.missingReferences}, repairCandidates=${report.summary.repairCandidateReferences}")
+            assertCtmPathReport(report,
+                    providers.gradleProperty('erydon.ctmPathAudit.allowMissing').map { it.toBoolean() }.getOrElse(false),
+                    output)
+        } finally {
+            zip.close()
+        }
+    }
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('validateCtmTilePaths')
+}
+
+tasks.named('auditErydonJar') {
+    dependsOn tasks.named('auditCtmTilePathsJar')
+}

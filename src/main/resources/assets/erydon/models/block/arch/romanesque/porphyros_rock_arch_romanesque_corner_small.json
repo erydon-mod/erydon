@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/arch/romanesque/arch_romanesque_corner_small",
+  "textures": {
+    "stone": "erydon:block/porphyros_rock_block"
+  }
+}
+

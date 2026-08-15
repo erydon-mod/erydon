@@ -1,0 +1,6 @@
+{
+    "parent":  "erydon:block/internal/wrapped/etruscus_herringbone_grout_slope_vertical_shallow_narrow",
+    "textures":  {
+                     "texture":  "erydon:block/etruscus_herringbone_grout_block"
+                 }
+}

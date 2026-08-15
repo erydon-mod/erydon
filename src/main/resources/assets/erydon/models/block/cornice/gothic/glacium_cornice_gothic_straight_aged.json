@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/cornice/gothic/cornice_gothic_straight",
+  "textures": {
+    "stone": "erydon:block/glacium_block_aged",
+    "particle": "erydon:block/glacium_block_aged"
+  }
+}

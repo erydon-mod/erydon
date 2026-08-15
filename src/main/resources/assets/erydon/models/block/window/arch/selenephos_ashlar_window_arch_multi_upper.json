@@ -1,0 +1,8 @@
+{
+  "parent": "erydon:block/window/arch/window_arch_multi_upper",
+  "textures": {
+    "stone": "erydon:block/selenephos_ashlar_block",
+    "pane": "erydon:block/glazing_silver",
+    "lead": "erydon:block/lead_black"
+  }
+}

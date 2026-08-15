@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/surround/gothic_ornate/surround_gothic_ornate_mantel_stub_rh",
+  "textures": {
+    "particle": "erydon:block/imperium_block",
+    "0": "erydon:block/imperium_block",
+    "1": "erydon:block/imperium_block",
+    "texture": "erydon:block/imperium_block",
+    "stone": "erydon:block/imperium_block"
+  }
+}

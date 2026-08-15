@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/slope_vertical_shallow_broad_rh",
+  "textures": {
+    "stone": "erydon:block/hesperion_herringbone_bronze_block",
+    "particle": "erydon:block/hesperion_herringbone_bronze_block"
+  }
+}

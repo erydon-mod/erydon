@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "erydon:block/slab/chrysonyx_slab_aged"
+    },
+    "type=top": {
+      "model": "erydon:block/slab/chrysonyx_slab_top_aged"
+    },
+    "type=double": {
+      "model": "erydon:block/block/chrysonyx_block_aged"
+    }
+  }
+}

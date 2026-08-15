@@ -1,0 +1,427 @@
+tasks.register('auditErydonAssets') {
+    group = 'verification'
+    description = 'Writes ERYDON asset/model graph audit reports without changing assets.'
+
+    doLast {
+        def projectRoot = project.projectDir
+        def resourcesRoot = file('src/main/resources')
+        def reportDir = layout.buildDirectory.dir('reports').get().asFile
+        reportDir.mkdirs()
+
+        def manifestFile = new File(reportDir, 'erydon_asset_manifest.txt')
+        def referencesFile = new File(reportDir, 'erydon_model_references.txt')
+        def candidatesFile = new File(reportDir, 'erydon_unused_model_candidates.txt')
+        def generatedAt = new Date().format("yyyy-MM-dd HH:mm:ss Z")
+        def slurper = new groovy.json.JsonSlurper()
+        def parseFailures = []
+
+        def relPath = { File f ->
+            projectRoot.toPath().relativize(f.toPath()).toString().replace(File.separator, '/')
+        }
+        def localRelPath = { File root, File f ->
+            root.toPath().relativize(f.toPath()).toString().replace(File.separator, '/')
+        }
+        def filesUnder = { File root, Closure<Boolean> keep ->
+            def result = []
+            if (root.exists()) {
+                root.eachFileRecurse(groovy.io.FileType.FILES) { file ->
+                    if (keep(file)) {
+                        result << file
+                    }
+                }
+            }
+            result.sort { relPath(it) }
+        }
+        def parseJson = { File file ->
+            try {
+                slurper.parse(file)
+            } catch (Exception exception) {
+                parseFailures << "${relPath(file)} :: ${exception.message}"
+                null
+            }
+        }
+
+        def collectStringValuesByKey
+        collectStringValuesByKey = { Object node, String wantedKey, List<String> out ->
+            if (node instanceof Map) {
+                node.each { key, value ->
+                    if (key.toString() == wantedKey && value instanceof CharSequence) {
+                        out << value.toString()
+                    }
+                    collectStringValuesByKey(value, wantedKey, out)
+                }
+            } else if (node instanceof Iterable) {
+                node.each { value ->
+                    collectStringValuesByKey(value, wantedKey, out)
+                }
+            }
+        }
+
+        def blockstatesRoot = file('src/main/resources/assets/erydon/blockstates')
+        def blockModelsRoot = file('src/main/resources/assets/erydon/models/block')
+        def itemModelsRoot = file('src/main/resources/assets/erydon/models/item')
+        def blockstates = filesUnder(blockstatesRoot) { it.name.endsWith('.json') }
+        def blockModels = filesUnder(blockModelsRoot) { it.name.endsWith('.json') }
+        def itemModels = filesUnder(itemModelsRoot) { it.name.endsWith('.json') }
+        def blockModelPrefix = 'src/main/resources/assets/erydon/models/block/'
+        def blockModelRelSet = blockModels.collect { relPath(it) } as Set
+
+        def normalizeBlockModelRef = { String raw ->
+            if (raw == null) {
+                return null
+            }
+            def value = raw.trim()
+            if (value.isEmpty() || value.startsWith('#') || !value.startsWith('erydon:')) {
+                return null
+            }
+            def idPath = value.substring('erydon:'.length())
+            if (!idPath.startsWith('block/')) {
+                return null
+            }
+            'src/main/resources/assets/erydon/models/' + idPath + '.json'
+        }
+        def modelIdFromRel = { String rel ->
+            "erydon:" + rel.substring('src/main/resources/assets/erydon/models/'.length(), rel.length() - '.json'.length())
+        }
+        def folderForModel = { String rel ->
+            def sub = rel.substring(blockModelPrefix.length())
+            if (sub.startsWith('internal/wrapped/')) {
+                return 'internal/wrapped'
+            }
+            def slash = sub.indexOf('/')
+            slash >= 0 ? sub.substring(0, slash) : '(root)'
+        }
+        def shortList = { Collection values ->
+            if (values == null || values.isEmpty()) {
+                return '-'
+            }
+            def list = values.toList().sort()
+            def shown = list.take(3).join(', ')
+            list.size() > 3 ? "${shown} +${list.size() - 3} more" : shown
+        }
+        def formatCountMap = { Map map ->
+            if (map.isEmpty()) {
+                return '-'
+            }
+            map.keySet().toList().sort().collect { key -> "${key}=${map[key]}" }.join(', ')
+        }
+        def countByExtension = { Collection files ->
+            def counts = new TreeMap<String, Integer>()
+            files.each { file ->
+                def extension = file.name.contains('.') ? file.name.substring(file.name.lastIndexOf('.')).toLowerCase(Locale.ROOT) : '(none)'
+                counts[extension] = (counts[extension] ?: 0) + 1
+            }
+            counts
+        }
+        def sizeMb = { Collection files ->
+            def bytes = files.sum { it.length() } ?: 0L
+            String.format(Locale.ROOT, '%.1f', bytes / (1024.0d * 1024.0d))
+        }
+
+        def allResourceFiles = filesUnder(resourcesRoot) { true }
+        def internalWrappedModels = blockModels.findAll { relPath(it).startsWith("${blockModelPrefix}internal/wrapped/") }
+        def atlasFiles = allResourceFiles.findAll { relPath(it) ==~ /src\/main\/resources\/assets\/[^\/]+\/atlases\/.*\.json/ }
+        def atlasSourceCount = 0
+        def atlasSourceExamples = []
+        atlasFiles.each { file ->
+            def json = parseJson(file)
+            if (json instanceof Map && json.sources instanceof Collection) {
+                atlasSourceCount += json.sources.size()
+                json.sources.take(5).each { source ->
+                    if (source instanceof Map) {
+                        atlasSourceExamples << "${relPath(file)} :: ${source.type ?: '?'} :: ${source.source ?: source.path ?: '?'}"
+                    }
+                }
+            }
+        }
+
+        def summarizeCtmRoot = { String label, File root ->
+            def files = filesUnder(root) { true }
+            def props = files.findAll { file ->
+                def rel = localRelPath(root, file)
+                file.name.endsWith('.properties') && (rel.contains('/optifine/ctm/') || rel.contains('/mcpatcher/ctm/'))
+            }
+            def pngs = files.findAll { file ->
+                def rel = localRelPath(root, file)
+                file.name.toLowerCase(Locale.ROOT).endsWith('.png') && rel.contains('/textures/optifine/ctm/')
+            }
+            def normals = pngs.findAll { it.name.toLowerCase(Locale.ROOT).endsWith('_n.png') }
+            def speculars = pngs.findAll { it.name.toLowerCase(Locale.ROOT).endsWith('_s.png') }
+            def albedo = pngs.size() - normals.size() - speculars.size()
+            def zipsInAssets = files.findAll { file ->
+                def rel = localRelPath(root, file)
+                file.name.toLowerCase(Locale.ROOT).endsWith('.zip') && rel.startsWith('assets/')
+            }
+            [
+                    label: label,
+                    exists: root.exists(),
+                    fileCount: files.size(),
+                    sizeMb: sizeMb(files),
+                    ctmProperties: props.size(),
+                    ctmPngs: pngs.size(),
+                    ctmAlbedoPngs: albedo,
+                    ctmNormalSidecars: normals.size(),
+                    ctmSpecularSidecars: speculars.size(),
+                    zipsInAssets: zipsInAssets.collect { localRelPath(root, it) }.sort(),
+                    extensionCounts: countByExtension(files)
+            ]
+        }
+
+        def ctmSummaries = [
+                summarizeCtmRoot('Core mod resources', resourcesRoot),
+                summarizeCtmRoot('erydon-rp-16x-lite', file('run-dev/resourcepacks/erydon-rp-16x-lite')),
+                summarizeCtmRoot('erydon-rp-64x-pbr', file('run-dev/resourcepacks/erydon-rp-64x-pbr'))
+        ]
+
+        def modelInfo = new LinkedHashMap<String, Map>()
+        blockModels.each { file ->
+            def rel = relPath(file)
+            modelInfo[rel] = [
+                    flags: new TreeSet<String>(),
+                    blockstates: new TreeSet<String>(),
+                    items: new TreeSet<String>(),
+                    parents: new TreeSet<String>(),
+                    children: new TreeSet<String>(),
+                    notes: new TreeSet<String>()
+            ]
+        }
+        def missingRefs = new TreeSet<String>()
+        def addFlag = { String rel, String flag, String note ->
+            if (rel == null) {
+                return
+            }
+            if (modelInfo.containsKey(rel)) {
+                modelInfo[rel]['flags'].add(flag)
+                if (note != null && !note.isBlank()) {
+                    modelInfo[rel]['notes'].add(note)
+                }
+            } else {
+                missingRefs.add(rel)
+            }
+        }
+
+        blockstates.each { file ->
+            def json = parseJson(file)
+            def refs = []
+            collectStringValuesByKey(json, 'model', refs)
+            refs.each { raw ->
+                def rel = normalizeBlockModelRef(raw)
+                if (rel != null) {
+                    addFlag(rel, 'A', 'referenced by placed blockstate')
+                    if (modelInfo.containsKey(rel)) {
+                        modelInfo[rel]['blockstates'].add(relPath(file))
+                    }
+                }
+            }
+        }
+
+        itemModels.each { file ->
+            def json = parseJson(file)
+            def refs = []
+            collectStringValuesByKey(json, 'parent', refs)
+            refs.each { raw ->
+                def rel = normalizeBlockModelRef(raw)
+                if (rel != null) {
+                    addFlag(rel, 'B', 'referenced by item model')
+                    if (modelInfo.containsKey(rel)) {
+                        modelInfo[rel]['items'].add(relPath(file))
+                    }
+                }
+            }
+        }
+
+        blockModels.each { file ->
+            def modelRel = relPath(file)
+            def json = parseJson(file)
+            def parents = []
+            collectStringValuesByKey(json, 'parent', parents)
+            parents.each { raw ->
+                def parentRel = normalizeBlockModelRef(raw)
+                if (parentRel != null) {
+                    addFlag(parentRel, 'C', 'referenced as a parent/template model')
+                    if (modelInfo.containsKey(parentRel)) {
+                        modelInfo[parentRel]['children'].add(modelRel)
+                    }
+                    if (modelInfo.containsKey(modelRel)) {
+                        modelInfo[modelRel]['parents'].add(parentRel)
+                    }
+                }
+            }
+            if (json instanceof Map) {
+                def elements = json.elements
+                def textures = json.textures
+                boolean emptyElements = elements == null || (elements instanceof Collection && elements.isEmpty())
+                if (emptyElements && textures instanceof Map && !textures.isEmpty()) {
+                    addFlag(modelRel, 'C', 'empty texture/particle anchor shape')
+                }
+            }
+        }
+
+        def dynamicRules = [
+                [label: 'internal wrapped anchor', matcher: { String rel -> folderForModel(rel) == 'internal/wrapped' }],
+                [label: 'alcove baked model family', matcher: { String rel -> folderForModel(rel) == 'alcove' || rel.contains('_alcove_') }],
+                [label: 'slope baked model family', matcher: { String rel -> folderForModel(rel) == 'slope' || rel.contains('_slope') }],
+                [label: 'arch baked model family', matcher: { String rel -> folderForModel(rel) == 'arch' || rel.contains('_arch_romanesque') }],
+                [label: 'ceiling baked model family', matcher: { String rel -> folderForModel(rel) == 'ceiling' || rel.contains('_ceiling_coffered') || rel.contains('/cover_') }],
+                [label: 'column baked model family', matcher: { String rel -> folderForModel(rel) == 'column' || rel.contains('_column_') }],
+                [label: 'cornice baked model family', matcher: { String rel -> folderForModel(rel) == 'cornice' || rel.contains('_cornice_') }],
+                [label: 'surround baked model family', matcher: { String rel -> folderForModel(rel) == 'surround' || rel.contains('_surround_') }],
+                [label: 'window baked model family', matcher: { String rel -> folderForModel(rel) == 'window' || rel.contains('_window_arch') || rel.contains('_window_french_georgian') }]
+        ]
+        modelInfo.keySet().each { rel ->
+            dynamicRules.each { rule ->
+                if (rule.matcher(rel)) {
+                    addFlag(rel, 'D', rule.label)
+                }
+            }
+        }
+        modelInfo.each { rel, info ->
+            if (info['flags'].isEmpty()) {
+                info['flags'].add('E')
+                info['notes'].add('candidate only: no JSON reference or protected dynamic family found by this audit')
+            }
+        }
+
+        def countFlag = { String flag ->
+            modelInfo.values().count { it['flags'].contains(flag) }
+        }
+        def folderStats = new TreeMap<String, Map>()
+        modelInfo.each { rel, info ->
+            def folder = folderForModel(rel)
+            if (!folderStats.containsKey(folder)) {
+                folderStats[folder] = [total: 0, A: 0, B: 0, C: 0, D: 0, E: 0]
+            }
+            folderStats[folder].total++
+            ['A', 'B', 'C', 'D', 'E'].each { flag ->
+                if (info['flags'].contains(flag)) {
+                    folderStats[folder][flag]++
+                }
+            }
+        }
+        def modelFolderCounts = new TreeMap<String, Integer>()
+        blockModels.each { file ->
+            def folder = folderForModel(relPath(file))
+            modelFolderCounts[folder] = (modelFolderCounts[folder] ?: 0) + 1
+        }
+        def highPriorityFolders = ['slope', 'internal/wrapped', 'alcove', 'arch', 'window', 'surround', 'ceiling', 'column', 'cornice']
+
+        def manifestLines = []
+        manifestLines << 'ERYDON Asset Manifest'
+        manifestLines << "Generated: ${generatedAt}"
+        manifestLines << 'Mode: read-only audit; no assets are changed by this task.'
+        manifestLines << ''
+        manifestLines << 'Summary'
+        manifestLines << "blockstates: ${blockstates.size()}"
+        manifestLines << "block models: ${blockModels.size()}"
+        manifestLines << "item models: ${itemModels.size()}"
+        manifestLines << "internal wrapped block models: ${internalWrappedModels.size()}"
+        manifestLines << "atlas files: ${atlasFiles.size()}"
+        manifestLines << "atlas sources: ${atlasSourceCount}"
+        manifestLines << "JSON parse warnings: ${parseFailures.size()}"
+        manifestLines << ''
+        manifestLines << 'High-priority model folders'
+        highPriorityFolders.each { folder ->
+            manifestLines << "${folder}: ${modelFolderCounts[folder] ?: 0}"
+        }
+        manifestLines << ''
+        manifestLines << 'Largest top-level block model folders'
+        modelFolderCounts.entrySet().toList().sort { -it.value }.take(30).each { entry ->
+            manifestLines << "${entry.key}: ${entry.value}"
+        }
+        manifestLines << ''
+        manifestLines << 'CTM, sidecars, atlas, and resource-pack counts'
+        ctmSummaries.each { summary ->
+            manifestLines << "${summary.label}:"
+            manifestLines << "  exists: ${summary.exists}"
+            manifestLines << "  files: ${summary.fileCount}"
+            manifestLines << "  size MB: ${summary.sizeMb}"
+            manifestLines << "  CTM properties: ${summary.ctmProperties}"
+            manifestLines << "  CTM PNGs: ${summary.ctmPngs}"
+            manifestLines << "  CTM albedo PNGs: ${summary.ctmAlbedoPngs}"
+            manifestLines << "  CTM normal sidecars: ${summary.ctmNormalSidecars}"
+            manifestLines << "  CTM specular sidecars: ${summary.ctmSpecularSidecars}"
+            manifestLines << "  extension counts: ${formatCountMap(summary.extensionCounts)}"
+            manifestLines << "  zip files under assets: ${summary.zipsInAssets.size()}"
+            summary.zipsInAssets.take(20).each { zipRel ->
+                manifestLines << "    ${zipRel}"
+            }
+        }
+        manifestLines << ''
+        manifestLines << 'Atlas source examples'
+        manifestLines.addAll(atlasSourceExamples.take(30))
+        if (parseFailures) {
+            manifestLines << ''
+            manifestLines << 'JSON parse warnings'
+            manifestLines.addAll(parseFailures.take(50))
+        }
+        manifestFile.text = manifestLines.join(System.lineSeparator()) + System.lineSeparator()
+
+        def referenceLines = []
+        referenceLines << 'ERYDON Model References'
+        referenceLines << "Generated: ${generatedAt}"
+        referenceLines << 'Flags: A=placed blockstate, B=item model, C=parent/template/particle carrier, D=dynamic/fallback protected, E=candidate only.'
+        referenceLines << ''
+        referenceLines << 'Summary'
+        referenceLines << "A used by placed blockstates: ${countFlag('A')}"
+        referenceLines << "B used by item models: ${countFlag('B')}"
+        referenceLines << "C parent/template/particle carriers: ${countFlag('C')}"
+        referenceLines << "D dynamic/fallback protected: ${countFlag('D')}"
+        referenceLines << "E possible unused candidates: ${countFlag('E')}"
+        referenceLines << "Missing ERYDON block model references: ${missingRefs.size()}"
+        referenceLines << ''
+        referenceLines << 'Folder classification counts'
+        referenceLines << 'folder | total | A | B | C | D | E'
+        folderStats.each { folder, stats ->
+            referenceLines << "${folder} | ${stats.total} | ${stats.A} | ${stats.B} | ${stats.C} | ${stats.D} | ${stats.E}"
+        }
+        referenceLines << ''
+        referenceLines << 'Dynamic protection rules'
+        dynamicRules.each { rule ->
+            referenceLines << "D: ${rule.label}"
+        }
+        if (missingRefs) {
+            referenceLines << ''
+            referenceLines << 'Missing ERYDON block model references'
+            missingRefs.take(200).each { referenceLines << it }
+        }
+        referenceLines << ''
+        referenceLines << 'Detailed model classifications'
+        referenceLines << 'flags | model id | file | blockstates | item models | parents | children | notes'
+        modelInfo.keySet().sort().each { rel ->
+            def info = modelInfo[rel]
+            referenceLines << "${info['flags'].join('')} | ${modelIdFromRel(rel)} | ${rel} | ${shortList(info['blockstates'])} | ${shortList(info['items'])} | ${shortList(info['parents'])} | ${shortList(info['children'])} | ${shortList(info['notes'])}"
+        }
+        referencesFile.text = referenceLines.join(System.lineSeparator()) + System.lineSeparator()
+
+        def candidates = modelInfo.findAll { rel, info -> info['flags'].contains('E') }
+        def candidateFolderStats = new TreeMap<String, Integer>()
+        candidates.each { rel, info ->
+            def folder = folderForModel(rel)
+            candidateFolderStats[folder] = (candidateFolderStats[folder] ?: 0) + 1
+        }
+        def candidateLines = []
+        candidateLines << 'ERYDON Possible Unused Model Candidates'
+        candidateLines << "Generated: ${generatedAt}"
+        candidateLines << 'Important: this is not deletion approval. Every candidate still needs manual checking before removal.'
+        candidateLines << ''
+        candidateLines << "Candidate count: ${candidates.size()}"
+        candidateLines << ''
+        candidateLines << 'Candidate folders'
+        candidateFolderStats.entrySet().toList().sort { -it.value }.each { entry ->
+            candidateLines << "${entry.key}: ${entry.value}"
+        }
+        candidateLines << ''
+        candidateLines << 'Candidates'
+        candidateLines << 'model id | file | reason'
+        candidates.keySet().sort().each { rel ->
+            def info = modelInfo[rel]
+            candidateLines << "${modelIdFromRel(rel)} | ${rel} | ${shortList(info['notes'])}"
+        }
+        candidatesFile.text = candidateLines.join(System.lineSeparator()) + System.lineSeparator()
+
+        logger.lifecycle("ERYDON asset manifest written to ${manifestFile}")
+        logger.lifecycle("ERYDON model references written to ${referencesFile}")
+        logger.lifecycle("ERYDON unused model candidates written to ${candidatesFile}")
+        logger.lifecycle("ERYDON audit summary: blockstates=${blockstates.size()}, blockModels=${blockModels.size()}, itemModels=${itemModels.size()}, candidates=${candidates.size()}")
+    }
+}

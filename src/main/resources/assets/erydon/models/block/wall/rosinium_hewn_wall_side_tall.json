@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/template_wall_side_tall",
+  "textures": {
+    "wall": "erydon:block/rosinium_hewn_block",
+    "particle": "erydon:block/rosinium_hewn_block"
+  }
+}

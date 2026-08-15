@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/column/circular/column_circular_pillar",
+  "textures": {
+    "stone": "erydon:block/nerium_block_aged",
+    "particle": "erydon:block/nerium_block_aged"
+  }
+}

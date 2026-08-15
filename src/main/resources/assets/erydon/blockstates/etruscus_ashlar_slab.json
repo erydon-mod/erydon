@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "erydon:block/slab/etruscus_ashlar_slab"
+    },
+    "type=top": {
+      "model": "erydon:block/slab/etruscus_ashlar_slab_top"
+    },
+    "type=double": {
+      "model": "erydon:block/block/etruscus_ashlar_block"
+    }
+  }
+}

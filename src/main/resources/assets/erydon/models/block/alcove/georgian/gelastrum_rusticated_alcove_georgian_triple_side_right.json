@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/alcove/georgian/alcove_georgian_triple_side_right",
+    "textures":  {
+                     "stone":  "erydon:block/gelastrum_rusticated_block",
+                     "particle":  "erydon:block/gelastrum_rusticated_block"
+                 }
+}

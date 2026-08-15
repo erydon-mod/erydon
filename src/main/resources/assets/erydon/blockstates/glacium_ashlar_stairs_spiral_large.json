@@ -1,0 +1,212 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "facing": "north",
+        "part": "a"
+      },
+      "apply": {
+        "model": "erydon:block/stairs/spiral/glacium_ashlar_stairs_spiral_large_a",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "b"
+      },
+      "apply": {
+        "model": "erydon:block/stairs/spiral/glacium_ashlar_stairs_spiral_large_b",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "c"
+      },
+      "apply": {
+        "model": "erydon:block/stairs/spiral/glacium_ashlar_stairs_spiral_large_c",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "b",
+        "cap": "true"
+      },
+      "apply": {
+        "model": "erydon:block/stairs/spiral/glacium_ashlar_stairs_spiral_large_e",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "d",
+        "cap": "true"
+      },
+      "apply": {
+        "model": "erydon:block/stairs/spiral/glacium_ashlar_stairs_spiral_large_d",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "a"
+      },
+      "apply": {
+        "model": "erydon:block/stairs/spiral/glacium_ashlar_stairs_spiral_large_a",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "b"
+      },
+      "apply": {
+        "model": "erydon:block/stairs/spiral/glacium_ashlar_stairs_spiral_large_b",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "c"
+      },
+      "apply": {
+        "model": "erydon:block/stairs/spiral/glacium_ashlar_stairs_spiral_large_c",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "b",
+        "cap": "true"
+      },
+      "apply": {
+        "model": "erydon:block/stairs/spiral/glacium_ashlar_stairs_spiral_large_e",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "d",
+        "cap": "true"
+      },
+      "apply": {
+        "model": "erydon:block/stairs/spiral/glacium_ashlar_stairs_spiral_large_d",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "a"
+      },
+      "apply": {
+        "model": "erydon:block/stairs/spiral/glacium_ashlar_stairs_spiral_large_a",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "b"
+      },
+      "apply": {
+        "model": "erydon:block/stairs/spiral/glacium_ashlar_stairs_spiral_large_b",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "c"
+      },
+      "apply": {
+        "model": "erydon:block/stairs/spiral/glacium_ashlar_stairs_spiral_large_c",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "b",
+        "cap": "true"
+      },
+      "apply": {
+        "model": "erydon:block/stairs/spiral/glacium_ashlar_stairs_spiral_large_e",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "d",
+        "cap": "true"
+      },
+      "apply": {
+        "model": "erydon:block/stairs/spiral/glacium_ashlar_stairs_spiral_large_d",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "a"
+      },
+      "apply": {
+        "model": "erydon:block/stairs/spiral/glacium_ashlar_stairs_spiral_large_a",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "b"
+      },
+      "apply": {
+        "model": "erydon:block/stairs/spiral/glacium_ashlar_stairs_spiral_large_b",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "c"
+      },
+      "apply": {
+        "model": "erydon:block/stairs/spiral/glacium_ashlar_stairs_spiral_large_c",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "b",
+        "cap": "true"
+      },
+      "apply": {
+        "model": "erydon:block/stairs/spiral/glacium_ashlar_stairs_spiral_large_e",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "d",
+        "cap": "true"
+      },
+      "apply": {
+        "model": "erydon:block/stairs/spiral/glacium_ashlar_stairs_spiral_large_d",
+        "y": 0
+      }
+    }
+  ]
+}

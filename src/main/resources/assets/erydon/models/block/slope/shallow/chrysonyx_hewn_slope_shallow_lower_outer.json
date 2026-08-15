@@ -1,0 +1,8 @@
+{
+  "parent": "erydon:block/slope/shallow/slope_shallow_lower_outer",
+  "textures": {
+    "stone": "erydon:block/chrysonyx_hewn_block",
+    "particle": "#stone"
+  }
+}
+

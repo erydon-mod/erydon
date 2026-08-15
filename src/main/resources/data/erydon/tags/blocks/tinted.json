@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    "erydon:glazing_tinted",
+    "erydon:glazing_tinted_block",
+    "erydon:glazing_tinted_layer_vertical",
+    "erydon:glazing_framed_tinted_shallow_slope_lower",
+    "erydon:glazing_framed_tinted_shallow_slope_upper",
+    "erydon:glazing_framed_tinted",
+    "erydon:glazing_framed_tinted_slope",
+    "erydon:glazing_framed_tinted_slope_vertical"
+  ]
+}

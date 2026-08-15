@@ -1,0 +1,6 @@
+{
+    "parent":  "erydon:block/stairs/spiral/stairs_spiral_large_icon",
+    "textures":  {
+                     "stone":  "erydon:block/chrysonyx_block"
+                 }
+}

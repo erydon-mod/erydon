@@ -1,0 +1,8 @@
+{
+  "parent": "erydon:block/slope/steep/slope_steep_lower_outer",
+  "textures": {
+    "stone": "erydon:block/mielonyx_block",
+    "0": "#stone",
+    "particle": "#stone"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/layer/slice_horizontal/slice_horizontal_bottom_size2",
+  "textures": {
+    "texture": "erydon:block/aterzon_block_aged",
+    "particle": "erydon:block/aterzon_block_aged"
+  }
+}

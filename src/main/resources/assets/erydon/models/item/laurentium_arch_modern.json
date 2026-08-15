@@ -1,0 +1,6 @@
+{
+    "parent": "erydon:block/arch/modern/arch_modern_icon",
+    "textures": {
+        "stone": "erydon:block/laurentium_block"
+    }
+}

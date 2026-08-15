@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "erydon:block/slab/imperium_ashlar_slab"
+    },
+    "type=top": {
+      "model": "erydon:block/slab/imperium_ashlar_slab_top"
+    },
+    "type=double": {
+      "model": "erydon:block/block/imperium_ashlar_block"
+    }
+  }
+}

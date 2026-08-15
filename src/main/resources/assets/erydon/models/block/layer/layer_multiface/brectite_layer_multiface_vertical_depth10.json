@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/layer/layer_multiface/parent/vertical_depth10",
+  "textures": {
+    "texture": "erydon:block/brectite_block"
+  }
+}

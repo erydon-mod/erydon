@@ -1,0 +1,158 @@
+def modelGeometryPython = providers.gradleProperty('erydon.pythonExecutable').orElse('python')
+def modelGeometryReportDirectory = layout.buildDirectory.dir('reports/model-geometry')
+
+tasks.register('verifyErydonModelGeometryTooling', Exec) {
+    group = 'verification'
+    description = 'Runs the standard-library regression tests for ERYDON standard/raw UV and z-fighting audits.'
+    workingDir project.projectDir
+
+    inputs.files(
+            file('tools/model_geometry_common.py'),
+            file('tools/model_uv_safety.py'),
+            file('tools/model_raw_uv_safety.py'),
+            file('tools/model_z_fighting_safety.py'),
+            file('src/main/java/com/oliver/erydon/client/model/ErydonRawModelLoadingPlugin.java')
+    )
+    inputs.dir(file('tools/tests'))
+
+    commandLine(
+            modelGeometryPython.get(),
+            '-m', 'unittest', 'discover',
+            '-s', 'tools/tests',
+            '-p', 'test_model_*_safety.py',
+            '-v'
+    )
+}
+
+tasks.register('auditErydonRawModelUvs', Exec) {
+    group = 'verification'
+    description = 'Audits loader-registered ERYDON raw-model effective UVs without modifying source assets.'
+    dependsOn tasks.named('verifyErydonModelGeometryTooling')
+    workingDir project.projectDir
+
+    def rawRoot = file('src/main/resources/assets/erydon/authoring_models/block')
+    def loaderSource = file('src/main/java/com/oliver/erydon/client/model/ErydonRawModelLoadingPlugin.java')
+    def jsonReport = modelGeometryReportDirectory.map { it.file('raw-uv-audit.json') }
+    def csvReport = modelGeometryReportDirectory.map { it.file('raw-uv-candidates.csv') }
+
+    inputs.dir(rawRoot)
+    inputs.file(loaderSource)
+    inputs.files(
+            file('tools/model_geometry_common.py'),
+            file('tools/model_raw_uv_safety.py')
+    )
+    outputs.files(jsonReport, csvReport)
+
+    doFirst {
+        modelGeometryReportDirectory.get().asFile.mkdirs()
+    }
+    commandLine(
+            modelGeometryPython.get(),
+            'tools/model_raw_uv_safety.py',
+            rawRoot.absolutePath,
+            '--loader-source', loaderSource.absolutePath,
+            '--json-report', jsonReport.get().asFile.absolutePath,
+            '--csv-report', csvReport.get().asFile.absolutePath
+    )
+}
+
+tasks.register('auditErydonModelUvs', Exec) {
+    group = 'verification'
+    description = 'Audits standard ERYDON Java-model UVs without modifying source assets.'
+    dependsOn tasks.named('verifyErydonModelGeometryTooling')
+    workingDir project.projectDir
+
+    def sourceRoot = file('src/main/resources/assets/erydon/models')
+    def jsonReport = modelGeometryReportDirectory.map { it.file('uv-audit.json') }
+    def csvReport = modelGeometryReportDirectory.map { it.file('uv-candidates.csv') }
+
+    inputs.dir(sourceRoot)
+    inputs.files(
+            file('tools/model_geometry_common.py'),
+            file('tools/model_uv_safety.py')
+    )
+    outputs.files(jsonReport, csvReport)
+
+    doFirst {
+        modelGeometryReportDirectory.get().asFile.mkdirs()
+    }
+    commandLine(
+            modelGeometryPython.get(),
+            'tools/model_uv_safety.py',
+            sourceRoot.absolutePath,
+            '--json-report', jsonReport.get().asFile.absolutePath,
+            '--csv-report', csvReport.get().asFile.absolutePath
+    )
+}
+
+tasks.register('auditErydonModelZFighting', Exec) {
+    group = 'verification'
+    description = 'Audits coplanar ERYDON model faces without modifying source assets.'
+    dependsOn tasks.named('verifyErydonModelGeometryTooling')
+    workingDir project.projectDir
+
+    def standardRoot = file('src/main/resources/assets/erydon/models/block')
+    def rawRoot = file('src/main/resources/assets/erydon/authoring_models/block')
+    def jsonReport = modelGeometryReportDirectory.map { it.file('z-fighting-audit.json') }
+    def csvReport = modelGeometryReportDirectory.map { it.file('z-fighting-candidates.csv') }
+
+    inputs.dir(standardRoot)
+    inputs.dir(rawRoot)
+    inputs.files(
+            file('tools/model_geometry_common.py'),
+            file('tools/model_uv_safety.py'),
+            file('tools/model_z_fighting_safety.py'),
+            file('src/main/java/com/oliver/erydon/client/model/ErydonRawModelLoadingPlugin.java')
+    )
+    outputs.files(jsonReport, csvReport)
+
+    doFirst {
+        modelGeometryReportDirectory.get().asFile.mkdirs()
+    }
+    commandLine(
+            modelGeometryPython.get(),
+            'tools/model_z_fighting_safety.py',
+            standardRoot.absolutePath,
+            rawRoot.absolutePath,
+            '--base', project.projectDir.absolutePath,
+            '--json-report', jsonReport.get().asFile.absolutePath,
+            '--csv-report', csvReport.get().asFile.absolutePath
+    )
+}
+
+tasks.register('auditErydonModelGeometrySafety') {
+    group = 'verification'
+    description = 'Runs all read-only ERYDON model geometry safety audits.'
+    dependsOn tasks.named('auditErydonModelUvs')
+    dependsOn tasks.named('auditErydonRawModelUvs')
+    dependsOn tasks.named('auditErydonModelZFighting')
+}
+
+tasks.register('verifyGeorgianWallPierAssets', Exec) {
+    group = 'verification'
+    description = 'Checks the Georgian wall pier and stub masters, wrappers, and multipart coverage.'
+    workingDir project.projectDir
+
+    inputs.file(file('tools/generate_georgian_wall_pier.py'))
+    inputs.file(file('src/main/resources/data/erydon/id_migration.tsv'))
+    inputs.file(file('src/main/resources/assets/erydon/models/block/wall/georgian/wall_georgian_pier.json'))
+    inputs.file(file('src/main/resources/assets/erydon/models/block/wall/georgian/wall_georgian_pier_stub.json'))
+    inputs.files(fileTree('src/main/resources/assets/erydon/models/block/wall/georgian') {
+        include '*_wall_georgian.json'
+        include '*_wall_georgian_pier.json'
+        include '*_wall_georgian_pier_stub.json'
+    })
+    inputs.files(fileTree('src/main/resources/assets/erydon/blockstates') {
+        include '*_wall_georgian.json'
+    })
+
+    commandLine(
+            modelGeometryPython.get(),
+            'tools/generate_georgian_wall_pier.py',
+            '--check'
+    )
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('verifyGeorgianWallPierAssets')
+}

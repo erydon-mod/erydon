@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/glacium_hewn_slope_vertical_shallow_narrow_lh",
+  "textures": {
+    "stone": "erydon:block/glacium_hewn_block",
+    "particle": "erydon:block/glacium_hewn_block"
+  }
+}

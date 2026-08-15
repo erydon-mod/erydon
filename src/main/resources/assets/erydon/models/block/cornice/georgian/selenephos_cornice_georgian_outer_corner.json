@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/cornice/georgian/cornice_georgian_outer_corner",
+  "textures": {
+    "stone": "erydon:block/selenephos_block",
+    "particle": "erydon:block/selenephos_block"
+  }
+}

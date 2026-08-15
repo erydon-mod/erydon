@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/surround/modern/surround_modern_mantel",
+  "textures": {
+    "particle": "erydon:block/hesperion_block_aged",
+    "0": "erydon:block/hesperion_block_aged",
+    "1": "erydon:block/hesperion_block_aged",
+    "texture": "erydon:block/hesperion_block_aged",
+    "stone": "erydon:block/hesperion_block_aged"
+  }
+}

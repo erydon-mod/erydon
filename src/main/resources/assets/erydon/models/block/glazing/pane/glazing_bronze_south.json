@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/template_glass_pane_side",
+  "textures": {
+    "pane": "erydon:block/glazing_bronze",
+    "edge": "erydon:block/glazing_bronze_edge"
+  }
+}

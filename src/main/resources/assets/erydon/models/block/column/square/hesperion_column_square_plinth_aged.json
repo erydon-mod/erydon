@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/column/square/column_square_plinth_shared",
+  "textures": {
+    "particle": "erydon:block/hesperion_block_aged",
+    "stone": "erydon:block/hesperion_block_aged"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "part=small": {
+      "model": "erydon:block/chimney/circular/calacattum_ashlar_chimney_circular_small"
+    },
+    "part=large_lower": {
+      "model": "erydon:block/chimney/circular/calacattum_ashlar_chimney_circular_large_lower"
+    },
+    "part=large_upper": {
+      "model": "erydon:block/chimney/circular/calacattum_ashlar_chimney_circular_large_upper"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/stairs",
+  "textures": {
+    "side": "erydon:block/solistra_block_aged",
+    "top": "erydon:block/solistra_block_aged",
+    "bottom": "erydon:block/solistra_block_aged"
+  }
+}

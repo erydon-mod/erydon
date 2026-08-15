@@ -1,0 +1,8 @@
+{
+  "parent": "erydon:block/slope/shallow/slope_shallow_upper_outer",
+  "textures": {
+    "stone": "erydon:block/porphyros_ashlar_block",
+    "particle": "#stone"
+  }
+}
+

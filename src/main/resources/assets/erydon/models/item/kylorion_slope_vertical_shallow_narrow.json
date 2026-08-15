@@ -1,0 +1,6 @@
+{
+    "parent":  "erydon:block/internal/wrapped/kylorion_slope_vertical_shallow_narrow",
+    "textures":  {
+                     "texture":  "erydon:block/kylorion_block"
+                 }
+}

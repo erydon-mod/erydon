@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/layer/layer_multiface/parent/vertical_depth2",
+  "textures": {
+    "texture": "erydon:block/chrysonyx_block"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "erydon:block/internal/wrapped/borealis_aged_arch_modern"
+      }
+    }
+  ]
+}

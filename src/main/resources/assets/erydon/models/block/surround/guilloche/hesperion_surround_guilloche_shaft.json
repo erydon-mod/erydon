@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/surround/guilloche/surround_guilloche_shaft",
+  "textures": {
+    "particle": "erydon:block/hesperion_block",
+    "0": "erydon:block/hesperion_block",
+    "1": "erydon:block/hesperion_block",
+    "texture": "erydon:block/hesperion_block",
+    "stone": "erydon:block/hesperion_block"
+  }
+}

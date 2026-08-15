@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "erydon:block/slab/solistra_slab"
+    },
+    "type=top": {
+      "model": "erydon:block/slab/solistra_slab_top"
+    },
+    "type=double": {
+      "model": "erydon:block/block/solistra_block"
+    }
+  }
+}

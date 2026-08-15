@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/wall/georgian/wall_georgian",
+    "textures":  {
+                     "wall":  "erydon:block/rosinium_block_aged",
+                     "particle":  "erydon:block/rosinium_block_aged"
+                 }
+}

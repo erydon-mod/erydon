@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/alcove/georgian/alcove_georgian_triple_top_center",
+    "textures":  {
+                     "stone":  "erydon:block/chalstrom_block",
+                     "particle":  "erydon:block/chalstrom_block"
+                 }
+}

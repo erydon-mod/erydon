@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "erydon:block/internal/wrapped/selenephos_rock_arch_modern"
+      }
+    }
+  ]
+}

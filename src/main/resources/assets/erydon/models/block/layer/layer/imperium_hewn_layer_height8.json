@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/snow_height8",
+  "textures": {
+    "texture": "erydon:block/imperium_hewn_block",
+    "particle": "erydon:block/imperium_hewn_block"
+  }
+}

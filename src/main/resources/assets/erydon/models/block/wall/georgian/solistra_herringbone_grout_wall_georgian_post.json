@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/wall/georgian/wall_georgian_post",
+    "textures":  {
+                     "wall":  "erydon:block/solistra_herringbone_grout_block",
+                     "particle":  "erydon:block/solistra_herringbone_grout_block"
+                 }
+}

@@ -1,0 +1,632 @@
+{
+    "format_version":  "1.9.0",
+    "credit":  "Made with Blockbench",
+    "Textures":  {
+                     "Particle":  "#stone"
+                 },
+    "elements":  [
+                     {
+                         "from":  [
+                                      14.5,
+                                      11,
+                                      6.5
+                                  ],
+                         "to":  [
+                                    15.5,
+                                    12,
+                                    7
+                                ],
+                         "rotation":  {
+                                          "angle":  0,
+                                          "axis":  "y",
+                                          "origin":  [
+                                                         17.10415,
+                                                         11.5,
+                                                         6.53334
+                                                     ]
+                                      },
+                         "color":  3,
+                         "faces":  {
+                                       "north":  {
+                                                     "texture":  "#stone"
+                                                 },
+                                       "east":  {
+                                                    "texture":  "#stone"
+                                                },
+                                       "south":  {
+                                                     "texture":  "#stone"
+                                                 },
+                                       "west":  {
+                                                    "texture":  "#stone"
+                                                },
+                                       "up":  {
+                                                  "texture":  "#stone"
+                                              },
+                                       "down":  {
+                                                    "texture":  "#stone"
+                                                }
+                                   }
+                     },
+                     {
+                         "from":  [
+                                      15.5,
+                                      13,
+                                      7.5
+                                  ],
+                         "to":  [
+                                    16,
+                                    15.5,
+                                    8
+                                ],
+                         "rotation":  {
+                                          "angle":  0,
+                                          "axis":  "y",
+                                          "origin":  [
+                                                         18.10415,
+                                                         13.5,
+                                                         7.53334
+                                                     ]
+                                      },
+                         "color":  3,
+                         "faces":  {
+                                       "north":  {
+                                                     "texture":  "#stone"
+                                                 },
+                                       "east":  {
+                                                    "texture":  "#stone",
+                                                    "cullface":  "east"
+                                                },
+                                       "south":  {
+                                                     "texture":  "#stone"
+                                                 },
+                                       "west":  {
+                                                    "texture":  "#stone"
+                                                },
+                                       "up":  {
+                                                  "texture":  "#stone"
+                                              },
+                                       "down":  {
+                                                    "texture":  "#stone"
+                                                }
+                                   }
+                     },
+                     {
+                         "from":  [
+                                      12,
+                                      15.502,
+                                      0.001
+                                  ],
+                         "to":  [
+                                    16,
+                                    15.999,
+                                    7.999
+                                ],
+                         "rotation":  {
+                                          "angle":  0,
+                                          "axis":  "y",
+                                          "origin":  [
+                                                         22.75,
+                                                         13.5,
+                                                         3.5
+                                                     ]
+                                      },
+                         "color":  8,
+                         "faces":  {
+                                       "north":  {
+                                                     "texture":  "#stone"
+                                                 },
+                                       "east":  {
+                                                    "texture":  "#stone",
+                                                    "cullface":  "east"
+                                                },
+                                       "south":  {
+                                                     "texture":  "#stone"
+                                                 },
+                                       "west":  {
+                                                    "texture":  "#stone"
+                                                },
+                                       "up":  {
+                                                  "texture":  "#stone"
+                                              },
+                                       "down":  {
+                                                    "texture":  "#stone"
+                                                }
+                                   }
+                     },
+                     {
+                         "from":  [
+                                      12,
+                                      4.5,
+                                      -0.001
+                                  ],
+                         "to":  [
+                                    16,
+                                    15.5,
+                                    0.499
+                                ],
+                         "rotation":  {
+                                          "angle":  0,
+                                          "axis":  "y",
+                                          "origin":  [
+                                                         22.6875,
+                                                         13.5,
+                                                         3.5
+                                                     ]
+                                      },
+                         "color":  8,
+                         "faces":  {
+                                       "north":  {
+                                                     "texture":  "#stone"
+                                                 },
+                                       "east":  {
+                                                    "texture":  "#stone",
+                                                    "cullface":  "east"
+                                                },
+                                       "south":  {
+                                                     "texture":  "#stone"
+                                                 },
+                                       "west":  {
+                                                    "texture":  "#stone"
+                                                },
+                                       "up":  {
+                                                  "texture":  "#stone"
+                                              },
+                                       "down":  {
+                                                    "texture":  "#stone"
+                                                }
+                                   }
+                     },
+                     {
+                         "from":  [
+                                      11.994,
+                                      4.47266,
+                                      0.00266
+                                  ],
+                         "to":  [
+                                    15.994,
+                                    10.67266,
+                                    1.97266
+                                ],
+                         "rotation":  {
+                                          "angle":  0,
+                                          "axis":  "y",
+                                          "origin":  [
+                                                         22.75,
+                                                         12.97266,
+                                                         3.44016
+                                                     ]
+                                      },
+                         "color":  8,
+                         "faces":  {
+                                       "north":  {
+                                                     "texture":  "#stone"
+                                                 },
+                                       "east":  {
+                                                    "texture":  "#stone"
+                                                },
+                                       "south":  {
+                                                     "texture":  "#stone"
+                                                 },
+                                       "west":  {
+                                                    "texture":  "#stone"
+                                                },
+                                       "up":  {
+                                                  "texture":  "#stone"
+                                              },
+                                       "down":  {
+                                                    "texture":  "#stone"
+                                                }
+                                   }
+                     },
+                     {
+                         "from":  [
+                                      12,
+                                      12.501,
+                                      0.5
+                                  ],
+                         "to":  [
+                                    16,
+                                    12.999,
+                                    7.999
+                                ],
+                         "rotation":  {
+                                          "angle":  0,
+                                          "axis":  "y",
+                                          "origin":  [
+                                                         22.75,
+                                                         13.5,
+                                                         3.5
+                                                     ]
+                                      },
+                         "color":  8,
+                         "faces":  {
+                                       "north":  {
+                                                     "texture":  "#stone"
+                                                 },
+                                       "east":  {
+                                                    "texture":  "#stone",
+                                                    "cullface":  "east"
+                                                },
+                                       "south":  {
+                                                     "texture":  "#stone"
+                                                 },
+                                       "west":  {
+                                                    "texture":  "#stone"
+                                                },
+                                       "up":  {
+                                                  "texture":  "#stone"
+                                              },
+                                       "down":  {
+                                                    "texture":  "#stone"
+                                                }
+                                   }
+                     },
+                     {
+                         "from":  [
+                                      12,
+                                      12.001,
+                                      0.5
+                                  ],
+                         "to":  [
+                                    16,
+                                    12.5008,
+                                    6.999
+                                ],
+                         "rotation":  {
+                                          "angle":  0,
+                                          "axis":  "y",
+                                          "origin":  [
+                                                         22.75,
+                                                         14,
+                                                         2.5
+                                                     ]
+                                      },
+                         "color":  8,
+                         "faces":  {
+                                       "north":  {
+                                                     "texture":  "#stone"
+                                                 },
+                                       "east":  {
+                                                    "texture":  "#stone",
+                                                    "cullface":  "east"
+                                                },
+                                       "south":  {
+                                                     "texture":  "#stone"
+                                                 },
+                                       "west":  {
+                                                    "texture":  "#stone"
+                                                },
+                                       "up":  {
+                                                  "texture":  "#stone"
+                                              },
+                                       "down":  {
+                                                    "texture":  "#stone"
+                                                }
+                                   }
+                     },
+                     {
+                         "from":  [
+                                      11.995,
+                                      5.64523,
+                                      0.99195
+                                  ],
+                         "to":  [
+                                    15.995,
+                                    10.64523,
+                                    2.99195
+                                ],
+                         "rotation":  {
+                                          "angle":  -22.5,
+                                          "axis":  "x",
+                                          "origin":  [
+                                                         24,
+                                                         7.52413,
+                                                         4.42976
+                                                     ]
+                                      },
+                         "color":  8,
+                         "faces":  {
+                                       "north":  {
+                                                     "texture":  "#stone"
+                                                 },
+                                       "east":  {
+                                                    "texture":  "#stone"
+                                                },
+                                       "south":  {
+                                                     "texture":  "#stone"
+                                                 },
+                                       "west":  {
+                                                    "texture":  "#stone"
+                                                },
+                                       "up":  {
+                                                  "texture":  "#stone"
+                                              },
+                                       "down":  {
+                                                    "texture":  "#stone"
+                                                }
+                                   }
+                     },
+                     {
+                         "from":  [
+                                      11.996,
+                                      6.19204,
+                                      2.41151
+                                  ],
+                         "to":  [
+                                    15.996,
+                                    11.19204,
+                                    4.41151
+                                ],
+                         "rotation":  {
+                                          "angle":  -45,
+                                          "axis":  "x",
+                                          "origin":  [
+                                                         24,
+                                                         7.41574,
+                                                         4.26755
+                                                     ]
+                                      },
+                         "color":  8,
+                         "faces":  {
+                                       "north":  {
+                                                     "texture":  "#stone"
+                                                 },
+                                       "east":  {
+                                                    "texture":  "#stone"
+                                                },
+                                       "south":  {
+                                                     "texture":  "#stone"
+                                                 },
+                                       "west":  {
+                                                    "texture":  "#stone"
+                                                },
+                                       "up":  {
+                                                  "texture":  "#stone"
+                                              },
+                                       "down":  {
+                                                    "texture":  "#stone"
+                                                }
+                                   }
+                     },
+                     {
+                         "from":  [
+                                      11.998,
+                                      7.10957,
+                                      0.38287
+                                  ],
+                         "to":  [
+                                    15.998,
+                                    9.10957,
+                                    5.38287
+                                ],
+                         "rotation":  {
+                                          "angle":  22.5,
+                                          "axis":  "x",
+                                          "origin":  [
+                                                         24,
+                                                         7.25353,
+                                                         4.15917
+                                                     ]
+                                      },
+                         "color":  8,
+                         "faces":  {
+                                       "north":  {
+                                                     "texture":  "#stone"
+                                                 },
+                                       "east":  {
+                                                    "texture":  "#stone"
+                                                },
+                                       "south":  {
+                                                     "texture":  "#stone"
+                                                 },
+                                       "west":  {
+                                                    "texture":  "#stone"
+                                                },
+                                       "up":  {
+                                                  "texture":  "#stone"
+                                              },
+                                       "down":  {
+                                                    "texture":  "#stone"
+                                                }
+                                   }
+                     },
+                     {
+                         "from":  [
+                                      11.999,
+                                      8.5,
+                                      1
+                                  ],
+                         "to":  [
+                                    15.999,
+                                    10.5,
+                                    5.999
+                                ],
+                         "rotation":  {
+                                          "angle":  0,
+                                          "axis":  "y",
+                                          "origin":  [
+                                                         24,
+                                                         7.06219,
+                                                         4.12111
+                                                     ]
+                                      },
+                         "color":  8,
+                         "faces":  {
+                                       "north":  {
+                                                     "texture":  "#stone"
+                                                 },
+                                       "east":  {
+                                                    "texture":  "#stone"
+                                                },
+                                       "south":  {
+                                                     "texture":  "#stone"
+                                                 },
+                                       "west":  {
+                                                    "texture":  "#stone"
+                                                },
+                                       "up":  {
+                                                  "texture":  "#stone"
+                                              },
+                                       "down":  {
+                                                    "texture":  "#stone"
+                                                }
+                                   }
+                     },
+                     {
+                         "from":  [
+                                      12,
+                                      11,
+                                      0.5
+                                  ],
+                         "to":  [
+                                    16,
+                                    12,
+                                    6.499
+                                ],
+                         "rotation":  {
+                                          "angle":  0,
+                                          "axis":  "y",
+                                          "origin":  [
+                                                         22.25,
+                                                         13,
+                                                         2.5
+                                                     ]
+                                      },
+                         "color":  8,
+                         "faces":  {
+                                       "north":  {
+                                                     "texture":  "#stone"
+                                                 },
+                                       "east":  {
+                                                    "texture":  "#stone",
+                                                    "cullface":  "east"
+                                                },
+                                       "south":  {
+                                                     "texture":  "#stone"
+                                                 },
+                                       "west":  {
+                                                    "texture":  "#stone"
+                                                },
+                                       "up":  {
+                                                  "texture":  "#stone"
+                                              },
+                                       "down":  {
+                                                    "texture":  "#stone"
+                                                }
+                                   }
+                     },
+                     {
+                         "from":  [
+                                      12,
+                                      10.501,
+                                      0.5
+                                  ],
+                         "to":  [
+                                    16,
+                                    10.999,
+                                    6.999
+                                ],
+                         "rotation":  {
+                                          "angle":  0,
+                                          "axis":  "y",
+                                          "origin":  [
+                                                         22.75,
+                                                         12,
+                                                         2.5
+                                                     ]
+                                      },
+                         "color":  8,
+                         "faces":  {
+                                       "north":  {
+                                                     "texture":  "#stone"
+                                                 },
+                                       "east":  {
+                                                    "texture":  "#stone",
+                                                    "cullface":  "east"
+                                                },
+                                       "south":  {
+                                                     "texture":  "#stone"
+                                                 },
+                                       "west":  {
+                                                    "texture":  "#stone"
+                                                },
+                                       "up":  {
+                                                  "texture":  "#stone"
+                                              },
+                                       "down":  {
+                                                    "texture":  "#stone"
+                                                }
+                                   }
+                     },
+                     {
+                         "from":  [
+                                      12,
+                                      13,
+                                      0.5
+                                  ],
+                         "to":  [
+                                    16,
+                                    15.5,
+                                    7.499
+                                ],
+                         "rotation":  {
+                                          "angle":  0,
+                                          "axis":  "y",
+                                          "origin":  [
+                                                         22.25,
+                                                         12.5,
+                                                         4
+                                                     ]
+                                      },
+                         "color":  8,
+                         "faces":  {
+                                       "north":  {
+                                                     "texture":  "#stone"
+                                                 },
+                                       "east":  {
+                                                    "texture":  "#stone",
+                                                    "cullface":  "east"
+                                                },
+                                       "south":  {
+                                                     "texture":  "#stone"
+                                                 },
+                                       "west":  {
+                                                    "texture":  "#stone"
+                                                },
+                                       "up":  {
+                                                  "texture":  "#stone"
+                                              },
+                                       "down":  {
+                                                    "texture":  "#stone"
+                                                }
+                                   }
+                     }
+                 ],
+    "groups":  [
+                   {
+                       "name":  "mantel stub rh",
+                       "origin":  [
+                                      6.16665,
+                                      3,
+                                      5.53334
+                                  ],
+                       "color":  8,
+                       "children":  [
+                                        0,
+                                        1,
+                                        2,
+                                        3,
+                                        4,
+                                        5,
+                                        6,
+                                        7,
+                                        8,
+                                        9,
+                                        10,
+                                        11,
+                                        12,
+                                        13
+                                    ]
+                   }
+               ]
+}

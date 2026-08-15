@@ -1,0 +1,10 @@
+{
+  "parent": "erydon:block/surround/modern/surround_modern_shaft",
+  "textures": {
+    "particle": "erydon:block/brectite_block",
+    "0": "erydon:block/brectite_block",
+    "1": "erydon:block/brectite_block",
+    "texture": "erydon:block/brectite_block",
+    "stone": "erydon:block/brectite_block"
+  }
+}

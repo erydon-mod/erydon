@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/striatus_herringbone_bronze_slope_vertical_shallow_broad_lh",
+  "textures": {
+    "stone": "erydon:block/striatus_herringbone_bronze_block",
+    "particle": "erydon:block/striatus_herringbone_bronze_block"
+  }
+}

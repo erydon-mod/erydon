@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/surround/georgian/surround_georgian_short_mantel",
+  "textures": {
+    "stone": "erydon:block/brectite_block_aged",
+    "particle": "#stone"
+  }
+}

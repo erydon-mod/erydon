@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/slope/slope_outer",
+  "textures": {
+    "stone": "erydon:block/calacattum_portorium_weave_bronze_block",
+    "particle": "#stone"
+  }
+}

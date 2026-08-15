@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/light/modern/light_modern_small",
+  "textures": {
+    "0": "erydon:block/gelastrum_block",
+    "particle": "erydon:block/gelastrum_block"
+  }
+}
