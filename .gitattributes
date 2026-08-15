@@ -10,6 +10,8 @@
 *.dat binary
 *.mca binary
 
+gradlew text eol=lf
+
 # Continuity/OptiFine property files are byte-sensitive. Preserve their
 # existing mixed line endings and never apply Git text conversion.
 /src/main/resources/**/*.properties binary
