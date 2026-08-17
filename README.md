@@ -37,7 +37,7 @@ official project pages.
 ## Build prerequisites
 
 - A 64-bit JDK 17
-- Python 3.12 or another version compatible with the pinned dependency
+- Python 3.13 or newer
 - Internet access for Gradle's declared build dependencies
 
 On Windows PowerShell:
