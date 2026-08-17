@@ -34,13 +34,13 @@ final class WorldAlignedYRotation implements RenderContext.QuadTransform {
         }
         int turns = Math.floorMod(degrees / 90, 4);
         if (turns == 0 && !clearCullFace) {
-            context.fallbackConsumer().accept(model);
+            SharedGeometryChildModel.emit(context, model);
             return;
         }
 
         context.pushTransform(new WorldAlignedYRotation(turns, clearCullFace));
         try {
-            context.fallbackConsumer().accept(model);
+            SharedGeometryChildModel.emit(context, model);
         } finally {
             context.popTransform();
         }

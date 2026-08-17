@@ -62,7 +62,7 @@ python -m pip install -r requirements.txt
 
 The release-shaped output is written to:
 
-`build/libs/erydon-fabric-mc1.20.1-compat2-1.5.14.jar`
+`build/libs/erydon-fabric-mc1.20.1-compat2-1.5.16.jar`
 
 The standard `build` task runs compilation, tests, source audits, texture-alias
 validation, restored-family fixture checks, and the final JAR audit. For the
@@ -87,4 +87,3 @@ follow `SECURITY.md`.
 - Third-party components: their original terms — `THIRD_PARTY_NOTICES.md`
 
 The root `LICENSE` is the authoritative path-to-licence map.
-

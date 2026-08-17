@@ -88,7 +88,7 @@ public final class AlcoveBakedModel implements BakedModel, FabricBakedModel {
                 BakedModel icon = MinecraftClient.getInstance().getBakedModelManager()
                         .getModel(modelId(blockId.getPath(), "icon"));
                 if (icon != null) {
-                    context.fallbackConsumer().accept(icon);
+                    SharedGeometryChildModel.emit(context, icon);
                     return;
                 }
             }

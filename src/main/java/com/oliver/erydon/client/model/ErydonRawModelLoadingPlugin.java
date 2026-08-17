@@ -5,8 +5,17 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.oliver.erydon.Erydon;
+import com.oliver.erydon.client.profile.ErydonSharedGeometryMetrics;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.model.loading.v1.PreparableModelLoadingPlugin;
+import net.fabricmc.fabric.api.renderer.v1.Renderer;
+import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
+import net.fabricmc.fabric.api.renderer.v1.mesh.Mesh;
+import net.fabricmc.fabric.api.renderer.v1.mesh.MeshBuilder;
+import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
+import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
+import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
+import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
@@ -17,12 +26,15 @@ import net.minecraft.client.render.model.json.ModelOverrideList;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.SpriteIdentifier;
+import net.minecraft.item.ItemStack;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
+import net.minecraft.world.BlockRenderView;
 import org.joml.Vector3f;
 
 import java.io.BufferedReader;
@@ -32,13 +44,16 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -93,29 +108,53 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
             Map.entry("arch_gothic/icon", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/gothic/arch_gothic_icon.json"))
     );
     private static final float EPSILON = 0.0005F;
+    static final String SHARED_GEOMETRY_MODE_PROPERTY = "erydon.shared_geometry.mode";
 
-    public static CompletableFuture<PreparedModels> load(ResourceManager resourceManager, Executor executor) {
-        return CompletableFuture.supplyAsync(() -> loadPreparedModels(resourceManager), executor);
+    private static boolean isGothicColumnKey(String modelKey) {
+        return modelKey.startsWith("column_gothic/");
     }
 
-    private static PreparedModels loadPreparedModels(ResourceManager resourceManager) {
+    public static CompletableFuture<PreparedModels> load(ResourceManager resourceManager, Executor executor) {
+        SharedGeometryMode mode = SharedGeometryMode.configured();
+        ErydonSharedGeometryMetrics.beginReload(mode.configValue);
+        return CompletableFuture.supplyAsync(() -> loadPreparedModels(resourceManager, mode), executor);
+    }
+
+    private static PreparedModels loadPreparedModels(ResourceManager resourceManager, SharedGeometryMode mode) {
         Map<String, RawModelData> models = new LinkedHashMap<>();
         for (Map.Entry<String, Identifier> entry : AUTHORING_MODELS.entrySet()) {
             Optional<Resource> resource = resourceManager.getResource(entry.getValue());
             if (resource.isEmpty()) {
                 Erydon.LOGGER.warn("[{}] Missing raw authoring model {}.", Erydon.MOD_ID, entry.getValue());
+                ErydonSharedGeometryMetrics.resourceOpened(
+                        entry.getValue(), "missing", 0L, false, isGothicColumnKey(entry.getKey()));
                 continue;
             }
 
+            long openStarted = System.nanoTime();
             try (BufferedReader reader = resource.get().getReader()) {
+                long openNanos = System.nanoTime() - openStarted;
+                ErydonSharedGeometryMetrics.resourceOpened(
+                        entry.getValue(), resource.get().getResourcePackName(), openNanos, true,
+                        isGothicColumnKey(entry.getKey()));
+                long parseStarted = System.nanoTime();
                 JsonElement root = JsonParser.parseReader(reader);
-                models.put(entry.getKey(), RawModelData.parse(entry.getValue(), root));
+                RawModelData parsed = RawModelData.parse(entry.getKey(), entry.getValue(), root);
+                models.put(entry.getKey(), parsed);
+                ErydonSharedGeometryMetrics.modelParsed(
+                        entry.getValue(), System.nanoTime() - parseStarted, true,
+                        isGothicColumnKey(entry.getKey()));
             } catch (IOException | RuntimeException exception) {
+                ErydonSharedGeometryMetrics.modelParsed(
+                        entry.getValue(), 0L, false, isGothicColumnKey(entry.getKey()));
                 Erydon.LOGGER.warn("[{}] Failed to load raw authoring model {}.", Erydon.MOD_ID, entry.getValue(), exception);
             }
         }
 
-        return new PreparedModels(models);
+        ModelOverrideIndex overrides = mode == SharedGeometryMode.SHARED_GEOMETRY
+                ? ModelOverrideIndex.scan(resourceManager)
+                : ModelOverrideIndex.EMPTY;
+        return new PreparedModels(models, mode, overrides);
     }
 
     @Override
@@ -131,15 +170,52 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
                 return null;
             }
 
-            return new RawUnbakedModel(model, component.textureId);
+            if (data.mode == SharedGeometryMode.SHARED_GEOMETRY) {
+                ModelOverrideDecision decision = data.overrides.decision(context.id(), component);
+                if (decision.structuralFallback) {
+                    ErydonSharedGeometryMetrics.structuralOverrideFallback(context.id().toString());
+                    return null;
+                }
+                SharedGeometry geometry = data.sharedGeometries.get(component.modelKey);
+                if (geometry != null) {
+                    return new RawUnbakedModel(
+                            model,
+                            decision.materialBinding,
+                            geometry,
+                            new AssemblyKey(component.modelKey)
+                    );
+                }
+            }
+
+            return new RawUnbakedModel(
+                    model,
+                    new MaterialBinding(component.textureId, component.textureId),
+                    null,
+                    new AssemblyKey(component.modelKey)
+            );
         });
     }
 
     public static final class PreparedModels {
         private final Map<String, RawModelData> models;
+        private final Map<String, SharedGeometry> sharedGeometries;
+        private final SharedGeometryMode mode;
+        private final ModelOverrideIndex overrides;
 
-        private PreparedModels(Map<String, RawModelData> models) {
+        private PreparedModels(Map<String, RawModelData> models,
+                               SharedGeometryMode mode,
+                               ModelOverrideIndex overrides) {
             this.models = Map.copyOf(models);
+            Map<String, SharedGeometry> geometry = new LinkedHashMap<>();
+            if (mode == SharedGeometryMode.SHARED_GEOMETRY) {
+                models.forEach((modelKey, model) -> {
+                    geometry.put(modelKey, new SharedGeometry(
+                            new GeometryKey(model.sourceId.toString()), model));
+                });
+            }
+            this.sharedGeometries = Map.copyOf(geometry);
+            this.mode = mode;
+            this.overrides = overrides;
         }
     }
 
@@ -150,6 +226,29 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
         private RawComponent(String modelKey, Identifier textureId) {
             this.modelKey = modelKey;
             this.textureId = textureId;
+        }
+
+        private boolean gothicColumn() {
+            return isGothicColumnKey(modelKey);
+        }
+
+        private Identifier parentModelId() {
+            int separator = modelKey.indexOf('/');
+            String family = modelKey.substring(0, separator);
+            String suffix = modelKey.substring(separator + 1);
+            String path = switch (family) {
+                case "column_gothic" -> "block/column/gothic/column_gothic_" + suffix;
+                case "alcove_georgian" -> "block/alcove/georgian/alcove_georgian_" + suffix;
+                case "alcove_gothic" -> "block/alcove/gothic/alcove_gothic_" + suffix;
+                case "arch_gothic" -> "block/arch/gothic/arch_gothic_" + suffix;
+                default -> throw new IllegalStateException("Unexpected raw-model family " + family);
+            };
+            return new Identifier(Erydon.MOD_ID, path);
+        }
+
+        private Identifier parentResourceId() {
+            Identifier parent = parentModelId();
+            return new Identifier(parent.getNamespace(), "models/" + parent.getPath() + ".json");
         }
 
         private static RawComponent from(Identifier id) {
@@ -200,11 +299,18 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
 
     private static final class RawUnbakedModel implements UnbakedModel {
         private final RawModelData data;
-        private final Identifier textureId;
+        private final MaterialBinding materialBinding;
+        private final SharedGeometry sharedGeometry;
+        private final AssemblyKey assemblyKey;
 
-        private RawUnbakedModel(RawModelData data, Identifier textureId) {
+        private RawUnbakedModel(RawModelData data,
+                                MaterialBinding materialBinding,
+                                SharedGeometry sharedGeometry,
+                                AssemblyKey assemblyKey) {
             this.data = data;
-            this.textureId = textureId;
+            this.materialBinding = materialBinding;
+            this.sharedGeometry = sharedGeometry;
+            this.assemblyKey = assemblyKey;
         }
 
         @Override
@@ -221,13 +327,36 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
                                Function<SpriteIdentifier, Sprite> textureGetter,
                                ModelBakeSettings rotationContainer,
                                Identifier modelId) {
-            Sprite sprite = textureGetter.apply(new SpriteIdentifier(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE, textureId));
+            Sprite sprite = textureGetter.apply(new SpriteIdentifier(
+                    PlayerScreenHandler.BLOCK_ATLAS_TEXTURE,
+                    materialBinding.surfaceTextureId));
+            Sprite particle = textureGetter.apply(new SpriteIdentifier(
+                    PlayerScreenHandler.BLOCK_ATLAS_TEXTURE,
+                    materialBinding.particleTextureId));
             Map<String, Sprite> authoredSprites = new HashMap<>();
             for (Map.Entry<String, Identifier> entry : data.textures.entrySet()) {
                 authoredSprites.put(entry.getKey(),
                         textureGetter.apply(new SpriteIdentifier(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE, entry.getValue())));
             }
-            return RawBakedModel.bake(data, sprite, authoredSprites);
+            if (sharedGeometry != null) {
+                return sharedGeometry.materialize(
+                        materialBinding,
+                        assemblyKey,
+                        modelId,
+                        sprite,
+                        particle,
+                        authoredSprites
+                );
+            }
+            return RawBakedModel.bake(
+                    data,
+                    sprite,
+                    particle,
+                    authoredSprites,
+                    modelId,
+                    materialBinding.stableValue(),
+                    BakePurpose.BASELINE
+            );
         }
     }
 
@@ -242,25 +371,28 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
             this.particle = particle;
         }
 
-        private static RawBakedModel bake(RawModelData data, Sprite fallbackSprite, Map<String, Sprite> authoredSprites) {
+        private static RawBakedModel bake(RawModelData data,
+                                          Sprite fallbackSprite,
+                                          Sprite particleSprite,
+                                          Map<String, Sprite> authoredSprites,
+                                          Identifier modelId,
+                                          String materialBinding,
+                                          BakePurpose purpose) {
+            long startedNanos = System.nanoTime();
             List<BakedQuad> unculled = new ArrayList<>();
             Map<Direction, List<BakedQuad>> culled = new EnumMap<>(Direction.class);
             for (Direction direction : Direction.values()) {
                 culled.put(direction, new ArrayList<>());
             }
 
-            for (RawElement element : data.elements) {
-                for (Map.Entry<Direction, RawFace> entry : element.faces.entrySet()) {
-                    Sprite sprite = spriteFor(entry.getValue(), fallbackSprite, authoredSprites);
-                    BakedQuad quad = bakeQuad(element, entry.getKey(), entry.getValue(), sprite);
-                    Direction cullFace = entry.getValue().cullFace;
-                    if (cullFace != null
-                            && (entry.getValue().cullBoundaryOverride
-                            || isOnCullBoundary(cullFace, element.transformedVertices(entry.getKey())))) {
-                        culled.get(cullFace).add(quad);
-                    } else {
-                        unculled.add(quad);
-                    }
+            List<RawSurface> surfaces = rawSurfaces(data);
+            for (RawSurface surface : surfaces) {
+                Sprite sprite = spriteFor(surface.face, fallbackSprite, authoredSprites);
+                BakedQuad quad = bakeQuad(surface, sprite);
+                if (surface.cullFace != null) {
+                    culled.get(surface.cullFace).add(quad);
+                } else {
+                    unculled.add(quad);
                 }
             }
 
@@ -268,7 +400,23 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
             for (Direction direction : Direction.values()) {
                 immutableCulled.put(direction, List.copyOf(culled.get(direction)));
             }
-            return new RawBakedModel(List.copyOf(unculled), immutableCulled, fallbackSprite);
+            RawBakedModel baked = new RawBakedModel(
+                    List.copyOf(unculled), immutableCulled, particleSprite);
+            long durationNanos = System.nanoTime() - startedNanos;
+            if (purpose == BakePurpose.BASELINE) {
+                ErydonSharedGeometryMetrics.baselineGeometryCreated(
+                        baked,
+                        data.geometryKey(),
+                        modelId.toString(),
+                        materialBinding,
+                        surfaces.size(),
+                        durationNanos
+                );
+            } else {
+                ErydonSharedGeometryMetrics.axiomFallbackCreated(
+                        data.geometryKey(), surfaces.size(), durationNanos);
+            }
+            return baked;
         }
 
         private static Sprite spriteFor(RawFace face, Sprite fallbackSprite, Map<String, Sprite> authoredSprites) {
@@ -285,16 +433,19 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
             return authoredSprites.getOrDefault(key, fallbackSprite);
         }
 
-        private static BakedQuad bakeQuad(RawElement element, Direction direction, RawFace face, Sprite sprite) {
-            Vector3f[] vertices = element.transformedVertices(direction);
-            Direction nominalFace = closestDirection(vertices);
-            float[] uv = face.uv == null ? RawElement.defaultUv(vertices, nominalFace) : rectUv(face.uv);
-            applyUvOffset(uv, face.uvOffset);
+        private static BakedQuad bakeQuad(RawSurface surface, Sprite sprite) {
             int[] data = new int[32];
             for (int vertex = 0; vertex < 4; vertex++) {
-                writeVertex(data, vertex, vertices[vertex], uv[vertex * 2], uv[vertex * 2 + 1], sprite);
+                writeVertex(
+                        data,
+                        vertex,
+                        surface.vertices[vertex],
+                        surface.uv[vertex * 2],
+                        surface.uv[vertex * 2 + 1],
+                        sprite
+                );
             }
-            return new BakedQuad(data, -1, nominalFace, sprite, true);
+            return new BakedQuad(data, -1, surface.nominalFace, sprite, true);
         }
 
         private static float[] rectUv(float[] uv) {
@@ -387,16 +538,647 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
         }
     }
 
+    private static final class SharedGeometry {
+        private final GeometryKey key;
+        private final RawModelData data;
+        private SharedMesh baked;
+
+        private SharedGeometry(GeometryKey key, RawModelData data) {
+            this.key = key;
+            this.data = data;
+        }
+
+        private SharedRawBakedModel materialize(MaterialBinding materialBinding,
+                                                AssemblyKey assemblyKey,
+                                                Identifier modelId,
+                                                Sprite surfaceSprite,
+                                                Sprite particleSprite,
+                                                Map<String, Sprite> authoredSprites) {
+            SharedMesh sharedMesh = bake(modelId);
+            long startedNanos = System.nanoTime();
+            SharedRawBakedModel model = new SharedRawBakedModel(
+                    sharedMesh,
+                    data,
+                    key,
+                    assemblyKey,
+                    materialBinding,
+                    modelId,
+                    surfaceSprite,
+                    particleSprite,
+                    authoredSprites
+            );
+            ErydonSharedGeometryMetrics.materialModelBaked(
+                    sharedMesh.mesh,
+                    key.value,
+                    modelId.toString(),
+                    materialBinding.stableValue(),
+                    sharedMesh.surfaceCount,
+                    System.nanoTime() - startedNanos
+            );
+            return model;
+        }
+
+        private synchronized SharedMesh bake(Identifier modelId) {
+            if (baked != null) {
+                ErydonSharedGeometryMetrics.geometryCacheLookup(
+                        true, key.value, modelId.toString(), baked.mesh);
+                return baked;
+            }
+
+            ErydonSharedGeometryMetrics.geometryCacheLookup(
+                    false, key.value, modelId.toString(), null);
+            long startedNanos = System.nanoTime();
+            List<RawSurface> surfaces = rawSurfaces(data);
+            Renderer renderer = RendererAccess.INSTANCE.getRenderer();
+            if (renderer == null) {
+                throw new IllegalStateException(
+                        "No Fabric Renderer API implementation is active while baking " + key.value);
+            }
+
+            MeshBuilder builder = renderer.meshBuilder();
+            QuadEmitter emitter = builder.getEmitter();
+            for (RawSurface surface : surfaces) {
+                for (int vertex = 0; vertex < 4; vertex++) {
+                    Vector3f position = surface.vertices[vertex];
+                    emitter.pos(vertex,
+                            position.x / 16.0F,
+                            position.y / 16.0F,
+                            position.z / 16.0F);
+                    emitter.uv(vertex,
+                            surface.uv[vertex * 2] / 16.0F,
+                            surface.uv[vertex * 2 + 1] / 16.0F);
+                }
+                emitter.color(-1, -1, -1, -1);
+                emitter.cullFace(surface.cullFace);
+                emitter.nominalFace(surface.nominalFace);
+                emitter.emit();
+            }
+
+            SharedMesh created = new SharedMesh(builder.build(), surfaces.size());
+            baked = created;
+            ErydonSharedGeometryMetrics.sharedGeometryCreated(
+                    created.mesh,
+                    key.value,
+                    created.surfaceCount,
+                    System.nanoTime() - startedNanos
+            );
+            return created;
+        }
+    }
+
+    private static final class SharedRawBakedModel
+            implements BakedModel, SharedGeometryChildModel {
+        private final SharedMesh sharedMesh;
+        private final RawModelData data;
+        private final GeometryKey geometryKey;
+        private final AssemblyKey assemblyKey;
+        private final MaterialBinding materialBinding;
+        private final Identifier modelId;
+        private final Sprite surfaceSprite;
+        private final Sprite particleSprite;
+        private final Map<String, Sprite> authoredSprites;
+        private final MaterialTransform materialTransform;
+        private volatile RawBakedModel axiomFallback;
+
+        private SharedRawBakedModel(SharedMesh sharedMesh,
+                                    RawModelData data,
+                                    GeometryKey geometryKey,
+                                    AssemblyKey assemblyKey,
+                                    MaterialBinding materialBinding,
+                                    Identifier modelId,
+                                    Sprite surfaceSprite,
+                                    Sprite particleSprite,
+                                    Map<String, Sprite> authoredSprites) {
+            this.sharedMesh = sharedMesh;
+            this.data = data;
+            this.geometryKey = geometryKey;
+            this.assemblyKey = assemblyKey;
+            this.materialBinding = materialBinding;
+            this.modelId = modelId;
+            this.surfaceSprite = surfaceSprite;
+            this.particleSprite = particleSprite;
+            this.authoredSprites = Map.copyOf(authoredSprites);
+            this.materialTransform = new MaterialTransform(surfaceSprite);
+        }
+
+        @Override
+        public boolean isVanillaAdapter() {
+            return false;
+        }
+
+        @Override
+        public void emitBlockQuads(BlockRenderView view,
+                                   BlockState state,
+                                   BlockPos pos,
+                                   Supplier<Random> randomSupplier,
+                                   RenderContext context) {
+            emitSharedGeometry(context);
+        }
+
+        @Override
+        public void emitSharedGeometry(RenderContext context) {
+            context.pushTransform(materialTransform);
+            try {
+                sharedMesh.mesh.outputTo(context.getEmitter());
+                ErydonSharedGeometryMetrics.blockEmitted(sharedMesh.surfaceCount);
+            } finally {
+                context.popTransform();
+            }
+        }
+
+        @Override
+        public void emitItemQuads(ItemStack stack,
+                                  Supplier<Random> randomSupplier,
+                                  RenderContext context) {
+            emitSharedGeometry(context);
+        }
+
+        @Override
+        public List<BakedQuad> getQuads(BlockState state, Direction face, Random random) {
+            return axiomFallback().getQuads(state, face, random);
+        }
+
+        private RawBakedModel axiomFallback() {
+            RawBakedModel fallback = axiomFallback;
+            if (fallback != null) {
+                return fallback;
+            }
+            synchronized (this) {
+                fallback = axiomFallback;
+                if (fallback == null) {
+                    fallback = RawBakedModel.bake(
+                            data,
+                            surfaceSprite,
+                            particleSprite,
+                            authoredSprites,
+                            modelId,
+                            materialBinding.stableValue(),
+                            BakePurpose.AXIOM_FALLBACK
+                    );
+                    axiomFallback = fallback;
+                }
+                return fallback;
+            }
+        }
+
+        @Override
+        public boolean useAmbientOcclusion() {
+            return true;
+        }
+
+        @Override
+        public boolean hasDepth() {
+            return true;
+        }
+
+        @Override
+        public boolean isSideLit() {
+            return true;
+        }
+
+        @Override
+        public boolean isBuiltin() {
+            return false;
+        }
+
+        @Override
+        public Sprite getParticleSprite() {
+            return particleSprite;
+        }
+
+        @Override
+        public ModelTransformation getTransformation() {
+            return ModelTransformation.NONE;
+        }
+
+        @Override
+        public ModelOverrideList getOverrides() {
+            return ModelOverrideList.EMPTY;
+        }
+    }
+
+    private record MaterialTransform(Sprite sprite) implements RenderContext.QuadTransform {
+        @Override
+        public boolean transform(MutableQuadView quad) {
+            quad.spriteBake(sprite, MutableQuadView.BAKE_NORMALIZED);
+            return true;
+        }
+    }
+
+    private record SharedMesh(Mesh mesh, int surfaceCount) {
+    }
+
+    private record GeometryKey(String value) {
+    }
+
+    private record MaterialBinding(Identifier surfaceTextureId, Identifier particleTextureId) {
+        private String stableValue() {
+            return "particle=" + particleTextureId + ";surface=" + surfaceTextureId;
+        }
+    }
+
+    private record AssemblyKey(String value) {
+    }
+
+    private record RawSurface(Vector3f[] vertices,
+                              float[] uv,
+                              Direction nominalFace,
+                              Direction cullFace,
+                              RawFace face) {
+    }
+
+    private enum BakePurpose {
+        BASELINE,
+        AXIOM_FALLBACK
+    }
+
+    private enum SharedGeometryMode {
+        BASELINE("baseline"),
+        SHARED_GEOMETRY("shared_geometry");
+
+        private final String configValue;
+
+        SharedGeometryMode(String configValue) {
+            this.configValue = configValue;
+        }
+
+        private static SharedGeometryMode configured() {
+            String configured = System.getProperty(
+                    SHARED_GEOMETRY_MODE_PROPERTY, BASELINE.configValue).trim();
+            for (SharedGeometryMode candidate : values()) {
+                if (candidate.configValue.equalsIgnoreCase(configured)) {
+                    return candidate;
+                }
+            }
+            Erydon.LOGGER.warn(
+                    "[{}] Unsupported shared-geometry mode '{}'; using baseline.",
+                    Erydon.MOD_ID,
+                    configured
+            );
+            return BASELINE;
+        }
+    }
+
+    private static final class ModelOverrideIndex {
+        private static final ModelOverrideIndex EMPTY = new ModelOverrideIndex(Map.of(), false);
+        private final Map<String, ModelOverrideDecision> decisions;
+        private final boolean strict;
+
+        private ModelOverrideIndex(Map<String, ModelOverrideDecision> decisions, boolean strict) {
+            this.decisions = Map.copyOf(decisions);
+            this.strict = strict;
+        }
+
+        private static ModelOverrideIndex scan(ResourceManager resourceManager) {
+            String builtInPack = mostFrequentAuthoringPack(resourceManager);
+            Set<String> unsafeParentKeys = new HashSet<>();
+            for (String modelKey : AUTHORING_MODELS.keySet()) {
+                RawComponent representative = representative(modelKey);
+                Identifier resourceId = representative.parentResourceId();
+                if (!isOverridden(resourceManager, resourceId, builtInPack)) {
+                    continue;
+                }
+                JsonObject parent = readActiveModel(resourceManager, resourceId);
+                if (!safeSharedParent(parent)) {
+                    unsafeParentKeys.add(modelKey);
+                }
+            }
+
+            Map<String, ModelOverrideDecision> decisions = new LinkedHashMap<>();
+            Map<Identifier, Resource> activeModels = new LinkedHashMap<>();
+            for (String root : List.of(
+                    "models/block/column/gothic",
+                    "models/block/alcove/georgian",
+                    "models/block/alcove/gothic",
+                    "models/block/arch/gothic")) {
+                activeModels.putAll(resourceManager.findResources(
+                        root, id -> id.getPath().endsWith(".json")));
+            }
+            for (Identifier resourceId : activeModels.keySet()) {
+                Identifier modelId = modelIdForResource(resourceId);
+                RawComponent component = modelId == null ? null : RawComponent.from(modelId);
+                if (component == null) {
+                    continue;
+                }
+
+                MaterialBinding defaultBinding = new MaterialBinding(
+                        component.textureId, component.textureId);
+                if (unsafeParentKeys.contains(component.modelKey)) {
+                    decisions.put(modelId.toString(), ModelOverrideDecision.fallback(defaultBinding));
+                    continue;
+                }
+
+                if (!isOverridden(resourceManager, resourceId, builtInPack)) {
+                    decisions.put(modelId.toString(), ModelOverrideDecision.shared(defaultBinding));
+                    continue;
+                }
+
+                JsonObject child = readActiveModel(resourceManager, resourceId);
+                if (!safeSharedChild(child, component.parentModelId().toString())) {
+                    decisions.put(modelId.toString(), ModelOverrideDecision.fallback(defaultBinding));
+                    continue;
+                }
+
+                MaterialBinding binding = bindingFromOverride(child);
+                decisions.put(modelId.toString(), binding == null
+                        ? ModelOverrideDecision.fallback(defaultBinding)
+                        : ModelOverrideDecision.shared(binding));
+            }
+
+            long fallbacks = decisions.values().stream()
+                    .filter(decision -> decision.structuralFallback)
+                    .count();
+            Erydon.LOGGER.info(
+                    "[{}] Shared raw-family override scan: models={}, structuralFallbacks={}, sourcePack={}.",
+                    Erydon.MOD_ID,
+                    decisions.size(),
+                    fallbacks,
+                    builtInPack == null ? "unknown" : builtInPack
+            );
+            return new ModelOverrideIndex(decisions, true);
+        }
+
+        private static RawComponent representative(String modelKey) {
+            String material = "shared_geometry_probe";
+            Identifier id;
+            if (modelKey.startsWith("column_gothic/")) {
+                id = new Identifier(Erydon.MOD_ID, "block/column/gothic/" + material
+                        + "_column_gothic_" + modelKey.substring("column_gothic/".length()));
+            } else if (modelKey.startsWith("alcove_georgian/")) {
+                id = new Identifier(Erydon.MOD_ID, "block/alcove/georgian/" + material
+                        + "_alcove_georgian_" + modelKey.substring("alcove_georgian/".length()));
+            } else if (modelKey.startsWith("alcove_gothic/")) {
+                id = new Identifier(Erydon.MOD_ID, "block/alcove/gothic/" + material
+                        + "_alcove_gothic_" + modelKey.substring("alcove_gothic/".length()));
+            } else if (modelKey.startsWith("arch_gothic/")) {
+                id = new Identifier(Erydon.MOD_ID, "block/arch/gothic/" + material
+                        + "_arch_gothic_" + modelKey.substring("arch_gothic/".length()));
+            } else {
+                throw new IllegalArgumentException("Unexpected raw-model key " + modelKey);
+            }
+            RawComponent component = RawComponent.from(id);
+            if (component == null) {
+                throw new IllegalStateException("Could not construct raw-model representative for " + modelKey);
+            }
+            return component;
+        }
+
+        private ModelOverrideDecision decision(Identifier modelId, RawComponent component) {
+            ModelOverrideDecision decision = decisions.get(modelId.toString());
+            if (decision != null) {
+                return decision;
+            }
+            MaterialBinding binding = new MaterialBinding(component.textureId, component.textureId);
+            return strict
+                    ? ModelOverrideDecision.fallback(binding)
+                    : ModelOverrideDecision.shared(binding);
+        }
+
+        private static String mostFrequentAuthoringPack(ResourceManager resourceManager) {
+            Map<String, Integer> counts = new LinkedHashMap<>();
+            for (Identifier resourceId : AUTHORING_MODELS.values()) {
+                for (Resource resource : resourceManager.getAllResources(resourceId)) {
+                    counts.merge(resource.getResourcePackName(), 1, Integer::sum);
+                }
+            }
+            String selected = null;
+            int maximum = -1;
+            for (Map.Entry<String, Integer> entry : counts.entrySet()) {
+                if (entry.getValue() > maximum) {
+                    selected = entry.getKey();
+                    maximum = entry.getValue();
+                }
+            }
+            return selected;
+        }
+
+        private static boolean isOverridden(ResourceManager resourceManager,
+                                            Identifier resourceId,
+                                            String builtInPack) {
+            List<Resource> resources = resourceManager.getAllResources(resourceId);
+            if (resources.size() > 1) {
+                return true;
+            }
+            Optional<Resource> active = resourceManager.getResource(resourceId);
+            return active.isEmpty()
+                    || (builtInPack != null
+                    && !builtInPack.equals(active.get().getResourcePackName()));
+        }
+
+        private static JsonObject readActiveModel(ResourceManager resourceManager, Identifier resourceId) {
+            Optional<Resource> resource = resourceManager.getResource(resourceId);
+            if (resource.isEmpty()) {
+                return null;
+            }
+            try (BufferedReader reader = resource.get().getReader()) {
+                JsonElement root = JsonParser.parseReader(reader);
+                return root != null && root.isJsonObject() ? root.getAsJsonObject() : null;
+            } catch (IOException | RuntimeException exception) {
+                Erydon.LOGGER.warn(
+                        "[{}] Unable to inspect active model override {}; using vanilla fallback.",
+                        Erydon.MOD_ID,
+                        resourceId,
+                        exception
+                );
+                return null;
+            }
+        }
+
+        private static Identifier modelIdForResource(Identifier resourceId) {
+            String path = resourceId.getPath();
+            if (!path.startsWith("models/") || !path.endsWith(".json")) {
+                return null;
+            }
+            return new Identifier(
+                    resourceId.getNamespace(),
+                    path.substring("models/".length(), path.length() - ".json".length())
+            );
+        }
+
+        private static boolean safeSharedParent(JsonObject model) {
+            if (model == null
+                    || !onlyKeys(model, Set.of("parent", "textures", "elements"))
+                    || !hasString(model, "parent", "minecraft:block/block")) {
+                return false;
+            }
+            JsonArray elements = model.getAsJsonArray("elements");
+            return elements != null && elements.isEmpty();
+        }
+
+        private static boolean safeSharedChild(JsonObject model, String expectedParent) {
+            return model != null
+                    && onlyKeys(model, Set.of("parent", "textures"))
+                    && hasString(model, "parent", expectedParent);
+        }
+
+        private static boolean onlyKeys(JsonObject object, Set<String> allowed) {
+            return object.keySet().stream().allMatch(allowed::contains);
+        }
+
+        private static boolean hasString(JsonObject object, String key, String expected) {
+            JsonElement element = object.get(key);
+            return element != null
+                    && element.isJsonPrimitive()
+                    && element.getAsJsonPrimitive().isString()
+                    && expected.equals(element.getAsString());
+        }
+
+        private static MaterialBinding bindingFromOverride(JsonObject model) {
+            JsonObject textures = model.getAsJsonObject("textures");
+            if (textures == null) {
+                return null;
+            }
+            Identifier surface = resolveTextureSlot(textures, "stone", new HashSet<>());
+            if (surface == null) {
+                surface = resolveTextureSlot(textures, "all", new HashSet<>());
+            }
+            if (surface == null) {
+                return null;
+            }
+            Identifier particle = resolveTextureSlot(textures, "particle", new HashSet<>());
+            return particle == null ? null : new MaterialBinding(surface, particle);
+        }
+
+        private static Identifier resolveTextureSlot(JsonObject textures,
+                                                     String slot,
+                                                     Set<String> visited) {
+            if (!visited.add(slot)) {
+                return null;
+            }
+            JsonElement element = textures.get(slot);
+            if (element == null
+                    || !element.isJsonPrimitive()
+                    || !element.getAsJsonPrimitive().isString()) {
+                return null;
+            }
+            String value = element.getAsString();
+            if (value.startsWith("#")) {
+                return resolveTextureSlot(textures, value.substring(1), visited);
+            }
+            try {
+                return value.contains(":")
+                        ? new Identifier(value)
+                        : new Identifier(Erydon.MOD_ID, value);
+            } catch (RuntimeException exception) {
+                return null;
+            }
+        }
+    }
+
+    private static final class ModelOverrideDecision {
+        private final boolean structuralFallback;
+        private final MaterialBinding materialBinding;
+
+        private ModelOverrideDecision(boolean structuralFallback,
+                                      MaterialBinding materialBinding) {
+            this.structuralFallback = structuralFallback;
+            this.materialBinding = materialBinding;
+        }
+
+        private static ModelOverrideDecision shared(MaterialBinding materialBinding) {
+            return new ModelOverrideDecision(false, materialBinding);
+        }
+
+        private static ModelOverrideDecision fallback(MaterialBinding materialBinding) {
+            return new ModelOverrideDecision(true, materialBinding);
+        }
+    }
+
+    private static List<RawSurface> rawSurfaces(RawModelData data) {
+        List<RawSurface> surfaces = new ArrayList<>();
+        for (RawElement element : data.elements) {
+            for (Map.Entry<Direction, RawFace> entry : element.faces.entrySet()) {
+                RawFace face = entry.getValue();
+                Vector3f[] vertices = element.transformedVertices(entry.getKey());
+                Direction nominalFace = RawBakedModel.closestDirection(vertices);
+                float[] uv = face.uv == null
+                        ? RawElement.defaultUv(vertices, nominalFace)
+                        : RawBakedModel.rectUv(face.uv);
+                RawBakedModel.applyUvOffset(uv, face.uvOffset);
+                Direction cullFace = face.cullFace != null
+                        && (face.cullBoundaryOverride
+                        || RawBakedModel.isOnCullBoundary(face.cullFace, vertices))
+                        ? face.cullFace
+                        : null;
+                surfaces.add(new RawSurface(vertices, uv, nominalFace, cullFace, face));
+            }
+        }
+        return List.copyOf(surfaces);
+    }
+
+    static List<SurfaceSnapshot> surfaceSnapshots(String modelKey,
+                                                  Identifier sourceId,
+                                                  JsonElement root) {
+        RawModelData data = RawModelData.parse(modelKey, sourceId, root);
+        List<SurfaceSnapshot> snapshots = new ArrayList<>();
+        for (RawSurface surface : rawSurfaces(data)) {
+            float[][] positions = new float[4][3];
+            float[][] sourceUvs = new float[4][2];
+            float[][] normalizedUvs = new float[4][2];
+            for (int vertex = 0; vertex < 4; vertex++) {
+                positions[vertex][0] = surface.vertices[vertex].x / 16.0F;
+                positions[vertex][1] = surface.vertices[vertex].y / 16.0F;
+                positions[vertex][2] = surface.vertices[vertex].z / 16.0F;
+                sourceUvs[vertex][0] = surface.uv[vertex * 2];
+                sourceUvs[vertex][1] = surface.uv[vertex * 2 + 1];
+                normalizedUvs[vertex][0] = surface.uv[vertex * 2] / 16.0F;
+                normalizedUvs[vertex][1] = surface.uv[vertex * 2 + 1] / 16.0F;
+            }
+            snapshots.add(new SurfaceSnapshot(
+                    positions,
+                    sourceUvs,
+                    normalizedUvs,
+                    surface.nominalFace.getName(),
+                    surface.cullFace == null ? null : surface.cullFace.getName()
+            ));
+        }
+        return List.copyOf(snapshots);
+    }
+
+    static boolean sharedChildOverrideIsSafe(JsonObject model, String suffix) {
+        return ModelOverrideIndex.safeSharedChild(
+                model,
+                Erydon.MOD_ID + ":block/column/gothic/column_gothic_" + suffix
+        );
+    }
+
+    static String sharedOverrideBinding(JsonObject model) {
+        MaterialBinding binding = ModelOverrideIndex.bindingFromOverride(model);
+        return binding == null ? null : binding.stableValue();
+    }
+
+    static String configuredModeForTest() {
+        return SharedGeometryMode.configured().configValue;
+    }
+
+    static boolean sharedGeometryEnabled() {
+        return SharedGeometryMode.configured() == SharedGeometryMode.SHARED_GEOMETRY;
+    }
+
+    record SurfaceSnapshot(float[][] vertexPositions,
+                           float[][] sourceUvs,
+                           float[][] normalizedUvs,
+                           String faceDirection,
+                           String cullFace) {
+    }
+
     private static final class RawModelData {
+        private final String modelKey;
+        private final Identifier sourceId;
         private final List<RawElement> elements;
         private final Map<String, Identifier> textures;
 
-        private RawModelData(List<RawElement> elements, Map<String, Identifier> textures) {
+        private RawModelData(String modelKey,
+                             Identifier sourceId,
+                             List<RawElement> elements,
+                             Map<String, Identifier> textures) {
+            this.modelKey = modelKey;
+            this.sourceId = sourceId;
             this.elements = List.copyOf(elements);
             this.textures = Map.copyOf(textures);
         }
 
-        private static RawModelData parse(Identifier id, JsonElement root) {
+        private static RawModelData parse(String modelKey, Identifier id, JsonElement root) {
             if (!root.isJsonObject()) {
                 throw new IllegalArgumentException("Raw model root is not an object: " + id);
             }
@@ -405,7 +1187,7 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
             Map<String, Identifier> textures = parseTextures(object.getAsJsonObject("textures"));
             JsonArray elementArray = object.getAsJsonArray("elements");
             if (elementArray == null) {
-                return new RawModelData(List.of(), textures);
+                return new RawModelData(modelKey, id, List.of(), textures);
             }
 
             Map<Integer, List<RawRotation>> groupRotations = collectGroupRotations(object);
@@ -416,7 +1198,20 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
                     elements.add(RawElement.parse(element.getAsJsonObject(), groupRotations.getOrDefault(index, List.of())));
                 }
             }
-            return new RawModelData(elements, textures);
+            return new RawModelData(modelKey, id, elements, textures);
+        }
+
+        @SuppressWarnings("unused")
+        private static RawModelData parse(Identifier id, JsonElement root) {
+            return parse(id.getPath(), id, root);
+        }
+
+        private boolean gothicColumn() {
+            return isGothicColumnKey(modelKey);
+        }
+
+        private String geometryKey() {
+            return sourceId.toString();
         }
 
         private static Map<String, Identifier> parseTextures(JsonObject textureObject) {

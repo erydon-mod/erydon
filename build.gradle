@@ -99,11 +99,41 @@ loom {
         client {
             programArgs '--gameDir', file('run-dev').absolutePath
             def clientMaxHeap = providers.gradleProperty('erydon.client.maxHeap').getOrElse('24G')
-            def runtimeReport = layout.buildDirectory.file('reports/erydon-model-performance-runtime.json').get().asFile.absolutePath
+            def runtimeReport = providers.gradleProperty('erydon.modelPerformance.runtimeReport')
+                    .getOrElse(layout.buildDirectory.file('reports/erydon-model-performance-runtime.json').get().asFile.absolutePath)
+            def sharedGeometryMode = providers.gradleProperty('erydon.sharedGeometryMode').getOrElse('baseline')
             vmArgs "-Xms6G", "-Xmx${clientMaxHeap}", "-XshowSettings:vm"
             vmArgs "-Derydon.model_performance.runtime_report=${runtimeReport}"
+            vmArgs "-Derydon.shared_geometry.mode=${sharedGeometryMode}"
             if (providers.gradleProperty('erydon.debug.loadProfile').map { it.toBoolean() }.getOrElse(false)) {
                 vmArgs "-Derydon.debug.load_profile=true", "-Derydon.debug.model_reload=true"
+            }
+            if (providers.gradleProperty('erydon.sharedGeometryMetrics').map { it.toBoolean() }.getOrElse(false)) {
+                def iteration = providers.gradleProperty('erydon.sharedGeometryIteration').getOrElse('0')
+                vmArgs "-Derydon.shared_geometry.metrics=true"
+                vmArgs "-Derydon.shared_geometry.iteration=${iteration}"
+            }
+            def benchmarkScenario = providers.gradleProperty('erydon.sharedGeometryBenchmarkScenario').orNull
+            if (benchmarkScenario != null) {
+                def benchmarkOutput = providers.gradleProperty('erydon.sharedGeometryBenchmarkOutput')
+                        .getOrElse(layout.buildDirectory.file('reports/erydon-shared-geometry/benchmarks/runtime.jsonl').get().asFile.absolutePath)
+                def expectedWorld = providers.gradleProperty('erydon.sharedGeometryBenchmarkWorld')
+                        .getOrElse('Erydon Shared Geometry Benchmark')
+                vmArgs "-Derydon.shared_geometry.metrics=true"
+                vmArgs "-Derydon.shared_geometry.benchmark=true"
+                vmArgs "-Derydon.shared_geometry.benchmark_scenario=${benchmarkScenario}"
+                vmArgs "-Derydon.shared_geometry.benchmark_output=${benchmarkOutput}"
+                vmArgs "-Derydon.shared_geometry.benchmark_world=${expectedWorld}"
+                def screenshotName = providers.gradleProperty('erydon.sharedGeometryScreenshotName').orNull
+                if (screenshotName != null) {
+                    vmArgs "-Derydon.shared_geometry.screenshot_name=${screenshotName}"
+                }
+                def benchmarkIteration = providers.gradleProperty('erydon.sharedGeometryIteration').getOrElse('0')
+                vmArgs "-Derydon.shared_geometry.iteration=${benchmarkIteration}"
+            }
+            def quickPlayWorld = providers.gradleProperty('erydon.quickPlayWorld').orNull
+            if (quickPlayWorld != null) {
+                programArgs '--quickPlaySingleplayer', quickPlayWorld
             }
             if (providers.gradleProperty('erydon.debug.disableRawModelLoader').map { it.toBoolean() }.getOrElse(false)) {
                 vmArgs "-Derydon.debug.disable_raw_model_loader=true"
@@ -115,6 +145,12 @@ loom {
 tasks.named('remapJar') {
     nestedJars.from continuityJar
     addNestedDependencies = true
+}
+
+tasks.named('jar') {
+    exclude 'com/oliver/erydon/client/profile/ErydonSharedGeometryMetricsProvider*.class'
+    exclude 'com/oliver/erydon/client/profile/ErydonSharedGeometryMetricsDevelopmentSink*.class'
+    exclude 'com/oliver/erydon/client/profile/ErydonSharedGeometryBenchmarkHarness*.class'
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -669,6 +705,32 @@ tasks.register('verifyAlcoveRunPartition', JavaExec) {
     dependsOn tasks.named('testClasses')
     classpath = sourceSets.test.runtimeClasspath
     mainClass = 'com.oliver.erydon.block.AlcoveRunPartitionAudit'
+}
+
+tasks.register('writeSharedGeometryParityDumps', JavaExec) {
+    group = 'verification'
+    description = 'Writes all-material Gothic-column baseline/prototype surface dumps for the external comparator.'
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.oliver.erydon.client.model.SharedGeometryParityDump'
+    args file('src/main/resources').absolutePath,
+            layout.buildDirectory.file('reports/erydon-shared-geometry/dumps/baseline.jsonl').get().asFile.absolutePath,
+            layout.buildDirectory.file('reports/erydon-shared-geometry/dumps/prototype.jsonl').get().asFile.absolutePath
+}
+
+tasks.register('nameSharedGeometryBenchmarkWorld', JavaExec) {
+    group = 'verification'
+    description = 'Names an already-copied development save for the shared-geometry benchmark harness.'
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.oliver.erydon.client.profile.SharedGeometryBenchmarkWorldNameTool'
+    doFirst {
+        if (!project.hasProperty('erydon.sharedGeometryBenchmarkWorldDirectory')) {
+            throw new GradleException('Missing -Perydon.sharedGeometryBenchmarkWorldDirectory=<copied save directory>.')
+        }
+        args project.property('erydon.sharedGeometryBenchmarkWorldDirectory').toString(),
+                'Erydon Shared Geometry Benchmark'
+    }
 }
 
 tasks.named('check') {

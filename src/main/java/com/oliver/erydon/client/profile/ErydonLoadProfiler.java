@@ -691,6 +691,7 @@ public final class ErydonLoadProfiler {
                 "erydonSlopeWrapperCounts", slopeWrapperSnapshot()
         ));
         report.put("ctmDiagnostics", ctmDiagnosticsSnapshot());
+        report.put("sharedGeometryPilot", ErydonSharedGeometryMetrics.snapshot());
         ResourceSnapshot snapshot = lastResourceSnapshot;
         if (snapshot != null) {
             report.put("resourceSnapshot", snapshot.snapshot());

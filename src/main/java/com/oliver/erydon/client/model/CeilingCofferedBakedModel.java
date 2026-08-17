@@ -213,13 +213,16 @@ public final class CeilingCofferedBakedModel implements BakedModel, FabricBakedM
     private static void emitTransformed(RenderContext context, BakedModel model, int degrees) {
         int turns = Math.floorMod(degrees / 90, 4);
         if (turns == 0) {
-            context.fallbackConsumer().accept(model);
+            SharedGeometryChildModel.emit(context, model);
             return;
         }
 
         context.pushTransform(new YRotationTransform(turns));
-        context.fallbackConsumer().accept(model);
-        context.popTransform();
+        try {
+            SharedGeometryChildModel.emit(context, model);
+        } finally {
+            context.popTransform();
+        }
     }
 
     private enum Style {

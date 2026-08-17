@@ -75,7 +75,7 @@ public final class ColumnBakedModel implements BakedModel, FabricBakedModel {
         String suffix = suffixForState(state);
         BakedModel model = MinecraftClient.getInstance().getBakedModelManager().getModel(modelId(state, suffix));
         if (model != null) {
-            context.fallbackConsumer().accept(model);
+            SharedGeometryChildModel.emit(context, model);
         }
     }
 

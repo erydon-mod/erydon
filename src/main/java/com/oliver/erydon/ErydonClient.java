@@ -7,6 +7,7 @@ import com.oliver.erydon.client.model.ErydonCtmService;
 import com.oliver.erydon.client.model.ErydonFamilyModelLoadingPlugin;
 import com.oliver.erydon.client.model.ErydonModelPerformanceProbePlugin;
 import com.oliver.erydon.client.model.ErydonRawModelLoadingPlugin;
+import com.oliver.erydon.client.model.ErydonSharedBakedGeometryPlugin;
 import com.oliver.erydon.client.model.ErydonSlopeModelLoadingPlugin;
 import com.oliver.erydon.client.model.GothicArchCtmModelLoadingPlugin;
 import com.oliver.erydon.client.model.ModernArchCtmModelLoadingPlugin;
@@ -43,6 +44,7 @@ public final class ErydonClient implements ClientModInitializer {
         } else {
             PreparableModelLoadingPlugin.register(ErydonRawModelLoadingPlugin::load, new ErydonRawModelLoadingPlugin());
         }
+        ModelLoadingPlugin.register(new ErydonSharedBakedGeometryPlugin());
         ModelLoadingPlugin.register(new ErydonFamilyModelLoadingPlugin());
         ModelLoadingPlugin.register(new ErydonSlopeModelLoadingPlugin());
         ModelLoadingPlugin.register(new SpiralStairModelLoadingPlugin());
@@ -53,6 +55,7 @@ public final class ErydonClient implements ClientModInitializer {
             ModelLoadingPlugin.register(new ErydonModelPerformanceProbePlugin());
             ErydonLoadProfiler.registerClientReloadListener();
         }
+        registerSharedGeometryBenchmarkHarness();
         ErydonTooltipClient.init();
 
         BlockRenderLayerMap.INSTANCE.putBlocks(RenderLayer.getTranslucent(),
@@ -569,5 +572,22 @@ public final class ErydonClient implements ClientModInitializer {
                 .forEach(block -> BlockRenderLayerMap.INSTANCE.putBlock(block, RenderLayer.getTranslucent()));
         // square column layer
         BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.AGANITE_COLUMN_SQUARE, RenderLayer.getCutout());
+    }
+
+    private static void registerSharedGeometryBenchmarkHarness() {
+        if (!Boolean.getBoolean("erydon.shared_geometry.benchmark")) {
+            return;
+        }
+        try {
+            Class.forName("com.oliver.erydon.client.profile.ErydonSharedGeometryBenchmarkHarness")
+                    .getMethod("register")
+                    .invoke(null);
+        } catch (ReflectiveOperationException | LinkageError exception) {
+            Erydon.LOGGER.warn(
+                    "[{}] Shared-geometry benchmark harness was requested but is unavailable.",
+                    Erydon.MOD_ID,
+                    exception
+            );
+        }
     }
 }
