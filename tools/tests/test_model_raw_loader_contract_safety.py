@@ -212,22 +212,38 @@ class RawLoaderSourceContractTests(unittest.TestCase):
         self.assertIn("this.uvOffset = uvOffset.clone();", normalized_face)
     def test_uv_offset_is_applied_after_uv_construction_to_all_four_pairs(self) -> None:
         baked_model = _body_after(self.source, r"\bclass\s+RawBakedModel\b")
+        raw_surfaces = _compact(
+            _body_after(
+                self.source,
+                r"\bList<RawSurface>\s+rawSurfaces\s*\(\s*RawModelData\s+data\s*\)",
+            )
+        )
+        _assert_in_order(
+            self,
+            raw_surfaces,
+            (
+                "Vector3f[] vertices = element.transformedVertices(entry.getKey());",
+                "Direction nominalFace = RawBakedModel.closestDirection(vertices);",
+                "float[] uv = face.uv == null ? RawElement.defaultUv(vertices, nominalFace) : RawBakedModel.rectUv(face.uv);",
+                "RawBakedModel.applyUvOffset(uv, face.uvOffset);",
+                "surfaces.add(new RawSurface(vertices, uv, nominalFace, cullFace, face));",
+            ),
+        )
+
         bake_quad = _compact(
             _body_after(
                 baked_model,
-                r"\bBakedQuad\s+bakeQuad\s*\(\s*RawElement\s+element\s*,\s*"
-                r"Direction\s+direction\s*,\s*RawFace\s+face\s*,\s*Sprite\s+sprite\s*\)",
+                r"\bBakedQuad\s+bakeQuad\s*\(\s*RawSurface\s+surface\s*,\s*"
+                r"Sprite\s+sprite\s*\)",
             )
         )
         _assert_in_order(
             self,
             bake_quad,
             (
-                "float[] uv = face.uv == null ? RawElement.defaultUv(vertices, nominalFace) : rectUv(face.uv);",
-                "applyUvOffset(uv, face.uvOffset);",
                 "for (int vertex = 0; vertex < 4; vertex++)",
-                "uv[vertex * 2]",
-                "uv[vertex * 2 + 1]",
+                "surface.uv[vertex * 2]",
+                "surface.uv[vertex * 2 + 1]",
             ),
         )
 
@@ -265,12 +281,18 @@ class RawLoaderSourceContractTests(unittest.TestCase):
             parse,
         )
 
-        baked_model = _compact(_body_after(self.source, r"\bclass\s+RawBakedModel\b"))
+        raw_surfaces = _compact(
+            _body_after(
+                self.source,
+                r"\bList<RawSurface>\s+rawSurfaces\s*\(\s*RawModelData\s+data\s*\)",
+            )
+        )
         self.assertRegex(
-            baked_model,
-            r"if\s*\(\s*cullFace\s*!=\s*null\s*&&\s*\(\s*"
-            r"entry\.getValue\(\)\.cullBoundaryOverride\s*\|\|\s*"
-            r"isOnCullBoundary\(cullFace,\s*element\.transformedVertices\(entry\.getKey\(\)\)\)\s*\)\s*\)",
+            raw_surfaces,
+            r"Direction\s+cullFace\s*=\s*face\.cullFace\s*!=\s*null\s*&&\s*\(\s*"
+            r"face\.cullBoundaryOverride\s*\|\|\s*"
+            r"RawBakedModel\.isOnCullBoundary\(face\.cullFace,\s*vertices\)\s*\)\s*"
+            r"\?\s*face\.cullFace\s*:\s*null\s*;",
         )
 
     def test_transform_order_matches_the_raw_authoring_contract(self) -> None:
