@@ -1,0 +1,17 @@
+{
+  "development_only": true,
+  "file_count": 126,
+  "models": [
+    "phase_in_range",
+    "phase_outside_negative",
+    "phase_outside_positive",
+    "phase_plus_two",
+    "phase_span_8_24",
+    "phase_span_multi"
+  ],
+  "namespace": "synapheia_dev",
+  "pbr_companion_sets": 36,
+  "phase_case_count": 14,
+  "phase_tiles": 36,
+  "tile_size": 16
+}

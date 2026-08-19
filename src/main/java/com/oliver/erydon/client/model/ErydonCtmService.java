@@ -165,7 +165,7 @@ public final class ErydonCtmService {
     }
 
     static int repeatTileIndex(int x, int y, int z, Direction face) {
-        // Must match Continuity's default RepeatSpriteProvider mapping exactly.
+        // Preserve the established world-aligned 6x6 repeat mapping.
         Direction safeFace = face == null ? Direction.UP : face;
         int tileX;
         int tileY;

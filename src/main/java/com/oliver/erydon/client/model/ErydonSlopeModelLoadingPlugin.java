@@ -9,7 +9,7 @@ import net.minecraft.client.util.ModelIdentifier;
 import net.minecraft.util.Identifier;
 
 public final class ErydonSlopeModelLoadingPlugin implements ModelLoadingPlugin {
-    private static final Identifier MINI_CTM_PHASE = new Identifier(Erydon.MOD_ID, "slope_mini_ctm");
+    static final Identifier MINI_CTM_PHASE = new Identifier(Erydon.MOD_ID, "slope_mini_ctm");
 
     @Override
     public void onInitializeModelLoader(Context pluginContext) {

@@ -1,0 +1,6 @@
+{
+  "pack": {
+    "description": "Synapheia development-only numbered repeat fixtures; must not ship",
+    "pack_format": 15
+  }
+}

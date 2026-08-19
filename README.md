@@ -18,9 +18,8 @@ worlds, local runtime state, or the separately distributed ERYDON Collection
 - Java 17
 - Family compatibility generation `2` (`compat2`)
 
-The build embeds Continuity `3.0.0+1.20.1` for current runtime parity. Players
-do not need to install a second copy solely for ERYDON. See
-`docs/CONTINUITY.md` for source and replacement information.
+ERYDON uses its built-in Synapheia engine for repeat and connected-overlay
+textures. Continuity is neither required nor bundled.
 
 ## Installation
 
@@ -62,7 +61,7 @@ python -m pip install -r requirements.txt
 
 The release-shaped output is written to:
 
-`build/libs/erydon-fabric-mc1.20.1-compat2-1.5.16.jar`
+`build/libs/erydon-fabric-mc1.20.1-compat2-1.5.17.jar`
 
 The standard `build` task runs compilation, tests, source audits, texture-alias
 validation, restored-family fixture checks, and the final JAR audit. For the

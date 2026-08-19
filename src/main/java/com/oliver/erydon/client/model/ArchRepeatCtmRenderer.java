@@ -29,8 +29,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 /**
- * Rebuilds an assembled arch in world-aligned repeat-CTM cells after Continuity
- * has wrapped the family model. This keeps one texture phase across rotated
+ * Rebuilds an assembled arch in world-aligned repeat-CTM cells before the final
+ * Synapheia pass. This keeps one texture phase across rotated
  * component boundaries while preserving atlas-safe cell splits.
  */
 public final class ArchRepeatCtmRenderer extends ForwardingBakedModel {

@@ -1,0 +1,74 @@
+{
+  "development_only": true,
+  "engine_mode": "synapheia",
+  "rules": [
+    {
+      "allowlist": {
+        "models": [
+          "synapheia_dev:block/phase_in_range",
+          "synapheia_dev:block/phase_outside_negative",
+          "synapheia_dev:block/phase_outside_positive",
+          "synapheia_dev:block/phase_plus_two",
+          "synapheia_dev:block/phase_span_8_24",
+          "synapheia_dev:block/phase_span_multi"
+        ]
+      },
+      "continuity_exclusion": "fixture_namespace_not_discoverable_by_continuity",
+      "faces": [
+        "down",
+        "up",
+        "north",
+        "south",
+        "west",
+        "east"
+      ],
+      "geometric_position_role": "repeat_phase",
+      "height": 6,
+      "id": "numbered_repeat_6x6",
+      "layer": "solid",
+      "method": "repeat",
+      "owner_position_role": "identity_tint_connectivity",
+      "tile_order": "row_major",
+      "tiles": [
+        "synapheia_dev:synapheia/phase/0",
+        "synapheia_dev:synapheia/phase/1",
+        "synapheia_dev:synapheia/phase/2",
+        "synapheia_dev:synapheia/phase/3",
+        "synapheia_dev:synapheia/phase/4",
+        "synapheia_dev:synapheia/phase/5",
+        "synapheia_dev:synapheia/phase/6",
+        "synapheia_dev:synapheia/phase/7",
+        "synapheia_dev:synapheia/phase/8",
+        "synapheia_dev:synapheia/phase/9",
+        "synapheia_dev:synapheia/phase/10",
+        "synapheia_dev:synapheia/phase/11",
+        "synapheia_dev:synapheia/phase/12",
+        "synapheia_dev:synapheia/phase/13",
+        "synapheia_dev:synapheia/phase/14",
+        "synapheia_dev:synapheia/phase/15",
+        "synapheia_dev:synapheia/phase/16",
+        "synapheia_dev:synapheia/phase/17",
+        "synapheia_dev:synapheia/phase/18",
+        "synapheia_dev:synapheia/phase/19",
+        "synapheia_dev:synapheia/phase/20",
+        "synapheia_dev:synapheia/phase/21",
+        "synapheia_dev:synapheia/phase/22",
+        "synapheia_dev:synapheia/phase/23",
+        "synapheia_dev:synapheia/phase/24",
+        "synapheia_dev:synapheia/phase/25",
+        "synapheia_dev:synapheia/phase/26",
+        "synapheia_dev:synapheia/phase/27",
+        "synapheia_dev:synapheia/phase/28",
+        "synapheia_dev:synapheia/phase/29",
+        "synapheia_dev:synapheia/phase/30",
+        "synapheia_dev:synapheia/phase/31",
+        "synapheia_dev:synapheia/phase/32",
+        "synapheia_dev:synapheia/phase/33",
+        "synapheia_dev:synapheia/phase/34",
+        "synapheia_dev:synapheia/phase/35"
+      ],
+      "width": 6
+    }
+  ],
+  "schema_version": 1
+}

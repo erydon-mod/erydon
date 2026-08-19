@@ -12,6 +12,7 @@ import com.oliver.erydon.client.model.ErydonSlopeModelLoadingPlugin;
 import com.oliver.erydon.client.model.GothicArchCtmModelLoadingPlugin;
 import com.oliver.erydon.client.model.ModernArchCtmModelLoadingPlugin;
 import com.oliver.erydon.client.model.SpiralStairModelLoadingPlugin;
+import com.oliver.erydon.client.model.SynapheiaModelLoadingPlugin;
 import com.oliver.erydon.client.profile.ErydonLoadProfiler;
 import com.oliver.erydon.client.tooltip.ErydonTooltipClient;
 import com.oliver.erydon.block.AlcoveBlock;
@@ -20,7 +21,6 @@ import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.model.loading.v1.PreparableModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.registry.Registries;
 
@@ -32,11 +32,6 @@ public final class ErydonClient implements ClientModInitializer {
     public void onInitializeClient() {
         ErydonConfigNetworkingClient.register();
         CollectionResourcePackNotice.register();
-        FabricLoader.getInstance().getModContainer("continuity").ifPresentOrElse(
-                mod -> Erydon.LOGGER.info("[{}] Using Continuity {}.", Erydon.MOD_ID, mod.getMetadata().getVersion().getFriendlyString()),
-                () -> Erydon.LOGGER.warn("[{}] Continuity is not loaded on this client.", Erydon.MOD_ID)
-        );
-
         // Ã¢Å“â€¦ REQUIRED: register model plugin manually
         ModelLoadingPlugin.register(new CoverModelLoadingPlugin());
         if (Boolean.getBoolean("erydon.debug.disable_raw_model_loader")) {
@@ -50,6 +45,7 @@ public final class ErydonClient implements ClientModInitializer {
         ModelLoadingPlugin.register(new SpiralStairModelLoadingPlugin());
         ModelLoadingPlugin.register(new GothicArchCtmModelLoadingPlugin());
         ModelLoadingPlugin.register(new ModernArchCtmModelLoadingPlugin());
+        SynapheiaModelLoadingPlugin.register();
         ErydonCtmService.registerReloadListener();
         if (ErydonLoadProfiler.isEnabled()) {
             ModelLoadingPlugin.register(new ErydonModelPerformanceProbePlugin());

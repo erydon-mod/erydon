@@ -13,8 +13,6 @@
   ],
   "client": [
     "client.BakedQuadFactoryMixin",
-    "client.ContinuityCtmTransformProbeMixin",
-    "client.ContinuityReservedSpriteWarningMixin",
     "client.FluidRendererMixin",
     "client.compat.axiom.BlockListEntryMixin",
     "client.compat.rei.ReiIdentifierArgumentTypeMixin",

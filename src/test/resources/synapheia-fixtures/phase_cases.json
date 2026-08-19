@@ -1,0 +1,891 @@
+{
+  "cases": [
+    {
+      "case_id": "owner_0_64_0_x_-1",
+      "expected_cell_offset": [
+        -1,
+        0,
+        0
+      ],
+      "expected_geometric_cell_position": [
+        -1,
+        64,
+        0
+      ],
+      "local_probe_position": [
+        -8.0,
+        8.0,
+        8.0
+      ],
+      "owner_position": [
+        0,
+        64,
+        0
+      ]
+    },
+    {
+      "case_id": "owner_0_64_0_x_0",
+      "expected_cell_offset": [
+        0,
+        0,
+        0
+      ],
+      "expected_geometric_cell_position": [
+        0,
+        64,
+        0
+      ],
+      "local_probe_position": [
+        8.0,
+        8.0,
+        8.0
+      ],
+      "owner_position": [
+        0,
+        64,
+        0
+      ]
+    },
+    {
+      "case_id": "owner_0_64_0_x_1",
+      "expected_cell_offset": [
+        1,
+        0,
+        0
+      ],
+      "expected_geometric_cell_position": [
+        1,
+        64,
+        0
+      ],
+      "local_probe_position": [
+        24.0,
+        8.0,
+        8.0
+      ],
+      "owner_position": [
+        0,
+        64,
+        0
+      ]
+    },
+    {
+      "case_id": "owner_0_64_0_x_2",
+      "expected_cell_offset": [
+        2,
+        0,
+        0
+      ],
+      "expected_geometric_cell_position": [
+        2,
+        64,
+        0
+      ],
+      "local_probe_position": [
+        40.0,
+        8.0,
+        8.0
+      ],
+      "owner_position": [
+        0,
+        64,
+        0
+      ]
+    },
+    {
+      "case_id": "owner_-7_64_-11_x_-1",
+      "expected_cell_offset": [
+        -1,
+        0,
+        0
+      ],
+      "expected_geometric_cell_position": [
+        -8,
+        64,
+        -11
+      ],
+      "local_probe_position": [
+        -8.0,
+        8.0,
+        8.0
+      ],
+      "owner_position": [
+        -7,
+        64,
+        -11
+      ]
+    },
+    {
+      "case_id": "owner_-7_64_-11_x_0",
+      "expected_cell_offset": [
+        0,
+        0,
+        0
+      ],
+      "expected_geometric_cell_position": [
+        -7,
+        64,
+        -11
+      ],
+      "local_probe_position": [
+        8.0,
+        8.0,
+        8.0
+      ],
+      "owner_position": [
+        -7,
+        64,
+        -11
+      ]
+    },
+    {
+      "case_id": "owner_-7_64_-11_x_1",
+      "expected_cell_offset": [
+        1,
+        0,
+        0
+      ],
+      "expected_geometric_cell_position": [
+        -6,
+        64,
+        -11
+      ],
+      "local_probe_position": [
+        24.0,
+        8.0,
+        8.0
+      ],
+      "owner_position": [
+        -7,
+        64,
+        -11
+      ]
+    },
+    {
+      "case_id": "owner_-7_64_-11_x_2",
+      "expected_cell_offset": [
+        2,
+        0,
+        0
+      ],
+      "expected_geometric_cell_position": [
+        -5,
+        64,
+        -11
+      ],
+      "local_probe_position": [
+        40.0,
+        8.0,
+        8.0
+      ],
+      "owner_position": [
+        -7,
+        64,
+        -11
+      ]
+    },
+    {
+      "case_id": "owner_15_31_15_x_-1",
+      "expected_cell_offset": [
+        -1,
+        0,
+        0
+      ],
+      "expected_geometric_cell_position": [
+        14,
+        31,
+        15
+      ],
+      "local_probe_position": [
+        -8.0,
+        8.0,
+        8.0
+      ],
+      "owner_position": [
+        15,
+        31,
+        15
+      ]
+    },
+    {
+      "case_id": "owner_15_31_15_x_0",
+      "expected_cell_offset": [
+        0,
+        0,
+        0
+      ],
+      "expected_geometric_cell_position": [
+        15,
+        31,
+        15
+      ],
+      "local_probe_position": [
+        8.0,
+        8.0,
+        8.0
+      ],
+      "owner_position": [
+        15,
+        31,
+        15
+      ]
+    },
+    {
+      "case_id": "owner_15_31_15_x_1",
+      "expected_cell_offset": [
+        1,
+        0,
+        0
+      ],
+      "expected_geometric_cell_position": [
+        16,
+        31,
+        15
+      ],
+      "local_probe_position": [
+        24.0,
+        8.0,
+        8.0
+      ],
+      "owner_position": [
+        15,
+        31,
+        15
+      ]
+    },
+    {
+      "case_id": "owner_15_31_15_x_2",
+      "expected_cell_offset": [
+        2,
+        0,
+        0
+      ],
+      "expected_geometric_cell_position": [
+        17,
+        31,
+        15
+      ],
+      "local_probe_position": [
+        40.0,
+        8.0,
+        8.0
+      ],
+      "owner_position": [
+        15,
+        31,
+        15
+      ]
+    },
+    {
+      "case_id": "span_8_24_x",
+      "expected_cells": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ]
+      ],
+      "oracle_fragments": [
+        {
+          "area": 128.0,
+          "u_cell": 0,
+          "v_cell": 0,
+          "vertex_count": 4,
+          "vertices": [
+            {
+              "normal": [
+                0.0,
+                0.0,
+                1.0
+              ],
+              "position": [
+                8,
+                0,
+                0
+              ],
+              "source_uv": [
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "normal": [
+                0.0,
+                0.0,
+                1.0
+              ],
+              "position": [
+                16.0,
+                0.0,
+                0.0
+              ],
+              "source_uv": [
+                0.5,
+                0.0
+              ]
+            },
+            {
+              "normal": [
+                0.0,
+                0.0,
+                1.0
+              ],
+              "position": [
+                16.0,
+                16.0,
+                0.0
+              ],
+              "source_uv": [
+                0.5,
+                1.0
+              ]
+            },
+            {
+              "normal": [
+                0.0,
+                0.0,
+                1.0
+              ],
+              "position": [
+                8,
+                16,
+                0
+              ],
+              "source_uv": [
+                0.0,
+                1.0
+              ]
+            }
+          ]
+        },
+        {
+          "area": 128.0,
+          "u_cell": 1,
+          "v_cell": 0,
+          "vertex_count": 4,
+          "vertices": [
+            {
+              "normal": [
+                0.0,
+                0.0,
+                1.0
+              ],
+              "position": [
+                16.0,
+                0.0,
+                0.0
+              ],
+              "source_uv": [
+                0.5,
+                0.0
+              ]
+            },
+            {
+              "normal": [
+                0.0,
+                0.0,
+                1.0
+              ],
+              "position": [
+                24,
+                0,
+                0
+              ],
+              "source_uv": [
+                1.0,
+                0.0
+              ]
+            },
+            {
+              "normal": [
+                0.0,
+                0.0,
+                1.0
+              ],
+              "position": [
+                24,
+                16,
+                0
+              ],
+              "source_uv": [
+                1.0,
+                1.0
+              ]
+            },
+            {
+              "normal": [
+                0.0,
+                0.0,
+                1.0
+              ],
+              "position": [
+                16.0,
+                16.0,
+                0.0
+              ],
+              "source_uv": [
+                0.5,
+                1.0
+              ]
+            }
+          ]
+        }
+      ],
+      "polygon": [
+        {
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "position": [
+            8,
+            0,
+            0
+          ],
+          "source_uv": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "position": [
+            24,
+            0,
+            0
+          ],
+          "source_uv": [
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "position": [
+            24,
+            16,
+            0
+          ],
+          "source_uv": [
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "position": [
+            8,
+            16,
+            0
+          ],
+          "source_uv": [
+            0.0,
+            1.0
+          ]
+        }
+      ],
+      "projection_axes": [
+        "x",
+        "y"
+      ]
+    },
+    {
+      "case_id": "span_negative_to_positive_x",
+      "expected_cells": [
+        [
+          -1,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          2,
+          0
+        ]
+      ],
+      "oracle_fragments": [
+        {
+          "area": 256.0,
+          "u_cell": -1,
+          "v_cell": 0,
+          "vertex_count": 4,
+          "vertices": [
+            {
+              "normal": [
+                0.0,
+                0.0,
+                1.0
+              ],
+              "position": [
+                -16,
+                0,
+                0
+              ],
+              "source_uv": [
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "normal": [
+                0.0,
+                0.0,
+                1.0
+              ],
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "source_uv": [
+                0.25,
+                0.0
+              ]
+            },
+            {
+              "normal": [
+                0.0,
+                0.0,
+                1.0
+              ],
+              "position": [
+                0.0,
+                16.0,
+                0.0
+              ],
+              "source_uv": [
+                0.25,
+                1.0
+              ]
+            },
+            {
+              "normal": [
+                0.0,
+                0.0,
+                1.0
+              ],
+              "position": [
+                -16,
+                16,
+                0
+              ],
+              "source_uv": [
+                0.0,
+                1.0
+              ]
+            }
+          ]
+        },
+        {
+          "area": 256.0,
+          "u_cell": 0,
+          "v_cell": 0,
+          "vertex_count": 4,
+          "vertices": [
+            {
+              "normal": [
+                0.0,
+                0.0,
+                1.0
+              ],
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "source_uv": [
+                0.25,
+                0.0
+              ]
+            },
+            {
+              "normal": [
+                0.0,
+                0.0,
+                1.0
+              ],
+              "position": [
+                16.0,
+                0.0,
+                0.0
+              ],
+              "source_uv": [
+                0.5,
+                0.0
+              ]
+            },
+            {
+              "normal": [
+                0.0,
+                0.0,
+                1.0
+              ],
+              "position": [
+                16.0,
+                16.0,
+                0.0
+              ],
+              "source_uv": [
+                0.5,
+                1.0
+              ]
+            },
+            {
+              "normal": [
+                0.0,
+                0.0,
+                1.0
+              ],
+              "position": [
+                0.0,
+                16.0,
+                0.0
+              ],
+              "source_uv": [
+                0.25,
+                1.0
+              ]
+            }
+          ]
+        },
+        {
+          "area": 256.0,
+          "u_cell": 1,
+          "v_cell": 0,
+          "vertex_count": 4,
+          "vertices": [
+            {
+              "normal": [
+                0.0,
+                0.0,
+                1.0
+              ],
+              "position": [
+                16.0,
+                0.0,
+                0.0
+              ],
+              "source_uv": [
+                0.5,
+                0.0
+              ]
+            },
+            {
+              "normal": [
+                0.0,
+                0.0,
+                1.0
+              ],
+              "position": [
+                32.0,
+                0.0,
+                0.0
+              ],
+              "source_uv": [
+                0.75,
+                0.0
+              ]
+            },
+            {
+              "normal": [
+                0.0,
+                0.0,
+                1.0
+              ],
+              "position": [
+                32.0,
+                16.0,
+                0.0
+              ],
+              "source_uv": [
+                0.75,
+                1.0
+              ]
+            },
+            {
+              "normal": [
+                0.0,
+                0.0,
+                1.0
+              ],
+              "position": [
+                16.0,
+                16.0,
+                0.0
+              ],
+              "source_uv": [
+                0.5,
+                1.0
+              ]
+            }
+          ]
+        },
+        {
+          "area": 256.0,
+          "u_cell": 2,
+          "v_cell": 0,
+          "vertex_count": 4,
+          "vertices": [
+            {
+              "normal": [
+                0.0,
+                0.0,
+                1.0
+              ],
+              "position": [
+                32.0,
+                0.0,
+                0.0
+              ],
+              "source_uv": [
+                0.75,
+                0.0
+              ]
+            },
+            {
+              "normal": [
+                0.0,
+                0.0,
+                1.0
+              ],
+              "position": [
+                48,
+                0,
+                0
+              ],
+              "source_uv": [
+                1.0,
+                0.0
+              ]
+            },
+            {
+              "normal": [
+                0.0,
+                0.0,
+                1.0
+              ],
+              "position": [
+                48,
+                16,
+                0
+              ],
+              "source_uv": [
+                1.0,
+                1.0
+              ]
+            },
+            {
+              "normal": [
+                0.0,
+                0.0,
+                1.0
+              ],
+              "position": [
+                32.0,
+                16.0,
+                0.0
+              ],
+              "source_uv": [
+                0.75,
+                1.0
+              ]
+            }
+          ]
+        }
+      ],
+      "polygon": [
+        {
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "position": [
+            -16,
+            0,
+            0
+          ],
+          "source_uv": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "position": [
+            48,
+            0,
+            0
+          ],
+          "source_uv": [
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "position": [
+            48,
+            16,
+            0
+          ],
+          "source_uv": [
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "position": [
+            -16,
+            16,
+            0
+          ],
+          "source_uv": [
+            0.0,
+            1.0
+          ]
+        }
+      ],
+      "projection_axes": [
+        "x",
+        "y"
+      ]
+    }
+  ],
+  "schema_version": 1
+}

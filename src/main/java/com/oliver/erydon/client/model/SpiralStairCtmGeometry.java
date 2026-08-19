@@ -238,7 +238,21 @@ final class SpiralStairCtmGeometry {
                   boolean hasNormal,
                   float normalX,
                   float normalY,
-                  float normalZ) {
+                  float normalZ,
+                  float sourceU,
+                  float sourceV) {
+        Vertex(float x,
+               float y,
+               float z,
+               int color,
+               int lightmap,
+               boolean hasNormal,
+               float normalX,
+               float normalY,
+               float normalZ) {
+            this(x, y, z, color, lightmap, hasNormal, normalX, normalY, normalZ, Float.NaN, Float.NaN);
+        }
+
         private static Vertex interpolate(Vertex from, Vertex to, float amount) {
             boolean interpolateNormal = from.hasNormal && to.hasNormal;
             float normalX = interpolateNormal ? lerp(from.normalX, to.normalX, amount) : 0.0F;
@@ -262,7 +276,9 @@ final class SpiralStairCtmGeometry {
                     interpolateNormal,
                     normalX,
                     normalY,
-                    normalZ
+                    normalZ,
+                    lerp(from.sourceU, to.sourceU, amount),
+                    lerp(from.sourceV, to.sourceV, amount)
             );
         }
 

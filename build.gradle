@@ -37,11 +37,6 @@ def idMigrationTool = file('tools/id_migration.py')
 def idMigrationManifest = file('src/main/resources/data/erydon/id_migration.tsv')
 def idMigrationReport = layout.buildDirectory.file('reports/id-migration/source-audit.json')
 
-def continuityJar = file('libs/continuity-3.0.0+1.20.1.jar')
-if (!continuityJar.exists()) {
-    throw new GradleException("Missing Continuity jar: ${continuityJar}")
-}
-
 repositories {
     maven { url = 'https://maven.fabricmc.net/' }
     maven { url = 'https://maven.shedaniel.me/' }
@@ -74,7 +69,6 @@ dependencies {
     modRuntimeOnly "maven.modrinth:sodium:mc1.20.1-0.5.13-fabric"
     modRuntimeOnly "maven.modrinth:indium:1.0.36+mc1.20.1"
     modRuntimeOnly "maven.modrinth:iris:1.7.6+1.20.1"
-    modLocalRuntime files(continuityJar)
     modCompileOnly "com.terraformersmc:modmenu:7.2.2"
     modRuntimeOnly "com.terraformersmc:modmenu:7.2.2" // optional
     modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:12.1.785"
@@ -138,13 +132,16 @@ loom {
             if (providers.gradleProperty('erydon.debug.disableRawModelLoader').map { it.toBoolean() }.getOrElse(false)) {
                 vmArgs "-Derydon.debug.disable_raw_model_loader=true"
             }
+            if (providers.gradleProperty('erydon.synapheiaMetrics').map { it.toBoolean() }.getOrElse(false)) {
+                def synapheiaRunId = providers.gradleProperty('erydon.synapheiaRunId').getOrElse('local')
+                def synapheiaMetricsOutput = providers.gradleProperty('erydon.synapheiaMetricsOutput')
+                        .getOrElse(layout.buildDirectory.file('reports/synapheia/events/synapheia.jsonl').get().asFile.absolutePath)
+                vmArgs "-Derydon.synapheia.metrics=true"
+                vmArgs "-Derydon.synapheia.run_id=${synapheiaRunId}"
+                vmArgs "-Derydon.synapheia.metrics.output=${synapheiaMetricsOutput}"
+            }
         }
     }
-}
-
-tasks.named('remapJar') {
-    nestedJars.from continuityJar
-    addNestedDependencies = true
 }
 
 tasks.named('jar') {
@@ -352,7 +349,7 @@ tasks.withType(Jar).configureEach {
 
 tasks.register('auditErydonJar') {
     group = 'verification'
-    description = 'Verifies release metadata and writes focused Continuity CTM and smooth slope checks.'
+    description = 'Verifies release metadata, Synapheia CTM ownership, and smooth slope checks.'
     dependsOn tasks.named('remapJar')
 
     doLast {
@@ -403,6 +400,9 @@ tasks.register('auditErydonJar') {
             }
             if (!configuredMixins.contains('erydon-texture-alias.mixins.json')) {
                 metadataErrors.add("required texture alias mixin config is missing")
+            }
+            if (entryNames.any { it.toLowerCase(Locale.ROOT).contains('continuity') }) {
+                metadataErrors.add('release jar still contains Continuity files')
             }
             requiredDependencies.each { key, expected ->
                 if (!dependencies.containsKey(key)) {
@@ -531,7 +531,7 @@ tasks.register('auditErydonJar') {
                     ".properties matches source byte-for-byte: ${yesNo(sourceProperties == jarProperties)}",
                     "required dependencies: ${requiredDependencies.collect { key, value -> "${key}=${dependencies[key]}" }.join(', ')}",
                     "release metadata consistent: ${yesNo(metadataErrors.isEmpty())}",
-                    "nested Continuity jar present: ${yesNo(entryNames.any { it == 'META-INF/jars/continuity-3.0.0+1.20.1.jar' })}",
+                    "nested Continuity jar absent: ${yesNo(!entryNames.any { it.toLowerCase(Locale.ROOT).contains('continuity') })}",
                     "CTM property files found: ${ctmEntries.size()}",
                     "CTM property files with UTF-8 BOM: ${ctmEntriesWithUtf8Bom.size()}",
                     "CTM methods found: ${ctmMethods.collect { key, value -> "${key}=${value}" }.join(', ')}",
@@ -540,11 +540,12 @@ tasks.register('auditErydonJar') {
                     "active old slope tree refs: ${entries.count { entry -> entry.name.endsWith('.json') && !entry.name.startsWith('assets/erydon/models/block/slope/') && readText(entry).contains('erydon:block/slope/') }}",
                     "internal wrapped slope models: ${entryNames.count { it.startsWith('assets/erydon/models/block/internal/wrapped/') && it.contains('slope') && it.endsWith('.json') }}",
                     "glazing slope paths classified: ${yesNo(classifierSource.contains('isGlazingPath') && classifierSource.contains('return Family.NONE;'))}",
-                    "Continuity gate mixin removed from source: ${yesNo(!allSource.contains('ModelWrappingHandlerMixin') && !allSource.contains('createBlockStateModelIdMap'))}",
-                    "Continuity mixin removed from mixin config: ${yesNo(!mixinsSource.contains('compat.continuity'))}",
+                    "legacy CTM gate mixin removed from source: ${yesNo(!allSource.contains('ModelWrappingHandlerMixin') && !allSource.contains('createBlockStateModelIdMap'))}",
+                    "legacy CTM mixins removed from mixin config: ${yesNo(!mixinsSource.toLowerCase(Locale.ROOT).contains('continuity'))}",
                     "ArdaGrass mixin removed from source/config: ${yesNo(!allSource.contains('ArdaGrassBakedModel') && !mixinsSource.contains('ardagrass'))}",
                     "hard-coded Conquest grass IDs absent: ${yesNo(!allSource.contains('clover_covered_grass') && !allSource.contains('taiga_grass'))}",
-                    "Continuity global config overrides absent: ${yesNo(!allSource.contains('erydon.continuity.mode') && !allSource.contains('erydon.continuity.max_ctm_states') && !allSource.contains('erydon.continuity.disable_global_emissive'))}",
+                    "legacy CTM global config overrides absent: ${yesNo(!allSource.contains('erydon.continuity.mode') && !allSource.contains('erydon.continuity.max_ctm_states') && !allSource.contains('erydon.continuity.disable_global_emissive'))}",
+                    "Synapheia production rule loader present: ${yesNo(allSource.contains('class SynapheiaManifest') && allSource.contains('OVERLAY_CTM'))}",
                     "ErydonCtmService still handles smooth slope CTM: ${yesNo(ctmServiceSource.contains('slopeCtmSetName') && ctmServiceSource.contains('resolveSlopeRepeatSprite'))}"
             ]
 
@@ -716,6 +717,23 @@ tasks.register('writeSharedGeometryParityDumps', JavaExec) {
     args file('src/main/resources').absolutePath,
             layout.buildDirectory.file('reports/erydon-shared-geometry/dumps/baseline.jsonl').get().asFile.absolutePath,
             layout.buildDirectory.file('reports/erydon-shared-geometry/dumps/prototype.jsonl').get().asFile.absolutePath
+}
+
+tasks.register('writeSynapheiaParityDumps', JavaExec) {
+    group = 'verification'
+    description = 'Writes deterministic ordinary-repeat oracle/prototype events for the Synapheia comparator.'
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.oliver.erydon.client.model.SynapheiaParityDump'
+    args layout.buildDirectory.file('reports/synapheia/events/continuity-ordinary.jsonl').get().asFile.absolutePath,
+            layout.buildDirectory.file('reports/synapheia/events/synapheia-ordinary.jsonl').get().asFile.absolutePath
+}
+
+tasks.register('installSynapheiaTestPack', Copy) {
+    group = 'verification'
+    description = 'Installs the development-only 32x32x32 automatic-UV Synapheia test pack.'
+    from('src/test/resources/synapheia-test-pack')
+    into('run-dev/resourcepacks/Synapheia-32x-Cube-Test')
 }
 
 tasks.register('nameSharedGeometryBenchmarkWorld', JavaExec) {

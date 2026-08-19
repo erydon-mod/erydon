@@ -6,7 +6,7 @@ import net.fabricmc.fabric.api.client.model.loading.v1.ModelModifier;
 import net.minecraft.client.util.ModelIdentifier;
 import net.minecraft.util.Identifier;
 
-/** Applies Gothic arch world projection after Continuity has finished wrapping the model. */
+/** Applies Gothic arch world projection before the final Synapheia pass. */
 public final class GothicArchCtmModelLoadingPlugin implements ModelLoadingPlugin {
     static final Identifier REPEAT_CTM_PHASE = new Identifier(Erydon.MOD_ID, "gothic_arch_repeat_ctm");
 

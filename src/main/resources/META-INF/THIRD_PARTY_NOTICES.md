@@ -1,25 +1,6 @@
 Third-party components included in the ERYDON JAR
 =================================================
 
-Continuity
-----------
-
-- Version: 3.0.0+1.20.1
-- Author: PepperCode1
-- Source tag: https://github.com/PepperCode1/Continuity/releases/tag/v3.0.0%2B1.20.1
-- Published version: https://modrinth.com/mod/continuity/version/qGTDcjHM
-- Distribution path: META-INF/jars/continuity-3.0.0+1.20.1.jar
-- Licence: LGPL-3.0-only
-- Modification status: unmodified upstream binary
-- Licence texts:
-  - META-INF/licenses/continuity-LGPL-3.0.txt
-  - META-INF/licenses/GPL-3.0.txt
-
-The tagged upstream source can be obtained from the source-tag link. ERYDON's
-MIT and CC BY-SA terms do not restrict rights granted for Continuity under the
-LGPL, including lawful replacement, modification, debugging, or reverse
-engineering for debugging a modified LGPL component.
-
 Cinzel
 ------
 

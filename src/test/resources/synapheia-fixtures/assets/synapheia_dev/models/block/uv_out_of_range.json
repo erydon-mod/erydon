@@ -1,0 +1,19 @@
+{
+  "ambientocclusion": true,
+  "elements": [
+    {
+      "from": [-8, 0, 0],
+      "to": [24, 16, 16],
+      "faces": {
+        "south": {
+          "texture": "#phase",
+          "uv": [-8, 0, 24, 16]
+        }
+      }
+    }
+  ],
+  "textures": {
+    "particle": "#phase",
+    "phase": "synapheia_dev:synapheia/phase/0"
+  }
+}

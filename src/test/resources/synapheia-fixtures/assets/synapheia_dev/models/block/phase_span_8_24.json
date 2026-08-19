@@ -1,0 +1,48 @@
+{
+  "ambientocclusion": true,
+  "elements": [
+    {
+      "faces": {
+        "down": {
+          "cullface": "down",
+          "texture": "#phase"
+        },
+        "east": {
+          "cullface": "east",
+          "texture": "#phase"
+        },
+        "north": {
+          "cullface": "north",
+          "texture": "#phase"
+        },
+        "south": {
+          "cullface": "south",
+          "texture": "#phase"
+        },
+        "up": {
+          "cullface": "up",
+          "texture": "#phase"
+        },
+        "west": {
+          "cullface": "west",
+          "texture": "#phase"
+        }
+      },
+      "from": [
+        8,
+        0,
+        0
+      ],
+      "shade": true,
+      "to": [
+        24,
+        16,
+        16
+      ]
+    }
+  ],
+  "textures": {
+    "particle": "#phase",
+    "phase": "synapheia_dev:synapheia/phase/0"
+  }
+}
