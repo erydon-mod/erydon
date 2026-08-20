@@ -14,7 +14,10 @@
   "client": [
     "client.BakedQuadFactoryMixin",
     "client.FluidRendererMixin",
+    "client.SpriteAtlasTextureMixin",
     "client.compat.axiom.BlockListEntryMixin",
+    "client.compat.iris.ProgramSetMixin",
+    "client.compat.iris.ShaderPropertiesMixin",
     "client.compat.rei.ReiIdentifierArgumentTypeMixin",
     "client.compat.rei.ReiTextArgumentTypeMixin",
     "client.indium.TerrainRenderContextMixin"
