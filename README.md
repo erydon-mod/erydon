@@ -83,6 +83,6 @@ follow `SECURITY.md`.
 
 - ERYDON code: MIT — `LICENSE-CODE.md`
 - ERYDON-owned assets: CC BY-SA 4.0 — `LICENSE-ASSETS.md`
-- Third-party components: their original terms — `THIRD_PARTY_NOTICES.md`
+- Separately licensed material: its original terms — `THIRD_PARTY_NOTICES.md`
 
 The root `LICENSE` is the authoritative path-to-licence map.

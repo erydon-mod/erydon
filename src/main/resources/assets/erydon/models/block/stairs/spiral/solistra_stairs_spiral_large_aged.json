@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/stairs/spiral/stairs_spiral_large",
+  "textures": {
+    "stone": "erydon:block/solistra_block_aged",
+    "particle": "erydon:block/solistra_block_aged"
+  }
+}

@@ -23,7 +23,6 @@ public final class ErydonCtmService {
     private static final Identifier RELOAD_LISTENER_ID = new Identifier(Erydon.MOD_ID, "ctm_service");
     private static final int REPEAT_TILE_COUNT = 36;
     private static final String NO_CTM_SET = "<none>";
-    private static final String SPIRAL_STAIR_SUFFIX = "_stairs_spiral_large";
     private static final String MODERN_ARCH_SUFFIX = "_arch_modern";
     private static final String GOTHIC_ARCH_SUFFIX = "_arch_gothic";
     private static final String[] SLOPE_SUFFIXES = {
@@ -79,19 +78,6 @@ public final class ErydonCtmService {
 
         String cached = slopeSetNames.computeIfAbsent(blockPath, ErydonCtmService::resolveSlopeCtmSetName);
         return NO_CTM_SET.equals(cached) ? null : cached;
-    }
-
-    public String spiralCtmSetName(String blockPath) {
-        if (blockPath == null) {
-            return null;
-        }
-        boolean aged = ErydonIdNaming.isAged(blockPath);
-        String basePath = ErydonIdNaming.withoutAged(blockPath);
-        if (!basePath.endsWith(SPIRAL_STAIR_SUFFIX)) {
-            return null;
-        }
-        String ctmSet = basePath.substring(0, basePath.length() - SPIRAL_STAIR_SUFFIX.length());
-        return aged ? ctmSet + "_aged" : ctmSet;
     }
 
     public String gothicArchCtmSetName(String blockPath) {
@@ -156,7 +142,6 @@ public final class ErydonCtmService {
 
     private void clearSpriteCache() {
         repeatSpritesBySet.clear();
-        SpiralStairBakedModel.clearGeometryCache();
         ArchRepeatCtmRenderer.clearGeometryCache();
     }
 

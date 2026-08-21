@@ -1,7 +1,0 @@
-{
-  "parent": "erydon:block/stairs/spiral/stairs_spiral_large_e",
-  "textures": {
-    "stone": "erydon:block/glacium_ashlar_block",
-    "particle": "erydon:block/glacium_ashlar_block"
-  }
-}

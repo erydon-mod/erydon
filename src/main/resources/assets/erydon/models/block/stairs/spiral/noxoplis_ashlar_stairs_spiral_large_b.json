@@ -1,7 +1,0 @@
-{
-  "parent": "erydon:block/stairs/spiral/stairs_spiral_large_b",
-  "textures": {
-    "stone": "erydon:block/noxoplis_ashlar_block",
-    "particle": "erydon:block/noxoplis_ashlar_block"
-  }
-}

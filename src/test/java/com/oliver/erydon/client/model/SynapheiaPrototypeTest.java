@@ -34,6 +34,20 @@ final class SynapheiaPrototypeTest {
     }
 
     @Test
+    void trianglePaddingSurvivesNormalAndFlippedRendererOrders() {
+        TangentVertex first = new TangentVertex(0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
+        TangentVertex second = new TangentVertex(1.0F, 0.0F, 0.0F, 1.0F, 0.0F);
+        TangentVertex third = new TangentVertex(0.0F, 1.0F, 0.0F, 0.0F, 1.0F);
+
+        List<TangentVertex> padded =
+                SynapheiaRepeatBakedModel.padTriangle(first, second, third);
+
+        assertEquals(List.of(first, second, third, first), padded);
+        assertValidTangentTriangle(padded, 0, 1, 2);
+        assertValidTangentTriangle(padded, 1, 2, 3);
+    }
+
+    @Test
     void generatedSignedCasesUseMathematicalFloorAndSeparateOwnerFromPhase() {
         JsonArray cases = resourceJson("/synapheia-fixtures/phase_cases.json")
                 .getAsJsonObject().getAsJsonArray("cases");
@@ -542,6 +556,33 @@ final class SynapheiaPrototypeTest {
                 () -> "Expected " + expected + ", found " + actual);
     }
 
+    private static void assertValidTangentTriangle(List<TangentVertex> vertices,
+                                                   int firstIndex,
+                                                   int secondIndex,
+                                                   int thirdIndex) {
+        TangentVertex first = vertices.get(firstIndex);
+        TangentVertex second = vertices.get(secondIndex);
+        TangentVertex third = vertices.get(thirdIndex);
+        float firstEdgeX = second.x - first.x;
+        float firstEdgeY = second.y - first.y;
+        float firstEdgeZ = second.z - first.z;
+        float secondEdgeX = third.x - first.x;
+        float secondEdgeY = third.y - first.y;
+        float secondEdgeZ = third.z - first.z;
+        float crossX = firstEdgeY * secondEdgeZ - firstEdgeZ * secondEdgeY;
+        float crossY = firstEdgeZ * secondEdgeX - firstEdgeX * secondEdgeZ;
+        float crossZ = firstEdgeX * secondEdgeY - firstEdgeY * secondEdgeX;
+        float crossLengthSquared = crossX * crossX + crossY * crossY + crossZ * crossZ;
+        float uvDeterminant = (second.u - first.u) * (third.v - first.v)
+                - (second.v - first.v) * (third.u - first.u);
+
+        assertTrue(crossLengthSquared > 0.000000001F);
+        assertTrue(Math.abs(uvDeterminant) > 0.000000001F);
+    }
+
     private record JsonElementView(JsonObject object) {
+    }
+
+    private record TangentVertex(float x, float y, float z, float u, float v) {
     }
 }

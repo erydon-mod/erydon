@@ -3,63 +3,11 @@
     {
       "when": {
         "facing": "north",
-        "part": "a"
-      },
-      "apply": {
-        "model": "erydon:block/stairs/spiral/selenephos_stairs_spiral_large_a_aged",
-        "y": 90
-      }
-    },
-    {
-      "when": {
-        "facing": "north",
         "part": "b"
       },
       "apply": {
-        "model": "erydon:block/stairs/spiral/selenephos_stairs_spiral_large_b_aged",
+        "model": "erydon:block/stairs/spiral/selenephos_stairs_spiral_large_aged",
         "y": 90
-      }
-    },
-    {
-      "when": {
-        "facing": "north",
-        "part": "c"
-      },
-      "apply": {
-        "model": "erydon:block/stairs/spiral/selenephos_stairs_spiral_large_c_aged",
-        "y": 90
-      }
-    },
-    {
-      "when": {
-        "facing": "north",
-        "part": "b",
-        "cap": "true"
-      },
-      "apply": {
-        "model": "erydon:block/stairs/spiral/selenephos_stairs_spiral_large_e_aged",
-        "y": 90
-      }
-    },
-    {
-      "when": {
-        "facing": "north",
-        "part": "d",
-        "cap": "true"
-      },
-      "apply": {
-        "model": "erydon:block/stairs/spiral/selenephos_stairs_spiral_large_d_aged",
-        "y": 90
-      }
-    },
-    {
-      "when": {
-        "facing": "east",
-        "part": "a"
-      },
-      "apply": {
-        "model": "erydon:block/stairs/spiral/selenephos_stairs_spiral_large_a_aged",
-        "y": 180
       }
     },
     {
@@ -68,50 +16,8 @@
         "part": "b"
       },
       "apply": {
-        "model": "erydon:block/stairs/spiral/selenephos_stairs_spiral_large_b_aged",
+        "model": "erydon:block/stairs/spiral/selenephos_stairs_spiral_large_aged",
         "y": 180
-      }
-    },
-    {
-      "when": {
-        "facing": "east",
-        "part": "c"
-      },
-      "apply": {
-        "model": "erydon:block/stairs/spiral/selenephos_stairs_spiral_large_c_aged",
-        "y": 180
-      }
-    },
-    {
-      "when": {
-        "facing": "east",
-        "part": "b",
-        "cap": "true"
-      },
-      "apply": {
-        "model": "erydon:block/stairs/spiral/selenephos_stairs_spiral_large_e_aged",
-        "y": 180
-      }
-    },
-    {
-      "when": {
-        "facing": "east",
-        "part": "d",
-        "cap": "true"
-      },
-      "apply": {
-        "model": "erydon:block/stairs/spiral/selenephos_stairs_spiral_large_d_aged",
-        "y": 180
-      }
-    },
-    {
-      "when": {
-        "facing": "south",
-        "part": "a"
-      },
-      "apply": {
-        "model": "erydon:block/stairs/spiral/selenephos_stairs_spiral_large_a_aged",
-        "y": 270
       }
     },
     {
@@ -120,50 +26,8 @@
         "part": "b"
       },
       "apply": {
-        "model": "erydon:block/stairs/spiral/selenephos_stairs_spiral_large_b_aged",
+        "model": "erydon:block/stairs/spiral/selenephos_stairs_spiral_large_aged",
         "y": 270
-      }
-    },
-    {
-      "when": {
-        "facing": "south",
-        "part": "c"
-      },
-      "apply": {
-        "model": "erydon:block/stairs/spiral/selenephos_stairs_spiral_large_c_aged",
-        "y": 270
-      }
-    },
-    {
-      "when": {
-        "facing": "south",
-        "part": "b",
-        "cap": "true"
-      },
-      "apply": {
-        "model": "erydon:block/stairs/spiral/selenephos_stairs_spiral_large_e_aged",
-        "y": 270
-      }
-    },
-    {
-      "when": {
-        "facing": "south",
-        "part": "d",
-        "cap": "true"
-      },
-      "apply": {
-        "model": "erydon:block/stairs/spiral/selenephos_stairs_spiral_large_d_aged",
-        "y": 270
-      }
-    },
-    {
-      "when": {
-        "facing": "west",
-        "part": "a"
-      },
-      "apply": {
-        "model": "erydon:block/stairs/spiral/selenephos_stairs_spiral_large_a_aged",
-        "y": 0
       }
     },
     {
@@ -172,39 +36,7 @@
         "part": "b"
       },
       "apply": {
-        "model": "erydon:block/stairs/spiral/selenephos_stairs_spiral_large_b_aged",
-        "y": 0
-      }
-    },
-    {
-      "when": {
-        "facing": "west",
-        "part": "c"
-      },
-      "apply": {
-        "model": "erydon:block/stairs/spiral/selenephos_stairs_spiral_large_c_aged",
-        "y": 0
-      }
-    },
-    {
-      "when": {
-        "facing": "west",
-        "part": "b",
-        "cap": "true"
-      },
-      "apply": {
-        "model": "erydon:block/stairs/spiral/selenephos_stairs_spiral_large_e_aged",
-        "y": 0
-      }
-    },
-    {
-      "when": {
-        "facing": "west",
-        "part": "d",
-        "cap": "true"
-      },
-      "apply": {
-        "model": "erydon:block/stairs/spiral/selenephos_stairs_spiral_large_d_aged",
+        "model": "erydon:block/stairs/spiral/selenephos_stairs_spiral_large_aged",
         "y": 0
       }
     }

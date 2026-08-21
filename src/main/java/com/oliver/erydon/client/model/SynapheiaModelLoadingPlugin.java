@@ -52,8 +52,6 @@ public final class SynapheiaModelLoadingPlugin
         pluginContext.modifyModelAfterBake().addPhaseOrdering(
                 ErydonSlopeModelLoadingPlugin.MINI_CTM_PHASE, CTM_PHASE);
         pluginContext.modifyModelAfterBake().addPhaseOrdering(
-                SpiralStairModelLoadingPlugin.REPEAT_CTM_PHASE, CTM_PHASE);
-        pluginContext.modifyModelAfterBake().addPhaseOrdering(
                 GothicArchCtmModelLoadingPlugin.REPEAT_CTM_PHASE, CTM_PHASE);
         pluginContext.modifyModelAfterBake().addPhaseOrdering(
                 ModernArchCtmModelLoadingPlugin.REPEAT_CTM_PHASE, CTM_PHASE);

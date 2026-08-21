@@ -33,9 +33,7 @@ This asset licence covers ERYDON-owned material under:
 It does not cover:
 
 - `src/main/resources/assets/erydon/font/cinzel.ttf`, which is OFL-1.1;
-- Continuity, which is LGPL-3.0-only;
 - the Gradle wrapper, which retains the Gradle distribution's licences;
 - Minecraft, Fabric, or other external projects and trademarks; or
 - separately distributed ERYDON Collection 32x/64x packs unless their own
   distribution explicitly applies this licence.
-

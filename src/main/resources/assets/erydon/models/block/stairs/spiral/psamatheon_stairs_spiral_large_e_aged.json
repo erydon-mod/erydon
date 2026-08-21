@@ -1,7 +1,0 @@
-{
-  "parent": "erydon:block/stairs/spiral/stairs_spiral_large_e",
-  "textures": {
-    "stone": "erydon:block/psamatheon_block_aged",
-    "particle": "erydon:block/psamatheon_block_aged"
-  }
-}

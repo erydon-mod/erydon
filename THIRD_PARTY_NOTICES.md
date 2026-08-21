@@ -1,23 +1,5 @@
 # Third-party notices
 
-## Continuity
-
-- Component: Continuity
-- Version: `3.0.0+1.20.1`
-- Author: PepperCode1
-- Repository path: `libs/continuity-3.0.0+1.20.1.jar`
-- Built-JAR path: `META-INF/jars/continuity-3.0.0+1.20.1.jar`
-- Source tag: <https://github.com/PepperCode1/Continuity/releases/tag/v3.0.0%2B1.20.1>
-- Project page: <https://modrinth.com/mod/continuity/version/qGTDcjHM>
-- Licence: LGPL-3.0-only
-- Modification status: unmodified upstream binary; nested for runtime parity
-- Licence texts: `LICENSES/LGPL-3.0-only.txt` and `LICENSES/GPL-3.0.txt`
-
-The tagged upstream source can be downloaded or cloned from the source-tag link.
-Instructions for building with or replacing the LGPL component are in
-`docs/CONTINUITY.md`. ERYDON's MIT and CC BY-SA terms do not restrict rights
-granted by the LGPL.
-
 ## Cinzel
 
 - Component: Cinzel Regular font
@@ -45,4 +27,3 @@ granted by the LGPL.
 
 Build-only dependencies downloaded by Gradle are not copied into this source
 repository or nested in the ERYDON JAR unless explicitly listed above.
-

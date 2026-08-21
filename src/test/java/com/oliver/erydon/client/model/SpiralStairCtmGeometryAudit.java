@@ -1,7 +1,5 @@
 package com.oliver.erydon.client.model;
 
-import net.minecraft.client.util.ModelIdentifier;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
 
 import java.util.EnumMap;
@@ -19,7 +17,6 @@ public final class SpiralStairCtmGeometryAudit {
         verifyEveryFaceProjectionAndOffset();
         verifyTinyBoundaryOffsetsAreSnapped();
         verifyRepeatTileArithmetic();
-        verifyCtmSetAndModelClassification();
         System.out.println("Spiral stair CTM geometry audit passed.");
     }
 
@@ -110,26 +107,6 @@ public final class SpiralStairCtmGeometryAudit {
         }
     }
 
-    private static void verifyCtmSetAndModelClassification() {
-        ErydonCtmService service = ErydonCtmService.get(null);
-        assertEquals("normal CTM set", "aganite", service.spiralCtmSetName("aganite_stairs_spiral_large"));
-        assertEquals("aged CTM set", "aganite_aged", service.spiralCtmSetName("aganite_stairs_spiral_large_aged"));
-        assertEquals("ashlar CTM set", "aganite_ashlar", service.spiralCtmSetName("aganite_ashlar_stairs_spiral_large"));
-        assertEquals("unrelated CTM set", null, service.spiralCtmSetName("aganite_stairs"));
-
-        Identifier blockId = new Identifier("erydon", "aganite_stairs_spiral_large");
-        if (!SpiralStairModelLoadingPlugin.isWorldSpiralModel(new ModelIdentifier(blockId, "facing=north,part=a,cap=false"))) {
-            throw new IllegalStateException("World spiral model was not classified.");
-        }
-        if (SpiralStairModelLoadingPlugin.isWorldSpiralModel(new ModelIdentifier(blockId, "inventory"))) {
-            throw new IllegalStateException("Inventory spiral model must retain its authored display model.");
-        }
-        if (SpiralStairModelLoadingPlugin.isWorldSpiralModel(
-                new ModelIdentifier(new Identifier("minecraft", "stone"), "normal"))) {
-            throw new IllegalStateException("Foreign model was classified as an ERYDON spiral.");
-        }
-    }
-
     private static List<SpiralStairCtmGeometry.Vertex> faceRectangle(Direction face) {
         float lowS = 1.25F;
         float highS = 1.75F;
@@ -192,9 +169,4 @@ public final class SpiralStairCtmGeometryAudit {
         }
     }
 
-    private static void assertEquals(String label, Object expected, Object actual) {
-        if (expected == null ? actual != null : !expected.equals(actual)) {
-            throw new IllegalStateException(label + ": expected " + expected + ", found " + actual);
-        }
-    }
 }

@@ -20,7 +20,6 @@ public final class ErydonModelPerformanceProbePlugin implements ModelLoadingPlug
         ErydonLoadProfiler.beginModelReload();
         pluginContext.modifyModelAfterBake().addPhaseOrdering(ModelModifier.WRAP_LAST_PHASE, PROBE_PHASE);
         pluginContext.modifyModelAfterBake().addPhaseOrdering(SLOPE_MINI_CTM_PHASE, PROBE_PHASE);
-        pluginContext.modifyModelAfterBake().addPhaseOrdering(SpiralStairModelLoadingPlugin.REPEAT_CTM_PHASE, PROBE_PHASE);
         pluginContext.modifyModelAfterBake().addPhaseOrdering(GothicArchCtmModelLoadingPlugin.REPEAT_CTM_PHASE, PROBE_PHASE);
         pluginContext.modifyModelAfterBake().addPhaseOrdering(ModernArchCtmModelLoadingPlugin.REPEAT_CTM_PHASE, PROBE_PHASE);
         pluginContext.modifyModelAfterBake().register(PROBE_PHASE, (model, context) -> {

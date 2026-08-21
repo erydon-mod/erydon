@@ -233,18 +233,19 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
             Direction cullFace = cullFaceForOffset(quad.cullFace(), offsetX, offsetY, offsetZ);
 
             if (vertices.size() == 3) {
-                emitRepeatPrimitive(emitter, quad, cullFace, vertices.get(0), vertices.get(1),
-                        vertices.get(2), vertices.get(2), sprites.get(tileIndex));
+                emitRepeatPrimitive(emitter, quad, cullFace,
+                        padTriangle(vertices.get(0), vertices.get(1), vertices.get(2)),
+                        sprites.get(tileIndex));
                 emitted++;
             } else if (vertices.size() == 4) {
-                emitRepeatPrimitive(emitter, quad, cullFace, vertices.get(0), vertices.get(1),
-                        vertices.get(2), vertices.get(3), sprites.get(tileIndex));
+                emitRepeatPrimitive(emitter, quad, cullFace, vertices, sprites.get(tileIndex));
                 emitted++;
             } else {
                 SpiralStairCtmGeometry.CellVertex first = vertices.get(0);
                 for (int index = 1; index < vertices.size() - 1; index++) {
-                    emitRepeatPrimitive(emitter, quad, cullFace, first, vertices.get(index),
-                            vertices.get(index + 1), vertices.get(index + 1), sprites.get(tileIndex));
+                    emitRepeatPrimitive(emitter, quad, cullFace,
+                            padTriangle(first, vertices.get(index), vertices.get(index + 1)),
+                            sprites.get(tileIndex));
                     emitted++;
                 }
             }
@@ -258,15 +259,18 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
         return emitted;
     }
 
+    static <T> List<T> padTriangle(T first, T second, T third) {
+        // Indium may rotate a quad to use the opposite AO diagonal. Repeating the first
+        // vertex keeps the first three vertices non-degenerate in either orientation,
+        // which Iris requires when deriving the PBR tangent.
+        return List.of(first, second, third, first);
+    }
+
     private static void emitRepeatPrimitive(QuadEmitter emitter,
                                             CapturedQuad source,
                                             Direction cullFace,
-                                            SpiralStairCtmGeometry.CellVertex first,
-                                            SpiralStairCtmGeometry.CellVertex second,
-                                            SpiralStairCtmGeometry.CellVertex third,
-                                            SpiralStairCtmGeometry.CellVertex fourth,
+                                            List<SpiralStairCtmGeometry.CellVertex> vertices,
                                             Sprite sprite) {
-        List<SpiralStairCtmGeometry.CellVertex> vertices = List.of(first, second, third, fourth);
         emitter.material(source.material());
         emitter.colorIndex(source.colorIndex());
         emitter.tag(source.tag());

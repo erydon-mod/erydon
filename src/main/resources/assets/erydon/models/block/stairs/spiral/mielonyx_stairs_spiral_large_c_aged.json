@@ -1,7 +1,0 @@
-{
-  "parent": "erydon:block/stairs/spiral/stairs_spiral_large_c",
-  "textures": {
-    "stone": "erydon:block/mielonyx_block_aged",
-    "particle": "erydon:block/mielonyx_block_aged"
-  }
-}

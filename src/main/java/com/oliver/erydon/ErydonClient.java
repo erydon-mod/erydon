@@ -11,7 +11,6 @@ import com.oliver.erydon.client.model.ErydonSharedBakedGeometryPlugin;
 import com.oliver.erydon.client.model.ErydonSlopeModelLoadingPlugin;
 import com.oliver.erydon.client.model.GothicArchCtmModelLoadingPlugin;
 import com.oliver.erydon.client.model.ModernArchCtmModelLoadingPlugin;
-import com.oliver.erydon.client.model.SpiralStairModelLoadingPlugin;
 import com.oliver.erydon.client.model.SynapheiaModelLoadingPlugin;
 import com.oliver.erydon.client.profile.ErydonLoadProfiler;
 import com.oliver.erydon.client.tooltip.ErydonTooltipClient;
@@ -42,7 +41,6 @@ public final class ErydonClient implements ClientModInitializer {
         ModelLoadingPlugin.register(new ErydonSharedBakedGeometryPlugin());
         ModelLoadingPlugin.register(new ErydonFamilyModelLoadingPlugin());
         ModelLoadingPlugin.register(new ErydonSlopeModelLoadingPlugin());
-        ModelLoadingPlugin.register(new SpiralStairModelLoadingPlugin());
         ModelLoadingPlugin.register(new GothicArchCtmModelLoadingPlugin());
         ModelLoadingPlugin.register(new ModernArchCtmModelLoadingPlugin());
         SynapheiaModelLoadingPlugin.register();
