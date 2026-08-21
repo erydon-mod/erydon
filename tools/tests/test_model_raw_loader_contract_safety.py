@@ -63,6 +63,13 @@ EXPECTED_AUTHORING_MODELS = {
     "arch_gothic/side_large": "authoring_models/block/arch/gothic/arch_gothic_side_large.json",
     "arch_gothic/top_large": "authoring_models/block/arch/gothic/arch_gothic_top_large.json",
     "arch_gothic/icon": "authoring_models/block/arch/gothic/arch_gothic_icon.json",
+    "wall_georgian_slope/27_upper": "authoring_models/block/wall/georgian/wall_georgian_27_upper.json",
+    "wall_georgian_slope/27_lower": "authoring_models/block/wall/georgian/wall_georgian_27_lower.json",
+    "wall_georgian_slope/27_lower_onramp": "authoring_models/block/wall/georgian/wall_georgian_27_lower_onramp.json",
+    "wall_georgian_slope/27_upper_offramp": "authoring_models/block/wall/georgian/wall_georgian_27_upper_offramp.json",
+    "wall_georgian_slope/45": "authoring_models/block/wall/georgian/wall_georgian_45.json",
+    "wall_georgian_slope/45_onramp": "authoring_models/block/wall/georgian/wall_georgian_45_onramp.json",
+    "wall_georgian_slope/45_offramp": "authoring_models/block/wall/georgian/wall_georgian_45_offramp.json",
 }
 
 # This is the authoring-loader geometry contract mirrored by the model audit tools.
@@ -152,7 +159,7 @@ class RawLoaderSourceContractTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.source = LOADER_PATH.read_text(encoding="utf-8")
 
-    def test_authoring_model_map_contains_exactly_the_43_registered_paths(self) -> None:
+    def test_authoring_model_map_contains_exactly_the_50_registered_paths(self) -> None:
         declaration = re.search(
             r"\bAUTHORING_MODELS\s*=\s*Map\.ofEntries\s*\(", self.source
         )
@@ -166,9 +173,26 @@ class RawLoaderSourceContractTests(unittest.TestCase):
             flags=re.DOTALL,
         )
 
-        self.assertEqual(43, initializer.count("Map.entry("))
-        self.assertEqual(43, len(entries), "Every authoring entry must match the locked path form")
+        self.assertEqual(50, initializer.count("Map.entry("))
+        self.assertEqual(50, len(entries), "Every authoring entry must match the locked path form")
         self.assertEqual(EXPECTED_AUTHORING_MODELS, dict(entries))
+
+    def test_supplemental_georgian_slope_assets_are_audited_but_not_shared_parsed(self) -> None:
+        helper = _compact(
+            _body_after(
+                self.source,
+                r"\bboolean\s+isSharedRawFamilyKey\s*\(\s*String\s+modelKey\s*\)",
+            )
+        )
+        self.assertNotIn("wall_georgian_slope/", helper)
+
+        prepared_loader = _compact(
+            _body_after(
+                self.source,
+                r"\bPreparedModels\s+loadPreparedModels\s*\(",
+            )
+        )
+        self.assertIn("if (!isSharedRawFamilyKey(entry.getKey())) { continue; }", prepared_loader)
 
     def test_uv_offset_is_strictly_two_finite_numbers_and_is_retained(self) -> None:
         raw_face = _body_after(self.source, r"\bclass\s+RawFace\b")

@@ -7205,7 +7205,7 @@
     "message.erydon.georgian_wall.pier_spacing.every_3": "cada 3 bloques rectos",
     "message.erydon.georgian_wall.pier_spacing.every_4": "cada 4 bloques rectos",
     "message.erydon.georgian_wall.pier_spacing.every_5": "cada 5 bloques rectos",
-    "message.erydon.georgian_wall.pier_spacing.corners_only": "solo en las esquinas",
-    "message.erydon.georgian_wall.pier_spacing.none": "ninguno (ni siquiera en las esquinas)",
+    "message.erydon.georgian_wall.pier_spacing.joints_only": "solo en las uniones",
+    "message.erydon.georgian_wall.pier_spacing.none": "ninguno (incluidas las uniones)",
     "message.erydon.georgian_wall.pier_spacing.failed": "No se pudo cambiar de forma segura el diseño del muro georgiano."
 }

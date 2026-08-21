@@ -5,7 +5,7 @@ enum GeorgianWallPierSpacing {
     EVERY_3(1, 3, "every_3"),
     EVERY_4(0, 4, "every_4"),
     EVERY_5(2, 5, "every_5"),
-    CORNERS_ONLY(3, 0, "corners_only"),
+    JOINTS_ONLY(3, 0, "joints_only"),
     NONE(4, 0, "none");
 
     private final int storedValue;
@@ -39,8 +39,8 @@ enum GeorgianWallPierSpacing {
             case EVERY_2 -> EVERY_3;
             case EVERY_3 -> EVERY_4;
             case EVERY_4 -> EVERY_5;
-            case EVERY_5 -> CORNERS_ONLY;
-            case CORNERS_ONLY -> NONE;
+            case EVERY_5 -> JOINTS_ONLY;
+            case JOINTS_ONLY -> NONE;
             case NONE -> EVERY_2;
         };
     }
@@ -49,7 +49,7 @@ enum GeorgianWallPierSpacing {
         return switch (value) {
             case 1 -> EVERY_3;
             case 2 -> EVERY_5;
-            case 3 -> CORNERS_ONLY;
+            case 3 -> JOINTS_ONLY;
             case 4 -> NONE;
             case 5 -> EVERY_2;
             default -> EVERY_4;

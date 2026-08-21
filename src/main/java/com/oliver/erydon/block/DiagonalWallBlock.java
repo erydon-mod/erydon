@@ -87,7 +87,8 @@ public class DiagonalWallBlock extends WallBlock implements ClusterRebuildableBl
     @Override
     public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState,
                                                 WorldAccess world, BlockPos pos, BlockPos neighborPos) {
-        boolean preserveStartingPier = isStartingPierMarker(state) || isIsolatedPierSection(state);
+        boolean preserveStartingPier = !isSlopeRunSection(world, pos, state)
+                && (isStartingPierMarker(state) || isIsolatedPierSection(state));
         BlockState updated = super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
         if (world instanceof ServerWorld serverWorld && !ClusterRecalcSafety.isActive()) {
             serverWorld.scheduleBlockTick(pos, this, 1);
@@ -98,22 +99,30 @@ public class DiagonalWallBlock extends WallBlock implements ClusterRebuildableBl
     @Override
     public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
         super.onBlockAdded(state, world, pos, oldState, notify);
+        if (!oldState.isOf(this)) {
+            refreshSlopeNeighbours(world, pos);
+        }
         if (world.isClient || oldState.isOf(this)) {
             return;
         }
         setPierSpacing(world, pos, inheritedPierSpacing(world, pos));
         updateDiagonalNeighbors(world, pos);
         scheduleWallRebuild(world, pos);
+        scheduleNearbyWallRebuilds(world, pos);
     }
 
     @Override
     public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
         super.onStateReplaced(state, world, pos, newState, moved);
+        if (!state.isOf(newState.getBlock())) {
+            refreshSlopeNeighbours(world, pos);
+        }
         if (!world.isClient && !state.isOf(newState.getBlock())) {
             if (!(newState.getBlock() instanceof DiagonalWallBlock)) {
                 clearPierSpacing(world, pos);
             }
             updateDiagonalNeighbors(world, pos);
+            scheduleNearbyWallRebuilds(world, pos);
         }
     }
 
@@ -123,7 +132,9 @@ public class DiagonalWallBlock extends WallBlock implements ClusterRebuildableBl
         if (player.getStackInHand(hand).isOf(Items.DEBUG_STICK)) {
             return ActionResult.PASS;
         }
-        if (hand != Hand.MAIN_HAND || player.isSneaking() || hit.getSide() != Direction.UP) {
+        if (hand != Hand.MAIN_HAND
+                || player.isSneaking()
+                || hit.getSide().getAxis() == Direction.Axis.Y) {
             return ActionResult.PASS;
         }
         if (world.isClient) {
@@ -175,7 +186,7 @@ public class DiagonalWallBlock extends WallBlock implements ClusterRebuildableBl
             return ClusterRecalcResult.none();
         }
 
-        Set<BlockPos> component = collectPlanarComponent(world, seed);
+        Set<BlockPos> component = collectConnectedComponent(world, seed);
         if (component.isEmpty()) {
             return ClusterRecalcResult.none();
         }
@@ -192,12 +203,19 @@ public class DiagonalWallBlock extends WallBlock implements ClusterRebuildableBl
         Set<BlockPos> periodicPiers = periodicPierPositions(world, component, spacing);
         for (BlockPos pos : component) {
             BlockState state = world.getBlockState(pos);
-            if (!(state.getBlock() instanceof DiagonalWallBlock)
-                    || straightAxis(state) == null
-                    || isActualPierSection(state)) {
+            if (!(state.getBlock() instanceof DiagonalWallBlock)) {
                 continue;
             }
-            BlockState updated = withPeriodicPierMarker(state, periodicPiers.contains(pos));
+            GeorgianWallSlopeResolver.Mode slopeMode =
+                    GeorgianWallSlopeResolver.resolve(world, state, pos);
+            BlockState updated;
+            if (slopeMode.isSlope()) {
+                updated = withoutSlopePierMarker(state);
+            } else if (straightAxis(state) == null || isActualPierSection(world, pos, state)) {
+                continue;
+            } else {
+                updated = withPeriodicPierMarker(state, periodicPiers.contains(pos));
+            }
             if (!updated.equals(state)) {
                 world.setBlockState(pos, updated, ClusterRecalcSafety.updateFlags(Block.NOTIFY_ALL));
             }
@@ -228,7 +246,7 @@ public class DiagonalWallBlock extends WallBlock implements ClusterRebuildableBl
                 .with(NORTH_EAST, northEast)
                 .with(SOUTH_EAST, southEast)
                 .with(SOUTH_WEST, southWest)
-                .with(NORTH_WEST, northWest), spacing, preserveStartingPier);
+                .with(NORTH_WEST, northWest), world, pos, spacing, preserveStartingPier);
     }
 
     private boolean connectsDiagonal(BlockState state, BlockView world, BlockPos pos, Direction first, Direction second) {
@@ -309,7 +327,7 @@ public class DiagonalWallBlock extends WallBlock implements ClusterRebuildableBl
         return false;
     }
 
-    private static Set<BlockPos> collectPlanarComponent(BlockView world, BlockPos seed) {
+    private static Set<BlockPos> collectConnectedComponent(BlockView world, BlockPos seed) {
         Set<BlockPos> component = new LinkedHashSet<>();
         if (!(ClusterRecalcSafety.getBlockState(world, seed).getBlock() instanceof DiagonalWallBlock)) {
             return component;
@@ -324,7 +342,7 @@ public class DiagonalWallBlock extends WallBlock implements ClusterRebuildableBl
 
         while (!queue.isEmpty()) {
             BlockPos pos = queue.removeFirst();
-            for (BlockPos neighbor : planarNeighbours(pos)) {
+            for (BlockPos neighbor : connectedNeighbours(world, pos)) {
                 if (component.contains(neighbor)
                         || !(ClusterRecalcSafety.getBlockState(world, neighbor).getBlock() instanceof DiagonalWallBlock)) {
                     continue;
@@ -351,6 +369,12 @@ public class DiagonalWallBlock extends WallBlock implements ClusterRebuildableBl
                 pos.south().west(),
                 pos.west().north()
         );
+    }
+
+    private static List<BlockPos> connectedNeighbours(BlockView world, BlockPos pos) {
+        Set<BlockPos> neighbours = new LinkedHashSet<>(planarNeighbours(pos));
+        neighbours.addAll(GeorgianWallSlopeResolver.connectedSlopeNeighbours(world, pos));
+        return List.copyOf(neighbours);
     }
 
     private static VoxelShape cachedShape(BlockState state) {
@@ -450,13 +474,29 @@ public class DiagonalWallBlock extends WallBlock implements ClusterRebuildableBl
         return shape;
     }
 
-    private static BlockState withPierState(BlockState state, GeorgianWallPierSpacing spacing,
+    private static BlockState withPierState(BlockState state,
+                                            BlockView world,
+                                            BlockPos pos,
+                                            GeorgianWallPierSpacing spacing,
                                             boolean preserveStartingPier) {
         boolean startingPier = spacing.piersEnabled()
                 && (preserveStartingPier || isStartingPierMarker(state));
         BlockState normalized = normalizeCardinalShapes(state);
         int cardinals = cardinalMask(normalized);
         boolean hasDiagonal = hasAnyDiagonal(normalized);
+        GeorgianWallSlopeResolver.Mode slopeMode = GeorgianWallSlopeResolver.resolve(world, normalized, pos);
+        if (slopeMode.isSlope()) {
+            return normalized.with(UP, true);
+        }
+
+        boolean stairJoint = spacing.piersEnabled()
+                && GeorgianWallSlopeResolver.isFlatStairJoint(world, normalized, pos);
+        if (stairJoint) {
+            if (cardinals == 0) {
+                return normalized.with(UP, false);
+            }
+            return markFirstCardinalTall(normalized.with(UP, true));
+        }
 
         if (startingPier && cardinals != 0) {
             return markFirstCardinalTall(normalized.with(UP, true));
@@ -530,6 +570,10 @@ public class DiagonalWallBlock extends WallBlock implements ClusterRebuildableBl
         return markConnectedCardinalsTall(normalized.with(UP, false));
     }
 
+    private static BlockState withoutSlopePierMarker(BlockState state) {
+        return normalizeCardinalShapes(state).with(UP, true);
+    }
+
     private static BlockState markConnectedCardinalsTall(BlockState state) {
         BlockState marked = state;
         if (marked.get(NORTH_SHAPE) != WallShape.NONE) {
@@ -547,10 +591,23 @@ public class DiagonalWallBlock extends WallBlock implements ClusterRebuildableBl
         return marked;
     }
 
-    private static boolean isPierSection(BlockState state) {
+    public static boolean isPierSection(BlockState state) {
         return hasTallCardinal(state)
                 || isDiagonalOnlyPierSection(state)
                 || isIsolatedPierSection(state);
+    }
+
+    public static List<Direction> pierStubDirections(BlockState state) {
+        if (!isPierSection(state)) {
+            return List.of();
+        }
+        List<Direction> directions = new ArrayList<>(4);
+        for (Direction direction : Direction.Type.HORIZONTAL) {
+            if (cardinalShape(state, direction) != WallShape.NONE) {
+                directions.add(direction);
+            }
+        }
+        return List.copyOf(directions);
     }
 
     private static boolean isPeriodicPierSection(BlockState state) {
@@ -638,7 +695,9 @@ public class DiagonalWallBlock extends WallBlock implements ClusterRebuildableBl
         for (BlockPos pos : component) {
             BlockState state = world.getBlockState(pos);
             Direction.Axis axis = straightAxis(state);
-            if (axis != null && !isActualPierSection(state)) {
+            if (axis != null
+                    && !isSlopeRunSection(world, pos, state)
+                    && !isActualPierSection(world, pos, state)) {
                 candidates.put(pos.toImmutable(), axis);
             }
         }
@@ -660,8 +719,9 @@ public class DiagonalWallBlock extends WallBlock implements ClusterRebuildableBl
                 cursor = cursor.offset(positive);
             }
 
-            boolean beginsAtPier = isActualPierSection(world.getBlockState(start.offset(negative)));
-            boolean endsAtPier = isActualPierSection(world.getBlockState(cursor));
+            BlockPos before = start.offset(negative);
+            boolean beginsAtPier = isActualPierSection(world, before, world.getBlockState(before));
+            boolean endsAtPier = isActualPierSection(world, cursor, world.getBlockState(cursor));
             for (int index = 0; index < run.size(); index++) {
                 int runIndex = GeorgianWallConnectionPolicy.anchoredRunIndex(
                         index, run.size(), beginsAtPier, endsAtPier);
@@ -676,18 +736,24 @@ public class DiagonalWallBlock extends WallBlock implements ClusterRebuildableBl
     }
 
     private static boolean isAdjacentToActualPier(BlockView world, BlockPos pos) {
-        for (BlockPos neighbor : planarNeighbours(pos)) {
-            if (isActualPierSection(world.getBlockState(neighbor))) {
+        for (BlockPos neighbor : connectedNeighbours(world, pos)) {
+            if (isActualPierSection(world, neighbor, world.getBlockState(neighbor))) {
                 return true;
             }
         }
         return false;
     }
 
-    private static boolean isActualPierSection(BlockState state) {
+    private static boolean isActualPierSection(BlockView world, BlockPos pos, BlockState state) {
         return state.getBlock() instanceof DiagonalWallBlock
                 && isPierSection(state)
-                && !isPeriodicPierSection(state);
+                && !isPeriodicPierSection(state)
+                && !isSlopeRunSection(world, pos, state);
+    }
+
+    private static boolean isSlopeRunSection(BlockView world, BlockPos pos, BlockState state) {
+        return state.getBlock() instanceof DiagonalWallBlock
+                && GeorgianWallSlopeResolver.resolve(world, state, pos).isSlope();
     }
 
     private static GeorgianWallPierSpacing inheritedPierSpacing(WorldAccess world, BlockPos pos) {
@@ -695,7 +761,7 @@ public class DiagonalWallBlock extends WallBlock implements ClusterRebuildableBl
         if (stored != 0) {
             return GeorgianWallPierSpacing.fromStoredValue(stored);
         }
-        for (BlockPos neighbor : planarNeighbours(pos)) {
+        for (BlockPos neighbor : spacingNeighbours(pos)) {
             if (!(world.getBlockState(neighbor).getBlock() instanceof DiagonalWallBlock)) {
                 continue;
             }
@@ -736,6 +802,42 @@ public class DiagonalWallBlock extends WallBlock implements ClusterRebuildableBl
         BlockState state = world.getBlockState(pos);
         if (state.getBlock() instanceof DiagonalWallBlock block && world instanceof ServerWorld serverWorld) {
             serverWorld.scheduleBlockTick(pos.toImmutable(), block, 1);
+        }
+    }
+
+    private static List<BlockPos> spacingNeighbours(BlockPos pos) {
+        Set<BlockPos> neighbours = new LinkedHashSet<>(planarNeighbours(pos));
+        for (Direction direction : Direction.Type.HORIZONTAL) {
+            neighbours.add(pos.offset(direction).up());
+            neighbours.add(pos.offset(direction).down());
+        }
+        return List.copyOf(neighbours);
+    }
+
+    private static void scheduleNearbyWallRebuilds(World world, BlockPos pos) {
+        if (world.isClient || ClusterRecalcSafety.isActive()) {
+            return;
+        }
+        for (Direction direction : Direction.Type.HORIZONTAL) {
+            for (int distance = 1; distance <= 2; distance++) {
+                for (int yOffset = -1; yOffset <= 1; yOffset++) {
+                    scheduleWallRebuild(world, pos.offset(direction, distance).add(0, yOffset, 0));
+                }
+            }
+        }
+    }
+
+    private static void refreshSlopeNeighbours(World world, BlockPos pos) {
+        for (Direction direction : Direction.Type.HORIZONTAL) {
+            for (int distance = 1; distance <= 2; distance++) {
+                for (int yOffset = -1; yOffset <= 1; yOffset++) {
+                    BlockPos neighbourPos = pos.offset(direction, distance).add(0, yOffset, 0);
+                    BlockState neighbour = world.getBlockState(neighbourPos);
+                    if (neighbour.getBlock() instanceof DiagonalWallBlock) {
+                        world.updateListeners(neighbourPos, neighbour, neighbour, Block.NOTIFY_LISTENERS);
+                    }
+                }
+            }
         }
     }
 

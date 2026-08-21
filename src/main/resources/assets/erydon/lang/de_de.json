@@ -7205,7 +7205,7 @@
     "message.erydon.georgian_wall.pier_spacing.every_3": "jeder 3. gerade Block",
     "message.erydon.georgian_wall.pier_spacing.every_4": "jeder 4. gerade Block",
     "message.erydon.georgian_wall.pier_spacing.every_5": "jeder 5. gerade Block",
-    "message.erydon.georgian_wall.pier_spacing.corners_only": "nur an Ecken",
-    "message.erydon.georgian_wall.pier_spacing.none": "keine (auch nicht an Ecken)",
+    "message.erydon.georgian_wall.pier_spacing.joints_only": "nur an Übergängen",
+    "message.erydon.georgian_wall.pier_spacing.none": "keine (auch nicht an Übergängen)",
     "message.erydon.georgian_wall.pier_spacing.failed": "Das Layout der georgischen Wand konnte nicht sicher geändert werden."
 }

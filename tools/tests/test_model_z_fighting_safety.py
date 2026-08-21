@@ -169,7 +169,7 @@ class ModelZFightingSafetyTests(unittest.TestCase):
             re.findall(r'authoring_models/block/([^"\\]+\.json)', java)
         )
         self.assertEqual(loader_paths, set(scanner.REGISTERED_RAW_MODEL_PATHS))
-        self.assertEqual(len(loader_paths), 43)
+        self.assertEqual(len(loader_paths), 50)
 
     def test_ordinary_file_audit_uses_raw_transforms_only_for_registered_models(self) -> None:
         repository = TOOLS.parent
@@ -217,6 +217,18 @@ class ModelZFightingSafetyTests(unittest.TestCase):
             "alcove/alcove_gothic_triple_top_left.json": 7,
             "alcove/alcove_gothic_triple_top_right.json": 7,
         }
+        intentional_georgian_slope_overlaps = {
+            "wall/georgian/wall_georgian_27_lower.json": 644,
+            "wall/georgian/wall_georgian_27_lower_onramp.json": 228,
+            "wall/georgian/wall_georgian_27_upper.json": 188,
+            "wall/georgian/wall_georgian_27_upper_offramp.json": 229,
+            "wall/georgian/wall_georgian_45_offramp.json": 8,
+            "wall/georgian/wall_georgian_45_onramp.json": 8,
+        }
+        intentional_exact_same_overlaps = {
+            **intentional_triple_panel_overlaps,
+            **intentional_georgian_slope_overlaps,
+        }
         observed_intentional_overlaps = {}
         exact_same = 0
         near = 0
@@ -238,19 +250,31 @@ class ModelZFightingSafetyTests(unittest.TestCase):
                 and finding["plane_quality"] == "exact"
             ]
             if same_findings:
-                self.assertIn(relative, intentional_triple_panel_overlaps)
-                self.assertTrue(
-                    all(
-                        finding["overlap_class"] == "partial"
-                        and finding["repair_classification"] == "REPORT_ONLY"
-                        and finding["reason"]
-                        == "overlap is not a literal identical-render duplicate"
-                        and "_triple_" in document["elements"][finding["a"]["element"]]["name"]
-                        and "_triple_" in document["elements"][finding["b"]["element"]]["name"]
-                        for finding in same_findings
-                    ),
-                    relative,
-                )
+                self.assertIn(relative, intentional_exact_same_overlaps)
+                if relative in intentional_triple_panel_overlaps:
+                    self.assertTrue(
+                        all(
+                            finding["overlap_class"] == "partial"
+                            and finding["repair_classification"] == "REPORT_ONLY"
+                            and finding["reason"]
+                            == "overlap is not a literal identical-render duplicate"
+                            and "_triple_" in document["elements"][finding["a"]["element"]]["name"]
+                            and "_triple_" in document["elements"][finding["b"]["element"]]["name"]
+                            for finding in same_findings
+                        ),
+                        relative,
+                    )
+                else:
+                    self.assertTrue(
+                        all(
+                            finding["overlap_class"] in {"partial", "contained"}
+                            and finding["repair_classification"] == "REPORT_ONLY"
+                            and finding["reason"]
+                            == "overlap is not a literal identical-render duplicate"
+                            for finding in same_findings
+                        ),
+                        relative,
+                    )
                 observed_intentional_overlaps[relative] = len(same_findings)
             exact_same += sum(
                 finding["orientation"] == "same"
@@ -262,10 +286,10 @@ class ModelZFightingSafetyTests(unittest.TestCase):
                 for finding in audit["findings"]
             )
             authored_cullfaces += len(scanner._raw_cull_boundary_state(document))
-        self.assertEqual(observed_intentional_overlaps, intentional_triple_panel_overlaps)
-        self.assertEqual(exact_same, 40)
-        self.assertEqual(near, 26)
-        self.assertEqual(authored_cullfaces, 120)
+        self.assertEqual(observed_intentional_overlaps, intentional_exact_same_overlaps)
+        self.assertEqual(exact_same, 1345)
+        self.assertEqual(near, 36)
+        self.assertEqual(authored_cullfaces, 931)
 
     def test_raw_nested_group_transform_order_matches_golden_vertices(self) -> None:
         source = (FIXTURES / "raw_nested_group_overlap.json").read_bytes()
@@ -424,7 +448,7 @@ class ModelZFightingSafetyTests(unittest.TestCase):
             report = json.loads(json_report.read_text(encoding="utf-8"))
             self.assertEqual(report["mode"], "report-only")
             self.assertIs(report["sourceWrites"], False)
-            self.assertIn("43 registered raw-authoring models", report["policy"]["rawTransforms"])
+            self.assertIn("50 registered raw-authoring models", report["policy"]["rawTransforms"])
             self.assertEqual(report["summary"]["files"], len(before))
             self.assertGreaterEqual(report["summary"]["auto_candidates"], 2)
             with csv_report.open(encoding="utf-8", newline="") as stream:
@@ -806,7 +830,7 @@ class ModelZFightingSafetyTests(unittest.TestCase):
                 raw_canonical_root=raw_root,
                 include_full_recess_repair=True,
             )
-            self.assertEqual(plan["summary"]["registeredRawFilesScanned"], 43)
+            self.assertEqual(plan["summary"]["registeredRawFilesScanned"], 50)
             self.assertEqual(plan["summary"]["rawExactSameFacingFindingsBefore"], 1)
             self.assertEqual(plan["summary"]["predictedRawExactSameFacingFindingsAfter"], 0)
             self.assertEqual(plan["summary"]["predictedUvRegressions"], 0)

@@ -127,6 +127,13 @@ REGISTERED_RAW_MODEL_PATHS = (
     "column/gothic/column_gothic_capital.json",
     "column/gothic/column_gothic_pillar.json",
     "column/gothic/column_gothic_plinth.json",
+    "wall/georgian/wall_georgian_27_lower.json",
+    "wall/georgian/wall_georgian_27_lower_onramp.json",
+    "wall/georgian/wall_georgian_27_upper.json",
+    "wall/georgian/wall_georgian_27_upper_offramp.json",
+    "wall/georgian/wall_georgian_45.json",
+    "wall/georgian/wall_georgian_45_offramp.json",
+    "wall/georgian/wall_georgian_45_onramp.json",
 )
 RAW_TRANSFORM_SEMANTICS = (
     "element Euler X->Y->Z, then groups innermost->outermost, each Euler X->Y->Z"

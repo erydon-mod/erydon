@@ -105,13 +105,27 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
             Map.entry("arch_gothic/side_medium", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/gothic/arch_gothic_side_medium.json")),
             Map.entry("arch_gothic/side_large", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/gothic/arch_gothic_side_large.json")),
             Map.entry("arch_gothic/top_large", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/gothic/arch_gothic_top_large.json")),
-            Map.entry("arch_gothic/icon", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/gothic/arch_gothic_icon.json"))
+            Map.entry("arch_gothic/icon", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/gothic/arch_gothic_icon.json")),
+            Map.entry("wall_georgian_slope/27_upper", new Identifier(Erydon.MOD_ID, "authoring_models/block/wall/georgian/wall_georgian_27_upper.json")),
+            Map.entry("wall_georgian_slope/27_lower", new Identifier(Erydon.MOD_ID, "authoring_models/block/wall/georgian/wall_georgian_27_lower.json")),
+            Map.entry("wall_georgian_slope/27_lower_onramp", new Identifier(Erydon.MOD_ID, "authoring_models/block/wall/georgian/wall_georgian_27_lower_onramp.json")),
+            Map.entry("wall_georgian_slope/27_upper_offramp", new Identifier(Erydon.MOD_ID, "authoring_models/block/wall/georgian/wall_georgian_27_upper_offramp.json")),
+            Map.entry("wall_georgian_slope/45", new Identifier(Erydon.MOD_ID, "authoring_models/block/wall/georgian/wall_georgian_45.json")),
+            Map.entry("wall_georgian_slope/45_onramp", new Identifier(Erydon.MOD_ID, "authoring_models/block/wall/georgian/wall_georgian_45_onramp.json")),
+            Map.entry("wall_georgian_slope/45_offramp", new Identifier(Erydon.MOD_ID, "authoring_models/block/wall/georgian/wall_georgian_45_offramp.json"))
     );
     private static final float EPSILON = 0.0005F;
     static final String SHARED_GEOMETRY_MODE_PROPERTY = "erydon.shared_geometry.mode";
 
     private static boolean isGothicColumnKey(String modelKey) {
         return modelKey.startsWith("column_gothic/");
+    }
+
+    private static boolean isSharedRawFamilyKey(String modelKey) {
+        return modelKey.startsWith("column_gothic/")
+                || modelKey.startsWith("alcove_georgian/")
+                || modelKey.startsWith("alcove_gothic/")
+                || modelKey.startsWith("arch_gothic/");
     }
 
     public static CompletableFuture<PreparedModels> load(ResourceManager resourceManager, Executor executor) {
@@ -123,6 +137,11 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
     private static PreparedModels loadPreparedModels(ResourceManager resourceManager, SharedGeometryMode mode) {
         Map<String, RawModelData> models = new LinkedHashMap<>();
         for (Map.Entry<String, Identifier> entry : AUTHORING_MODELS.entrySet()) {
+            // Georgian slope geometry is registered here for complete raw-model
+            // source auditing, but its dedicated renderer owns parsing and reuse.
+            if (!isSharedRawFamilyKey(entry.getKey())) {
+                continue;
+            }
             Optional<Resource> resource = resourceManager.getResource(entry.getValue());
             if (resource.isEmpty()) {
                 Erydon.LOGGER.warn("[{}] Missing raw authoring model {}.", Erydon.MOD_ID, entry.getValue());
@@ -833,6 +852,9 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
             String builtInPack = mostFrequentAuthoringPack(resourceManager);
             Set<String> unsafeParentKeys = new HashSet<>();
             for (String modelKey : AUTHORING_MODELS.keySet()) {
+                if (!isSharedRawFamilyKey(modelKey)) {
+                    continue;
+                }
                 RawComponent representative = representative(modelKey);
                 Identifier resourceId = representative.parentResourceId();
                 if (!isOverridden(resourceManager, resourceId, builtInPack)) {
@@ -936,7 +958,11 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
 
         private static String mostFrequentAuthoringPack(ResourceManager resourceManager) {
             Map<String, Integer> counts = new LinkedHashMap<>();
-            for (Identifier resourceId : AUTHORING_MODELS.values()) {
+            for (Map.Entry<String, Identifier> entry : AUTHORING_MODELS.entrySet()) {
+                if (!isSharedRawFamilyKey(entry.getKey())) {
+                    continue;
+                }
+                Identifier resourceId = entry.getValue();
                 for (Resource resource : resourceManager.getAllResources(resourceId)) {
                     counts.merge(resource.getResourcePackName(), 1, Integer::sum);
                 }

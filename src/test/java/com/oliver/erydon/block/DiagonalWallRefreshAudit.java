@@ -366,7 +366,7 @@ public final class DiagonalWallRefreshAudit {
         }
         if (GeorgianWallPierSpacing.fromStoredValue(1) != GeorgianWallPierSpacing.EVERY_3
                 || GeorgianWallPierSpacing.fromStoredValue(2) != GeorgianWallPierSpacing.EVERY_5
-                || GeorgianWallPierSpacing.fromStoredValue(3) != GeorgianWallPierSpacing.CORNERS_ONLY
+                || GeorgianWallPierSpacing.fromStoredValue(3) != GeorgianWallPierSpacing.JOINTS_ONLY
                 || GeorgianWallPierSpacing.fromStoredValue(4) != GeorgianWallPierSpacing.NONE
                 || GeorgianWallPierSpacing.fromStoredValue(5) != GeorgianWallPierSpacing.EVERY_2) {
             throw new AssertionError("Georgian wall spacing storage compatibility changed");
@@ -377,7 +377,7 @@ public final class DiagonalWallRefreshAudit {
                 GeorgianWallPierSpacing.EVERY_3,
                 GeorgianWallPierSpacing.EVERY_4,
                 GeorgianWallPierSpacing.EVERY_5,
-                GeorgianWallPierSpacing.CORNERS_ONLY,
+                GeorgianWallPierSpacing.JOINTS_ONLY,
                 GeorgianWallPierSpacing.NONE,
         };
         for (int index = 0; index < cycle.length; index++) {
@@ -386,9 +386,9 @@ public final class DiagonalWallRefreshAudit {
                 throw new AssertionError("Unexpected Georgian wall spacing cycle after " + cycle[index]);
             }
         }
-        if (!GeorgianWallPierSpacing.CORNERS_ONLY.piersEnabled()
+        if (!GeorgianWallPierSpacing.JOINTS_ONLY.piersEnabled()
                 || GeorgianWallPierSpacing.NONE.piersEnabled()) {
-            throw new AssertionError("Georgian wall corner-only and no-pier modes are not distinct");
+            throw new AssertionError("Georgian wall joint-only and no-pier modes are not distinct");
         }
 
         for (int interval : new int[]{2, 3, 4, 5}) {

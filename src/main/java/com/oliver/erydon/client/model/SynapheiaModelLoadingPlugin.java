@@ -15,7 +15,7 @@ import java.util.concurrent.Executor;
 
 public final class SynapheiaModelLoadingPlugin
         implements PreparableModelLoadingPlugin<SynapheiaManifest.Prepared> {
-    private static final Identifier CTM_PHASE = new Identifier(Erydon.MOD_ID, "synapheia_ctm");
+    static final Identifier CTM_PHASE = new Identifier(Erydon.MOD_ID, "synapheia_ctm");
 
     public static void register() {
         PreparableModelLoadingPlugin.register(SynapheiaModelLoadingPlugin::load,
