@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import json
+import math
 import re
 import unittest
 from collections import Counter
@@ -74,13 +75,20 @@ class SpiralStairUvSafetyTests(unittest.TestCase):
         self.assertIn('EnumProperty.of("part", Part.class)', source)
         self.assertIn('BooleanProperty.of("cap")', source)
         self.assertIn('.with(PART, Part.B)', source)
+        self.assertIn('.with(CAP, !isSpiralAnchor(above))', source)
         self.assertIn('adjacentFacing.rotateYClockwise()', source)
         self.assertIn('adjacentFacing.rotateYCounterclockwise()', source)
+        self.assertIn('!isSpiralAnchor(ClusterRecalcSafety.getBlockState(world, pos.up()))', source)
+        self.assertIn('sourcePos.equals(pos.up())', source)
+        self.assertIn('if (!state.get(CAP))', source)
+        self.assertIn('legacyHelperPositions(pos, layerFacing)', source)
+        self.assertIn('REMOVING_LEGACY_LAYER.set(true)', source)
+        self.assertIn('Blocks.AIR.getDefaultState()', source)
         self.assertNotIn('void onPlaced(', source)
         self.assertNotIn('syncCapForLayer', source)
         self.assertNotIn('getAllPartPositions', source)
 
-    def test_blockstates_render_only_the_single_pivot_model(self) -> None:
+    def test_blockstates_add_the_offstep_only_to_the_top_single_pivot(self) -> None:
         paths = sorted(BLOCKSTATES.glob("*stairs_spiral_large*.json"))
         self.assertEqual(81, len(paths))
         rotations: Counter[int] = Counter()
@@ -90,7 +98,7 @@ class SpiralStairUvSafetyTests(unittest.TestCase):
         for path in paths:
             resource_stem = legacy_resource_id(path.stem)
             multipart = load_json(path).get("multipart", [])
-            self.assertEqual(4, len(multipart), path.name)
+            self.assertEqual(8, len(multipart), path.name)
             clauses = Counter()
             for entry in multipart:
                 when = entry["when"]
@@ -98,50 +106,128 @@ class SpiralStairUvSafetyTests(unittest.TestCase):
                 facing = when["facing"]
                 self.assertEqual(expected_y[facing], apply["y"], path.name)
                 self.assertNotIn("uvlock", apply, path.name)
-                self.assertEqual({"facing", "part"}, set(when), path.name)
                 self.assertEqual("b", when["part"], path.name)
+                offstep = when.get("cap") == "true"
                 self.assertEqual(
-                    f"erydon:block/stairs/spiral/{resource_stem}",
+                    {"facing", "part", "cap"} if offstep else {"facing", "part"},
+                    set(when),
+                    path.name,
+                )
+                self.assertEqual(
+                    f"erydon:block/stairs/spiral/{resource_stem}"
+                    + ("_offstep" if offstep else ""),
                     apply["model"],
                     path.name,
                 )
-                clauses[facing] += 1
+                clauses[(facing, offstep)] += 1
                 rotations[apply["y"]] += 1
                 total_applications += 1
 
             for facing in expected_y:
-                self.assertEqual(1, clauses[facing], path.name)
+                self.assertEqual(1, clauses[(facing, False)], path.name)
+                self.assertEqual(1, clauses[(facing, True)], path.name)
 
-        self.assertEqual(324, total_applications)
-        self.assertEqual(Counter({0: 81, 90: 81, 180: 81, 270: 81}), rotations)
+        self.assertEqual(648, total_applications)
+        self.assertEqual(Counter({0: 162, 90: 162, 180: 162, 270: 162}), rotations)
 
-    def test_single_master_preserves_supplied_out_of_bounds_geometry_and_uvs(self) -> None:
-        path = MODELS / "stairs_spiral_large.json"
-        document = load_json(path)
-        self.assertEqual(16, len(document.get("elements", [])))
-        self.assertEqual(["A", "B", "C"], [group["name"] for group in document["groups"]])
+    def test_separate_masters_preserve_supplied_out_of_bounds_geometry_and_uvs(self) -> None:
+        expected = {
+            "stairs_spiral_large.json": (12, 72, 72, -16, 32),
+            "stairs_spiral_large_offstep.json": (4, 22, 16, -16, 16.008),
+        }
+        for name, (elements, faces, out_of_bounds, minimum, maximum) in expected.items():
+            path = MODELS / name
+            document = load_json(path)
+            self.assertEqual(elements, len(document.get("elements", [])), name)
+            self.assertEqual(
+                ["spiral", "offstep"],
+                [group["name"] for group in document["groups"]],
+                name,
+            )
 
-        total_faces = 0
-        out_of_bounds_uv_faces = 0
-        coordinates = []
+            total_faces = 0
+            out_of_bounds_uv_faces = 0
+            coordinates = []
+            for element_index, element in enumerate(document["elements"]):
+                coordinates.extend(element["from"])
+                coordinates.extend(element["to"])
+                self.assertEqual("y", element["rotation"]["axis"], element_index)
+                for face_name, face in element["faces"].items():
+                    total_faces += 1
+                    self.assertEqual("#stone", face.get("texture"), path.name)
+                    uv = face.get("uv")
+                    self.assertEqual(4, len(uv), f"element {element_index} {face_name}")
+                    if min(uv) < 0 or max(uv) > 16:
+                        out_of_bounds_uv_faces += 1
+
+            self.assertEqual(faces, total_faces, name)
+            self.assertEqual(out_of_bounds, out_of_bounds_uv_faces, name)
+            self.assertAlmostEqual(minimum, min(coordinates), places=5, msg=name)
+            self.assertAlmostEqual(maximum, max(coordinates), places=5, msg=name)
+
+    def test_offstep_collision_is_a_shallow_top_plate_covering_every_element(self) -> None:
+        source = BLOCK_SOURCE.read_text(encoding="utf-8")
+        match = re.search(
+            r"OFFSTEP_SECTION_NORTH\s*=\s*shape\((.*?)\n\s*\);",
+            source,
+            re.DOTALL,
+        )
+        self.assertIsNotNone(match)
+        values = [
+            float(value)
+            for value in re.findall(
+                r"[-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[Ee][-+]?\d+)?",
+                match.group(1),
+            )
+        ]
+        self.assertEqual(24, len(values))
+        collision_boxes = [values[index : index + 6] for index in range(0, len(values), 6)]
+        for box in collision_boxes:
+            self.assertAlmostEqual(15.5 / 16, box[1])
+            self.assertAlmostEqual(1.0, box[4])
+
+        document = load_json(MODELS / "stairs_spiral_large_offstep.json")
         for element_index, element in enumerate(document["elements"]):
-            coordinates.extend(element["from"])
-            coordinates.extend(element["to"])
-            self.assertEqual("y", element["rotation"]["axis"], element_index)
-            for face_name, face in element["faces"].items():
-                total_faces += 1
-                self.assertEqual("#stone", face.get("texture"), path.name)
-                uv = face.get("uv")
-                self.assertEqual(4, len(uv), f"element {element_index} {face_name}")
-                if min(uv) < 0 or max(uv) > 16:
-                    out_of_bounds_uv_faces += 1
+            rotation = element["rotation"]
+            self.assertEqual("y", rotation["axis"], element_index)
+            angle = math.radians(rotation["angle"])
+            origin_x, _, origin_z = rotation["origin"]
+            xs = []
+            zs = []
+            for x in (element["from"][0], element["to"][0]):
+                for z in (element["from"][2], element["to"][2]):
+                    delta_x = x - origin_x
+                    delta_z = z - origin_z
+                    xs.append(
+                        origin_x
+                        + delta_x * math.cos(angle)
+                        + delta_z * math.sin(angle)
+                    )
+                    zs.append(
+                        origin_z
+                        - delta_x * math.sin(angle)
+                        + delta_z * math.cos(angle)
+                    )
 
-        self.assertEqual(94, total_faces)
-        self.assertEqual(88, out_of_bounds_uv_faces)
-        self.assertEqual(-16, min(coordinates))
-        self.assertEqual(32, max(coordinates))
+            horizontal_bounds = (
+                min(xs) / 16,
+                min(zs) / 16,
+                max(xs) / 16,
+                max(zs) / 16,
+            )
+            covered = any(
+                box[0] <= horizontal_bounds[0]
+                and box[2] <= horizontal_bounds[1]
+                and box[3] >= horizontal_bounds[2]
+                and box[5] >= horizontal_bounds[3]
+                for box in collision_boxes
+            )
+            self.assertTrue(
+                covered,
+                f"offstep element {element_index}: {horizontal_bounds}",
+            )
 
-    def test_all_material_children_share_the_single_world_geometry_master(self) -> None:
+    def test_all_material_children_share_the_two_world_geometry_masters(self) -> None:
         child_models = set()
         for blockstate_path in BLOCKSTATES.glob("*stairs_spiral_large*.json"):
             stem = legacy_resource_id(blockstate_path.stem)
@@ -159,8 +245,10 @@ class SpiralStairUvSafetyTests(unittest.TestCase):
                 child_path = MODELS / f"{child_name}.json"
                 self.assertTrue(child_path.is_file(), str(child_path))
                 child = load_json(child_path)
+                offstep = child_name.endswith("_offstep")
                 self.assertEqual(
-                    "erydon:block/stairs/spiral/stairs_spiral_large",
+                    "erydon:block/stairs/spiral/stairs_spiral_large"
+                    + ("_offstep" if offstep else ""),
                     child.get("parent"),
                     child_name,
                 )
@@ -168,7 +256,7 @@ class SpiralStairUvSafetyTests(unittest.TestCase):
                 self.assertEqual(expected_texture, child.get("textures", {}).get("particle"), child_name)
                 child_models.add(child_name)
 
-        self.assertEqual(81, len(child_models))
+        self.assertEqual(162, len(child_models))
 
     def test_every_spiral_block_has_ctm_coverage_in_available_pack_roots(self) -> None:
         block_ids = {

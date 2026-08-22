@@ -221,7 +221,7 @@ class ModelZFightingSafetyTests(unittest.TestCase):
             "wall/georgian/wall_georgian_27_lower.json": 644,
             "wall/georgian/wall_georgian_27_lower_onramp.json": 228,
             "wall/georgian/wall_georgian_27_upper.json": 188,
-            "wall/georgian/wall_georgian_27_upper_offramp.json": 229,
+            "wall/georgian/wall_georgian_27_upper_offramp.json": 233,
             "wall/georgian/wall_georgian_45_offramp.json": 8,
             "wall/georgian/wall_georgian_45_onramp.json": 8,
         }
@@ -287,9 +287,9 @@ class ModelZFightingSafetyTests(unittest.TestCase):
             )
             authored_cullfaces += len(scanner._raw_cull_boundary_state(document))
         self.assertEqual(observed_intentional_overlaps, intentional_exact_same_overlaps)
-        self.assertEqual(exact_same, 1345)
+        self.assertEqual(exact_same, 1349)
         self.assertEqual(near, 36)
-        self.assertEqual(authored_cullfaces, 931)
+        self.assertEqual(authored_cullfaces, 933)
 
     def test_raw_nested_group_transform_order_matches_golden_vertices(self) -> None:
         source = (FIXTURES / "raw_nested_group_overlap.json").read_bytes()

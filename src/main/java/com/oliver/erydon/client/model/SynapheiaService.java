@@ -126,6 +126,24 @@ final class SynapheiaService {
             return null;
         }
 
+        /**
+         * Selects a repeat rule for geometry whose authored UVs can leave the source
+         * sprite before Synapheia captures the baked quad. Such geometry is projected
+         * from its positions, so an apparent CTM-tile source sprite may be atlas bleed
+         * rather than evidence that another renderer already transformed the face.
+         */
+        SynapheiaManifest.Rule repeatRuleForProjectedGeometry(Identifier blockId,
+                                                               Direction face) {
+            for (SynapheiaManifest.Rule rule : rulesFor(blockId)) {
+                if (rule.method() == SynapheiaManifest.Method.REPEAT
+                        && rule.matchTiles().isEmpty()
+                        && rule.matches(face, null)) {
+                    return rule;
+                }
+            }
+            return null;
+        }
+
         List<SynapheiaManifest.Rule> overlayRulesFor(Identifier blockId,
                                                       Direction face,
                                                       Identifier sourceSprite) {

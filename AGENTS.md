@@ -8,6 +8,12 @@
 - Derive exact build and validation commands from the current README and CI workflow rather than guessing.
 - Use the authenticated `erydon-mod` GitHub identity and a GitHub-provided noreply commit address.
 
+## Test JARs
+
+- Do not create a test JAR unless the user explicitly asks for one.
+- Routine validation and testing must stop at compilation, tests, and non-JAR audits. Do not run packaging tasks such as `jar`, `remapJar`, `build`, or `auditErydonJar` merely to prepare a test artifact.
+- A specifically requested release, publication, or other named deliverable may still be built according to that request.
+
 ## Meaning of "commit"
 
 When the user explicitly says `commit` or `commit these changes` after reviewing a completed task, Codex is authorised to:

@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/stairs/spiral/stairs_spiral_large_offstep",
+  "textures": {
+    "stone": "erydon:block/gelastrum_ashlar_block",
+    "particle": "erydon:block/gelastrum_ashlar_block"
+  }
+}

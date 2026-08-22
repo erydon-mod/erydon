@@ -1,5 +1,8 @@
 package com.oliver.erydon.block;
 
+import net.minecraft.block.enums.BlockHalf;
+import net.minecraft.block.enums.SlabType;
+import net.minecraft.block.enums.StairShape;
 import net.minecraft.block.enums.WallShape;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -12,6 +15,105 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class GeorgianWallSlopeResolverTest {
+    @Test
+    void erydonShallowStairsMapToTheAlternatingTwentySevenDegreeParts() {
+        assertEquals(
+                GeorgianWallSlopeResolver.Part.UPPER,
+                GeorgianWallSlopeResolver.partForShallowStair(false, StairShape.STRAIGHT)
+        );
+        assertEquals(
+                GeorgianWallSlopeResolver.Part.LOWER,
+                GeorgianWallSlopeResolver.partForShallowStair(true, StairShape.STRAIGHT)
+        );
+        assertEquals(
+                GeorgianWallSlopeResolver.Part.NONE,
+                GeorgianWallSlopeResolver.partForShallowStair(false, StairShape.INNER_LEFT)
+        );
+    }
+
+    @Test
+    void erydonShallowStairsMustFaceAlongTheIncline() {
+        assertTrue(GeorgianWallSlopeResolver.isAlignedShallowStair(
+                StairShape.STRAIGHT,
+                Direction.EAST,
+                Direction.EAST
+        ));
+        assertFalse(GeorgianWallSlopeResolver.isAlignedShallowStair(
+                StairShape.STRAIGHT,
+                Direction.NORTH,
+                Direction.EAST
+        ));
+        assertFalse(GeorgianWallSlopeResolver.isAlignedShallowStair(
+                StairShape.OUTER_RIGHT,
+                Direction.EAST,
+                Direction.EAST
+        ));
+    }
+
+    @Test
+    void erydonShallowStairsAreNotMisreadAsFortyFiveDegreeStairs() {
+        assertFalse(GeorgianWallSlopeResolver.isAlignedSteepStair(
+                true,
+                true,
+                BlockHalf.BOTTOM,
+                StairShape.STRAIGHT,
+                Direction.EAST,
+                Direction.EAST
+        ));
+        assertTrue(GeorgianWallSlopeResolver.isAlignedSteepStair(
+                true,
+                false,
+                BlockHalf.BOTTOM,
+                StairShape.STRAIGHT,
+                Direction.EAST,
+                Direction.EAST
+        ));
+    }
+
+    @Test
+    void onlyFourAndEightLayerSupportsUseTheShallowWallModels() {
+        assertEquals(
+                GeorgianWallSlopeResolver.Part.UPPER,
+                GeorgianWallSlopeResolver.partForLayer(4, false)
+        );
+        assertEquals(
+                GeorgianWallSlopeResolver.Part.NONE,
+                GeorgianWallSlopeResolver.partForLayer(4, true)
+        );
+        assertEquals(
+                GeorgianWallSlopeResolver.Part.LOWER,
+                GeorgianWallSlopeResolver.partForLayer(8, false)
+        );
+        assertEquals(
+                GeorgianWallSlopeResolver.Part.LOWER,
+                GeorgianWallSlopeResolver.partForLayer(8, true)
+        );
+        assertEquals(
+                GeorgianWallSlopeResolver.Part.NONE,
+                GeorgianWallSlopeResolver.partForLayer(3, false)
+        );
+        assertEquals(
+                GeorgianWallSlopeResolver.Part.NONE,
+                GeorgianWallSlopeResolver.partForLayer(5, false)
+        );
+    }
+
+    @Test
+    void lowerSlabsRemainSupportedAndUpperSlabsRemainRejected() {
+        assertEquals(
+                GeorgianWallSlopeResolver.Part.UPPER,
+                GeorgianWallSlopeResolver.partForSlab(SlabType.BOTTOM)
+        );
+        assertEquals(
+                GeorgianWallSlopeResolver.Part.LOWER,
+                GeorgianWallSlopeResolver.partForSlab(SlabType.DOUBLE)
+        );
+        assertEquals(
+                GeorgianWallSlopeResolver.Part.NONE,
+                GeorgianWallSlopeResolver.partForSlab(SlabType.TOP)
+        );
+    }
+
     @Test
     void shallowTransitionsSelectOnlyTheModelsThatExist() {
         assertEquals(
@@ -207,6 +309,31 @@ class GeorgianWallSlopeResolverTest {
                 GeorgianWallSlopeResolver.Profile.SHALLOW_27,
                 true,
                 false
+        ));
+    }
+
+    @Test
+    void upperShallowStairEndpointRemainsPierFree() {
+        assertTrue(GeorgianWallSlopeResolver.isPierFreeShallowStairEndpoint(
+                GeorgianWallSlopeResolver.Part.LOWER,
+                GeorgianWallSlopeResolver.Profile.SHALLOW_27,
+                true,
+                false,
+                true
+        ));
+        assertFalse(GeorgianWallSlopeResolver.isPierFreeShallowStairEndpoint(
+                GeorgianWallSlopeResolver.Part.LOWER,
+                GeorgianWallSlopeResolver.Profile.SHALLOW_27,
+                true,
+                false,
+                false
+        ));
+        assertFalse(GeorgianWallSlopeResolver.isPierFreeShallowStairEndpoint(
+                GeorgianWallSlopeResolver.Part.LOWER,
+                GeorgianWallSlopeResolver.Profile.SHALLOW_27,
+                true,
+                true,
+                true
         ));
     }
 

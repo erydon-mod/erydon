@@ -20,6 +20,7 @@ import java.util.stream.IntStream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -45,6 +46,37 @@ final class SynapheiaPrototypeTest {
         assertEquals(List.of(first, second, third, first), padded);
         assertValidTangentTriangle(padded, 0, 1, 2);
         assertValidTangentTriangle(padded, 1, 2, 3);
+    }
+
+    @Test
+    void projectedRepeatFragmentsUseStablePomBounds() {
+        List<SpiralStairCtmGeometry.CellVertex> source = List.of(
+                cellVertex(0.15F, 0.25F),
+                cellVertex(0.85F, 0.35F),
+                cellVertex(0.65F, 0.90F)
+        );
+
+        List<List<SpiralStairCtmGeometry.CellVertex>> primitives =
+                SynapheiaRepeatBakedModel.repeatPrimitives(source, true);
+
+        assertTrue(primitives.size() > 1);
+        assertNear(Math.abs(cellArea(source)), primitives.stream()
+                .mapToDouble(primitive -> Math.abs(cellArea(primitive))).sum());
+        for (List<SpiralStairCtmGeometry.CellVertex> primitive : primitives) {
+            assertTrue(ArchRepeatCtmRenderer.hasStablePomBounds(primitive));
+            if (primitive.size() == 3) {
+                List<SpiralStairCtmGeometry.CellVertex> padded =
+                        SynapheiaRepeatBakedModel.padPomSafeTriangle(
+                                primitive.get(0), primitive.get(1), primitive.get(2));
+                assertEquals(primitive.get(2).vertex(), padded.get(3).vertex());
+                assertNear((minimumS(primitive) + maximumS(primitive)) * 0.5D,
+                        padded.stream().mapToDouble(SpiralStairCtmGeometry.CellVertex::localS)
+                                .average().orElseThrow());
+                assertNear((minimumT(primitive) + maximumT(primitive)) * 0.5D,
+                        padded.stream().mapToDouble(SpiralStairCtmGeometry.CellVertex::localT)
+                                .average().orElseThrow());
+            }
+        }
     }
 
     @Test
@@ -366,6 +398,30 @@ final class SynapheiaPrototypeTest {
     }
 
     @Test
+    void projectedSpiralGeometryCannotBeMistakenForAnAlreadyProcessedCtmTile() {
+        List<Identifier> tiles = IntStream.range(0, 36)
+                .mapToObj(index -> new Identifier("minecraft", "optifine/ctm/aganite/" + index))
+                .toList();
+        Identifier spiral = new Identifier("erydon", "aganite_stairs_spiral_large");
+        SynapheiaManifest.Rule rule = new SynapheiaManifest.Rule(
+                new Identifier("minecraft", "optifine/ctm/aganite/a_aganite_base.properties"),
+                "test", SynapheiaManifest.Method.REPEAT, tiles,
+                Set.of(Direction.values()), Set.of(spiral), Set.of(), true, 10);
+        SynapheiaService.Snapshot snapshot = SynapheiaService.publish(
+                new SynapheiaManifest.Prepared(List.of(rule), "test", 1, 1, 0, 1L));
+
+        // The normal route deliberately rejects a CTM source tile to avoid double processing.
+        assertNull(snapshot.repeatRuleFor(spiral, Direction.UP, tiles.get(17)));
+        // Spiral geometry is rebuilt from world positions, so this apparent tile may be atlas bleed.
+        assertEquals(rule, snapshot.repeatRuleForProjectedGeometry(spiral, Direction.UP));
+        assertTrue(SynapheiaRepeatBakedModel.usesProjectedRepeatGeometry(spiral));
+        assertTrue(SynapheiaRepeatBakedModel.usesProjectedRepeatGeometry(
+                new Identifier("erydon", "aganite_stairs_spiral_large_aged")));
+        assertFalse(SynapheiaRepeatBakedModel.usesProjectedRepeatGeometry(
+                new Identifier("erydon", "aganite_block")));
+    }
+
+    @Test
     void legacyAgedIdsAlsoIndexTheirCanonicalBlocks() {
         List<Identifier> tiles = IntStream.range(0, 36)
                 .mapToObj(index -> new Identifier("minecraft", "optifine/ctm/aganite_aged/" + index))
@@ -497,6 +553,11 @@ final class SynapheiaPrototypeTest {
         return vertex(x, y, z, 0.0F, 0.0F, -1, 0, 0.0F, 0.0F, 1.0F);
     }
 
+    private static SpiralStairCtmGeometry.CellVertex cellVertex(float localS, float localT) {
+        return new SpiralStairCtmGeometry.CellVertex(
+                vertex(localS, localT, 0.5F), localS, localT);
+    }
+
     private static float model(float coordinate) {
         return coordinate / 16.0F;
     }
@@ -551,6 +612,37 @@ final class SynapheiaPrototypeTest {
         return Math.abs(twiceArea) * 0.5D;
     }
 
+    private static double cellArea(List<SpiralStairCtmGeometry.CellVertex> vertices) {
+        double twiceArea = 0.0D;
+        for (int index = 0; index < vertices.size(); index++) {
+            SpiralStairCtmGeometry.CellVertex current = vertices.get(index);
+            SpiralStairCtmGeometry.CellVertex next = vertices.get((index + 1) % vertices.size());
+            twiceArea += (double) current.localS() * next.localT()
+                    - (double) next.localS() * current.localT();
+        }
+        return twiceArea * 0.5D;
+    }
+
+    private static float minimumS(List<SpiralStairCtmGeometry.CellVertex> vertices) {
+        return vertices.stream().map(SpiralStairCtmGeometry.CellVertex::localS)
+                .min(Float::compare).orElseThrow();
+    }
+
+    private static float maximumS(List<SpiralStairCtmGeometry.CellVertex> vertices) {
+        return vertices.stream().map(SpiralStairCtmGeometry.CellVertex::localS)
+                .max(Float::compare).orElseThrow();
+    }
+
+    private static float minimumT(List<SpiralStairCtmGeometry.CellVertex> vertices) {
+        return vertices.stream().map(SpiralStairCtmGeometry.CellVertex::localT)
+                .min(Float::compare).orElseThrow();
+    }
+
+    private static float maximumT(List<SpiralStairCtmGeometry.CellVertex> vertices) {
+        return vertices.stream().map(SpiralStairCtmGeometry.CellVertex::localT)
+                .max(Float::compare).orElseThrow();
+    }
+
     private static void assertNear(double expected, double actual) {
         assertTrue(Math.abs(expected - actual) <= EPSILON,
                 () -> "Expected " + expected + ", found " + actual);
@@ -585,4 +677,5 @@ final class SynapheiaPrototypeTest {
 
     private record TangentVertex(float x, float y, float z, float u, float v) {
     }
+
 }

@@ -27,6 +27,7 @@ import net.minecraft.world.World;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -50,7 +51,7 @@ public class StairsSpiralLargeBlock extends HorizontalFacingBlock implements Clu
 
     /** Retained only for blockstate compatibility with published worlds. */
     public static final EnumProperty<Part> PART = EnumProperty.of("part", Part.class);
-    /** Retained only for blockstate compatibility with published worlds. */
+    /** Marks the highest section so its off-step landing can be added by multipart. */
     public static final BooleanProperty CAP = BooleanProperty.of("cap");
 
     private static final ThreadLocal<Boolean> REMOVING_LEGACY_LAYER =
@@ -114,15 +115,21 @@ public class StairsSpiralLargeBlock extends HorizontalFacingBlock implements Clu
             0.2109375, 0.75, 0.7097500324249267, 0.3359375, 1, 1.0000000324249267,
             0.0859375, 0.75, 0.7625, 0.2109375, 1, 1
     );
-    private static final VoxelShape OFFSTEP_D_NORTH = VoxelShapes.cuboid(
-            0.0006249985694886107, 0.7516874974966049, -0.004249998629093199,
-            0.7978749985694886, 0.999812497496605, 0.4407500013709068
+    /** Horizontal coverage for all four offstep elements, with a 0.5-unit plate at their top. */
+    private static final VoxelShape OFFSTEP_SECTION_NORTH = shape(
+            0.6237, 0.96875, 0.0004, 0.9995, 1.0, 0.5593,
+            0.5488, 0.96875, -1.0, 0.9996, 1.0, 0.0723,
+            -0.9998, 0.96875, -1.0, 0.5488, 1.0, 0.8015,
+            0.5488, 0.96875, 0.0722, 0.8121, 1.0, 0.3008
     );
 
-    private static final VoxelShape FULL_SECTION_NORTH = makeFullSectionShape();
-    private static final VoxelShape FULL_SECTION_EAST = rotateShape(Direction.NORTH, Direction.EAST, FULL_SECTION_NORTH);
-    private static final VoxelShape FULL_SECTION_SOUTH = rotateShape(Direction.NORTH, Direction.SOUTH, FULL_SECTION_NORTH);
-    private static final VoxelShape FULL_SECTION_WEST = rotateShape(Direction.NORTH, Direction.WEST, FULL_SECTION_NORTH);
+    private static final VoxelShape BASE_SECTION_NORTH = makeBaseSectionShape();
+    private static final VoxelShape BASE_SECTION_EAST = rotateShape(Direction.NORTH, Direction.EAST, BASE_SECTION_NORTH);
+    private static final VoxelShape BASE_SECTION_SOUTH = rotateShape(Direction.NORTH, Direction.SOUTH, BASE_SECTION_NORTH);
+    private static final VoxelShape BASE_SECTION_WEST = rotateShape(Direction.NORTH, Direction.WEST, BASE_SECTION_NORTH);
+    private static final VoxelShape OFFSTEP_SECTION_EAST = rotateShape(Direction.NORTH, Direction.EAST, OFFSTEP_SECTION_NORTH);
+    private static final VoxelShape OFFSTEP_SECTION_SOUTH = rotateShape(Direction.NORTH, Direction.SOUTH, OFFSTEP_SECTION_NORTH);
+    private static final VoxelShape OFFSTEP_SECTION_WEST = rotateShape(Direction.NORTH, Direction.WEST, OFFSTEP_SECTION_NORTH);
 
     private static final VoxelShape COLLISION_A_EAST = rotateShape(Direction.NORTH, Direction.EAST, COLLISION_A_NORTH);
     private static final VoxelShape COLLISION_A_SOUTH = rotateShape(Direction.NORTH, Direction.SOUTH, COLLISION_A_NORTH);
@@ -161,7 +168,10 @@ public class StairsSpiralLargeBlock extends HorizontalFacingBlock implements Clu
         } else {
             facing = context.getHorizontalPlayerFacing();
         }
-        return getDefaultState().with(FACING, facing).with(PART, Part.B).with(CAP, false);
+        return getDefaultState()
+                .with(FACING, facing)
+                .with(PART, Part.B)
+                .with(CAP, !isSpiralAnchor(above));
     }
 
     static Direction stackedFacing(Direction adjacentFacing, boolean placingAbove) {
@@ -170,6 +180,12 @@ public class StairsSpiralLargeBlock extends HorizontalFacingBlock implements Clu
 
     private boolean isModernAnchor(BlockState state) {
         return state.isOf(this) && state.get(PART) == Part.B;
+    }
+
+    private static boolean isSpiralAnchor(BlockState state) {
+        return state.getBlock() instanceof StairsSpiralLargeBlock
+                && state.contains(PART)
+                && state.get(PART) == Part.B;
     }
 
     @Override
@@ -207,8 +223,24 @@ public class StairsSpiralLargeBlock extends HorizontalFacingBlock implements Clu
             cursor = cursor.up();
         }
 
-        Set<BlockPos> touched = new LinkedHashSet<>();
+        List<LegacyHelper> legacyHelpers = new ArrayList<>();
+        Set<BlockPos> candidates = new LinkedHashSet<>(anchors);
         for (BlockPos pos : anchors) {
+            BlockState current = ClusterRecalcSafety.getBlockState(world, pos);
+            Direction layerFacing = current.get(FACING);
+            for (Map.Entry<Part, BlockPos> entry : legacyHelperPositions(pos, layerFacing).entrySet()) {
+                BlockState helperState = ClusterRecalcSafety.getBlockState(world, entry.getValue());
+                if (helperState.isOf(this)
+                        && helperState.get(PART) == entry.getKey()
+                        && helperState.get(FACING) == layerFacing) {
+                    legacyHelpers.add(new LegacyHelper(entry.getKey(), entry.getValue(), layerFacing));
+                    candidates.add(entry.getValue());
+                }
+            }
+        }
+
+        Set<BlockPos> touched = new LinkedHashSet<>();
+        for (BlockPos pos : candidates) {
             if (!ClusterRecalcSafety.claim(pos)) {
                 break;
             }
@@ -219,16 +251,48 @@ public class StairsSpiralLargeBlock extends HorizontalFacingBlock implements Clu
             return unsafe;
         }
 
+        boolean alreadyRemovingLegacyLayer = REMOVING_LEGACY_LAYER.get();
+        REMOVING_LEGACY_LAYER.set(true);
+        try {
+            for (LegacyHelper helper : legacyHelpers) {
+                BlockState current = ClusterRecalcSafety.getBlockState(world, helper.pos());
+                if (current.isOf(this)
+                        && current.get(PART) == helper.part()
+                        && current.get(FACING) == helper.facing()) {
+                    world.setBlockState(helper.pos(), Blocks.AIR.getDefaultState(),
+                            ClusterRecalcSafety.updateFlags(Block.NOTIFY_ALL));
+                }
+            }
+        } finally {
+            REMOVING_LEGACY_LAYER.set(alreadyRemovingLegacyLayer);
+        }
+
         Direction facing = ClusterRecalcSafety.getBlockState(world, lowest).get(FACING);
         for (BlockPos pos : anchors) {
             BlockState current = ClusterRecalcSafety.getBlockState(world, pos);
-            BlockState target = current.with(FACING, facing).with(PART, Part.B).with(CAP, false);
+            BlockState target = current.with(FACING, facing)
+                    .with(PART, Part.B)
+                    .with(CAP, !isSpiralAnchor(ClusterRecalcSafety.getBlockState(world, pos.up())));
             if (current != target) {
                 world.setBlockState(pos, target, ClusterRecalcSafety.updateFlags(Block.NOTIFY_ALL));
             }
             facing = stackedFacing(facing, true);
         }
         return new ClusterRecalcResult(touched, true);
+    }
+
+    @Override
+    public void neighborUpdate(BlockState state, World world, BlockPos pos,
+                               Block sourceBlock, BlockPos sourcePos, boolean notify) {
+        super.neighborUpdate(state, world, pos, sourceBlock, sourcePos, notify);
+        if (world.isClient || state.get(PART) != Part.B || !sourcePos.equals(pos.up())) {
+            return;
+        }
+
+        boolean cap = !isSpiralAnchor(world.getBlockState(pos.up()));
+        if (state.get(CAP) != cap) {
+            world.setBlockState(pos, state.with(CAP, cap), Block.NOTIFY_LISTENERS);
+        }
     }
 
     @Override
@@ -249,8 +313,14 @@ public class StairsSpiralLargeBlock extends HorizontalFacingBlock implements Clu
     private static VoxelShape collisionShape(BlockState state) {
         Direction facing = state.get(FACING).rotateYClockwise();
         if (state.get(PART) == Part.B) {
-            return orientedShape(facing, FULL_SECTION_NORTH, FULL_SECTION_EAST,
-                    FULL_SECTION_SOUTH, FULL_SECTION_WEST);
+            VoxelShape section = orientedShape(facing, BASE_SECTION_NORTH, BASE_SECTION_EAST,
+                    BASE_SECTION_SOUTH, BASE_SECTION_WEST);
+            if (!state.get(CAP)) {
+                return section;
+            }
+            VoxelShape offstep = orientedShape(facing, OFFSTEP_SECTION_NORTH, OFFSTEP_SECTION_EAST,
+                    OFFSTEP_SECTION_SOUTH, OFFSTEP_SECTION_WEST);
+            return VoxelShapes.union(section, offstep);
         }
         return switch (state.get(PART)) {
             case A -> orientedShape(facing, COLLISION_A_NORTH, COLLISION_A_EAST,
@@ -259,7 +329,7 @@ public class StairsSpiralLargeBlock extends HorizontalFacingBlock implements Clu
                     COLLISION_C_SOUTH, COLLISION_C_WEST);
             case D -> orientedShape(facing, COLLISION_D_NORTH, COLLISION_D_EAST,
                     COLLISION_D_SOUTH, COLLISION_D_WEST);
-            default -> FULL_SECTION_NORTH;
+            default -> BASE_SECTION_NORTH;
         };
     }
 
@@ -356,6 +426,15 @@ public class StairsSpiralLargeBlock extends HorizontalFacingBlock implements Clu
         return originA.add(rotated.x, 0, rotated.z);
     }
 
+    static Map<Part, BlockPos> legacyHelperPositions(BlockPos anchor, Direction facing) {
+        BlockPos originA = legacyOriginA(anchor, facing, Part.B);
+        return Map.of(
+                Part.A, legacyPartPos(originA, facing, Part.A),
+                Part.C, legacyPartPos(originA, facing, Part.C),
+                Part.D, legacyPartPos(originA, facing, Part.D)
+        );
+    }
+
     private static Vec2i legacyOffset(Part part) {
         return switch (part) {
             case A -> new Vec2i(0, 0);
@@ -385,13 +464,12 @@ public class StairsSpiralLargeBlock extends HorizontalFacingBlock implements Clu
         return state.rotate(mirror.getRotation(state.get(FACING)));
     }
 
-    private static VoxelShape makeFullSectionShape() {
+    private static VoxelShape makeBaseSectionShape() {
         VoxelShape shape = COLLISION_B_NORTH;
         shape = VoxelShapes.union(shape, COLLISION_A_NORTH.offset(0.0D, 0.0D, 1.0D));
         shape = VoxelShapes.union(shape, COLLISION_C_NORTH.offset(-1.0D, 0.0D, 1.0D));
         shape = VoxelShapes.union(shape, COLLISION_D_NORTH.offset(-1.0D, 0.0D, 0.0D));
-        shape = VoxelShapes.union(shape, OFFSTEP_D_NORTH);
-        return VoxelShapes.union(shape, OFFSTEP_D_NORTH.offset(-1.0D, 0.0D, 0.0D));
+        return shape;
     }
 
     private static VoxelShape shape(double... boxes) {
@@ -431,5 +509,8 @@ public class StairsSpiralLargeBlock extends HorizontalFacingBlock implements Clu
     }
 
     private record Vec2i(int x, int z) {
+    }
+
+    private record LegacyHelper(Part part, BlockPos pos, Direction facing) {
     }
 }

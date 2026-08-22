@@ -66,7 +66,9 @@ public class DiagonalWallBlock extends WallBlock implements ClusterRebuildableBl
     private static final VoxelShape[] SHAPE_CACHE = new VoxelShape[2 * 3 * 3 * 3 * 3 * 2 * 2 * 2 * 2];
 
     public DiagonalWallBlock(Settings settings) {
-        super(settings);
+        // Incline geometry is derived from the live stair/slab support, so the
+        // vanilla per-state shape cache must not replace it with a flat shape.
+        super(settings.dynamicBounds());
         setDefaultState(getDefaultState()
                 .with(NORTH_EAST, false)
                 .with(SOUTH_EAST, false)
@@ -167,12 +169,17 @@ public class DiagonalWallBlock extends WallBlock implements ClusterRebuildableBl
 
     @Override
     public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        return cachedShape(state);
+        return interactionShape(state, world, pos);
     }
 
     @Override
     public VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        return cachedShape(state);
+        return interactionShape(state, world, pos);
+    }
+
+    @Override
+    public VoxelShape getRaycastShape(BlockState state, BlockView world, BlockPos pos) {
+        return interactionShape(state, world, pos);
     }
 
     @Override
@@ -206,10 +213,8 @@ public class DiagonalWallBlock extends WallBlock implements ClusterRebuildableBl
             if (!(state.getBlock() instanceof DiagonalWallBlock)) {
                 continue;
             }
-            GeorgianWallSlopeResolver.Mode slopeMode =
-                    GeorgianWallSlopeResolver.resolve(world, state, pos);
             BlockState updated;
-            if (slopeMode.isSlope()) {
+            if (isSlopeRunSection(world, pos, state)) {
                 updated = withoutSlopePierMarker(state);
             } else if (straightAxis(state) == null || isActualPierSection(world, pos, state)) {
                 continue;
@@ -415,6 +420,13 @@ public class DiagonalWallBlock extends WallBlock implements ClusterRebuildableBl
         };
     }
 
+    private static VoxelShape interactionShape(BlockState state, BlockView world, BlockPos pos) {
+        GeorgianWallSlopeResolver.Mode mode = GeorgianWallSlopeResolver.resolve(world, state, pos);
+        return mode.isSlope()
+                ? GeorgianWallInteractionShapes.shapeFor(state, mode)
+                : cachedShape(state);
+    }
+
     private static VoxelShape createShape(BlockState state) {
         VoxelShape shape = VoxelShapes.empty();
         boolean pierSection = isPierSection(state);
@@ -484,8 +496,7 @@ public class DiagonalWallBlock extends WallBlock implements ClusterRebuildableBl
         BlockState normalized = normalizeCardinalShapes(state);
         int cardinals = cardinalMask(normalized);
         boolean hasDiagonal = hasAnyDiagonal(normalized);
-        GeorgianWallSlopeResolver.Mode slopeMode = GeorgianWallSlopeResolver.resolve(world, normalized, pos);
-        if (slopeMode.isSlope()) {
+        if (isSlopeRunSection(world, pos, normalized)) {
             return normalized.with(UP, true);
         }
 
@@ -753,7 +764,8 @@ public class DiagonalWallBlock extends WallBlock implements ClusterRebuildableBl
 
     private static boolean isSlopeRunSection(BlockView world, BlockPos pos, BlockState state) {
         return state.getBlock() instanceof DiagonalWallBlock
-                && GeorgianWallSlopeResolver.resolve(world, state, pos).isSlope();
+                && (GeorgianWallSlopeResolver.resolve(world, state, pos).isSlope()
+                || GeorgianWallSlopeResolver.isPierFreeShallowStairEndpoint(world, state, pos));
     }
 
     private static GeorgianWallPierSpacing inheritedPierSpacing(WorldAccess world, BlockPos pos) {

@@ -71,6 +71,10 @@ public final class HorizontalUvLockAudit {
         assertTarget("Romanesque arch component", "erydon", "block/arch/romanesque/aganite_arch_romanesque_top_large", true);
         assertTarget("circular column component", "erydon", "block/column/circular/aganite_column_circular_capital", true);
         assertTarget("square column component", "erydon", "block/column/square/aganite_column_square_capital", true);
+        assertTarget("spiral stair master", "erydon", "block/stairs/spiral/stairs_spiral_large", true);
+        assertTarget("spiral stair offstep master", "erydon", "block/stairs/spiral/stairs_spiral_large_offstep", true);
+        assertTarget("spiral stair material model", "erydon", "block/stairs/spiral/aganite_stairs_spiral_large", true);
+        assertTarget("spiral stair material offstep", "erydon", "block/stairs/spiral/aganite_stairs_spiral_large_offstep", true);
         assertTarget("arched window component", "erydon", "block/window/arch/aganite_window_arch_wall", true);
         assertTarget("French window component", "erydon", "block/window/french_georgian/aganite_window_french_georgian_sill", true);
         assertTarget("wall post", "erydon", "block/wall/georgian/aganite_wall_georgian_post", true);
@@ -82,6 +86,7 @@ public final class HorizontalUvLockAudit {
         assertTarget("modern arch icon", "erydon", "block/arch/modern/arch_modern_icon", false);
         assertTarget("Gothic arch icon", "erydon", "block/arch/gothic/aganite_arch_gothic_icon", false);
         assertTarget("Gothic column item", "erydon", "block/column/gothic/column_gothic_item", false);
+        assertTarget("spiral stair icon", "erydon", "block/stairs/spiral/stairs_spiral_large_icon", false);
         assertTarget("foreign model", "minecraft", "block/stone", false);
     }
 

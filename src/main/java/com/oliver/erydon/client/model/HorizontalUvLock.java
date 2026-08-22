@@ -106,6 +106,7 @@ public final class HorizontalUvLock {
                 || path.startsWith("block/arch/gothic/")
                 || path.startsWith("block/column/circular/")
                 || path.startsWith("block/column/square/")
+                || path.startsWith("block/stairs/spiral/")
                 || path.startsWith("block/window/arch/")
                 || path.startsWith("block/window/french_georgian/")) {
             return true;

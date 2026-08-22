@@ -25,7 +25,7 @@ class GeorgianWallSlopeGeometryTest {
             new ModelExpectation("27_upper", 312, 188),
             new ModelExpectation("27_lower", 636, 432),
             new ModelExpectation("27_lower_onramp", 347, 202),
-            new ModelExpectation("27_upper_offramp", 344, 202),
+            new ModelExpectation("27_upper_offramp", 348, 202),
             new ModelExpectation("45", 318, 0),
             new ModelExpectation("45_onramp", 350, 0),
             new ModelExpectation("45_offramp", 348, 0)

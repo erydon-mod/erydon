@@ -43,6 +43,7 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
     private final ModelIdentifier modelId;
     private final Identifier blockId;
     private final SynapheiaService.Snapshot snapshot;
+    private final boolean projectedRepeatGeometry;
 
     SynapheiaRepeatBakedModel(BakedModel wrapped,
                              ModelIdentifier modelId,
@@ -52,6 +53,7 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
         this.modelId = modelId;
         this.blockId = blockId;
         this.snapshot = snapshot;
+        this.projectedRepeatGeometry = usesProjectedRepeatGeometry(blockId);
     }
 
     @Override
@@ -88,8 +90,9 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
         Map<OverlayKey, SynapheiaManifest.Rule> overlays = new LinkedHashMap<>();
         int emitted = 0;
         for (CapturedQuad quad : captured) {
-            SynapheiaManifest.Rule repeatRule = snapshot.repeatRuleFor(
-                    blockId, quad.lightFace(), quad.sourceSprite());
+            SynapheiaManifest.Rule repeatRule = projectedRepeatGeometry
+                    ? snapshot.repeatRuleForProjectedGeometry(blockId, quad.lightFace())
+                    : snapshot.repeatRuleFor(blockId, quad.lightFace(), quad.sourceSprite());
             if (repeatRule == null) {
                 emitOriginal(emitter, quad);
                 emitted++;
@@ -118,6 +121,15 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
                         "overlay_surface_count", overlays.size(),
                         "model_identifier", modelId.toString(), "block_id", blockId.toString()
                 ));
+    }
+
+    static boolean usesProjectedRepeatGeometry(Identifier blockId) {
+        if (blockId == null || !Erydon.MOD_ID.equals(blockId.getNamespace())) {
+            return false;
+        }
+        String path = blockId.getPath();
+        return path.endsWith("_stairs_spiral_large")
+                || path.endsWith("_stairs_spiral_large_aged");
     }
 
     static void clearCaches() {
@@ -232,22 +244,15 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
                     quad.lightFace());
             Direction cullFace = cullFaceForOffset(quad.cullFace(), offsetX, offsetY, offsetZ);
 
-            if (vertices.size() == 3) {
-                emitRepeatPrimitive(emitter, quad, cullFace,
-                        padTriangle(vertices.get(0), vertices.get(1), vertices.get(2)),
-                        sprites.get(tileIndex));
+            for (List<SpiralStairCtmGeometry.CellVertex> primitive
+                    : repeatPrimitives(vertices, projectedRepeatGeometry)) {
+                List<SpiralStairCtmGeometry.CellVertex> emittedVertices = primitive.size() == 3
+                        ? (projectedRepeatGeometry
+                        ? padPomSafeTriangle(primitive.get(0), primitive.get(1), primitive.get(2))
+                        : padTriangle(primitive.get(0), primitive.get(1), primitive.get(2)))
+                        : primitive;
+                emitRepeatPrimitive(emitter, quad, cullFace, emittedVertices, sprites.get(tileIndex));
                 emitted++;
-            } else if (vertices.size() == 4) {
-                emitRepeatPrimitive(emitter, quad, cullFace, vertices, sprites.get(tileIndex));
-                emitted++;
-            } else {
-                SpiralStairCtmGeometry.CellVertex first = vertices.get(0);
-                for (int index = 1; index < vertices.size() - 1; index++) {
-                    emitRepeatPrimitive(emitter, quad, cullFace,
-                            padTriangle(first, vertices.get(index), vertices.get(index + 1)),
-                            sprites.get(tileIndex));
-                    emitted++;
-                }
             }
         }
         SynapheiaMetrics.event("stage_invoked", SynapheiaMode.SYNAPHEIA, snapshot.generation(), fields(
@@ -259,11 +264,38 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
         return emitted;
     }
 
+    static List<List<SpiralStairCtmGeometry.CellVertex>> repeatPrimitives(
+            List<SpiralStairCtmGeometry.CellVertex> vertices,
+            boolean pomSafe) {
+        if (pomSafe) {
+            // Projected spiral faces can be skewed after a CTM cell split. Reuse the
+            // proven Gothic-arch tessellation so Iris sees stable height-map bounds.
+            return ArchRepeatCtmRenderer.pomSafePrimitives(vertices);
+        }
+        if (vertices.size() <= 4) {
+            return List.of(List.copyOf(vertices));
+        }
+        List<List<SpiralStairCtmGeometry.CellVertex>> result = new ArrayList<>();
+        SpiralStairCtmGeometry.CellVertex first = vertices.get(0);
+        for (int index = 1; index < vertices.size() - 1; index++) {
+            result.add(List.of(first, vertices.get(index), vertices.get(index + 1)));
+        }
+        return List.copyOf(result);
+    }
+
     static <T> List<T> padTriangle(T first, T second, T third) {
         // Indium may rotate a quad to use the opposite AO diagonal. Repeating the first
         // vertex keeps the first three vertices non-degenerate in either orientation,
         // which Iris requires when deriving the PBR tangent.
         return List.of(first, second, third, first);
+    }
+
+    static List<SpiralStairCtmGeometry.CellVertex> padPomSafeTriangle(
+            SpiralStairCtmGeometry.CellVertex first,
+            SpiralStairCtmGeometry.CellVertex second,
+            SpiralStairCtmGeometry.CellVertex third) {
+        return List.of(first, second, third,
+                ArchRepeatCtmRenderer.pomSafeTriangleGhost(first, second, third));
     }
 
     private static void emitRepeatPrimitive(QuadEmitter emitter,

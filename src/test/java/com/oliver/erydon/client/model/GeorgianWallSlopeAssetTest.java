@@ -35,9 +35,9 @@ class GeorgianWallSlopeAssetTest {
                     "down", 39, "east", 65, "north", 55,
                     "south", 69, "up", 58, "west", 61
             )),
-            new Expectation("27_upper_offramp", 110, 344, 26.565D, 4, 72, 202, Map.of(
-                    "down", 39, "east", 65, "north", 68,
-                    "south", 53, "up", 58, "west", 61
+            new Expectation("27_upper_offramp", 111, 348, 26.565D, 4, 72, 202, Map.of(
+                    "down", 40, "east", 66, "north", 68,
+                    "south", 53, "up", 59, "west", 62
             )),
             new Expectation("45", 106, 318, 45.0D, 4, 0, 0, Map.of(
                     "down", 43, "east", 60, "north", 54,
@@ -79,13 +79,29 @@ class GeorgianWallSlopeAssetTest {
         );
 
         JsonArray shallowOfframp = read("27_upper_offramp").getAsJsonArray("elements");
-        assertVector(
-                shallowOfframp.get(1).getAsJsonObject().getAsJsonArray("from"),
+        JsonObject shallowOfframpHandoff = findElementStartingAt(
+                shallowOfframp,
                 4.75D, 0.0D, -2.5D
         );
         assertVector(
-                shallowOfframp.get(1).getAsJsonObject().getAsJsonArray("to"),
+                shallowOfframpHandoff.getAsJsonArray("from"),
+                4.75D, 0.0D, -2.5D
+        );
+        assertVector(
+                shallowOfframpHandoff.getAsJsonArray("to"),
                 11.25D, 1.5D, 0.179D
+        );
+        JsonObject shallowOfframpFiller = findElementStartingAt(
+                shallowOfframp,
+                6.26831D, -4.25D, 15.65132D
+        );
+        assertVector(
+                shallowOfframpFiller.getAsJsonArray("from"),
+                6.26831D, -4.25D, 15.65132D
+        );
+        assertVector(
+                shallowOfframpFiller.getAsJsonArray("to"),
+                7.51631D, 5.0D, 16.24806D
         );
 
         JsonArray steepOnramp = read("45_onramp").getAsJsonArray("elements");
@@ -153,6 +169,23 @@ class GeorgianWallSlopeAssetTest {
         assertEquals(x, actual.get(0).getAsDouble(), 0.000001D);
         assertEquals(y, actual.get(1).getAsDouble(), 0.000001D);
         assertEquals(z, actual.get(2).getAsDouble(), 0.000001D);
+    }
+
+    private static JsonObject findElementStartingAt(JsonArray elements,
+                                                    double x,
+                                                    double y,
+                                                    double z) {
+        for (JsonElement elementValue : elements) {
+            JsonObject element = elementValue.getAsJsonObject();
+            JsonArray from = element.getAsJsonArray("from");
+            if (from != null
+                    && Math.abs(from.get(0).getAsDouble() - x) < 0.000001D
+                    && Math.abs(from.get(1).getAsDouble() - y) < 0.000001D
+                    && Math.abs(from.get(2).getAsDouble() - z) < 0.000001D) {
+                return element;
+            }
+        }
+        throw new AssertionError("Missing element starting at [" + x + ", " + y + ", " + z + "]");
     }
 
     private static JsonObject read(String name) throws IOException {

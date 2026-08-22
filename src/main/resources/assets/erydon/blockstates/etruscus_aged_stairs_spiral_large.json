@@ -12,11 +12,33 @@
     },
     {
       "when": {
+        "facing": "north",
+        "part": "b",
+        "cap": "true"
+      },
+      "apply": {
+        "model": "erydon:block/stairs/spiral/etruscus_stairs_spiral_large_aged_offstep",
+        "y": 90
+      }
+    },
+    {
+      "when": {
         "facing": "east",
         "part": "b"
       },
       "apply": {
         "model": "erydon:block/stairs/spiral/etruscus_stairs_spiral_large_aged",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "b",
+        "cap": "true"
+      },
+      "apply": {
+        "model": "erydon:block/stairs/spiral/etruscus_stairs_spiral_large_aged_offstep",
         "y": 180
       }
     },
@@ -32,11 +54,33 @@
     },
     {
       "when": {
+        "facing": "south",
+        "part": "b",
+        "cap": "true"
+      },
+      "apply": {
+        "model": "erydon:block/stairs/spiral/etruscus_stairs_spiral_large_aged_offstep",
+        "y": 270
+      }
+    },
+    {
+      "when": {
         "facing": "west",
         "part": "b"
       },
       "apply": {
         "model": "erydon:block/stairs/spiral/etruscus_stairs_spiral_large_aged",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "b",
+        "cap": "true"
+      },
+      "apply": {
+        "model": "erydon:block/stairs/spiral/etruscus_stairs_spiral_large_aged_offstep",
         "y": 0
       }
     }

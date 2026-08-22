@@ -120,12 +120,29 @@ public final class GeorgianWallSlopeResolver {
 
     public static Part partForSupport(BlockView world, BlockPos supportPos) {
         BlockState support = world.getBlockState(supportPos);
+        // A Georgian wall is never a stair support. Avoid recursively asking a
+        // stacked wall for its own world-derived interaction shape.
+        if (support.getBlock() instanceof DiagonalWallBlock) {
+            return Part.NONE;
+        }
+        if (support.getBlock() instanceof ShallowStairsBlockBase shallowStair) {
+            StairShape shape = support.contains(Properties.STAIR_SHAPE)
+                    ? support.get(Properties.STAIR_SHAPE)
+                    : null;
+            return partForShallowStair(shallowStair.isTopHalf(), shape);
+        }
+
         if (support.getBlock() instanceof SlabBlock && support.contains(Properties.SLAB_TYPE)) {
-            return switch (support.get(Properties.SLAB_TYPE)) {
-                case BOTTOM -> Part.UPPER;
-                case DOUBLE -> Part.LOWER;
-                case TOP -> Part.NONE;
-            };
+            return partForSlab(support.get(Properties.SLAB_TYPE));
+        }
+
+        if (support.getBlock() instanceof LayerBlock
+                && support.contains(LayerBlock.LAYERS)
+                && support.contains(LayerBlock.TOP)) {
+            return partForLayer(
+                    support.get(LayerBlock.LAYERS),
+                    support.get(LayerBlock.TOP)
+            );
         }
 
         VoxelShape outline = support.getOutlineShape(world, supportPos, ShapeContext.absent());
@@ -160,12 +177,15 @@ public final class GeorgianWallSlopeResolver {
                                                     BlockPos pos,
                                                     Part part,
                                                     Direction uphill) {
-        if (part == Part.LOWER) {
-            return isPart(world, pos.offset(uphill).up(), Part.UPPER)
-                    || isPart(world, pos.offset(uphill.getOpposite()), Part.UPPER);
+        if (!supportsShallowDirection(world.getBlockState(pos.down()), uphill)) {
+            return false;
         }
-        return isPart(world, pos.offset(uphill), Part.LOWER)
-                || isPart(world, pos.offset(uphill.getOpposite()).down(), Part.LOWER);
+        if (part == Part.LOWER) {
+            return isShallowRunWall(world, pos.offset(uphill).up(), Part.UPPER, uphill)
+                    || isShallowRunWall(world, pos.offset(uphill.getOpposite()), Part.UPPER, uphill);
+        }
+        return isShallowRunWall(world, pos.offset(uphill), Part.LOWER, uphill)
+                || isShallowRunWall(world, pos.offset(uphill.getOpposite()).down(), Part.LOWER, uphill);
     }
 
     private static boolean hasSteepSlopeNeighbour(BlockView world,
@@ -220,15 +240,39 @@ public final class GeorgianWallSlopeResolver {
             BlockPos neighbour = uphillSide
                     ? pos.offset(uphill).up()
                     : pos.offset(uphill.getOpposite());
-            return isPart(world, neighbour, Part.UPPER);
+            return isShallowRunWall(world, neighbour, Part.UPPER, uphill);
         }
         if (part == Part.UPPER) {
             BlockPos neighbour = uphillSide
                     ? pos.offset(uphill)
                     : pos.offset(uphill.getOpposite()).down();
-            return isPart(world, neighbour, Part.LOWER);
+            return isShallowRunWall(world, neighbour, Part.LOWER, uphill);
         }
         return false;
+    }
+
+    private static boolean isShallowRunWall(BlockView world,
+                                            BlockPos pos,
+                                            Part expected,
+                                            Direction uphill) {
+        BlockState state = world.getBlockState(pos);
+        BlockState support = world.getBlockState(pos.down());
+        return state.getBlock() instanceof DiagonalWallBlock
+                && partForSupport(world, pos.down()) == expected
+                && supportsShallowDirection(support, uphill);
+    }
+
+    private static boolean supportsShallowDirection(BlockState support, Direction uphill) {
+        if (!(support.getBlock() instanceof ShallowStairsBlockBase)) {
+            return true;
+        }
+        return support.contains(Properties.STAIR_SHAPE)
+                && support.contains(Properties.HORIZONTAL_FACING)
+                && isAlignedShallowStair(
+                        support.get(Properties.STAIR_SHAPE),
+                        support.get(Properties.HORIZONTAL_FACING),
+                        uphill
+                );
     }
 
     private static boolean isSteepRunWall(BlockView world,
@@ -244,24 +288,22 @@ public final class GeorgianWallSlopeResolver {
     }
 
     private static boolean isAlignedBottomStair(BlockState support, Direction uphill) {
-        return support.getBlock() instanceof StairsBlock
-                && support.contains(Properties.BLOCK_HALF)
-                && support.get(Properties.BLOCK_HALF) == BlockHalf.BOTTOM
+        return support.contains(Properties.BLOCK_HALF)
                 && support.contains(Properties.STAIR_SHAPE)
-                && support.get(Properties.STAIR_SHAPE) == StairShape.STRAIGHT
                 && support.contains(Properties.HORIZONTAL_FACING)
-                && support.get(Properties.HORIZONTAL_FACING) == uphill;
+                && isAlignedSteepStair(
+                        support.getBlock() instanceof StairsBlock,
+                        support.getBlock() instanceof ShallowStairsBlockBase,
+                        support.get(Properties.BLOCK_HALF),
+                        support.get(Properties.STAIR_SHAPE),
+                        support.get(Properties.HORIZONTAL_FACING),
+                        uphill
+                );
     }
 
     private static BlockPos lowFlatPos(BlockPos pos, SlopeCandidate candidate) {
         BlockPos flatPos = pos.offset(candidate.uphill().getOpposite());
         return candidate.profile() == Profile.STEEP_45 ? flatPos.down() : flatPos;
-    }
-
-    private static boolean isPart(BlockView world, BlockPos pos, Part expected) {
-        BlockState state = world.getBlockState(pos);
-        return state.getBlock() instanceof DiagonalWallBlock
-                && partForSupport(world, pos.down()) == expected;
     }
 
     private static boolean hasFlatWall(BlockView world, BlockPos flatPos) {
@@ -289,9 +331,55 @@ public final class GeorgianWallSlopeResolver {
         return isShallowFlatContinuation(
                 part,
                 candidate.profile(),
-                isPart(world, pos.offset(uphill.getOpposite()), Part.UPPER),
-                isPart(world, pos.offset(uphill).up(), Part.UPPER)
+                isShallowRunWall(world, pos.offset(uphill.getOpposite()), Part.UPPER, uphill),
+                isShallowRunWall(world, pos.offset(uphill).up(), Part.UPPER, uphill)
         );
+    }
+
+    /**
+     * The wall above an ERYDON upper shallow stair uses the flat wall model at
+     * the high handoff, but the support is still part of the incline. The
+     * preceding upper-offramp supplies the small filler, and this position must
+     * never be promoted to a stair-joint or periodic pier.
+     */
+    static boolean isPierFreeShallowStairEndpoint(BlockView world,
+                                                  BlockState state,
+                                                  BlockPos pos) {
+        if (!(state.getBlock() instanceof DiagonalWallBlock)
+                || !isSlopeCompatible(state)) {
+            return false;
+        }
+
+        BlockState support = world.getBlockState(pos.down());
+        boolean upperShallowStair = support.getBlock() instanceof ShallowStairsBlockBase shallowStair
+                && shallowStair.isTopHalf();
+        if (!upperShallowStair) {
+            return false;
+        }
+
+        Part part = partForSupport(world, pos.down());
+        SlopeCandidate candidate = findSlopeCandidate(world, pos, part);
+        if (candidate == null) {
+            return false;
+        }
+
+        Direction uphill = candidate.uphill();
+        return isPierFreeShallowStairEndpoint(
+                part,
+                candidate.profile(),
+                isShallowRunWall(world, pos.offset(uphill.getOpposite()), Part.UPPER, uphill),
+                isShallowRunWall(world, pos.offset(uphill).up(), Part.UPPER, uphill),
+                upperShallowStair
+        );
+    }
+
+    static boolean isPierFreeShallowStairEndpoint(Part part,
+                                                  Profile profile,
+                                                  boolean hasUpperBehind,
+                                                  boolean hasUpperAhead,
+                                                  boolean upperShallowStair) {
+        return upperShallowStair
+                && isShallowFlatContinuation(part, profile, hasUpperBehind, hasUpperAhead);
     }
 
     static boolean isShallowFlatContinuation(Part part,
@@ -410,7 +498,8 @@ public final class GeorgianWallSlopeResolver {
      */
     static boolean isFlatStairJoint(BlockView world, BlockState state, BlockPos pos) {
         if (!(state.getBlock() instanceof DiagonalWallBlock)
-                || resolve(world, state, pos).isSlope()) {
+                || resolve(world, state, pos).isSlope()
+                || isPierFreeShallowStairEndpoint(world, state, pos)) {
             return false;
         }
 
@@ -534,6 +623,50 @@ public final class GeorgianWallSlopeResolver {
                 && near(bounds.maxY, 0.5D)
                 && near(bounds.minZ, 0.0D)
                 && near(bounds.maxZ, 1.0D);
+    }
+
+    static Part partForShallowStair(boolean topHalf, StairShape shape) {
+        if (shape != StairShape.STRAIGHT) {
+            return Part.NONE;
+        }
+        return topHalf ? Part.LOWER : Part.UPPER;
+    }
+
+    static Part partForSlab(SlabType type) {
+        return switch (type) {
+            case BOTTOM -> Part.UPPER;
+            case DOUBLE -> Part.LOWER;
+            case TOP -> Part.NONE;
+        };
+    }
+
+    static Part partForLayer(int layers, boolean topAnchored) {
+        if (layers == 8) {
+            return Part.LOWER;
+        }
+        if (layers == 4 && !topAnchored) {
+            return Part.UPPER;
+        }
+        return Part.NONE;
+    }
+
+    static boolean isAlignedShallowStair(StairShape shape,
+                                          Direction facing,
+                                          Direction uphill) {
+        return shape == StairShape.STRAIGHT && facing == uphill;
+    }
+
+    static boolean isAlignedSteepStair(boolean stairBlock,
+                                       boolean shallowStair,
+                                       BlockHalf half,
+                                       StairShape shape,
+                                       Direction facing,
+                                       Direction uphill) {
+        return stairBlock
+                && !shallowStair
+                && half == BlockHalf.BOTTOM
+                && shape == StairShape.STRAIGHT
+                && facing == uphill;
     }
 
     private static boolean near(double first, double second) {
