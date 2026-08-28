@@ -27,6 +27,10 @@ final class SynapheiaMetrics {
     private SynapheiaMetrics() {
     }
 
+    static boolean enabled() {
+        return ENABLED;
+    }
+
     static void event(String event,
                       SynapheiaMode mode,
                       long reloadGeneration,

@@ -8,15 +8,28 @@ public final class ErydonCuPomLookupPlan {
     public record SpritePhase(
             int atlasWidth,
             int atlasHeight,
+            int spriteX,
+            int spriteY,
             int spriteWidth,
-            int spriteHeight,
-            int centreX,
-            int centreY
+            int spriteHeight
     ) {
         public SpritePhase {
             if (atlasWidth <= 0 || atlasHeight <= 0 || spriteWidth <= 0 || spriteHeight <= 0) {
                 throw new IllegalArgumentException("Sprite and atlas dimensions must be positive");
             }
+            if (atlasWidth > ErydonCuPomLookupLayout.MAX_ATLAS_DIMENSION
+                    || atlasHeight > ErydonCuPomLookupLayout.MAX_ATLAS_DIMENSION) {
+                throw new IllegalArgumentException("Atlas dimensions exceed the lookup coverage");
+            }
+            new ErydonCuPomLookupLayout.SpriteBounds(spriteX, spriteY, spriteWidth, spriteHeight);
+            if ((long) spriteX + spriteWidth > atlasWidth
+                    || (long) spriteY + spriteHeight > atlasHeight) {
+                throw new IllegalArgumentException("Sprite bounds exceed the active atlas");
+            }
+        }
+
+        ErydonCuPomLookupLayout.SpriteBounds bounds() {
+            return new ErydonCuPomLookupLayout.SpriteBounds(spriteX, spriteY, spriteWidth, spriteHeight);
         }
     }
 
@@ -42,12 +55,12 @@ public final class ErydonCuPomLookupPlan {
         }
 
         SpritePhase atlasReference = requireCompleteFamily(families.get(0)).get(0);
-        List<List<ErydonCuPomLookupLayout.SpriteCentre>> centresByFamily =
+        List<List<ErydonCuPomLookupLayout.SpriteBounds>> boundsByFamily =
                 new ArrayList<>(families.size());
         for (SpriteFamily family : families) {
             List<SpritePhase> phases = requireCompleteFamily(family);
             SpritePhase familyReference = phases.get(0);
-            List<ErydonCuPomLookupLayout.SpriteCentre> centres = new ArrayList<>(phases.size());
+            List<ErydonCuPomLookupLayout.SpriteBounds> bounds = new ArrayList<>(phases.size());
             for (int phase = 0; phase < phases.size(); phase++) {
                 SpritePhase sprite = phases.get(phase);
                 if (sprite.atlasWidth() != atlasReference.atlasWidth()
@@ -60,12 +73,12 @@ public final class ErydonCuPomLookupPlan {
                     throw new IllegalArgumentException(
                             family.name() + " phase " + phase + " reports a different sprite size");
                 }
-                centres.add(new ErydonCuPomLookupLayout.SpriteCentre(sprite.centreX(), sprite.centreY()));
+                bounds.add(sprite.bounds());
             }
-            centresByFamily.add(List.copyOf(centres));
+            boundsByFamily.add(List.copyOf(bounds));
         }
         return ErydonCuPomLookupLayout.encode(
-                atlasReference.atlasWidth(), atlasReference.atlasHeight(), centresByFamily);
+                atlasReference.atlasWidth(), atlasReference.atlasHeight(), boundsByFamily);
     }
 
     private static List<SpritePhase> requireCompleteFamily(SpriteFamily family) {

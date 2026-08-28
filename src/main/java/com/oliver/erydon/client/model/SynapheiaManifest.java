@@ -39,7 +39,9 @@ final class SynapheiaManifest {
 
         List<Rule> rules = new ArrayList<>();
         Set<String> sourcePacks = new LinkedHashSet<>();
+        SynapheiaTileSequencePool tileSequences = new SynapheiaTileSequencePool();
         int bytesRead = 0;
+        boolean metricsEnabled = SynapheiaMetrics.enabled();
         for (Map.Entry<Identifier, Resource> entry : resources.entrySet()) {
             Identifier resourceId = entry.getKey();
             Resource resource = entry.getValue();
@@ -51,13 +53,16 @@ final class SynapheiaManifest {
                 continue;
             }
 
-            Rule rule = parseRule(resourceId, resource.getResourcePackName(), properties, blocks);
+            Rule parsedRule = parseRule(resourceId, resource.getResourcePackName(), properties, blocks);
+            Rule rule = parsedRule.withTiles(tileSequences.intern(parsedRule.tiles()));
             rules.add(rule);
             sourcePacks.add(resource.getResourcePackName());
-            SynapheiaMetrics.event("ctm_rule_parsed", SynapheiaMode.SYNAPHEIA, 0L, fields(
-                    "rule_id", rule.id(), "method", rule.method().propertyValue(),
-                    "status", "accepted", "block_count", rule.blocks().size()
-            ));
+            if (metricsEnabled) {
+                SynapheiaMetrics.event("ctm_rule_parsed", SynapheiaMode.SYNAPHEIA, 0L, fields(
+                        "rule_id", rule.id(), "method", rule.method().propertyValue(),
+                        "status", "accepted", "block_count", rule.blocks().size()
+                ));
+            }
         }
 
         if (rules.isEmpty()) {
@@ -314,6 +319,11 @@ final class SynapheiaManifest {
                 int priority) {
         String id() {
             return resourceId + "@" + sourcePack;
+        }
+
+        Rule withTiles(List<Identifier> replacementTiles) {
+            return new Rule(resourceId, sourcePack, method, replacementTiles, faces,
+                    blocks, matchTiles, innerSeams, priority);
         }
 
         boolean matches(Direction face, Identifier sourceSprite) {

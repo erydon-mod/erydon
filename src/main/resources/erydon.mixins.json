@@ -13,9 +13,11 @@
   ],
   "client": [
     "client.BakedQuadFactoryMixin",
+    "client.MultipartUnbakedModelMixin",
     "client.FluidRendererMixin",
     "client.SpriteAtlasTextureMixin",
     "client.compat.axiom.BlockListEntryMixin",
+    "client.compat.iris.IrisChunkProgramOverridesMixin",
     "client.compat.iris.ProgramSetMixin",
     "client.compat.iris.ShaderPropertiesMixin",
     "client.compat.rei.ReiIdentifierArgumentTypeMixin",

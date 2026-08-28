@@ -1,11 +1,13 @@
 import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 
 import java.nio.charset.StandardCharsets
 import java.util.zip.ZipFile
 
 def ctmPathAudit = { List<Map<String, Object>> propertyResources,
                      Set<String> resourcePaths,
-                     String inputKind ->
+                     String inputKind,
+                     Set<String> atlasDirectorySources ->
     def resolveToken
     resolveToken = { String propertyEntry, String token, Set<String> availablePaths = resourcePaths ->
         def resourceMatcher = propertyEntry =~ /^assets\/([^\/]+)\/(.+)$/
@@ -188,6 +190,17 @@ def ctmPathAudit = { List<Map<String, Object>> propertyResources,
     def uniqueReferences = references.collect { "${it.namespace}:${it.parsedPath}" }.toSet()
     def uniqueMissing = missing.collect { "${it.namespace}:${it.parsedPath}" }.toSet()
     def uniqueRepairCandidates = repairCandidates.collect { "${it.namespace}:${it.parsedPath}" }.toSet()
+    String minecraftTexturePrefix = 'assets/minecraft/textures/'
+    def referencedAtlasDirectories = references.collect { reference ->
+        String resource = reference.resolvedResource as String
+        if (!resource.startsWith(minecraftTexturePrefix)) {
+            return null
+        }
+        String texturePath = resource.substring(minecraftTexturePrefix.length())
+        int lastSlash = texturePath.lastIndexOf('/')
+        lastSlash > 0 ? texturePath.substring(0, lastSlash) : null
+    }.findAll { it != null }.toSet()
+    def missingAtlasDirectories = (referencedAtlasDirectories - atlasDirectorySources).toList().sort()
     def report = [
             schemaVersion : 1,
             inputKind    : inputKind,
@@ -209,13 +222,27 @@ def ctmPathAudit = { List<Map<String, Object>> propertyResources,
                     repairCandidateReferences : repairCandidates.size(),
                     uniqueRepairCandidates    : uniqueRepairCandidates.size(),
                     brokenOptifineCtmReferences: brokenOptifineCtm.size(),
-                    affectedFiles             : brokenOptifineCtm.collect { it.file }.toSet().size()
+                    affectedFiles             : brokenOptifineCtm.collect { it.file }.toSet().size(),
+                    atlasDirectorySources     : atlasDirectorySources.size(),
+                    referencedAtlasDirectories: referencedAtlasDirectories.size(),
+                    missingAtlasDirectories   : missingAtlasDirectories.size()
             ],
             propertiesWithoutTiles: propertiesWithoutTiles,
             missingReferences: missing,
-            repairCandidates: repairCandidates
+            repairCandidates: repairCandidates,
+            missingAtlasDirectories: missingAtlasDirectories
     ]
     report
+}
+
+def readAtlasDirectorySources = { byte[] bytes, String sourceName ->
+    def atlas = new JsonSlurper().parseText(new String(bytes, StandardCharsets.UTF_8))
+    if (!(atlas instanceof Map) || !(atlas.sources instanceof Collection)) {
+        throw new GradleException("Invalid block atlas sources in ${sourceName}")
+    }
+    atlas.sources.findAll { source ->
+        source instanceof Map && source.type == 'directory' && source.source instanceof CharSequence
+    }.collect { source -> source.source.toString() }.toSet()
 }
 
 def writeCtmPathReport = { File output, Map report ->
@@ -232,6 +259,11 @@ def assertCtmPathReport = { Map report, boolean allowMissing, File output ->
     if (missing > 0 && !allowMissing) {
         def first = report.missingReferences.first()
         throw new GradleException("CTM tile path validation found ${missing} missing references. First: ${first.file}:${first.line} token '${first.token}' -> ${first.resolvedResource}. Report: ${output}")
+    }
+    int missingAtlasDirectories = report.summary.missingAtlasDirectories as int
+    if (missingAtlasDirectories > 0) {
+        String first = report.missingAtlasDirectories.first()
+        throw new GradleException("Synapheia atlas coverage found ${missingAtlasDirectories} referenced CTM tile directories absent from assets/minecraft/atlases/blocks.json. First: ${first}. Report: ${output}")
     }
 }
 
@@ -256,12 +288,14 @@ tasks.register('validateCtmTilePaths') {
             ]
         }
 
-        Map report = ctmPathAudit(properties, resourcePaths, 'source')
+        File atlasFile = file('src/main/resources/assets/minecraft/atlases/blocks.json')
+        Set<String> atlasDirectorySources = readAtlasDirectorySources(atlasFile.bytes, atlasFile.path)
+        Map report = ctmPathAudit(properties, resourcePaths, 'source', atlasDirectorySources)
         File output = providers.gradleProperty('erydon.ctmPathAudit.sourceOutput')
                 .map { file(it) }
                 .getOrElse(layout.buildDirectory.file('reports/ctm-path-audit/source.json').get().asFile)
         writeCtmPathReport(output, report)
-        logger.lifecycle("ERYDON source CTM path audit: files=${report.summary.propertyFiles}, refs=${report.summary.tileReferences}, missing=${report.summary.missingReferences}, repairCandidates=${report.summary.repairCandidateReferences}")
+        logger.lifecycle("ERYDON source CTM path audit: files=${report.summary.propertyFiles}, refs=${report.summary.tileReferences}, missing=${report.summary.missingReferences}, missingAtlasDirs=${report.summary.missingAtlasDirectories}, repairCandidates=${report.summary.repairCandidateReferences}")
         assertCtmPathReport(report,
                 providers.gradleProperty('erydon.ctmPathAudit.allowMissing').map { it.toBoolean() }.getOrElse(false),
                 output)
@@ -286,12 +320,19 @@ tasks.register('auditCtmTilePathsJar') {
                 [entry: entry.name, bytes: zip.getInputStream(entry).withCloseable { it.bytes }]
             }
 
-            Map report = ctmPathAudit(properties, resourcePaths, 'jar')
+            def atlasEntry = zip.getEntry('assets/minecraft/atlases/blocks.json')
+            if (atlasEntry == null) {
+                throw new GradleException('Remapped ERYDON JAR is missing assets/minecraft/atlases/blocks.json')
+            }
+            Set<String> atlasDirectorySources = readAtlasDirectorySources(
+                    zip.getInputStream(atlasEntry).withCloseable { it.bytes },
+                    atlasEntry.name)
+            Map report = ctmPathAudit(properties, resourcePaths, 'jar', atlasDirectorySources)
             File output = providers.gradleProperty('erydon.ctmPathAudit.jarOutput')
                     .map { file(it) }
                     .getOrElse(layout.buildDirectory.file('reports/ctm-path-audit/jar.json').get().asFile)
             writeCtmPathReport(output, report)
-            logger.lifecycle("ERYDON JAR CTM path audit: files=${report.summary.propertyFiles}, refs=${report.summary.tileReferences}, missing=${report.summary.missingReferences}, repairCandidates=${report.summary.repairCandidateReferences}")
+            logger.lifecycle("ERYDON JAR CTM path audit: files=${report.summary.propertyFiles}, refs=${report.summary.tileReferences}, missing=${report.summary.missingReferences}, missingAtlasDirs=${report.summary.missingAtlasDirectories}, repairCandidates=${report.summary.repairCandidateReferences}")
             assertCtmPathReport(report,
                     providers.gradleProperty('erydon.ctmPathAudit.allowMissing').map { it.toBoolean() }.getOrElse(false),
                     output)

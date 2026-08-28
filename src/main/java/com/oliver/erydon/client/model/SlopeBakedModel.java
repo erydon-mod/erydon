@@ -485,12 +485,19 @@ public final class SlopeBakedModel implements BakedModel, FabricBakedModel {
     }
 
     private static int normalRotationForState(BlockState state) {
-        int rotation = rotationForFacing(state.get(SlopeBlock.FACING));
-        SlopeBlock.SlopeShape shape = state.get(SlopeBlock.SHAPE);
-        boolean top = state.get(SlopeBlock.HALF) == BlockHalf.TOP;
+        return normalRotationForState(
+                state.get(SlopeBlock.FACING),
+                state.get(SlopeBlock.HALF),
+                state.get(SlopeBlock.SHAPE));
+    }
+
+    static int normalRotationForState(Direction facing, BlockHalf half, SlopeBlock.SlopeShape shape) {
+        int rotation = rotationForFacing(facing);
+        boolean top = half == BlockHalf.TOP;
 
         return switch (shape) {
-            case STRAIGHT, INNER_RIGHT -> rotation;
+            case STRAIGHT -> rotation;
+            case INNER_RIGHT -> rotation + 180;
             case INNER_LEFT -> top ? rotation - 90 : rotation;
             case OUTER_LEFT -> top ? rotation : rotation - 90;
             case OUTER_RIGHT -> top ? rotation + 90 : rotation;

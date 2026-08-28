@@ -33,7 +33,7 @@ public final class ErydonCuPomLookupTexture {
             }
             ErydonCuPomLookupLayout.Encoded encoded =
                     ErydonCuPomLookupPlan.buildFamilies(stitchedFamilies);
-            install(createTexture(encoded.rgba()));
+            install(createTexture(encoded.rgba(), encoded.lookupWidth(), encoded.lookupHeight()));
             Erydon.LOGGER.info(
                     "[{}] CTM-POM lookup ready: families={}, phases={}, atlas={}x{}, runtimeBytes={}.",
                     Erydon.MOD_ID,
@@ -70,10 +70,13 @@ public final class ErydonCuPomLookupTexture {
                     width, sprite.getMaxU() - sprite.getMinU(), "width", spriteId);
             int atlasHeight = inferAtlasDimension(
                     height, sprite.getMaxV() - sprite.getMinV(), "height", spriteId);
-            int centreX = Math.round(sprite.getX() + width * 0.5F);
-            int centreY = Math.round(sprite.getY() + height * 0.5F);
-            phases.add(new ErydonCuPomLookupPlan.SpritePhase(
-                    atlasWidth, atlasHeight, width, height, centreX, centreY));
+            try {
+                phases.add(new ErydonCuPomLookupPlan.SpritePhase(
+                        atlasWidth, atlasHeight, sprite.getX(), sprite.getY(), width, height));
+            } catch (IllegalArgumentException exception) {
+                throw new IllegalArgumentException("Invalid stitched bounds for " + spriteId
+                        + " in " + family.name() + ": " + exception.getMessage(), exception);
+            }
         }
         return phases;
     }
@@ -91,18 +94,17 @@ public final class ErydonCuPomLookupTexture {
     }
 
     private static NativeImageBackedTexture createInvalidTexture() {
-        return createTexture(new byte[4]);
+        return createTexture(new byte[4], 1, 1);
     }
 
-    private static NativeImageBackedTexture createTexture(byte[] rgba) {
-        int dimension = rgba.length == 4 ? 1 : ErydonCuPomLookupLayout.DIMENSION;
-        if (rgba.length != dimension * dimension * 4) {
+    private static NativeImageBackedTexture createTexture(byte[] rgba, int width, int height) {
+        if (width <= 0 || height <= 0 || rgba.length != width * height * 4) {
             throw new IllegalArgumentException("Unexpected lookup byte count: " + rgba.length);
         }
-        NativeImage image = new NativeImage(dimension, dimension, false);
-        for (int y = 0; y < dimension; y++) {
-            for (int x = 0; x < dimension; x++) {
-                int offset = (y * dimension + x) * 4;
+        NativeImage image = new NativeImage(width, height, false);
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int offset = (y * width + x) * 4;
                 int r = rgba[offset] & 0xFF;
                 int g = rgba[offset + 1] & 0xFF;
                 int b = rgba[offset + 2] & 0xFF;

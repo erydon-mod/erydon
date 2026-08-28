@@ -3,6 +3,7 @@ package com.oliver.erydon.mixin.client.compat.iris;
 import com.oliver.erydon.Erydon;
 import com.oliver.erydon.client.pom.ComplementaryUnboundDev5SourceTransformer;
 import com.oliver.erydon.client.pom.ErydonCuPomAdapterConfig;
+import com.oliver.erydon.client.pom.ErydonCuPomRuntimeState;
 import com.oliver.erydon.client.pom.ErydonIrisShaderPropertiesExtension;
 import net.irisshaders.iris.gl.texture.TextureDefinition;
 import net.irisshaders.iris.helpers.StringPair;
@@ -40,6 +41,7 @@ public abstract class ShaderPropertiesMixin implements ErydonIrisShaderPropertie
                         contents,
                         ErydonCuPomAdapterConfig.configuredMode());
         erydon$cuPomEligible = result.eligible();
+        ErydonCuPomRuntimeState.beginShaderLoad(result.eligible());
         if (result.changed()) {
             Erydon.LOGGER.info("[{}] Enabled the exact Complementary Unbound dev5 CTM-POM adapter in memory.",
                     Erydon.MOD_ID);

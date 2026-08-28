@@ -11,8 +11,8 @@ import java.util.List;
  * sprite cannot cover every face correctly.
  */
 final class SpiralStairCtmGeometry {
-    private static final float CELL_SNAP_EPSILON = 0.001F;
-    private static final float RANGE_EPSILON = 0.000001F;
+    static final float CELL_SNAP_EPSILON = 0.001F;
+    static final float RANGE_EPSILON = 0.000001F;
     private static final double AREA_EPSILON = 0.000000001D;
 
     private SpiralStairCtmGeometry() {
@@ -30,8 +30,8 @@ final class SpiralStairCtmGeometry {
         float maxT = Float.NEGATIVE_INFINITY;
 
         for (Vertex vertex : vertices) {
-            float s = snapToCell(textureS(face, vertex));
-            float t = snapToCell(textureT(face, vertex));
+            float s = snapToCell(textureS(face, vertex.x, vertex.y, vertex.z));
+            float t = snapToCell(textureT(face, vertex.x, vertex.y, vertex.z));
             source.add(new ProjectedVertex(vertex, s, t));
             minS = Math.min(minS, s);
             maxS = Math.max(maxS, s);
@@ -75,37 +75,54 @@ final class SpiralStairCtmGeometry {
     }
 
     static float u(Direction face, CellVertex vertex) {
-        return switch (face) {
-            case NORTH, EAST -> 1.0F - vertex.localS;
-            default -> vertex.localS;
-        };
+        return u(face, vertex.localS);
     }
 
     static float v(Direction face, CellVertex vertex) {
+        return v(face, vertex.localT);
+    }
+
+    static float u(Direction face, float localS) {
         return switch (face) {
-            case UP -> vertex.localT;
-            default -> 1.0F - vertex.localT;
+            case NORTH, EAST -> 1.0F - localS;
+            default -> localS;
         };
     }
 
+    static float v(Direction face, float localT) {
+        return face == Direction.UP ? localT : 1.0F - localT;
+    }
+
     static int offsetX(Direction face, Fragment fragment) {
+        return offsetX(face, fragment.cellS, fragment.cellT);
+    }
+
+    static int offsetX(Direction face, int cellS, int cellT) {
         return switch (face) {
-            case UP, DOWN, NORTH, SOUTH -> fragment.cellS;
+            case UP, DOWN, NORTH, SOUTH -> cellS;
             default -> 0;
         };
     }
 
     static int offsetY(Direction face, Fragment fragment) {
+        return offsetY(face, fragment.cellS, fragment.cellT);
+    }
+
+    static int offsetY(Direction face, int cellS, int cellT) {
         return switch (face) {
-            case NORTH, SOUTH, EAST, WEST -> fragment.cellT;
+            case NORTH, SOUTH, EAST, WEST -> cellT;
             default -> 0;
         };
     }
 
     static int offsetZ(Direction face, Fragment fragment) {
+        return offsetZ(face, fragment.cellS, fragment.cellT);
+    }
+
+    static int offsetZ(Direction face, int cellS, int cellT) {
         return switch (face) {
-            case UP, DOWN -> fragment.cellT;
-            case EAST, WEST -> fragment.cellS;
+            case UP, DOWN -> cellT;
+            case EAST, WEST -> cellS;
             default -> 0;
         };
     }
@@ -194,30 +211,30 @@ final class SpiralStairCtmGeometry {
         return Math.abs(twiceArea) * 0.5D;
     }
 
-    private static float textureS(Direction face, Vertex vertex) {
+    static float textureS(Direction face, float x, float y, float z) {
         return switch (face) {
-            case EAST, WEST -> vertex.z;
-            default -> vertex.x;
+            case EAST, WEST -> z;
+            default -> x;
         };
     }
 
-    private static float textureT(Direction face, Vertex vertex) {
+    static float textureT(Direction face, float x, float y, float z) {
         return switch (face) {
-            case UP, DOWN -> vertex.z;
-            default -> vertex.y;
+            case UP, DOWN -> z;
+            default -> y;
         };
     }
 
-    private static float snapToCell(float value) {
+    static float snapToCell(float value) {
         float nearest = Math.round(value);
         return Math.abs(value - nearest) <= CELL_SNAP_EPSILON ? nearest : value;
     }
 
-    private static int floorCell(float value) {
+    static int floorCell(float value) {
         return (int) Math.floor(value);
     }
 
-    private static float clamp01(float value) {
+    static float clamp01(float value) {
         return Math.max(0.0F, Math.min(1.0F, value));
     }
 

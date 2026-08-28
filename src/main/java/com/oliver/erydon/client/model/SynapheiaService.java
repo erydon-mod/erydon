@@ -39,20 +39,25 @@ final class SynapheiaService {
         }
         Map<Identifier, List<SynapheiaManifest.Rule>> byBlock = new LinkedHashMap<>();
         mutable.forEach((block, rules) -> byBlock.put(block, List.copyOf(rules)));
+        Map<Identifier, SynapheiaBlockPlan> plansByBlock = new LinkedHashMap<>();
+        byBlock.forEach((block, rules) ->
+                plansByBlock.put(block, SynapheiaBlockPlan.compile(block, rules)));
 
-        Snapshot published = new Snapshot(generation, Map.copyOf(byBlock),
+        Snapshot published = new Snapshot(generation, Map.copyOf(byBlock), Map.copyOf(plansByBlock),
                 prepared.repeatRuleCount(), prepared.overlayRuleCount(), prepared.sourcePacks());
         SPRITES.clear();
         SynapheiaRepeatBakedModel.clearCaches();
         current = published;
 
-        SynapheiaMetrics.event("resource_reload_phase", SynapheiaMode.SYNAPHEIA, generation, fields(
-                "phase", "ctm_rule_publish", "state", "end", "status", "PASS",
-                "duration_ns", prepared.durationNanos(), "rule_count", prepared.rules().size(),
-                "repeat_rule_count", prepared.repeatRuleCount(),
-                "overlay_rule_count", prepared.overlayRuleCount(),
-                "block_count", byBlock.size(), "source_packs", prepared.sourcePacks()
-        ));
+        if (SynapheiaMetrics.enabled()) {
+            SynapheiaMetrics.event("resource_reload_phase", SynapheiaMode.SYNAPHEIA, generation, fields(
+                    "phase", "ctm_rule_publish", "state", "end", "status", "PASS",
+                    "duration_ns", prepared.durationNanos(), "rule_count", prepared.rules().size(),
+                    "repeat_rule_count", prepared.repeatRuleCount(),
+                    "overlay_rule_count", prepared.overlayRuleCount(),
+                    "block_count", byBlock.size(), "source_packs", prepared.sourcePacks()
+            ));
+        }
         Erydon.LOGGER.info("[{}] Synapheia loaded {} repeat and {} connected-overlay rules for {} blocks (generation {}).",
                 Erydon.MOD_ID, prepared.repeatRuleCount(), prepared.overlayRuleCount(),
                 byBlock.size(), generation);
@@ -67,14 +72,14 @@ final class SynapheiaService {
         if (snapshot.generation() != current.generation() || !snapshot.active()) {
             return null;
         }
-        SpriteKey key = new SpriteKey(snapshot.generation(), rule.id());
+        SpriteKey key = new SpriteKey(snapshot.generation(), rule.tiles());
         return SPRITES.computeIfAbsent(key, ignored -> {
             var atlas = MinecraftClient.getInstance().getSpriteAtlas(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE);
-            List<Sprite> result = rule.tiles().stream().map(atlas).toList();
+            List<Sprite> result = key.tiles().stream().map(atlas).toList();
             for (int index = 0; index < result.size(); index++) {
                 Identifier actual = result.get(index).getContents().getId();
-                if (!rule.tiles().get(index).equals(actual)) {
-                    throw new IllegalStateException("Synapheia sprite " + rule.tiles().get(index)
+                if (!key.tiles().get(index).equals(actual)) {
+                    throw new IllegalStateException("Synapheia sprite " + key.tiles().get(index)
                             + " is missing from the block atlas for rule " + rule.resourceId() + ".");
                 }
             }
@@ -92,19 +97,24 @@ final class SynapheiaService {
 
     record Snapshot(long generation,
                     Map<Identifier, List<SynapheiaManifest.Rule>> rulesByBlock,
+                    Map<Identifier, SynapheiaBlockPlan> plansByBlock,
                     int repeatRuleCount,
                     int overlayRuleCount,
                     String sourcePacks) {
         static Snapshot empty() {
-            return new Snapshot(0L, Map.of(), 0, 0, "<initial>");
+            return new Snapshot(0L, Map.of(), Map.of(), 0, 0, "<initial>");
         }
 
         boolean active() {
-            return !rulesByBlock.isEmpty();
+            return !plansByBlock.isEmpty();
         }
 
         List<SynapheiaManifest.Rule> rulesFor(Identifier blockId) {
             return rulesByBlock.getOrDefault(blockId, List.of());
+        }
+
+        SynapheiaBlockPlan planFor(Identifier blockId) {
+            return plansByBlock.get(blockId);
         }
 
         SynapheiaManifest.Rule repeatRuleFor(Identifier blockId,
@@ -158,6 +168,9 @@ final class SynapheiaService {
         }
     }
 
-    private record SpriteKey(long generation, String ruleId) {
+    record SpriteKey(long generation, List<Identifier> tiles) {
+        SpriteKey {
+            tiles = SynapheiaTileSequencePool.stableCacheKey(tiles);
+        }
     }
 }

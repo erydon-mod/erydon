@@ -8,13 +8,12 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import com.oliver.erydon.Erydon;
-import com.oliver.erydon.block.ClusterRebuildableBlock;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.oliver.erydon.state.ClusterManualLockState;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.BlockPosArgumentType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
@@ -30,13 +29,11 @@ import net.minecraft.world.World;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
@@ -45,25 +42,30 @@ public final class ErydonSwapCommand {
 
     private static final int MAX_RADIUS = 32;
     private static final long MAX_BOX_VOLUME = 524_288L;
+    // Builders and Axiom can intentionally place unsupported architectural states.
+    // A material swap must preserve those placements instead of re-running survival checks.
+    private static final int MATERIAL_SWAP_FLAGS = Block.NOTIFY_LISTENERS | Block.FORCE_STATE;
+    private static final String SOURCE_ARGUMENT = "source";
+    private static final String TARGET_ARGUMENT = "target";
     private static final Map<RegistryKey<World>, LastSwapUndo> LAST_UNDO_BY_WORLD = new HashMap<>();
 
     private static final SimpleCommandExceptionType SAME_FAMILY =
             new SimpleCommandExceptionType(Text.literal("Source and target families must be different."));
     private static final SimpleCommandExceptionType MIXED_FAMILY_GROUP =
-            new SimpleCommandExceptionType(Text.literal("Family groups can only be swapped to another family group, for example aganite_family -> borealis_family."));
+            new SimpleCommandExceptionType(Text.literal("Material families can only be swapped to another material family, for example \"Aganite Family\" -> \"Borealis Family\"."));
     private static final SimpleCommandExceptionType ALL_ERYDON_BLOCKS_TARGET =
-            new SimpleCommandExceptionType(Text.literal("all_erydon_blocks can only be used as the source family."));
+            new SimpleCommandExceptionType(Text.literal("All ERYDON Blocks can only be used as the source."));
     private static final SimpleCommandExceptionType NO_SWAP_TO_UNDO =
             new SimpleCommandExceptionType(Text.literal("There is no swap to undo in this world."));
     private static final DynamicCommandExceptionType NO_MATCHING_BLOCKS =
             new DynamicCommandExceptionType(family ->
-                    Text.literal("No ERYDON blocks in family '" + family + "' were found in the selected area."));
+                    Text.literal("No ERYDON-family blocks in family '" + family + "' were found in the selected area."));
     private static final DynamicCommandExceptionType INVALID_FAMILY =
             new DynamicCommandExceptionType(family ->
-                    Text.literal("Invalid ERYDON family '" + family + "'. Use a canonical family such as aganite, aganite_family, aganite_aged, or borealis_rusticated."));
+                    Text.literal("Invalid family '" + family + "'. Use a name such as Aganite, \"Aganite Family\", \"Aganite Aged\", or \"Borealis Rusticated\"."));
     private static final DynamicCommandExceptionType INVALID_NAMESPACE =
             new DynamicCommandExceptionType(family ->
-                    Text.literal("Only ERYDON families are supported here: '" + family + "'."));
+                    Text.literal("Only ERYDON, Daedalon, and Themelios families are supported here: '" + family + "'."));
     private static final Dynamic2CommandExceptionType BOX_TOO_LARGE =
             new Dynamic2CommandExceptionType((actual, limit) ->
                     Text.literal("Selected volume is " + actual + " blocks, which exceeds the limit of " + limit + "."));
@@ -76,36 +78,36 @@ public final class ErydonSwapCommand {
                 .then(literal("undolast")
                         .executes(ctx -> executeUndoLast(ctx.getSource())))
                 .then(literal("chunk")
-                        .then(argument("from_family", StringArgumentType.word())
-                                .suggests((context, builder) -> CommandSource.suggestMatching(ErydonSwapFamilyDatabase.sourceKeys(), builder))
-                                .then(argument("to_family", StringArgumentType.word())
-                                        .suggests((context, builder) -> CommandSource.suggestMatching(targetSuggestions(context), builder))
+                        .then(argument(SOURCE_ARGUMENT, StringArgumentType.string())
+                                .suggests((context, builder) -> suggestFamilies(ErydonSwapFamilyDatabase.sourceKeys(), builder))
+                                .then(argument(TARGET_ARGUMENT, StringArgumentType.string())
+                                        .suggests(ErydonSwapCommand::suggestTargetFamilies)
                                         .executes(ctx -> executeChunk(
                                                 ctx.getSource(),
-                                                StringArgumentType.getString(ctx, "from_family"),
-                                                StringArgumentType.getString(ctx, "to_family"))))))
+                                                StringArgumentType.getString(ctx, SOURCE_ARGUMENT),
+                                                StringArgumentType.getString(ctx, TARGET_ARGUMENT))))))
                 .then(literal("radius")
-                        .then(argument("from_family", StringArgumentType.word())
-                                .suggests((context, builder) -> CommandSource.suggestMatching(ErydonSwapFamilyDatabase.sourceKeys(), builder))
-                                .then(argument("to_family", StringArgumentType.word())
-                                        .suggests((context, builder) -> CommandSource.suggestMatching(targetSuggestions(context), builder))
+                        .then(argument(SOURCE_ARGUMENT, StringArgumentType.string())
+                                .suggests((context, builder) -> suggestFamilies(ErydonSwapFamilyDatabase.sourceKeys(), builder))
+                                .then(argument(TARGET_ARGUMENT, StringArgumentType.string())
+                                        .suggests(ErydonSwapCommand::suggestTargetFamilies)
                                         .then(argument("radius", IntegerArgumentType.integer(1, MAX_RADIUS))
                                                 .executes(ctx -> executeRadius(
                                                         ctx.getSource(),
-                                                        StringArgumentType.getString(ctx, "from_family"),
-                                                        StringArgumentType.getString(ctx, "to_family"),
+                                                        StringArgumentType.getString(ctx, SOURCE_ARGUMENT),
+                                                        StringArgumentType.getString(ctx, TARGET_ARGUMENT),
                                                         IntegerArgumentType.getInteger(ctx, "radius")))))))
                 .then(literal("box")
-                        .then(argument("from_family", StringArgumentType.word())
-                                .suggests((context, builder) -> CommandSource.suggestMatching(ErydonSwapFamilyDatabase.sourceKeys(), builder))
-                                .then(argument("to_family", StringArgumentType.word())
-                                        .suggests((context, builder) -> CommandSource.suggestMatching(targetSuggestions(context), builder))
+                        .then(argument(SOURCE_ARGUMENT, StringArgumentType.string())
+                                .suggests((context, builder) -> suggestFamilies(ErydonSwapFamilyDatabase.sourceKeys(), builder))
+                                .then(argument(TARGET_ARGUMENT, StringArgumentType.string())
+                                        .suggests(ErydonSwapCommand::suggestTargetFamilies)
                                         .then(argument("from", BlockPosArgumentType.blockPos())
                                                 .then(argument("to", BlockPosArgumentType.blockPos())
                                                         .executes(ctx -> executeBox(
                                                                 ctx.getSource(),
-                                                                StringArgumentType.getString(ctx, "from_family"),
-                                                                StringArgumentType.getString(ctx, "to_family"),
+                                                                StringArgumentType.getString(ctx, SOURCE_ARGUMENT),
+                                                                StringArgumentType.getString(ctx, TARGET_ARGUMENT),
                                                                 BlockPosArgumentType.getBlockPos(ctx, "from"),
                                                                 BlockPosArgumentType.getBlockPos(ctx, "to"))))))));
     }
@@ -192,19 +194,28 @@ public final class ErydonSwapCommand {
                 .orElseThrow(() -> INVALID_FAMILY.create(rawFamily));
     }
 
-    private static String normalizeFamilyKey(String rawFamily) throws CommandSyntaxException {
+    static String normalizeFamilyKey(String rawFamily) throws CommandSyntaxException {
         String normalized = rawFamily.toLowerCase(Locale.ROOT).trim();
         if (normalized.isEmpty()) {
             return normalized;
         }
 
+        if (normalized.length() >= 2 && normalized.startsWith("\"") && normalized.endsWith("\"")) {
+            normalized = normalized.substring(1, normalized.length() - 1).trim();
+        }
+
         int namespaceSeparator = normalized.indexOf(':');
         if (namespaceSeparator >= 0) {
             String namespace = normalized.substring(0, namespaceSeparator);
-            if (!Erydon.MOD_ID.equals(namespace)) {
+            if (!ErydonSwapFamilyDatabase.isSupportedNamespace(namespace)) {
                 throw INVALID_NAMESPACE.create(rawFamily);
             }
             normalized = normalized.substring(namespaceSeparator + 1);
+        }
+
+        normalized = normalized.replace('-', '_').replaceAll("\\s+", "_");
+        while (normalized.contains("__")) {
+            normalized = normalized.replace("__", "_");
         }
 
         while (normalized.startsWith("_")) {
@@ -214,15 +225,41 @@ public final class ErydonSwapCommand {
             normalized = normalized.substring(0, normalized.length() - 1);
         }
 
-        if (normalized.isEmpty() || normalized.contains(" ")) {
+        if (normalized.isEmpty() || !normalized.matches("[a-z0-9_]+")) {
             throw INVALID_FAMILY.create(rawFamily);
         }
 
         return normalized;
     }
 
-    private static Iterable<String> targetSuggestions(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-        return ErydonSwapFamilyDatabase.targetKeysForSource(normalizeFamilyKey(StringArgumentType.getString(context, "from_family")));
+    static int materialSwapFlags() {
+        return MATERIAL_SWAP_FLAGS;
+    }
+
+    private static CompletableFuture<Suggestions> suggestTargetFamilies(
+            CommandContext<ServerCommandSource> context, SuggestionsBuilder builder) throws CommandSyntaxException {
+        String sourceKey = normalizeFamilyKey(StringArgumentType.getString(context, SOURCE_ARGUMENT));
+        return suggestFamilies(ErydonSwapFamilyDatabase.targetKeysForSource(sourceKey), builder);
+    }
+
+    private static CompletableFuture<Suggestions> suggestFamilies(
+            Iterable<String> canonicalKeys, SuggestionsBuilder builder) {
+        String remaining = normalizeSuggestionFragment(builder.getRemaining());
+        for (String canonicalKey : canonicalKeys) {
+            if (remaining.isEmpty() || canonicalKey.startsWith(remaining)) {
+                builder.suggest(ErydonSwapFamilyDatabase.commandSuggestion(canonicalKey));
+            }
+        }
+        return builder.buildFuture();
+    }
+
+    private static String normalizeSuggestionFragment(String raw) {
+        String normalized = raw.toLowerCase(Locale.ROOT).trim().replace("\"", "");
+        int namespaceSeparator = normalized.indexOf(':');
+        if (namespaceSeparator >= 0) {
+            normalized = normalized.substring(namespaceSeparator + 1);
+        }
+        return normalized.replace('-', '_').replaceAll("\\s+", "_");
     }
 
     private static SwapOutcome swapInBox(ServerWorld world, Box requestedBox,
@@ -231,14 +268,12 @@ public final class ErydonSwapCommand {
             throws CommandSyntaxException {
         Box box = requestedBox.clampY(world);
         if (box.isEmpty()) {
-            throw NO_MATCHING_BLOCKS.create(fromFamily.canonicalKey());
+            throw NO_MATCHING_BLOCKS.create(ErydonSwapFamilyDatabase.displayName(fromFamily.canonicalKey()));
         }
         ensureVolumeWithinLimit(box.volume());
 
         List<Replacement> replacements = new ArrayList<>();
-        Set<BlockPos> clusterSeeds = new LinkedHashSet<>();
-        Set<BlockPos> preservedManualLocks = new LinkedHashSet<>();
-        Map<String, Optional<Block>> counterpartCache = new HashMap<>();
+        Map<Identifier, Optional<Block>> counterpartCache = new HashMap<>();
         BlockPos.Mutable mutable = new BlockPos.Mutable();
 
         int matchingBlocks = 0;
@@ -256,8 +291,8 @@ public final class ErydonSwapCommand {
                     }
 
                     matchingBlocks++;
-                    String targetPath = match.get().targetPath(toFamily);
-                    Block targetBlock = resolveTargetBlock(targetPath, counterpartCache);
+                    Identifier targetId = match.get().targetId(toFamily);
+                    Block targetBlock = resolveTargetBlock(targetId, counterpartCache);
                     if (targetBlock == null) {
                         missingCounterparts++;
                         continue;
@@ -271,27 +306,20 @@ public final class ErydonSwapCommand {
                             sourceState,
                             createBlockEntityNbt(world, pos)
                     ));
-                    if (hasManualLock(world, pos)) {
-                        preservedManualLocks.add(pos);
-                    }
-                    if (sourceState.getBlock() instanceof ClusterRebuildableBlock || targetBlock instanceof ClusterRebuildableBlock) {
-                        clusterSeeds.add(pos);
-                    }
                 }
             }
         }
 
         if (matchingBlocks == 0) {
-            throw NO_MATCHING_BLOCKS.create(fromFamily.canonicalKey());
+            throw NO_MATCHING_BLOCKS.create(ErydonSwapFamilyDatabase.displayName(fromFamily.canonicalKey()));
         }
 
         int replacedBlocks = 0;
         List<UndoEntry> undoEntries = new ArrayList<>();
-        StabilizationOutcome stabilization;
         try (ClusterManualLockState.SwapPreservation ignored =
-                     ClusterManualLockState.beginSwapPreservation(preservedManualLocks)) {
+                     ClusterManualLockState.beginSwapPreservation(positionsOf(replacements))) {
             for (Replacement replacement : replacements) {
-                if (world.setBlockState(replacement.pos(), replacement.state(), Block.NOTIFY_ALL)) {
+                if (world.setBlockState(replacement.pos(), replacement.state(), MATERIAL_SWAP_FLAGS)) {
                     undoEntries.add(new UndoEntry(
                             replacement.pos(),
                             replacement.previousState(),
@@ -300,31 +328,27 @@ public final class ErydonSwapCommand {
                     replacedBlocks++;
                 }
             }
-
-            stabilization = stabilize(world, replacements, clusterSeeds);
         }
 
         if (!undoEntries.isEmpty()) {
             LAST_UNDO_BY_WORLD.put(world.getRegistryKey(), new LastSwapUndo(List.copyOf(undoEntries)));
         }
 
-        return new SwapOutcome(matchingBlocks, replacedBlocks, missingCounterparts,
-                stabilization.recalculatedClusters(), stabilization.recalculatedBlocks(),
-                stabilization.skippedClusters(), stabilization.skippedBlocks());
+        return new SwapOutcome(replacedBlocks, missingCounterparts);
     }
 
     private static void sendSummary(ServerCommandSource source, String scope, FamilyPair families, SwapOutcome outcome) {
         StringBuilder message = new StringBuilder();
         message.append("Swapped ")
                 .append(outcome.replacedBlocks())
-                .append(" ERYDON block")
+                .append(" ERYDON-family block")
                 .append(outcome.replacedBlocks() == 1 ? "" : "s")
                 .append(" in ")
                 .append(scope)
                 .append(" (")
-                .append(families.fromFamily().canonicalKey())
+                .append(ErydonSwapFamilyDatabase.displayName(families.fromFamily().canonicalKey()))
                 .append(" -> ")
-                .append(families.toFamily().canonicalKey());
+                .append(ErydonSwapFamilyDatabase.displayName(families.toFamily().canonicalKey()));
 
         if (outcome.missingCounterparts() > 0) {
             message.append(", ")
@@ -332,28 +356,6 @@ public final class ErydonSwapCommand {
                     .append(" matching block")
                     .append(outcome.missingCounterparts() == 1 ? "" : "s")
                     .append(" had no counterpart");
-        }
-
-        if (outcome.recalculatedClusters() > 0) {
-            message.append(", rebuilt ")
-                    .append(outcome.recalculatedClusters())
-                    .append(" cluster")
-                    .append(outcome.recalculatedClusters() == 1 ? "" : "s")
-                    .append(" / ")
-                    .append(outcome.recalculatedBlocks())
-                    .append(" block")
-                    .append(outcome.recalculatedBlocks() == 1 ? "" : "s");
-        }
-
-        if (outcome.skippedClusters() > 0) {
-            message.append(", kept ")
-                    .append(outcome.skippedClusters())
-                    .append(" manual-locked cluster")
-                    .append(outcome.skippedClusters() == 1 ? "" : "s")
-                    .append(" / ")
-                    .append(outcome.skippedBlocks())
-                    .append(" block")
-                    .append(outcome.skippedBlocks() == 1 ? "" : "s");
         }
 
         message.append(").");
@@ -371,69 +373,25 @@ public final class ErydonSwapCommand {
             message.append(" of ").append(outcome.totalBlocks());
         }
 
-        if (outcome.recalculatedClusters() > 0) {
-            message.append(", rebuilt ")
-                    .append(outcome.recalculatedClusters())
-                    .append(" cluster")
-                    .append(outcome.recalculatedClusters() == 1 ? "" : "s")
-                    .append(" / ")
-                    .append(outcome.recalculatedBlocks())
-                    .append(" block")
-                    .append(outcome.recalculatedBlocks() == 1 ? "" : "s");
-        }
-
-        if (outcome.skippedClusters() > 0) {
-            message.append(", kept ")
-                    .append(outcome.skippedClusters())
-                    .append(" manual-locked cluster")
-                    .append(outcome.skippedClusters() == 1 ? "" : "s")
-                    .append(" / ")
-                    .append(outcome.skippedBlocks())
-                    .append(" block")
-                    .append(outcome.skippedBlocks() == 1 ? "" : "s");
-        }
-
         message.append(".");
         source.sendFeedback(() -> Text.literal(message.toString()), false);
     }
 
     private static UndoOutcome undoSwap(ServerWorld world, LastSwapUndo undo) {
-        Set<BlockPos> clusterSeeds = new LinkedHashSet<>();
-        Set<BlockPos> preservedManualLocks = new LinkedHashSet<>();
-
-        for (UndoEntry entry : undo.entries()) {
-            BlockState currentState = world.getBlockState(entry.pos());
-            if (currentState.getBlock() instanceof ClusterRebuildableBlock
-                    || entry.state().getBlock() instanceof ClusterRebuildableBlock) {
-                clusterSeeds.add(entry.pos());
-            }
-            if (hasManualLock(world, entry.pos())) {
-                preservedManualLocks.add(entry.pos());
-            }
-        }
-
         int restoredBlocks = 0;
-        StabilizationOutcome stabilization;
         try (ClusterManualLockState.SwapPreservation ignored =
-                     ClusterManualLockState.beginSwapPreservation(preservedManualLocks)) {
+                     ClusterManualLockState.beginSwapPreservation(undo.entries().stream()
+                             .map(UndoEntry::pos)
+                             .toList())) {
             for (UndoEntry entry : undo.entries()) {
-                if (world.setBlockState(entry.pos(), entry.state(), Block.NOTIFY_ALL)) {
+                if (world.setBlockState(entry.pos(), entry.state(), MATERIAL_SWAP_FLAGS)) {
                     restoredBlocks++;
                 }
                 restoreBlockEntityNbt(world, entry.pos(), entry.blockEntityNbt());
             }
-
-            stabilization = stabilizeUndo(world, undo.entries(), clusterSeeds);
         }
 
-        return new UndoOutcome(
-                restoredBlocks,
-                undo.entries().size(),
-                stabilization.recalculatedClusters(),
-                stabilization.recalculatedBlocks(),
-                stabilization.skippedClusters(),
-                stabilization.skippedBlocks()
-        );
+        return new UndoOutcome(restoredBlocks, undo.entries().size());
     }
 
     private static void ensureVolumeWithinLimit(long volume) throws CommandSyntaxException {
@@ -442,17 +400,17 @@ public final class ErydonSwapCommand {
         }
     }
 
-    private static Block resolveTargetBlock(String targetPath, Map<String, Optional<Block>> counterpartCache) {
-        Optional<Block> cached = counterpartCache.get(targetPath);
+    private static Block resolveTargetBlock(
+            Identifier targetId, Map<Identifier, Optional<Block>> counterpartCache) {
+        Optional<Block> cached = counterpartCache.get(targetId);
         if (cached != null) {
             return cached.orElse(null);
         }
 
-        Identifier targetId = new Identifier(Erydon.MOD_ID, targetPath);
         Optional<Block> resolved = Registries.BLOCK.containsId(targetId)
                 ? Optional.of(Registries.BLOCK.get(targetId))
                 : Optional.empty();
-        counterpartCache.put(targetPath, resolved);
+        counterpartCache.put(targetId, resolved);
         return resolved.orElse(null);
     }
 
@@ -509,68 +467,12 @@ public final class ErydonSwapCommand {
         world.updateListeners(pos, state, state, Block.NOTIFY_LISTENERS);
     }
 
-    private static StabilizationOutcome stabilize(ServerWorld world, List<Replacement> replacements, Set<BlockPos> clusterSeeds) {
+    private static List<BlockPos> positionsOf(List<Replacement> replacements) {
         List<BlockPos> changedPositions = new ArrayList<>(replacements.size());
         for (Replacement replacement : replacements) {
             changedPositions.add(replacement.pos());
         }
-        return stabilizePositions(world, changedPositions, clusterSeeds);
-    }
-
-    private static StabilizationOutcome stabilizeUndo(ServerWorld world, List<UndoEntry> undoEntries, Set<BlockPos> clusterSeeds) {
-        List<BlockPos> changedPositions = new ArrayList<>(undoEntries.size());
-        for (UndoEntry entry : undoEntries) {
-            changedPositions.add(entry.pos());
-        }
-        return stabilizePositions(world, changedPositions, clusterSeeds);
-    }
-
-    private static StabilizationOutcome stabilizePositions(ServerWorld world, Iterable<BlockPos> changedPositions,
-                                                           Set<BlockPos> clusterSeeds) {
-        for (BlockPos pos : changedPositions) {
-            BlockState currentState = world.getBlockState(pos);
-            world.updateNeighborsAlways(pos, currentState.getBlock());
-        }
-
-        int recalculatedClusters = 0;
-        int recalculatedBlocks = 0;
-        int skippedClusters = 0;
-        int skippedBlocks = 0;
-        Set<BlockPos> processed = new HashSet<>();
-
-        for (BlockPos seed : clusterSeeds) {
-            if (processed.contains(seed)) {
-                continue;
-            }
-
-            BlockState currentState = world.getBlockState(seed);
-            if (!(currentState.getBlock() instanceof ClusterRebuildableBlock rebuildable)) {
-                continue;
-            }
-
-            ClusterRebuildableBlock.ClusterRecalcResult result = rebuildable.recalcCluster(world, seed);
-            if (result.positions().isEmpty()) {
-                continue;
-            }
-
-            processed.addAll(result.positions());
-            if (result.recalculated()) {
-                recalculatedClusters++;
-                recalculatedBlocks += result.positions().size();
-            } else {
-                skippedClusters++;
-                skippedBlocks += result.positions().size();
-            }
-        }
-
-        return new StabilizationOutcome(recalculatedClusters, recalculatedBlocks, skippedClusters, skippedBlocks);
-    }
-
-    private static boolean hasManualLock(ServerWorld world, BlockPos pos) {
-        return ClusterManualLockState.isLocked(world, ClusterManualLockState.COLUMN_SCOPE, pos)
-                || ClusterManualLockState.isLocked(world, ClusterManualLockState.SURROUND_SCOPE, pos)
-                || ClusterManualLockState.isLocked(world, ClusterManualLockState.WINDOW_ARCH_SCOPE, pos)
-                || ClusterManualLockState.isLocked(world, ClusterManualLockState.WINDOW_FRENCH_GEORGIAN_SCOPE, pos);
+        return changedPositions;
     }
 
     private static String formatPos(BlockPos pos) {
@@ -591,18 +493,10 @@ public final class ErydonSwapCommand {
     private record LastSwapUndo(List<UndoEntry> entries) {
     }
 
-    private record StabilizationOutcome(int recalculatedClusters, int recalculatedBlocks,
-                                        int skippedClusters, int skippedBlocks) {
+    private record SwapOutcome(int replacedBlocks, int missingCounterparts) {
     }
 
-    private record SwapOutcome(int matchingBlocks, int replacedBlocks, int missingCounterparts,
-                               int recalculatedClusters, int recalculatedBlocks,
-                               int skippedClusters, int skippedBlocks) {
-    }
-
-    private record UndoOutcome(int restoredBlocks, int totalBlocks,
-                               int recalculatedClusters, int recalculatedBlocks,
-                               int skippedClusters, int skippedBlocks) {
+    private record UndoOutcome(int restoredBlocks, int totalBlocks) {
     }
 
     private record Box(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {

@@ -2,6 +2,7 @@ package com.oliver.erydon.block;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.block.SlabBlock;
 import net.minecraft.block.StairsBlock;
@@ -10,10 +11,12 @@ import net.minecraft.block.enums.SlabType;
 import net.minecraft.block.enums.StairShape;
 import net.minecraft.block.enums.WallShape;
 import net.minecraft.state.property.Properties;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
+import net.minecraft.world.chunk.WorldChunk;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -33,6 +36,16 @@ public final class GeorgianWallSlopeResolver {
 
     public static Mode resolve(BlockView world, BlockState state, BlockPos pos) {
         if (!(state.getBlock() instanceof DiagonalWallBlock)) {
+            return Mode.NONE;
+        }
+        // Starlight asks for outline shapes from chunk-lighting workers. The
+        // resolver intentionally calls neighbouring blocks' shape methods, and
+        // those methods (including third-party mixins) may synchronously query
+        // the world. Keep accurate interaction shapes on the client and server
+        // thread, but make background lighting use DiagonalWallBlock's cached
+        // flat shape without entering any world-derived resolver path.
+        if (world instanceof ServerWorld serverWorld
+                && !serverWorld.getServer().isOnThread()) {
             return Mode.NONE;
         }
 
@@ -119,7 +132,7 @@ public final class GeorgianWallSlopeResolver {
     }
 
     public static Part partForSupport(BlockView world, BlockPos supportPos) {
-        BlockState support = world.getBlockState(supportPos);
+        BlockState support = loadedState(world, supportPos);
         // A Georgian wall is never a stair support. Avoid recursively asking a
         // stacked wall for its own world-derived interaction shape.
         if (support.getBlock() instanceof DiagonalWallBlock) {
@@ -143,6 +156,14 @@ public final class GeorgianWallSlopeResolver {
                     support.get(LayerBlock.LAYERS),
                     support.get(LayerBlock.TOP)
             );
+        }
+
+        // loadedState uses void air when the chunk is not immediately
+        // available. Do not pass that fallback into third-party shape hooks,
+        // which may query the ServerWorld again and defeat the non-blocking
+        // lookup above.
+        if (support.isAir()) {
+            return Part.NONE;
         }
 
         VoxelShape outline = support.getOutlineShape(world, supportPos, ShapeContext.absent());
@@ -177,7 +198,7 @@ public final class GeorgianWallSlopeResolver {
                                                     BlockPos pos,
                                                     Part part,
                                                     Direction uphill) {
-        if (!supportsShallowDirection(world.getBlockState(pos.down()), uphill)) {
+        if (!supportsShallowDirection(loadedState(world, pos.down()), uphill)) {
             return false;
         }
         if (part == Part.LOWER) {
@@ -194,7 +215,7 @@ public final class GeorgianWallSlopeResolver {
         if (isSteepOnrampAnchor(world, pos, uphill)) {
             return true;
         }
-        if (!isAlignedBottomStair(world.getBlockState(pos.down()), uphill)) {
+        if (!isAlignedBottomStair(loadedState(world, pos.down()), uphill)) {
             return false;
         }
         return isSteepRunWall(world, pos.offset(uphill).up(), uphill)
@@ -204,12 +225,12 @@ public final class GeorgianWallSlopeResolver {
     private static boolean isSteepOnrampAnchor(BlockView world,
                                                 BlockPos pos,
                                                 Direction uphill) {
-        BlockState currentSupport = world.getBlockState(pos.down());
+        BlockState currentSupport = loadedState(world, pos.down());
         BlockPos firstStairWallPos = pos.offset(uphill).up();
-        BlockState firstStairWall = world.getBlockState(firstStairWallPos);
+        BlockState firstStairWall = loadedState(world, firstStairWallPos);
         boolean firstStairWallIsAligned = firstStairWall.getBlock() instanceof DiagonalWallBlock
                 && isSlopeCompatible(firstStairWall)
-                && isAlignedBottomStair(world.getBlockState(firstStairWallPos.down()), uphill);
+                && isAlignedBottomStair(loadedState(world, firstStairWallPos.down()), uphill);
         return isSteepOnrampAnchor(
                 partForSupport(world, pos.down()),
                 isAlignedBottomStair(currentSupport, uphill),
@@ -255,8 +276,8 @@ public final class GeorgianWallSlopeResolver {
                                             BlockPos pos,
                                             Part expected,
                                             Direction uphill) {
-        BlockState state = world.getBlockState(pos);
-        BlockState support = world.getBlockState(pos.down());
+        BlockState state = loadedState(world, pos);
+        BlockState support = loadedState(world, pos.down());
         return state.getBlock() instanceof DiagonalWallBlock
                 && partForSupport(world, pos.down()) == expected
                 && supportsShallowDirection(support, uphill);
@@ -278,11 +299,11 @@ public final class GeorgianWallSlopeResolver {
     private static boolean isSteepRunWall(BlockView world,
                                           BlockPos pos,
                                           Direction uphill) {
-        BlockState state = world.getBlockState(pos);
+        BlockState state = loadedState(world, pos);
         if (!(state.getBlock() instanceof DiagonalWallBlock)) {
             return false;
         }
-        BlockState support = world.getBlockState(pos.down());
+        BlockState support = loadedState(world, pos.down());
         return isAlignedBottomStair(support, uphill)
                 || partForSupport(world, pos.down()) == Part.LOWER;
     }
@@ -307,7 +328,7 @@ public final class GeorgianWallSlopeResolver {
     }
 
     private static boolean hasFlatWall(BlockView world, BlockPos flatPos) {
-        BlockState flatState = world.getBlockState(flatPos);
+        BlockState flatState = loadedState(world, flatPos);
         if (!(flatState.getBlock() instanceof DiagonalWallBlock)
                 || !isSlopeCompatible(flatState)) {
             return false;
@@ -350,7 +371,7 @@ public final class GeorgianWallSlopeResolver {
             return false;
         }
 
-        BlockState support = world.getBlockState(pos.down());
+        BlockState support = loadedState(world, pos.down());
         boolean upperShallowStair = support.getBlock() instanceof ShallowStairsBlockBase shallowStair
                 && shallowStair.isTopHalf();
         if (!upperShallowStair) {
@@ -469,7 +490,7 @@ public final class GeorgianWallSlopeResolver {
      * slope model of its own, but the adjacent onramp/offramp still points to it.
      */
     static List<BlockPos> connectedSlopeNeighbours(BlockView world, BlockPos pos) {
-        BlockState state = world.getBlockState(pos);
+        BlockState state = loadedState(world, pos);
         if (!(state.getBlock() instanceof DiagonalWallBlock)) {
             return List.of();
         }
@@ -480,7 +501,7 @@ public final class GeorgianWallSlopeResolver {
         for (Direction direction : Direction.Type.HORIZONTAL) {
             for (int yOffset = -1; yOffset <= 1; yOffset++) {
                 BlockPos candidatePos = pos.offset(direction).add(0, yOffset, 0);
-                BlockState candidate = world.getBlockState(candidatePos);
+                BlockState candidate = loadedState(world, candidatePos);
                 if (!(candidate.getBlock() instanceof DiagonalWallBlock)) {
                     continue;
                 }
@@ -504,7 +525,7 @@ public final class GeorgianWallSlopeResolver {
         }
 
         for (BlockPos slopePos : connectedSlopeNeighbours(world, pos)) {
-            BlockState slopeState = world.getBlockState(slopePos);
+            BlockState slopeState = loadedState(world, slopePos);
             Mode slopeMode = resolve(world, slopeState, slopePos);
             if (isSlopeEndpoint(pos, slopePos, slopeMode)) {
                 return true;
@@ -560,10 +581,32 @@ public final class GeorgianWallSlopeResolver {
                                          Set<BlockPos> target,
                                          List<BlockPos> candidates) {
         for (BlockPos candidate : candidates) {
-            if (world.getBlockState(candidate).getBlock() instanceof DiagonalWallBlock) {
+            if (loadedState(world, candidate).getBlock() instanceof DiagonalWallBlock) {
                 target.add(candidate.toImmutable());
             }
         }
+    }
+
+    /**
+     * Dynamic wall shapes are also queried while a chunk is being lit. Asking a
+     * {@link ServerWorld} for an unavailable neighbouring chunk from that worker
+     * can wait on the same chunk-lighting future and deadlock the integrated
+     * server. ServerChunkManager#getWorldChunk is a non-blocking get-now lookup;
+     * it returns null on the lighting worker rather than scheduling or awaiting
+     * chunk work. Treat that neighbour as absent until a normal server-thread
+     * render/collision query can resolve the authored incline.
+     */
+    private static BlockState loadedState(BlockView world, BlockPos pos) {
+        if (world instanceof ServerWorld serverWorld) {
+            WorldChunk chunk = serverWorld.getChunkManager().getWorldChunk(
+                    pos.getX() >> 4,
+                    pos.getZ() >> 4
+            );
+            return chunk == null
+                    ? Blocks.VOID_AIR.getDefaultState()
+                    : chunk.getBlockState(pos);
+        }
+        return world.getBlockState(pos);
     }
 
     static List<Direction> flatCornerDirections(Direction uphill,

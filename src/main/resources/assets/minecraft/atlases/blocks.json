@@ -1126,6 +1126,141 @@
                         "prefix":  "optifine/ctm/striatus_rusticated/"
                     },
                     {
+                        "type":  "directory",
+                        "source":  "optifine/ctm/aganite_rock",
+                        "prefix":  "optifine/ctm/aganite_rock/"
+                    },
+                    {
+                        "type":  "directory",
+                        "source":  "optifine/ctm/aterzon_rock",
+                        "prefix":  "optifine/ctm/aterzon_rock/"
+                    },
+                    {
+                        "type":  "directory",
+                        "source":  "optifine/ctm/borealis_rock",
+                        "prefix":  "optifine/ctm/borealis_rock/"
+                    },
+                    {
+                        "type":  "directory",
+                        "source":  "optifine/ctm/brectite_rock",
+                        "prefix":  "optifine/ctm/brectite_rock/"
+                    },
+                    {
+                        "type":  "directory",
+                        "source":  "optifine/ctm/calacattum_rock",
+                        "prefix":  "optifine/ctm/calacattum_rock/"
+                    },
+                    {
+                        "type":  "directory",
+                        "source":  "optifine/ctm/chalstrom_rock",
+                        "prefix":  "optifine/ctm/chalstrom_rock/"
+                    },
+                    {
+                        "type":  "directory",
+                        "source":  "optifine/ctm/chrysonyx_rock",
+                        "prefix":  "optifine/ctm/chrysonyx_rock/"
+                    },
+                    {
+                        "type":  "directory",
+                        "source":  "optifine/ctm/etruscus_rock",
+                        "prefix":  "optifine/ctm/etruscus_rock/"
+                    },
+                    {
+                        "type":  "directory",
+                        "source":  "optifine/ctm/gelastrum_rock",
+                        "prefix":  "optifine/ctm/gelastrum_rock/"
+                    },
+                    {
+                        "type":  "directory",
+                        "source":  "optifine/ctm/glacium_rock",
+                        "prefix":  "optifine/ctm/glacium_rock/"
+                    },
+                    {
+                        "type":  "directory",
+                        "source":  "optifine/ctm/hesperion_rock",
+                        "prefix":  "optifine/ctm/hesperion_rock/"
+                    },
+                    {
+                        "type":  "directory",
+                        "source":  "optifine/ctm/imperium_rock",
+                        "prefix":  "optifine/ctm/imperium_rock/"
+                    },
+                    {
+                        "type":  "directory",
+                        "source":  "optifine/ctm/kelastrion_rock",
+                        "prefix":  "optifine/ctm/kelastrion_rock/"
+                    },
+                    {
+                        "type":  "directory",
+                        "source":  "optifine/ctm/kylorion_rock",
+                        "prefix":  "optifine/ctm/kylorion_rock/"
+                    },
+                    {
+                        "type":  "directory",
+                        "source":  "optifine/ctm/latmion_rock",
+                        "prefix":  "optifine/ctm/latmion_rock/"
+                    },
+                    {
+                        "type":  "directory",
+                        "source":  "optifine/ctm/laurentium_rock",
+                        "prefix":  "optifine/ctm/laurentium_rock/"
+                    },
+                    {
+                        "type":  "directory",
+                        "source":  "optifine/ctm/mielonyx_rock",
+                        "prefix":  "optifine/ctm/mielonyx_rock/"
+                    },
+                    {
+                        "type":  "directory",
+                        "source":  "optifine/ctm/nerium_rock",
+                        "prefix":  "optifine/ctm/nerium_rock/"
+                    },
+                    {
+                        "type":  "directory",
+                        "source":  "optifine/ctm/noxoplis_rock",
+                        "prefix":  "optifine/ctm/noxoplis_rock/"
+                    },
+                    {
+                        "type":  "directory",
+                        "source":  "optifine/ctm/porphyros_rock",
+                        "prefix":  "optifine/ctm/porphyros_rock/"
+                    },
+                    {
+                        "type":  "directory",
+                        "source":  "optifine/ctm/portorium_rock",
+                        "prefix":  "optifine/ctm/portorium_rock/"
+                    },
+                    {
+                        "type":  "directory",
+                        "source":  "optifine/ctm/psamatheon_rock",
+                        "prefix":  "optifine/ctm/psamatheon_rock/"
+                    },
+                    {
+                        "type":  "directory",
+                        "source":  "optifine/ctm/rosinium_rock",
+                        "prefix":  "optifine/ctm/rosinium_rock/"
+                    },
+                    {
+                        "type":  "directory",
+                        "source":  "optifine/ctm/sanguenite_rock",
+                        "prefix":  "optifine/ctm/sanguenite_rock/"
+                    },
+                    {
+                        "type":  "directory",
+                        "source":  "optifine/ctm/selenephos_rock",
+                        "prefix":  "optifine/ctm/selenephos_rock/"
+                    },
+                    {
+                        "type":  "directory",
+                        "source":  "optifine/ctm/solistra_rock",
+                        "prefix":  "optifine/ctm/solistra_rock/"
+                    },
+                    {
+                        "type":  "directory",
+                        "source":  "optifine/ctm/striatus_rock",
+                        "prefix":  "optifine/ctm/striatus_rock/"
+                    },
+                    {
                         "type":  "filter",
                         "pattern":  {
                                         "namespace":  "minecraft",

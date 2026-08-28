@@ -49,7 +49,25 @@ final class SynapheiaPrototypeTest {
     }
 
     @Test
-    void projectedRepeatFragmentsUseStablePomBounds() {
+    void exactShaderBoundsKeepSkewedProjectedFragmentsBounded() {
+        List<SpiralStairCtmGeometry.CellVertex> source = List.of(
+                cellVertex(0.15F, 0.25F),
+                cellVertex(0.85F, 0.35F),
+                cellVertex(0.65F, 0.90F)
+        );
+
+        List<List<SpiralStairCtmGeometry.CellVertex>> primitives =
+                SynapheiaRepeatBakedModel.repeatPrimitives(source, false);
+
+        assertFalse(ArchRepeatCtmRenderer.hasStablePomBounds(source));
+        assertEquals(List.of(source), primitives);
+        assertEquals(List.of(source.get(0), source.get(1), source.get(2), source.get(0)),
+                SynapheiaRepeatBakedModel.padTriangle(
+                        source.get(0), source.get(1), source.get(2)));
+    }
+
+    @Test
+    void unsupportedPomPipelinesRetainStableGeometryFallback() {
         List<SpiralStairCtmGeometry.CellVertex> source = List.of(
                 cellVertex(0.15F, 0.25F),
                 cellVertex(0.85F, 0.35F),
@@ -62,21 +80,28 @@ final class SynapheiaPrototypeTest {
         assertTrue(primitives.size() > 1);
         assertNear(Math.abs(cellArea(source)), primitives.stream()
                 .mapToDouble(primitive -> Math.abs(cellArea(primitive))).sum());
-        for (List<SpiralStairCtmGeometry.CellVertex> primitive : primitives) {
-            assertTrue(ArchRepeatCtmRenderer.hasStablePomBounds(primitive));
-            if (primitive.size() == 3) {
-                List<SpiralStairCtmGeometry.CellVertex> padded =
-                        SynapheiaRepeatBakedModel.padPomSafeTriangle(
-                                primitive.get(0), primitive.get(1), primitive.get(2));
-                assertEquals(primitive.get(2).vertex(), padded.get(3).vertex());
-                assertNear((minimumS(primitive) + maximumS(primitive)) * 0.5D,
-                        padded.stream().mapToDouble(SpiralStairCtmGeometry.CellVertex::localS)
-                                .average().orElseThrow());
-                assertNear((minimumT(primitive) + maximumT(primitive)) * 0.5D,
-                        padded.stream().mapToDouble(SpiralStairCtmGeometry.CellVertex::localT)
-                                .average().orElseThrow());
-            }
-        }
+        assertTrue(primitives.stream().allMatch(ArchRepeatCtmRenderer::hasStablePomBounds));
+    }
+
+    @Test
+    void alreadyStableProjectedTrianglesRetainPomBounds() {
+        List<SpiralStairCtmGeometry.CellVertex> source = List.of(
+                cellVertex(0.15F, 0.25F),
+                cellVertex(0.85F, 0.25F),
+                cellVertex(0.85F, 0.90F)
+        );
+
+        assertTrue(ArchRepeatCtmRenderer.hasStablePomBounds(source));
+        List<SpiralStairCtmGeometry.CellVertex> padded =
+                SynapheiaRepeatBakedModel.padPomSafeTriangle(
+                        source.get(0), source.get(1), source.get(2));
+        assertEquals(source.get(2).vertex(), padded.get(3).vertex());
+        assertNear(0.5D, padded.stream()
+                .mapToDouble(SpiralStairCtmGeometry.CellVertex::localS)
+                .average().orElseThrow());
+        assertNear(0.575D, padded.stream()
+                .mapToDouble(SpiralStairCtmGeometry.CellVertex::localT)
+                .average().orElseThrow());
     }
 
     @Test
@@ -621,26 +646,6 @@ final class SynapheiaPrototypeTest {
                     - (double) next.localS() * current.localT();
         }
         return twiceArea * 0.5D;
-    }
-
-    private static float minimumS(List<SpiralStairCtmGeometry.CellVertex> vertices) {
-        return vertices.stream().map(SpiralStairCtmGeometry.CellVertex::localS)
-                .min(Float::compare).orElseThrow();
-    }
-
-    private static float maximumS(List<SpiralStairCtmGeometry.CellVertex> vertices) {
-        return vertices.stream().map(SpiralStairCtmGeometry.CellVertex::localS)
-                .max(Float::compare).orElseThrow();
-    }
-
-    private static float minimumT(List<SpiralStairCtmGeometry.CellVertex> vertices) {
-        return vertices.stream().map(SpiralStairCtmGeometry.CellVertex::localT)
-                .min(Float::compare).orElseThrow();
-    }
-
-    private static float maximumT(List<SpiralStairCtmGeometry.CellVertex> vertices) {
-        return vertices.stream().map(SpiralStairCtmGeometry.CellVertex::localT)
-                .max(Float::compare).orElseThrow();
     }
 
     private static void assertNear(double expected, double actual) {

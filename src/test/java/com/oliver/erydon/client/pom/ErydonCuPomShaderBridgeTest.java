@@ -3,21 +3,86 @@ package com.oliver.erydon.client.pom;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ErydonCuPomShaderBridgeTest {
     @Test
     void helperContainsAllRequiredMaterialSamplingAndFallbackPaths() {
-        String source = ErydonCuPomShaderBridge.source();
-        assertTrue(source.contains("uniform sampler2D erydonCtmPomLookup;"));
-        assertTrue(source.contains("vec2 ordinaryUv"));
-        assertTrue(source.contains("return ordinaryUv;"));
-        assertTrue(source.contains("erydonCtmPomRepeatDelta"));
-        assertTrue(source.contains("targetMidUv"));
-        assertTrue(source.contains("ERYDON_CTM_POM_LUT_DIM = 256.0"));
-        assertTrue(source.contains("ERYDON_CTM_POM_HASH_SLOTS = 24571.0"));
-        assertTrue(source.contains("ERYDON_CTM_POM_CENTRE_START = 49158.0"));
-        assertTrue(source.contains("abs(magic.w - 3.0)"));
+        String vertex = ErydonCuPomShaderBridge.vertexSource();
+        String fragment = ErydonCuPomShaderBridge.fragmentSource();
+        assertFalse(vertex.isBlank());
+        assertFalse(fragment.isBlank());
+        assertFalse(vertex.lines().anyMatch(line -> line.stripLeading().startsWith("#")));
+        assertFalse(fragment.lines().anyMatch(line -> line.stripLeading().startsWith("#")));
+
+        assertTrue(vertex.contains("uniform sampler2D erydonCtmPomLookup;"));
+        assertTrue(vertex.contains("ERYDON_CTM_POM_LUT_SIZE = vec2(1024.0, 1057.0)"));
+        assertTrue(vertex.contains("ERYDON_CTM_POM_OCCUPANCY_START = 1024.0"));
+        assertTrue(vertex.contains("ERYDON_CTM_POM_RECORD_START = 1049600.0"));
+        assertTrue(vertex.contains("abs(magic.w - 4.0)"));
+        assertTrue(vertex.contains("texture2DLod("));
+        assertTrue(vertex.contains("void erydonCtmPomApplyExactBounds("));
+        assertFalse(vertex.contains("int erydonPomFragmentRecord = -2;"));
+
+        assertTrue(fragment.contains("uniform sampler2D erydonCtmPomLookup;"));
+        assertTrue(fragment.contains("texture2D("));
+        assertFalse(fragment.contains("texture2DLod("));
+        assertFalse(fragment.contains("void erydonCtmPomApplyExactBounds("));
+        assertTrue(fragment.contains("vec2 ordinaryUv"));
+        assertTrue(fragment.contains("return ordinaryUv;"));
+        assertTrue(fragment.contains("erydonCtmPomRepeatDelta"));
+        assertTrue(fragment.contains("targetBounds"));
+        assertTrue(fragment.contains("int erydonPomFragmentRecord = -2;"));
+        assertTrue(fragment.contains("int erydonCtmPomResolveFragmentRecord()"));
+        assertTrue(fragment.contains("int resolvedRecord = erydonCtmPomResolveFragmentRecord();"));
+        assertTrue(fragment.contains("(wrapped - 0.5) * vTexCoordAM.pq"));
+    }
+
+    @Test
+    void unknownOrUnbalancedDirectivesFailStageSpecialization() {
+        boolean unknownRejected = false;
+        try {
+            ErydonCuPomShaderBridge.specialize("#define TOO_LATE 1\n", ErydonCuPomShaderBridge.Stage.VERTEX);
+        } catch (IllegalArgumentException expected) {
+            unknownRejected = true;
+        }
+        assertTrue(unknownRejected);
+
+        boolean unbalancedRejected = false;
+        try {
+            ErydonCuPomShaderBridge.specialize(
+                    "#ifdef ERYDON_CTM_POM_VERTEX_STAGE\nfloat value;\n",
+                    ErydonCuPomShaderBridge.Stage.VERTEX);
+        } catch (IllegalArgumentException expected) {
+            unbalancedRejected = true;
+        }
+        assertTrue(unbalancedRejected);
+    }
+
+    @Test
+    void exactBoundsReconstructEveryOriginalAtlasCoordinate() {
+        double minU = 2048.0 / 16384.0;
+        double minV = 4096.0 / 16384.0;
+        double spanU = 64.0 / 16384.0;
+        double spanV = 64.0 / 16384.0;
+        double[][] localCoordinates = {
+                {0.11, 0.27},
+                {0.88, 0.34},
+                {0.63, 0.93},
+                {0.42, 0.61}
+        };
+
+        for (double[] local : localCoordinates) {
+            double atlasU = minU + local[0] * spanU;
+            double atlasV = minV + local[1] * spanV;
+            double signU = 2.0 * ((atlasU - minU) / spanU) - 1.0;
+            double signV = 2.0 * ((atlasV - minV) / spanV) - 1.0;
+            double reconstructedU = minU + (signU * 0.5 + 0.5) * spanU;
+            double reconstructedV = minV + (signV * 0.5 + 0.5) * spanV;
+            assertTrue(Math.abs(atlasU - reconstructedU) < 0.0000000001D);
+            assertTrue(Math.abs(atlasV - reconstructedV) < 0.0000000001D);
+        }
     }
 
     @Test

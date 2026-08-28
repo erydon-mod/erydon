@@ -1,29 +1,42 @@
 /*
  * ERYDON-owned CTM-aware POM bridge for the exact supported Complementary
- * Unbound source shape. The shader ZIP is never changed. Unknown sprites,
- * invalid lookup data and unsupported geometry use CU's original fract wrap.
+ * Unbound source shape. The shader ZIP is never changed. The vertex stage
+ * corrects POM bounds only for ERYDON's reserved large-spiral material id.
+ * Unknown sprites and invalid lookup data leave ordinary albedo intact.
  */
 
 uniform sampler2D erydonCtmPomLookup;
 
-const float ERYDON_CTM_POM_LUT_DIM = 256.0;
-const float ERYDON_CTM_POM_HASH_START = 16.0;
-const float ERYDON_CTM_POM_HASH_SLOTS = 24571.0;
-const float ERYDON_CTM_POM_CENTRE_START = 49158.0;
+const vec2 ERYDON_CTM_POM_LUT_SIZE = vec2(1024.0, 1057.0);
+const float ERYDON_CTM_POM_OCCUPANCY_START = 1024.0;
+const float ERYDON_CTM_POM_OCCUPANCY_WIDTH = 1024.0;
+const float ERYDON_CTM_POM_OCCUPANCY_HEIGHT = 1024.0;
+const float ERYDON_CTM_POM_RECORD_START = 1049600.0;
+const float ERYDON_CTM_POM_RECORD_TEXELS = 2.0;
+const float ERYDON_CTM_POM_ATLAS_QUANTUM = 16.0;
 const float ERYDON_CTM_POM_PHASES_PER_FAMILY = 36.0;
 const float ERYDON_CTM_POM_GRID_WIDTH = 6.0;
 
 vec2 erydonCtmPomTexelUv(float linearIndex) {
-    float y = floor(linearIndex / ERYDON_CTM_POM_LUT_DIM);
-    float x = linearIndex - y * ERYDON_CTM_POM_LUT_DIM;
-    return (vec2(x, y) + 0.5) / ERYDON_CTM_POM_LUT_DIM;
+    float y = floor(linearIndex / ERYDON_CTM_POM_LUT_SIZE.x);
+    float x = linearIndex - y * ERYDON_CTM_POM_LUT_SIZE.x;
+    return (vec2(x, y) + 0.5) / ERYDON_CTM_POM_LUT_SIZE;
 }
 
 vec4 erydonCtmPomReadBytes(float linearIndex) {
-    return floor(texture2D(
+#ifdef ERYDON_CTM_POM_VERTEX_STAGE
+    vec4 sampleValue = texture2DLod(
+        erydonCtmPomLookup,
+        erydonCtmPomTexelUv(linearIndex),
+        0.0
+    );
+#else
+    vec4 sampleValue = texture2D(
         erydonCtmPomLookup,
         erydonCtmPomTexelUv(linearIndex)
-    ) * 255.0 + 0.5);
+    );
+#endif
+    return floor(sampleValue * 255.0 + 0.5);
 }
 
 float erydonCtmPomDecodeU16(vec2 bytes) {
@@ -35,7 +48,7 @@ bool erydonCtmPomHeaderValid(vec2 currentAtlasSize) {
     if (abs(magic.x - 69.0) > 0.5 ||
         abs(magic.y - 67.0) > 0.5 ||
         abs(magic.z - 80.0) > 0.5 ||
-        abs(magic.w - 3.0) > 0.5) {
+        abs(magic.w - 4.0) > 0.5) {
         return false;
     }
 
@@ -44,7 +57,16 @@ bool erydonCtmPomHeaderValid(vec2 currentAtlasSize) {
         erydonCtmPomDecodeU16(atlasBytes.xy),
         erydonCtmPomDecodeU16(atlasBytes.zw)
     );
-    return all(lessThan(abs(encodedAtlasSize - currentAtlasSize), vec2(0.5)));
+    vec4 lookupBytes = erydonCtmPomReadBytes(3.0);
+    vec2 encodedLookupSize = vec2(
+        erydonCtmPomDecodeU16(lookupBytes.xy),
+        erydonCtmPomDecodeU16(lookupBytes.zw)
+    );
+    vec4 layoutBytes = erydonCtmPomReadBytes(4.0);
+    return all(lessThan(abs(encodedAtlasSize - currentAtlasSize), vec2(0.5))) &&
+        all(lessThan(abs(encodedLookupSize - ERYDON_CTM_POM_LUT_SIZE), vec2(0.5))) &&
+        abs(erydonCtmPomDecodeU16(layoutBytes.xy) - ERYDON_CTM_POM_ATLAS_QUANTUM) < 0.5 &&
+        abs(erydonCtmPomDecodeU16(layoutBytes.zw) - ERYDON_CTM_POM_PHASES_PER_FAMILY) < 0.5;
 }
 
 float erydonCtmPomRecordCount() {
@@ -52,41 +74,90 @@ float erydonCtmPomRecordCount() {
     return erydonCtmPomDecodeU16(counts.xy);
 }
 
-float erydonCtmPomFindRecord(vec2 currentMidUv, vec2 currentAtlasSize) {
-    if (!erydonCtmPomHeaderValid(currentAtlasSize)) return -1.0;
-
-    vec2 centrePx = floor(currentMidUv * currentAtlasSize + 0.5);
-    float firstSlot = mod(
-        centrePx.x * 73.0 + centrePx.y * 151.0,
-        ERYDON_CTM_POM_HASH_SLOTS
+vec4 erydonCtmPomReadBoundsPx(float record) {
+    float start = ERYDON_CTM_POM_RECORD_START + record * ERYDON_CTM_POM_RECORD_TEXELS;
+    vec4 minimumBytes = erydonCtmPomReadBytes(start);
+    vec4 sizeBytes = erydonCtmPomReadBytes(start + 1.0);
+    return vec4(
+        erydonCtmPomDecodeU16(minimumBytes.xy),
+        erydonCtmPomDecodeU16(minimumBytes.zw),
+        erydonCtmPomDecodeU16(sizeBytes.xy),
+        erydonCtmPomDecodeU16(sizeBytes.zw)
     );
-
-    for (int probe = 0; probe < 16; ++probe) {
-        float slot = mod(firstSlot + float(probe), ERYDON_CTM_POM_HASH_SLOTS);
-        float entry = ERYDON_CTM_POM_HASH_START + slot * 2.0;
-        vec4 key = erydonCtmPomReadBytes(entry);
-        vec4 payload = erydonCtmPomReadBytes(entry + 1.0);
-        if (payload.z < 127.5) return -1.0;
-
-        vec2 keyCentre = vec2(
-            erydonCtmPomDecodeU16(key.xy),
-            erydonCtmPomDecodeU16(key.zw)
-        );
-        if (all(lessThan(abs(keyCentre - centrePx), vec2(0.5)))) {
-            float record = erydonCtmPomDecodeU16(payload.xy);
-            return record < erydonCtmPomRecordCount() ? record : -1.0;
-        }
-    }
-    return -1.0;
 }
 
-vec2 erydonCtmPomReadCentreUv(float record, vec2 currentAtlasSize) {
-    vec4 bytes = erydonCtmPomReadBytes(ERYDON_CTM_POM_CENTRE_START + record);
-    vec2 centrePx = vec2(
-        erydonCtmPomDecodeU16(bytes.xy),
-        erydonCtmPomDecodeU16(bytes.zw)
-    );
-    return centrePx / currentAtlasSize;
+vec4 erydonCtmPomReadBoundsUv(float record, vec2 currentAtlasSize) {
+    vec4 boundsPx = erydonCtmPomReadBoundsPx(record);
+    return vec4(boundsPx.xy / currentAtlasSize, boundsPx.zw / currentAtlasSize);
+}
+
+int erydonCtmPomFindRecord(vec2 interiorUv, vec2 currentAtlasSize) {
+    if (!erydonCtmPomHeaderValid(currentAtlasSize)) return -1;
+
+    vec2 atlasPx = floor(interiorUv * currentAtlasSize);
+    if (any(lessThan(atlasPx, vec2(0.0))) ||
+        any(greaterThanEqual(atlasPx, currentAtlasSize))) {
+        return -1;
+    }
+    vec2 cell = floor(atlasPx / ERYDON_CTM_POM_ATLAS_QUANTUM);
+    if (any(lessThan(cell, vec2(0.0))) ||
+        cell.x >= ERYDON_CTM_POM_OCCUPANCY_WIDTH ||
+        cell.y >= ERYDON_CTM_POM_OCCUPANCY_HEIGHT) {
+        return -1;
+    }
+
+    float occupancy = ERYDON_CTM_POM_OCCUPANCY_START +
+        cell.y * ERYDON_CTM_POM_OCCUPANCY_WIDTH + cell.x;
+    vec4 entry = erydonCtmPomReadBytes(occupancy);
+    float encodedRecord = erydonCtmPomDecodeU16(entry.xy);
+    float record = encodedRecord - 1.0;
+    if (encodedRecord < 0.5 || record >= erydonCtmPomRecordCount()) return -1;
+
+    vec4 boundsPx = erydonCtmPomReadBoundsPx(record);
+    if (any(lessThan(atlasPx, boundsPx.xy)) ||
+        any(greaterThanEqual(atlasPx, boundsPx.xy + boundsPx.zw))) {
+        return -1;
+    }
+    return int(floor(record + 0.5));
+}
+
+#ifdef ERYDON_CTM_POM_VERTEX_STAGE
+void erydonCtmPomApplyExactBounds(
+    vec2 atlasUv,
+    vec2 currentAtlasSize,
+    int record,
+    inout vec4 spriteBounds,
+    inout vec2 localSign,
+    inout vec2 spriteRadius,
+    inout vec2 spriteMidpoint
+) {
+    vec4 exactBounds = erydonCtmPomReadBoundsUv(float(record), currentAtlasSize);
+    vec2 localUv = (atlasUv - exactBounds.xy) / exactBounds.zw;
+    spriteBounds = exactBounds;
+    localSign = localUv * 2.0 - 1.0;
+    spriteRadius = exactBounds.zw * 0.5;
+    spriteMidpoint = exactBounds.xy + spriteRadius;
+}
+#endif
+
+#ifdef ERYDON_CTM_POM_FRAGMENT_STAGE
+/*
+ * Ordinary repeat-CTM blocks retain the established phase-aware POM path,
+ * but resolve their record only if a POM ray actually crosses a tile edge.
+ * The large spiral already supplies its record from the vertex stage.
+ */
+int erydonPomFragmentRecord = -2;
+
+int erydonCtmPomResolveFragmentRecord() {
+    if (erydonPomRecord >= 0) return erydonPomRecord;
+    if (erydonPomFragmentRecord == -2) {
+        vec2 currentMidpoint = vTexCoordAM.st + 0.5 * vTexCoordAM.pq;
+        erydonPomFragmentRecord = erydonCtmPomFindRecord(
+            currentMidpoint,
+            vec2(atlasSize)
+        );
+    }
+    return erydonPomFragmentRecord;
 }
 
 bool erydonCtmPomDominantAxis(vec3 value, out vec3 axis) {
@@ -106,7 +177,7 @@ bool erydonCtmPomDominantAxis(vec3 value, out vec3 axis) {
     return true;
 }
 
-/* Convert crossed local U/V tiles to Continuity's repeat-grid X/Y offset. */
+/* Convert crossed local U/V tiles to Synapheia's repeat-grid X/Y offset. */
 bool erydonCtmPomRepeatDelta(vec2 localTiles, out vec2 repeatTiles) {
     mat3 viewToWorld = mat3(gbufferModelViewInverse);
     vec3 worldTangent = normalize(viewToWorld * tangent);
@@ -155,17 +226,15 @@ vec2 erydonCtmPomAtlasUv(vec2 unwrappedLocalUv) {
     if (!crossed) {
         return vTexCoordAM.st + unwrappedLocalUv * vTexCoordAM.pq;
     }
-
-    vec2 currentAtlasSize = vec2(atlasSize);
-    vec2 currentMidUv = vTexCoordAM.st + 0.5 * vTexCoordAM.pq;
-    float currentRecord = erydonCtmPomFindRecord(currentMidUv, currentAtlasSize);
-    if (currentRecord < 0.0) return ordinaryUv;
+    int resolvedRecord = erydonCtmPomResolveFragmentRecord();
+    if (resolvedRecord < 0) return ordinaryUv;
 
     vec2 repeatDelta;
     if (!erydonCtmPomRepeatDelta(floor(unwrappedLocalUv), repeatDelta)) {
         return ordinaryUv;
     }
 
+    float currentRecord = float(resolvedRecord);
     float familyBase =
         floor(currentRecord / ERYDON_CTM_POM_PHASES_PER_FAMILY) *
         ERYDON_CTM_POM_PHASES_PER_FAMILY;
@@ -179,6 +248,8 @@ vec2 erydonCtmPomAtlasUv(vec2 unwrappedLocalUv) {
         familyBase + targetPhase.y * ERYDON_CTM_POM_GRID_WIDTH + targetPhase.x;
     if (targetRecord >= erydonCtmPomRecordCount()) return ordinaryUv;
 
-    vec2 targetMidUv = erydonCtmPomReadCentreUv(targetRecord, currentAtlasSize);
-    return targetMidUv + (wrapped - 0.5) * vTexCoordAM.pq;
+    vec4 targetBounds = erydonCtmPomReadBoundsUv(targetRecord, vec2(atlasSize));
+    vec2 targetMidpoint = targetBounds.xy + 0.5 * targetBounds.zw;
+    return targetMidpoint + (wrapped - 0.5) * vTexCoordAM.pq;
 }
+#endif

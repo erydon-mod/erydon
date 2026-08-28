@@ -23,22 +23,29 @@ public final class SynapheiaModelLoadingPlugin
     }
 
     public static CompletableFuture<SynapheiaManifest.Prepared> load(ResourceManager manager, Executor executor) {
-        long startedNanos = System.nanoTime();
-        SynapheiaMetrics.event("resource_reload_phase", SynapheiaMode.SYNAPHEIA, 0L, fields(
-                "phase", "ctm_rule_prepare", "state", "start", "duration_ns", 0L
-        ));
+        boolean metricsEnabled = SynapheiaMetrics.enabled();
+        long startedNanos = metricsEnabled ? System.nanoTime() : 0L;
+        if (metricsEnabled) {
+            SynapheiaMetrics.event("resource_reload_phase", SynapheiaMode.SYNAPHEIA, 0L, fields(
+                    "phase", "ctm_rule_prepare", "state", "start", "duration_ns", 0L
+            ));
+        }
         return CompletableFuture.supplyAsync(() -> {
             try {
                 SynapheiaManifest.Prepared prepared = SynapheiaManifest.load(manager);
-                return prepared.withDuration(System.nanoTime() - startedNanos);
+                return metricsEnabled
+                        ? prepared.withDuration(System.nanoTime() - startedNanos)
+                        : prepared;
             } catch (RuntimeException exception) {
                 String reason = exception.getMessage() == null || exception.getMessage().isBlank()
                         ? exception.getClass().getSimpleName()
                         : exception.getMessage();
-                SynapheiaMetrics.event("ctm_rule_parsed", SynapheiaMode.SYNAPHEIA, 0L, fields(
-                        "rule_id", "<active-resource-stack>", "method", "unknown", "status", "rejected",
-                        "reason", reason
-                ));
+                if (metricsEnabled) {
+                    SynapheiaMetrics.event("ctm_rule_parsed", SynapheiaMode.SYNAPHEIA, 0L, fields(
+                            "rule_id", "<active-resource-stack>", "method", "unknown", "status", "rejected",
+                            "reason", reason
+                    ));
+                }
                 Erydon.LOGGER.error("[{}] Synapheia cannot load the active CTM rules: {}", Erydon.MOD_ID, reason);
                 throw exception;
             }
@@ -64,10 +71,11 @@ public final class SynapheiaModelLoadingPlugin
                 return model;
             }
             Identifier blockId = new Identifier(modelId.getNamespace(), modelId.getPath());
-            if (snapshot.rulesFor(blockId).isEmpty()) {
+            SynapheiaBlockPlan plan = snapshot.planFor(blockId);
+            if (plan == null) {
                 return model;
             }
-            return new SynapheiaRepeatBakedModel(model, modelId, blockId, snapshot);
+            return new SynapheiaRepeatBakedModel(model, modelId, plan, snapshot);
         });
     }
 

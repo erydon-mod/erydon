@@ -1,6 +1,7 @@
 package com.oliver.erydon.client.model;
 
 import com.oliver.erydon.Erydon;
+import com.oliver.erydon.client.pom.ErydonCuPomRuntimeState;
 import net.fabricmc.fabric.api.renderer.v1.Renderer;
 import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
 import net.fabricmc.fabric.api.renderer.v1.material.BlendMode;
@@ -42,18 +43,20 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
 
     private final ModelIdentifier modelId;
     private final Identifier blockId;
+    private final SynapheiaBlockPlan plan;
     private final SynapheiaService.Snapshot snapshot;
     private final boolean projectedRepeatGeometry;
 
     SynapheiaRepeatBakedModel(BakedModel wrapped,
                              ModelIdentifier modelId,
-                             Identifier blockId,
+                             SynapheiaBlockPlan plan,
                              SynapheiaService.Snapshot snapshot) {
         this.wrapped = wrapped;
         this.modelId = modelId;
-        this.blockId = blockId;
+        this.blockId = plan.blockId();
+        this.plan = plan;
         this.snapshot = snapshot;
-        this.projectedRepeatGeometry = usesProjectedRepeatGeometry(blockId);
+        this.projectedRepeatGeometry = usesProjectedRepeatGeometry(this.blockId);
     }
 
     @Override
@@ -74,10 +77,46 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
             return;
         }
 
-        long startedNanos = System.nanoTime();
+        boolean metricsEnabled = SynapheiaMetrics.enabled();
+        long startedNanos = metricsEnabled ? System.nanoTime() : 0L;
+        boolean geometryPomFallback = projectedRepeatGeometry
+                && ErydonCuPomRuntimeState.requiresGeometryFallback();
         List<CapturedQuad> captured = new ArrayList<>();
+        Map<OverlayKey, SynapheiaManifest.Rule> overlays = new LinkedHashMap<>();
+        int[] surfaceCounts = metricsEnabled ? new int[2] : null;
         context.pushTransform(quad -> {
-            captured.add(capture(quad));
+            if (surfaceCounts != null) {
+                surfaceCounts[0]++;
+            }
+            Identifier sourceSprite = spriteFinder().find(quad).getContents().getId();
+            Direction face = quad.lightFace();
+            if (plan.hasOverlay() && isUnitSquare(quad)) {
+                for (SynapheiaManifest.Rule overlayRule : plan.overlayRules(face, sourceSprite)) {
+                    overlays.putIfAbsent(new OverlayKey(overlayRule.id(), face), overlayRule);
+                }
+            }
+
+            SynapheiaManifest.Rule repeatRule = projectedRepeatGeometry
+                    ? plan.repeatRuleForProjectedGeometry(face)
+                    : plan.repeatRule(face, sourceSprite);
+            if (repeatRule == null) {
+                if (surfaceCounts != null) {
+                    surfaceCounts[1]++;
+                }
+                return true;
+            }
+
+            SynapheiaCellGeometry.Cell cell = geometryPomFallback
+                    ? null : SynapheiaCellGeometry.singleCell(face, quad);
+            if (cell != null) {
+                applySingleCellRepeat(quad, repeatRule, state, pos, cell);
+                if (surfaceCounts != null) {
+                    surfaceCounts[1]++;
+                }
+                return true;
+            }
+
+            captured.add(capture(quad, repeatRule));
             return false;
         });
         try {
@@ -87,40 +126,26 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
         }
 
         QuadEmitter emitter = context.getEmitter();
-        Map<OverlayKey, SynapheiaManifest.Rule> overlays = new LinkedHashMap<>();
-        int emitted = 0;
+        int emitted = surfaceCounts == null ? 0 : surfaceCounts[1];
         for (CapturedQuad quad : captured) {
-            SynapheiaManifest.Rule repeatRule = projectedRepeatGeometry
-                    ? snapshot.repeatRuleForProjectedGeometry(blockId, quad.lightFace())
-                    : snapshot.repeatRuleFor(blockId, quad.lightFace(), quad.sourceSprite());
-            if (repeatRule == null) {
-                emitOriginal(emitter, quad);
-                emitted++;
-            } else {
-                emitted += emitRepeat(emitter, quad, repeatRule, state, pos);
-            }
-
-            if (isUnitSquare(quad)) {
-                for (SynapheiaManifest.Rule overlayRule : snapshot.overlayRulesFor(
-                        blockId, quad.lightFace(), quad.sourceSprite())) {
-                    overlays.putIfAbsent(new OverlayKey(overlayRule.id(), quad.lightFace()), overlayRule);
-                }
-            }
+            emitted += emitRepeat(emitter, quad, quad.repeatRule(), state, pos, geometryPomFallback);
         }
         for (Map.Entry<OverlayKey, SynapheiaManifest.Rule> entry : overlays.entrySet()) {
             emitOverlay(emitter, view, state, pos, entry.getKey().face(), entry.getValue());
             emitted++;
         }
 
-        SynapheiaMetrics.event("chunk_rebuild_phase", SynapheiaMode.SYNAPHEIA,
-                snapshot.generation(), fields(
-                        "phase", "synapheia_ctm", "state", "sample",
-                        "duration_ns", System.nanoTime() - startedNanos,
-                        "input_surface_count", captured.size(),
-                        "emitted_surface_count", emitted,
-                        "overlay_surface_count", overlays.size(),
-                        "model_identifier", modelId.toString(), "block_id", blockId.toString()
-                ));
+        if (metricsEnabled) {
+            SynapheiaMetrics.event("chunk_rebuild_phase", SynapheiaMode.SYNAPHEIA,
+                    snapshot.generation(), fields(
+                            "phase", "synapheia_ctm", "state", "sample",
+                            "duration_ns", System.nanoTime() - startedNanos,
+                            "input_surface_count", surfaceCounts[0],
+                            "emitted_surface_count", emitted,
+                            "overlay_surface_count", overlays.size(),
+                            "model_identifier", modelId.toString(), "block_id", blockId.toString()
+                    ));
+        }
     }
 
     static boolean usesProjectedRepeatGeometry(Identifier blockId) {
@@ -198,8 +223,8 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
         };
     }
 
-    private static CapturedQuad capture(MutableQuadView quad) {
-        Sprite sprite = spriteFinder().find(quad);
+    private static CapturedQuad capture(MutableQuadView quad,
+                                        SynapheiaManifest.Rule repeatRule) {
         List<SpiralStairCtmGeometry.Vertex> vertices = new ArrayList<>(4);
         for (int vertexIndex = 0; vertexIndex < 4; vertexIndex++) {
             boolean hasNormal = quad.hasNormal(vertexIndex);
@@ -213,15 +238,49 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
             ));
         }
         return new CapturedQuad(quad.lightFace(), quad.nominalFace(), quad.cullFace(),
-                quad.material(), quad.colorIndex(), quad.tag(), sprite.getContents().getId(),
-                List.copyOf(vertices));
+                quad.material(), quad.colorIndex(), quad.tag(), List.copyOf(vertices), repeatRule);
+    }
+
+    private void applySingleCellRepeat(MutableQuadView quad,
+                                       SynapheiaManifest.Rule rule,
+                                       BlockState state,
+                                       BlockPos pos,
+                                       SynapheiaCellGeometry.Cell cell) {
+        List<Sprite> sprites = SynapheiaService.sprites(snapshot, rule);
+        if (sprites == null || sprites.size() != 36) {
+            throw new IllegalStateException("Synapheia repeat sprites are unavailable for "
+                    + rule.resourceId() + ".");
+        }
+        Direction face = quad.lightFace();
+        int offsetX = cell.offsetX(face);
+        int offsetY = cell.offsetY(face);
+        int offsetZ = cell.offsetZ(face);
+        int tileIndex = ErydonCtmService.repeatTileIndex(
+                pos.getX() + offsetX, pos.getY() + offsetY, pos.getZ() + offsetZ, face);
+        for (int vertex = 0; vertex < 4; vertex++) {
+            quad.uv(vertex, SynapheiaCellGeometry.u(face, quad, vertex, cell),
+                    SynapheiaCellGeometry.v(face, quad, vertex, cell));
+        }
+        quad.cullFace(cullFaceForOffset(quad.cullFace(), offsetX, offsetY, offsetZ));
+        quad.spriteBake(sprites.get(tileIndex), MutableQuadView.BAKE_NORMALIZED);
+
+        if (SynapheiaMetrics.enabled()) {
+            SynapheiaMetrics.event("stage_invoked", SynapheiaMode.SYNAPHEIA,
+                    snapshot.generation(), fields(
+                            "stage", "repeat", "model_identifier", modelId.toString(),
+                            "block_id", blockId.toString(), "rule_id", rule.id(),
+                            "block_pos", List.of(pos.getX(), pos.getY(), pos.getZ()),
+                            "emitted_surface_count", 1, "blockstate", state.toString()
+                    ));
+        }
     }
 
     private int emitRepeat(QuadEmitter emitter,
                            CapturedQuad quad,
                            SynapheiaManifest.Rule rule,
                            BlockState state,
-                           BlockPos pos) {
+                           BlockPos pos,
+                           boolean geometryPomFallback) {
         List<SpiralStairCtmGeometry.Fragment> fragments =
                 SpiralStairCtmGeometry.split(quad.lightFace(), quad.vertices());
         if (fragments.isEmpty()) {
@@ -245,9 +304,9 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
             Direction cullFace = cullFaceForOffset(quad.cullFace(), offsetX, offsetY, offsetZ);
 
             for (List<SpiralStairCtmGeometry.CellVertex> primitive
-                    : repeatPrimitives(vertices, projectedRepeatGeometry)) {
+                    : repeatPrimitives(vertices, geometryPomFallback)) {
                 List<SpiralStairCtmGeometry.CellVertex> emittedVertices = primitive.size() == 3
-                        ? (projectedRepeatGeometry
+                        ? (geometryPomFallback
                         ? padPomSafeTriangle(primitive.get(0), primitive.get(1), primitive.get(2))
                         : padTriangle(primitive.get(0), primitive.get(1), primitive.get(2)))
                         : primitive;
@@ -255,23 +314,29 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
                 emitted++;
             }
         }
-        SynapheiaMetrics.event("stage_invoked", SynapheiaMode.SYNAPHEIA, snapshot.generation(), fields(
-                "stage", "repeat", "model_identifier", modelId.toString(),
-                "block_id", blockId.toString(), "rule_id", rule.id(),
-                "block_pos", List.of(pos.getX(), pos.getY(), pos.getZ()),
-                "emitted_surface_count", emitted, "blockstate", state.toString()
-        ));
+        if (SynapheiaMetrics.enabled()) {
+            SynapheiaMetrics.event("stage_invoked", SynapheiaMode.SYNAPHEIA, snapshot.generation(), fields(
+                    "stage", "repeat", "model_identifier", modelId.toString(),
+                    "block_id", blockId.toString(), "rule_id", rule.id(),
+                    "block_pos", List.of(pos.getX(), pos.getY(), pos.getZ()),
+                    "emitted_surface_count", emitted, "blockstate", state.toString()
+            ));
+        }
         return emitted;
     }
 
     static List<List<SpiralStairCtmGeometry.CellVertex>> repeatPrimitives(
             List<SpiralStairCtmGeometry.CellVertex> vertices,
-            boolean pomSafe) {
-        if (pomSafe) {
-            // Projected spiral faces can be skewed after a CTM cell split. Reuse the
-            // proven Gothic-arch tessellation so Iris sees stable height-map bounds.
+            boolean geometryPomFallback) {
+        if (geometryPomFallback) {
+            // Unknown POM pipelines retain the proven geometry-only correction.
+            // The supported CU path resolves exact sprite bounds in its vertex
+            // shader and therefore does not need this per-surface expansion.
             return ArchRepeatCtmRenderer.pomSafePrimitives(vertices);
         }
+        // The authored main spiral is 118 bounded surfaces versus 284 with the
+        // geometry-only POM decomposition. Keep the normal path to one quad for
+        // triangles/quads and an n-2 fan for larger clipped polygons.
         if (vertices.size() <= 4) {
             return List.of(List.copyOf(vertices));
         }
@@ -324,25 +389,6 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
         emitter.emit();
     }
 
-    private static void emitOriginal(QuadEmitter emitter, CapturedQuad quad) {
-        emitter.material(quad.material());
-        emitter.colorIndex(quad.colorIndex());
-        emitter.tag(quad.tag());
-        emitter.cullFace(quad.cullFace());
-        emitter.nominalFace(quad.nominalFace());
-        for (int index = 0; index < 4; index++) {
-            SpiralStairCtmGeometry.Vertex vertex = quad.vertices().get(index);
-            emitter.pos(index, vertex.x(), vertex.y(), vertex.z());
-            emitter.uv(index, vertex.sourceU(), vertex.sourceV());
-            emitter.color(index, vertex.color());
-            emitter.lightmap(index, vertex.lightmap());
-            if (vertex.hasNormal()) {
-                emitter.normal(index, vertex.normalX(), vertex.normalY(), vertex.normalZ());
-            }
-        }
-        emitter.emit();
-    }
-
     private void emitOverlay(QuadEmitter emitter,
                              BlockRenderView view,
                              BlockState state,
@@ -364,11 +410,13 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
         emitter.material(material);
         emitter.emit();
 
-        SynapheiaMetrics.event("tile_selected", SynapheiaMode.SYNAPHEIA, snapshot.generation(), fields(
-                "stage", "overlay_ctm", "rule_id", rule.id(), "tile_index", tileIndex,
-                "connection_mask", mask, "face_direction", face.getName(),
-                "block_pos", List.of(pos.getX(), pos.getY(), pos.getZ())
-        ));
+        if (SynapheiaMetrics.enabled()) {
+            SynapheiaMetrics.event("tile_selected", SynapheiaMode.SYNAPHEIA, snapshot.generation(), fields(
+                    "stage", "overlay_ctm", "rule_id", rule.id(), "tile_index", tileIndex,
+                    "connection_mask", mask, "face_direction", face.getName(),
+                    "block_pos", List.of(pos.getX(), pos.getY(), pos.getZ())
+            ));
+        }
     }
 
     private static int connectionMask(BlockRenderView view,
@@ -416,17 +464,18 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
         return new Direction[]{horizontal, vertical.getOpposite(), horizontal.getOpposite(), vertical};
     }
 
-    private static boolean isUnitSquare(CapturedQuad quad) {
-        if (quad.lightFace() == null) {
+    private static boolean isUnitSquare(QuadView quad) {
+        Direction face = quad.lightFace();
+        if (face == null) {
             return false;
         }
-        for (SpiralStairCtmGeometry.Vertex vertex : quad.vertices()) {
+        for (int vertex = 0; vertex < 4; vertex++) {
             float first;
             float second;
-            switch (quad.lightFace().getAxis()) {
-                case X -> { first = vertex.y(); second = vertex.z(); }
-                case Y -> { first = vertex.x(); second = vertex.z(); }
-                case Z -> { first = vertex.y(); second = vertex.x(); }
+            switch (face.getAxis()) {
+                case X -> { first = quad.y(vertex); second = quad.z(vertex); }
+                case Y -> { first = quad.x(vertex); second = quad.z(vertex); }
+                case Z -> { first = quad.y(vertex); second = quad.x(vertex); }
                 default -> throw new IllegalStateException("Unexpected face axis.");
             }
             if (!unitBoundary(first) || !unitBoundary(second)) {
@@ -490,8 +539,8 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
                                 RenderMaterial material,
                                 int colorIndex,
                                 int tag,
-                                Identifier sourceSprite,
-                                List<SpiralStairCtmGeometry.Vertex> vertices) {
+                                List<SpiralStairCtmGeometry.Vertex> vertices,
+                                SynapheiaManifest.Rule repeatRule) {
     }
 
     private record OverlayKey(String ruleId, Direction face) {

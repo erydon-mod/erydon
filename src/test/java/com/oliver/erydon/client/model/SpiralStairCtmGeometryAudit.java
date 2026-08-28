@@ -1,7 +1,17 @@
 package com.oliver.erydon.client.model;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
+import org.joml.Vector3f;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +27,132 @@ public final class SpiralStairCtmGeometryAudit {
         verifyEveryFaceProjectionAndOffset();
         verifyTinyBoundaryOffsetsAreSnapped();
         verifyRepeatTileArithmetic();
+        verifyAuthoredSpiralPomBudgets();
         System.out.println("Spiral stair CTM geometry audit passed.");
+    }
+
+    private static void verifyAuthoredSpiralPomBudgets() {
+        PomMetrics main = inspectAuthoredSpiralPomGeometry("stairs_spiral_large");
+        PomMetrics offstep = inspectAuthoredSpiralPomGeometry("stairs_spiral_large_offstep");
+
+        assertPomMetrics("main", main, 72, 102, 28, 118, 284);
+        assertPomMetrics("offstep", offstep, 22, 36, 2, 36, 48);
+        if (main.maximumFallbackPrimitives() > 16 || offstep.maximumFallbackPrimitives() > 16) {
+            throw new IllegalStateException("A real spiral fragment exceeded the measured POM fallback ceiling: "
+                    + main.maximumFallbackPrimitives() + "/" + offstep.maximumFallbackPrimitives());
+        }
+
+        System.out.println("Spiral POM budget: main=" + main.boundedPrimitiveCount()
+                + " bounded/" + main.fallbackPrimitiveCount() + " fallback, offstep="
+                + offstep.boundedPrimitiveCount() + " bounded/"
+                + offstep.fallbackPrimitiveCount() + " fallback, max fallback fragment="
+                + Math.max(main.maximumFallbackPrimitives(), offstep.maximumFallbackPrimitives()) + ".");
+    }
+
+    private static PomMetrics inspectAuthoredSpiralPomGeometry(String modelName) {
+        String resourcePath = "assets/erydon/models/block/stairs/spiral/" + modelName + ".json";
+        int faceCount = 0;
+        int fragmentCount = 0;
+        int unsafeFragmentCount = 0;
+        int boundedPrimitiveCount = 0;
+        int fallbackPrimitiveCount = 0;
+        int maximumPrimitives = 0;
+
+        try (InputStream input = SpiralStairCtmGeometryAudit.class.getClassLoader()
+                .getResourceAsStream(resourcePath)) {
+            if (input == null) {
+                throw new IllegalStateException("Missing spiral master " + resourcePath);
+            }
+            JsonElement root = JsonParser.parseReader(
+                    new InputStreamReader(input, StandardCharsets.UTF_8));
+            Class<?> modelDataClass = Class.forName(
+                    "com.oliver.erydon.client.model.ErydonRawModelLoadingPlugin$RawModelData");
+            Method parse = modelDataClass.getDeclaredMethod(
+                    "parse", Identifier.class, JsonElement.class);
+            parse.setAccessible(true);
+            Object model = parse.invoke(null,
+                    new Identifier("erydon", "block/stairs/spiral/" + modelName), root);
+            Field elementsField = modelDataClass.getDeclaredField("elements");
+            elementsField.setAccessible(true);
+            @SuppressWarnings("unchecked")
+            List<Object> elements = (List<Object>) elementsField.get(model);
+
+            for (int elementIndex = 0; elementIndex < elements.size(); elementIndex++) {
+                Object element = elements.get(elementIndex);
+                Field facesField = element.getClass().getDeclaredField("faces");
+                facesField.setAccessible(true);
+                Method transformedVertices = element.getClass()
+                        .getDeclaredMethod("transformedVertices", Direction.class);
+                transformedVertices.setAccessible(true);
+                @SuppressWarnings("unchecked")
+                Map<Direction, Object> faces = (Map<Direction, Object>) facesField.get(element);
+                for (Direction authoredFace : faces.keySet()) {
+                    faceCount++;
+                    Vector3f[] positions = (Vector3f[]) transformedVertices.invoke(element, authoredFace);
+                    Direction lightFace = closestDirection(positions);
+                    List<SpiralStairCtmGeometry.Vertex> vertices = new ArrayList<>(4);
+                    for (Vector3f position : positions) {
+                        vertices.add(vertex(position.x / 16.0F,
+                                position.y / 16.0F, position.z / 16.0F));
+                    }
+                    for (SpiralStairCtmGeometry.Fragment fragment
+                            : SpiralStairCtmGeometry.split(lightFace, vertices)) {
+                        fragmentCount++;
+                        if (!ArchRepeatCtmRenderer.hasStablePomBounds(fragment.vertices())) {
+                            unsafeFragmentCount++;
+                        }
+                        boundedPrimitiveCount += SynapheiaRepeatBakedModel
+                                .repeatPrimitives(fragment.vertices(), false).size();
+                        int fallbackPrimitives = SynapheiaRepeatBakedModel
+                                .repeatPrimitives(fragment.vertices(), true).size();
+                        fallbackPrimitiveCount += fallbackPrimitives;
+                        maximumPrimitives = Math.max(maximumPrimitives, fallbackPrimitives);
+                    }
+                }
+            }
+        } catch (ReflectiveOperationException exception) {
+            throw new IllegalStateException("Could not inspect spiral raw model geometry.", exception);
+        } catch (Exception exception) {
+            if (exception instanceof IllegalStateException stateException) {
+                throw stateException;
+            }
+            throw new IllegalStateException("Could not read spiral master " + modelName + ".", exception);
+        }
+        return new PomMetrics(faceCount, fragmentCount, unsafeFragmentCount,
+                boundedPrimitiveCount, fallbackPrimitiveCount, maximumPrimitives);
+    }
+
+    private static void assertPomMetrics(String label,
+                                         PomMetrics actual,
+                                         int faces,
+                                         int fragments,
+                                         int unsafe,
+                                         int bounded,
+                                         int fallback) {
+        PomMetrics expected = new PomMetrics(faces, fragments, unsafe, bounded, fallback,
+                actual.maximumFallbackPrimitives());
+        if (!actual.equals(expected)) {
+            throw new IllegalStateException(label + " spiral POM budget changed: expected "
+                    + expected + ", found " + actual);
+        }
+    }
+
+    private static Direction closestDirection(Vector3f[] vertices) {
+        Vector3f firstEdge = new Vector3f(vertices[1]).sub(vertices[0]);
+        Vector3f secondEdge = new Vector3f(vertices[2]).sub(vertices[0]);
+        Vector3f normal = firstEdge.cross(secondEdge);
+        if (normal.lengthSquared() <= EPSILON) {
+            return Direction.UP;
+        }
+        return Direction.getFacing(normal.x, normal.y, normal.z);
+    }
+
+    private record PomMetrics(int faceCount,
+                              int fragmentCount,
+                              int unsafeFragmentCount,
+                              int boundedPrimitiveCount,
+                              int fallbackPrimitiveCount,
+                              int maximumFallbackPrimitives) {
     }
 
     private static void verifyAreaPreservingCellSplit() {

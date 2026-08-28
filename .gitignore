@@ -4,6 +4,8 @@
 build/
 out/
 classes/
+output/
+tmp/
 
 # IntelliJ and editor state
 .idea/
