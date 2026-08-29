@@ -49,6 +49,7 @@ tasks.register('verifyCtmIsolation') {
         def slopePluginSource = sourceText('src/main/java/com/oliver/erydon/client/model/ErydonSlopeModelLoadingPlugin.java')
         def classifierSource = sourceText('src/main/java/com/oliver/erydon/client/model/ErydonSlopeModelClassifier.java')
         def ctmServiceSource = sourceText('src/main/java/com/oliver/erydon/client/model/ErydonCtmService.java')
+        def continuityOwnershipSource = sourceText('src/main/java/com/oliver/erydon/mixin/client/compat/continuity/SynapheiaOwnershipMixin.java')
 
         def fixtureFile = file('src/test/resources/ctm-isolation/fixture.json')
         def fixture = fixtureFile.exists() ? new JsonSlurper().parse(fixtureFile) : [:]
@@ -182,6 +183,12 @@ tasks.register('verifyCtmIsolation') {
                 check(!allJavaSource.contains('disable_global_emissive') && !allJavaSource.contains('wrapEmissive'),
                         'No ERYDON configuration changes Continuity global emissive behavior',
                         'No ERYDON source edits Continuity emissive wrapping.'),
+                check(mixinsText.contains('client.compat.continuity.SynapheiaOwnershipMixin')
+                                && continuityOwnershipSource.contains('SynapheiaModelLoadingPlugin.ownsCtmModel')
+                                && continuityOwnershipSource.contains('return blockStateModelIds.get(modelId);')
+                                && continuityOwnershipSource.contains('return null;'),
+                        'Continuity compatibility skips only Synapheia-owned CTM models',
+                        'The narrow lookup redirect preserves Continuity for foreign models and leaves its emissive path intact.'),
                 check(modelModifierChecks.every { it.nonErydonReturnsOriginal },
                         'Every model modifier returns the original model for non-ERYDON IDs',
                         modelModifierChecks.findAll { !it.nonErydonReturnsOriginal }.collect { it.plugin }.join(', ') ?: 'All model loading plugins are namespace guarded.')
@@ -189,9 +196,9 @@ tasks.register('verifyCtmIsolation') {
 
         def forbiddenChecks = [
                 check(!allJavaSource.contains('ModelWrappingHandlerMixin') && !allJavaSource.contains('createBlockStateModelIdMap')
-                                && !mixinsText.contains('compat.continuity'),
-                        'No ERYDON Continuity model-map replacement remains',
-                        'Continuity ModelWrappingHandler is no longer mixed into or replaced.'),
+                                && !continuityOwnershipSource.contains('wrapEmissive'),
+                        'No global Continuity model-map or emissive replacement remains',
+                        'The legacy global replacement is absent; only the narrow Synapheia ownership redirect is allowed.'),
                 check(!allJavaSource.contains('erydon.continuity.mode')
                                 && !allJavaSource.contains('erydon.continuity.disable_global_emissive'),
                         'No ERYDON Continuity mode/emissive config path remains',

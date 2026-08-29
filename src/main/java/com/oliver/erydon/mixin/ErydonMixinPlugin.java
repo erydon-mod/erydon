@@ -26,6 +26,9 @@ public final class ErydonMixinPlugin implements IMixinConfigPlugin {
         if (mixinClassName.contains(".compat.iris.")) {
             return FabricLoader.getInstance().isModLoaded("iris");
         }
+        if (mixinClassName.contains(".compat.continuity.")) {
+            return FabricLoader.getInstance().isModLoaded("continuity");
+        }
         if (mixinClassName.contains(".compat.rei.")) {
             return FabricLoader.getInstance().isModLoaded("roughlyenoughitems");
         }

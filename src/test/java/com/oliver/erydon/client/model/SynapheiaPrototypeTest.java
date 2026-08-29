@@ -495,12 +495,21 @@ final class SynapheiaPrototypeTest {
         overlay.setProperty("connect", "block");
         overlay.setProperty("innerSeams", "true");
         overlay.setProperty("priority", "20");
-        overlay.setProperty("layer", "translucent");
+        overlay.setProperty("layer", "cutout_mipped");
         SynapheiaManifest.Rule overlayRule = SynapheiaManifest.parseRule(
                 new Identifier("minecraft", "optifine/ctm/aganite/overlay.properties"),
                 "test", overlay, Set.of(block));
         assertEquals(SynapheiaManifest.Method.OVERLAY_CTM, overlayRule.method());
         assertEquals(47, overlayRule.tiles().size());
+
+        Properties legacyOverlay = new Properties();
+        legacyOverlay.putAll(overlay);
+        legacyOverlay.setProperty("layer", "translucent");
+        SynapheiaManifest.Rule legacyOverlayRule = SynapheiaManifest.parseRule(
+                new Identifier("minecraft", "optifine/ctm/aganite/legacy_overlay.properties"),
+                "legacy-test", legacyOverlay, Set.of(block));
+        assertEquals(SynapheiaManifest.Method.OVERLAY_CTM, legacyOverlayRule.method());
+        assertEquals(47, legacyOverlayRule.tiles().size());
     }
 
     @Test

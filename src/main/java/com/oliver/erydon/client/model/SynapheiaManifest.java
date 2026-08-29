@@ -41,6 +41,7 @@ final class SynapheiaManifest {
         Set<String> sourcePacks = new LinkedHashSet<>();
         SynapheiaTileSequencePool tileSequences = new SynapheiaTileSequencePool();
         int bytesRead = 0;
+        int legacyTranslucentOverlayRules = 0;
         boolean metricsEnabled = SynapheiaMetrics.enabled();
         for (Map.Entry<Identifier, Resource> entry : resources.entrySet()) {
             Identifier resourceId = entry.getKey();
@@ -54,6 +55,9 @@ final class SynapheiaManifest {
             }
 
             Rule parsedRule = parseRule(resourceId, resource.getResourcePackName(), properties, blocks);
+            if (parsedRule.method() == Method.OVERLAY_CTM && usesLegacyTranslucentLayer(properties)) {
+                legacyTranslucentOverlayRules++;
+            }
             Rule rule = parsedRule.withTiles(tileSequences.intern(parsedRule.tiles()));
             rules.add(rule);
             sourcePacks.add(resource.getResourcePackName());
@@ -73,6 +77,10 @@ final class SynapheiaManifest {
         long overlayCount = rules.stream().filter(rule -> rule.method() == Method.OVERLAY_CTM).count();
         if (repeatCount == 0) {
             throw new IllegalStateException("The active resource stack contains no ERYDON repeat rules.");
+        }
+        if (legacyTranslucentOverlayRules > 0) {
+            Erydon.LOGGER.info("[{}] Synapheia mapped {} legacy layer=translucent overlay rules to cutout_mipped.",
+                    Erydon.MOD_ID, legacyTranslucentOverlayRules);
         }
         return new Prepared(List.copyOf(rules), String.join(", ", sourcePacks), bytesRead,
                 Math.toIntExact(repeatCount), Math.toIntExact(overlayCount), 0L);
@@ -101,8 +109,11 @@ final class SynapheiaManifest {
             if (width != 6 || height != 6) {
                 throw invalid(resourceId, "repeat rules must be 6x6");
             }
-        } else if (!"translucent".equalsIgnoreCase(properties.getProperty("layer", "translucent").trim())) {
-            throw invalid(resourceId, "overlay_ctm layer must be translucent");
+        } else {
+            String layer = properties.getProperty("layer", "cutout_mipped").trim();
+            if (!"cutout_mipped".equalsIgnoreCase(layer) && !"translucent".equalsIgnoreCase(layer)) {
+                throw invalid(resourceId, "overlay_ctm layer must be cutout_mipped");
+            }
         }
 
         String connect = properties.getProperty("connect", "block").trim();
@@ -213,6 +224,10 @@ final class SynapheiaManifest {
             }
         }
         return List.copyOf(result);
+    }
+
+    private static boolean usesLegacyTranslucentLayer(Properties properties) {
+        return "translucent".equalsIgnoreCase(properties.getProperty("layer", "").trim());
     }
 
     private static Identifier resolveTextureId(String token, Identifier resourceId) {

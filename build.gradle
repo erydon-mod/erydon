@@ -369,6 +369,9 @@ tasks.register('auditErydonJar') {
         try {
             def entries = zip.entries().toList()
             def entryNames = entries.collect { it.name }
+            def nestedContinuityJars = entryNames.findAll {
+                it.toLowerCase(Locale.ROOT).contains('continuity') && it.toLowerCase(Locale.ROOT).endsWith('.jar')
+            }
             def readText = { entry ->
                 zip.getInputStream(entry).withCloseable { input ->
                     input.getText('UTF-8')
@@ -407,8 +410,8 @@ tasks.register('auditErydonJar') {
             if (!configuredMixins.contains('erydon-texture-alias.mixins.json')) {
                 metadataErrors.add("required texture alias mixin config is missing")
             }
-            if (entryNames.any { it.toLowerCase(Locale.ROOT).contains('continuity') }) {
-                metadataErrors.add('release jar still contains Continuity files')
+            if (!nestedContinuityJars.isEmpty()) {
+                metadataErrors.add('release jar still contains a nested Continuity jar')
             }
             requiredDependencies.each { key, expected ->
                 if (!dependencies.containsKey(key)) {
@@ -537,7 +540,7 @@ tasks.register('auditErydonJar') {
                     ".properties matches source byte-for-byte: ${yesNo(sourceProperties == jarProperties)}",
                     "required dependencies: ${requiredDependencies.collect { key, value -> "${key}=${dependencies[key]}" }.join(', ')}",
                     "release metadata consistent: ${yesNo(metadataErrors.isEmpty())}",
-                    "nested Continuity jar absent: ${yesNo(!entryNames.any { it.toLowerCase(Locale.ROOT).contains('continuity') })}",
+                    "nested Continuity jar absent: ${yesNo(nestedContinuityJars.isEmpty())}",
                     "CTM property files found: ${ctmEntries.size()}",
                     "CTM property files with UTF-8 BOM: ${ctmEntriesWithUtf8Bom.size()}",
                     "CTM methods found: ${ctmMethods.collect { key, value -> "${key}=${value}" }.join(', ')}",
@@ -547,7 +550,7 @@ tasks.register('auditErydonJar') {
                     "internal wrapped slope models: ${entryNames.count { it.startsWith('assets/erydon/models/block/internal/wrapped/') && it.contains('slope') && it.endsWith('.json') }}",
                     "glazing slope paths classified: ${yesNo(classifierSource.contains('isGlazingPath') && classifierSource.contains('return Family.NONE;'))}",
                     "legacy CTM gate mixin removed from source: ${yesNo(!allSource.contains('ModelWrappingHandlerMixin') && !allSource.contains('createBlockStateModelIdMap'))}",
-                    "legacy CTM mixins removed from mixin config: ${yesNo(!mixinsSource.toLowerCase(Locale.ROOT).contains('continuity'))}",
+                    "narrow Continuity compatibility mixin configured: ${yesNo(mixinsSource.contains('client.compat.continuity.SynapheiaOwnershipMixin'))}",
                     "ArdaGrass mixin removed from source/config: ${yesNo(!allSource.contains('ArdaGrassBakedModel') && !mixinsSource.contains('ardagrass'))}",
                     "hard-coded Conquest grass IDs absent: ${yesNo(!allSource.contains('clover_covered_grass') && !allSource.contains('taiga_grass'))}",
                     "legacy CTM global config overrides absent: ${yesNo(!allSource.contains('erydon.continuity.mode') && !allSource.contains('erydon.continuity.max_ctm_states') && !allSource.contains('erydon.continuity.disable_global_emissive'))}",

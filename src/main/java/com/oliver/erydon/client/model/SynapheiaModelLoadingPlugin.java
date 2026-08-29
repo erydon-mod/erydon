@@ -52,6 +52,17 @@ public final class SynapheiaModelLoadingPlugin
         }, executor);
     }
 
+    /** Returns whether Synapheia will wrap this placed ERYDON block model. */
+    public static boolean ownsCtmModel(Identifier modelId) {
+        if (!(modelId instanceof ModelIdentifier placedModel)
+                || !Erydon.MOD_ID.equals(placedModel.getNamespace())
+                || "inventory".equals(placedModel.getVariant())) {
+            return false;
+        }
+        Identifier blockId = new Identifier(placedModel.getNamespace(), placedModel.getPath());
+        return SynapheiaService.current().planFor(blockId) != null;
+    }
+
     @Override
     public void onInitializeModelLoader(SynapheiaManifest.Prepared prepared,
                                         ModelLoadingPlugin.Context pluginContext) {
@@ -67,7 +78,7 @@ public final class SynapheiaModelLoadingPlugin
                     || "inventory".equals(modelId.getVariant())) {
                 return model;
             }
-            if (!Erydon.MOD_ID.equals(modelId.getNamespace())) {
+            if (!ownsCtmModel(modelId)) {
                 return model;
             }
             Identifier blockId = new Identifier(modelId.getNamespace(), modelId.getPath());

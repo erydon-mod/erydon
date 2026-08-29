@@ -74,6 +74,23 @@ final class SpiralStairCtmGeometry {
         return List.copyOf(fragments);
     }
 
+    static boolean hasProjectedArea(Direction face, List<Vertex> vertices) {
+        if (face == null || vertices.size() < 3) {
+            return false;
+        }
+        double twiceArea = 0.0D;
+        for (int index = 0; index < vertices.size(); index++) {
+            Vertex current = vertices.get(index);
+            Vertex next = vertices.get((index + 1) % vertices.size());
+            double currentS = snapToCell(textureS(face, current.x, current.y, current.z));
+            double currentT = snapToCell(textureT(face, current.x, current.y, current.z));
+            double nextS = snapToCell(textureS(face, next.x, next.y, next.z));
+            double nextT = snapToCell(textureT(face, next.x, next.y, next.z));
+            twiceArea += currentS * nextT - nextS * currentT;
+        }
+        return Math.abs(twiceArea) * 0.5D > AREA_EPSILON;
+    }
+
     static float u(Direction face, CellVertex vertex) {
         return u(face, vertex.localS);
     }
