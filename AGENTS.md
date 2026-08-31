@@ -55,6 +55,11 @@ Codex is responsible for routine Git and GitHub maintenance for this repository:
 - Never force-push.
 - Help maintain issues, pull requests, dependencies, and releases when requested.
 
+## Changelog dates
+
+- Whenever a live changelog row is added or amended, fill the `Date of change` column with the actual date of the work. Never use `Not Recorded` for newly added or amended work.
+- Keep `Date of change` separate from `Launch date`; leave the launch date blank until the release date is known.
+
 ## Related projects
 
 Daedalon, Themelios, and the ERYDON resource packs are intended to receive separate public repositories only after individual clean-export reviews. Do not create or publish them automatically; each requires its own licensing review, README, ignore rules, CI, and explicit publication approval. Never import private development history.
