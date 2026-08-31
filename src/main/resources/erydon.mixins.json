@@ -17,6 +17,7 @@
     "client.FluidRendererMixin",
     "client.SpriteAtlasTextureMixin",
     "client.compat.axiom.BlockListEntryMixin",
+    "client.compat.axiom.BlockRenderCacheMixin",
     "client.compat.continuity.SynapheiaOwnershipMixin",
     "client.compat.iris.IrisChunkProgramOverridesMixin",
     "client.compat.iris.ProgramSetMixin",

@@ -775,6 +775,7 @@ apply from: 'gradle/erydon-restored-family-geometry.gradle'
 apply from: 'gradle/erydon-hotpath-benchmark.gradle'
 apply from: 'gradle/erydon-model-geometry-safety.gradle'
 apply from: 'gradle/erydon-modmenu-audit.gradle'
+apply from: 'gradle/erydon-axiom-icon-audit.gradle'
 
 publishing {
     publications {

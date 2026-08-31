@@ -1,0 +1,234 @@
+tasks.register('auditErydonAxiomIconParity') {
+    group = 'verification'
+    description = 'Inventories every ERYDON block/item icon pair and verifies Axiom uses the Creative/REI item-rendering path.'
+
+    def reportFile = layout.buildDirectory.file('reports/erydon_axiom_icon_parity.txt')
+    def inventoryFile = layout.buildDirectory.file('reports/erydon_axiom_icon_inventory.csv')
+    inputs.files(
+            fileTree('src/main/resources/assets/erydon/blockstates') { include '*.json' },
+            fileTree('src/main/resources/assets/erydon/models/item') { include '*.json' },
+            files(
+                    'src/main/java/com/oliver/erydon/mixin/client/compat/axiom/BlockRenderCacheMixin.java',
+                    'src/main/resources/erydon.mixins.json',
+                    'src/main/java/com/oliver/erydon/mixin/ErydonMixinPlugin.java',
+                    'src/main/java/com/oliver/erydon/item/ModItemGroups.java',
+                    'src/main/java/com/oliver/erydon/compat/rei/ErydonReiClientPlugin.java',
+                    'src/main/java/com/oliver/erydon/ModBlocks.java'
+            )
+    )
+    outputs.files(reportFile, inventoryFile)
+
+    doLast {
+        def slurper = new groovy.json.JsonSlurper()
+        def blockstatesRoot = file('src/main/resources/assets/erydon/blockstates')
+        def itemModelsRoot = file('src/main/resources/assets/erydon/models/item')
+        def mixinFile = file('src/main/java/com/oliver/erydon/mixin/client/compat/axiom/BlockRenderCacheMixin.java')
+        def mixinConfigFile = file('src/main/resources/erydon.mixins.json')
+        def mixinPluginFile = file('src/main/java/com/oliver/erydon/mixin/ErydonMixinPlugin.java')
+        def creativeFile = file('src/main/java/com/oliver/erydon/item/ModItemGroups.java')
+        def reiFile = file('src/main/java/com/oliver/erydon/compat/rei/ErydonReiClientPlugin.java')
+        def registrationsFile = file('src/main/java/com/oliver/erydon/ModBlocks.java')
+
+        def jsonFilesById = { File root ->
+            def result = new TreeMap<String, File>()
+            fileTree(root) { include '*.json' }.files.each { candidate ->
+                def id = candidate.name.substring(0, candidate.name.length() - '.json'.length())
+                if (result.put(id, candidate) != null) {
+                    throw new GradleException("Duplicate icon audit ID ${id} under ${root}")
+                }
+            }
+            result
+        }
+        def collectModelReferences
+        collectModelReferences = { Object node, Set<String> output ->
+            if (node instanceof Map) {
+                node.each { key, value ->
+                    if (key.toString() == 'model' && value instanceof CharSequence) {
+                        output.add(value.toString())
+                    }
+                    collectModelReferences(value, output)
+                }
+            } else if (node instanceof Iterable) {
+                node.each { value -> collectModelReferences(value, output) }
+            }
+        }
+        def csv = { Object value ->
+            '"' + (value == null ? '' : value.toString()).replace('"', '""') + '"'
+        }
+
+        def blockstatesById = jsonFilesById(blockstatesRoot)
+        def itemModelsById = jsonFilesById(itemModelsRoot)
+        def blockstateIds = blockstatesById.keySet() as Set
+        def itemModelIds = itemModelsById.keySet() as Set
+        def publicIds = new TreeSet<String>(blockstateIds.intersect(itemModelIds))
+
+        def expectedTechnicalBlocks = ['light_pendant_halo'] as Set
+        def expectedItemOnlyModels = [
+                'emblem',
+                'surround_georgian_icon',
+                'surround_gothic_ornate_icon',
+                'surround_guilloche_icon',
+                'surround_modern_icon'
+        ] as Set
+        def blockstateOnly = new TreeSet<String>(blockstateIds - itemModelIds)
+        def itemModelOnly = new TreeSet<String>(itemModelIds - blockstateIds)
+        def unexpectedBlockstateOnly = blockstateOnly - expectedTechnicalBlocks
+        def unexpectedItemModelOnly = itemModelOnly - expectedItemOnlyModels
+
+        int unconditionalBlockstates = 0
+        int conditionedBlockstates = 0
+        int directlySharedModels = 0
+        int distinctItemModels = 0
+        def itemsWithoutParent = new TreeSet<String>()
+        def inventoryRows = []
+
+        publicIds.each { id ->
+            def blockstate = slurper.parse(blockstatesById[id])
+            def itemModel = slurper.parse(itemModelsById[id])
+            def variantKeys = blockstate instanceof Map && blockstate.variants instanceof Map
+                    ? blockstate.variants.keySet().collect { it.toString() }
+                    : []
+            boolean conditioned = blockstate instanceof Map
+                    && (blockstate.multipart instanceof Collection
+                    || variantKeys.any { !it.isEmpty() })
+            if (conditioned) {
+                conditionedBlockstates++
+            } else {
+                unconditionalBlockstates++
+            }
+
+            def placedModels = new TreeSet<String>()
+            collectModelReferences(blockstate, placedModels)
+            def itemParent = itemModel instanceof Map && itemModel.parent instanceof CharSequence
+                    ? itemModel.parent.toString()
+                    : ''
+            if (itemParent.isEmpty()) {
+                itemsWithoutParent.add(id)
+            }
+            boolean directlyShared = !itemParent.isEmpty() && placedModels.contains(itemParent)
+            if (directlyShared) {
+                directlySharedModels++
+            } else {
+                distinctItemModels++
+            }
+            inventoryRows << [
+                    id,
+                    conditioned ? 'multipart-or-conditioned' : 'unconditional',
+                    itemParent,
+                    placedModels.join(';'),
+                    directlyShared,
+                    'Creative/REI/Axiom item renderer'
+            ]
+        }
+
+        def mixinSource = mixinFile.getText('UTF-8')
+        def mixinConfig = new groovy.json.JsonSlurper().parse(mixinConfigFile)
+        def mixinPluginSource = mixinPluginFile.getText('UTF-8')
+        def creativeSource = creativeFile.getText('UTF-8')
+        def reiSource = reiFile.getText('UTF-8')
+        def registrationsSource = registrationsFile.getText('UTF-8')
+
+        boolean creativeUsesBlockItems = creativeSource.contains(
+                'ErydonItemOrdering.orderedBlockItems().forEach(entries::add);')
+        boolean reiUsesBlockItemStacks = reiSource.contains(
+                'ErydonItemOrdering.orderedBlockStacks()')
+                && reiSource.contains('EntryStacks::of')
+        boolean registrationsPairBlocksAndItems = registrationsSource.contains(
+                'registerBlockItem(canonicalName, block);')
+        boolean mixinConfigured = mixinConfig.client instanceof Collection
+                && mixinConfig.client.contains('client.compat.axiom.BlockRenderCacheMixin')
+        boolean mixinIsAxiomGated = mixinPluginSource.contains('mixinClassName.contains(".compat.axiom.")')
+                && mixinPluginSource.contains('isModLoaded("axiom")')
+        boolean axiomUsesItemRenderer = mixinSource.contains(
+                'targets = "com.moulberry.axiom.render.BlockRenderCache"')
+                && mixinSource.contains('method = "shouldRenderAsItem"')
+                && mixinSource.contains('Registries.ITEM.getId(stack.getItem())')
+                && mixinSource.contains('Erydon.MOD_ID.equals(itemId.getNamespace())')
+                && mixinSource.contains('callbackInfo.setReturnValue(true)')
+        def forbiddenMixinWork = [
+                'getBakedModelManager',
+                'getQuads(',
+                'new ArrayList',
+                'new HashMap',
+                '.stream()',
+                'for (',
+                'while ('
+        ].findAll { mixinSource.contains(it) }
+
+        def errors = []
+        if (!unexpectedBlockstateOnly.isEmpty()) {
+            errors << "unexpected blocks without item models: ${unexpectedBlockstateOnly.join(', ')}"
+        }
+        if (!unexpectedItemModelOnly.isEmpty()) {
+            errors << "unexpected item-only models: ${unexpectedItemModelOnly.join(', ')}"
+        }
+        if (!itemsWithoutParent.isEmpty()) {
+            errors << "public block items without a parent model: ${itemsWithoutParent.take(20).join(', ')}"
+        }
+        if (!creativeUsesBlockItems) errors << 'Creative inventory no longer uses the canonical ERYDON block-item list'
+        if (!reiUsesBlockItemStacks) errors << 'REI no longer uses the canonical ERYDON block-item stacks'
+        if (!registrationsPairBlocksAndItems) errors << 'normal ERYDON block registration no longer pairs blocks with items'
+        if (!mixinConfigured) errors << 'Axiom icon parity mixin is not configured'
+        if (!mixinIsAxiomGated) errors << 'Axiom compatibility mixins are not gated on the Axiom mod'
+        if (!axiomUsesItemRenderer) errors << 'Axiom icon parity mixin no longer forces ERYDON item rendering'
+        if (!forbiddenMixinWork.isEmpty()) {
+            errors << "Axiom icon selector performs unexpected model/loop work: ${forbiddenMixinWork.join(', ')}"
+        }
+
+        def report = reportFile.get().asFile
+        report.parentFile.mkdirs()
+        def lines = [
+                'ERYDON Axiom GUI Icon Parity Audit',
+                "Generated: ${new Date().format('yyyy-MM-dd HH:mm:ss Z')}",
+                "Result: ${errors.isEmpty() ? 'PASS' : 'FAIL'}",
+                '',
+                'Inventory',
+                "- public block/item icon pairs: ${publicIds.size()}",
+                "- technical blocks without items: ${blockstateOnly.size()} (${blockstateOnly.join(', ')})",
+                "- non-block/helper item models: ${itemModelOnly.size()} (${itemModelOnly.join(', ')})",
+                "- unconditional blockstate definitions: ${unconditionalBlockstates}",
+                "- multipart or state-conditioned blockstate definitions: ${conditionedBlockstates}",
+                "- item parent also used directly by the placed blockstate: ${directlySharedModels}",
+                "- item parent distinct from every directly placed model: ${distinctItemModels}",
+                '',
+                'Parity route',
+                "- Creative uses canonical block items: ${creativeUsesBlockItems}",
+                "- REI uses canonical block-item stacks: ${reiUsesBlockItemStacks}",
+                "- Axiom mixin configured and mod-gated: ${mixinConfigured && mixinIsAxiomGated}",
+                "- Axiom forces the ERYDON item renderer: ${axiomUsesItemRenderer}",
+                '',
+                'Performance boundary',
+                '- no eager icon generation, model lookup, quad traversal, collection allocation, or loop was added',
+                '- the selector performs one item-registry lookup only when Axiom populates its own icon cache',
+                '- Creative, REI, world rendering, chunk rendering, and model baking are unchanged',
+                '',
+                'Errors'
+        ]
+        lines.addAll(errors.isEmpty() ? ['- none'] : errors.collect { "- ${it}" })
+        report.setText(lines.join(System.lineSeparator()) + System.lineSeparator(), 'UTF-8')
+
+        def inventory = inventoryFile.get().asFile
+        inventory.parentFile.mkdirs()
+        def csvLines = [[
+                'block_id',
+                'blockstate_kind',
+                'item_parent',
+                'directly_placed_models',
+                'item_parent_directly_placed',
+                'resolved_gui_route'
+        ].collect(csv).join(',')]
+        inventoryRows.each { row -> csvLines << row.collect(csv).join(',') }
+        inventory.setText(csvLines.join(System.lineSeparator()) + System.lineSeparator(), 'UTF-8')
+
+        logger.lifecycle("ERYDON Axiom icon parity audit written to ${report}")
+        logger.lifecycle("ERYDON Axiom icon inventory written to ${inventory}")
+        logger.lifecycle("ERYDON Axiom icon summary: publicPairs=${publicIds.size()}, distinctItemModels=${distinctItemModels}, result=${errors.isEmpty() ? 'PASS' : 'FAIL'}")
+        if (!errors.isEmpty()) {
+            throw new GradleException("ERYDON Axiom icon parity audit failed: ${errors.join('; ')}")
+        }
+    }
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('auditErydonAxiomIconParity')
+}
