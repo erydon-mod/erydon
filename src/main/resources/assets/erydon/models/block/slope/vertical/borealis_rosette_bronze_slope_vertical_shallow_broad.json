@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/borealis_rosette_bronze_slope_vertical_shallow_broad_lh",
+  "textures": {
+    "stone": "erydon:block/borealis_block_bronzerose",
+    "particle": "erydon:block/borealis_block_bronzerose"
+  }
+}

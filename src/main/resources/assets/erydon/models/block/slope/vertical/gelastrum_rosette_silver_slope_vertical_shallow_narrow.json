@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/gelastrum_rosette_silver_slope_vertical_shallow_narrow_lh",
+  "textures": {
+    "stone": "erydon:block/gelastrum_block_silverrose",
+    "particle": "erydon:block/gelastrum_block_silverrose"
+  }
+}

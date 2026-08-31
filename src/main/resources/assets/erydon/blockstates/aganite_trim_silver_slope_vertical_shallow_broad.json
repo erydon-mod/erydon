@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/aganite_trim_silver_slope_vertical_shallow_broad"
+                                    }
+                      }
+                  ]
+}

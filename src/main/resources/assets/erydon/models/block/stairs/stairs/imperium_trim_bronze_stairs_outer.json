@@ -1,0 +1,9 @@
+{
+  "parent": "erydon:block/stairs/stairs/imperium_herringbone_bronze_stairs_outer",
+  "textures": {
+    "side": "erydon:block/imperium_block_bronzetrim",
+    "top": "erydon:block/imperium_block_bronzetrim",
+    "bottom": "erydon:block/imperium_block_bronzetrim",
+    "particle": "erydon:block/imperium_block_bronzetrim"
+  }
+}

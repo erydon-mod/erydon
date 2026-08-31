@@ -1,0 +1,9 @@
+{
+  "parent": "erydon:block/stairs/stairs/borealis_herringbone_bronze_stairs_outer",
+  "textures": {
+    "side": "erydon:block/borealis_block_bronzetrim",
+    "top": "erydon:block/borealis_block_bronzetrim",
+    "bottom": "erydon:block/borealis_block_bronzetrim",
+    "particle": "erydon:block/borealis_block_bronzetrim"
+  }
+}

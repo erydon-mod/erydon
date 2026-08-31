@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/chrysonyx_rosette_silver_slope"
+                                    }
+                      }
+                  ]
+}

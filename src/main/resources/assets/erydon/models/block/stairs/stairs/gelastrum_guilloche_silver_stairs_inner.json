@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/inner_stairs",
+  "textures": {
+    "side": "erydon:block/gelastrum_block_silverguilloche",
+    "top": "erydon:block/gelastrum_block_silverguilloche",
+    "bottom": "erydon:block/gelastrum_block_silverguilloche"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/chalstrom_quatrefoil_bronze_slope_vertical_shallow_broad_lh",
+  "textures": {
+    "stone": "erydon:block/chalstrom_block_bronzequatrefoil",
+    "particle": "erydon:block/chalstrom_block_bronzequatrefoil"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "erydon:block/stairs/shallow/shallow_stairs_bottom",
+  "textures": {
+    "all": "erydon:block/brectite_block_silverrose",
+    "underside": "erydon:block/brectite_block_silverrose",
+    "particle": "#all"
+  }
+}

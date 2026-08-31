@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/layer/layer_multiface/parent/height2",
+  "textures": {
+    "texture": "erydon:block/portorium_block_bronzeguilloche"
+  }
+}

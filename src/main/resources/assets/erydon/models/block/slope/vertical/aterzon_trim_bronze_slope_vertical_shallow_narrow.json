@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/aterzon_trim_bronze_slope_vertical_shallow_narrow_lh",
+  "textures": {
+    "stone": "erydon:block/aterzon_block_bronzetrim",
+    "particle": "erydon:block/aterzon_block_bronzetrim"
+  }
+}

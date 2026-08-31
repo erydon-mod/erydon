@@ -100,6 +100,23 @@ class ErydonSwapFamilyDatabaseTest {
     }
 
     @Test
+    void sourceOverlayShapesSwapAcrossCompleteMaterialFamilies() {
+        ErydonSwapFamilyDatabase.FamilySpec target =
+                ErydonSwapFamilyDatabase.findFamily("aganite_family").orElseThrow();
+        for (String path : Set.of(
+                "nerium_trim_bronze_layer_multiface",
+                "nerium_trim_silver_slope_vertical_shallow_narrow",
+                "nerium_guilloche_bronze_stairs_shallow_top",
+                "nerium_quatrefoil_silver_slope_steep_lower",
+                "nerium_rosette_bronze_stairs")) {
+            ErydonSwapFamilyDatabase.FamilyMatch match = ErydonSwapFamilyDatabase
+                    .match(new Identifier(Erydon.MOD_ID, path))
+                    .orElseThrow(() -> new AssertionError("Overlay shape was not matched: " + path));
+            assertEquals(path.replaceFirst("^nerium_", "aganite_"), match.targetPath(target), path);
+        }
+    }
+
+    @Test
     void agedFamiliesRoundTripEveryCanonicalAgedBlockstate() throws IOException {
         Set<String> agedPaths = blockstatePaths().stream()
                 .filter(ErydonIdNaming::isAged)

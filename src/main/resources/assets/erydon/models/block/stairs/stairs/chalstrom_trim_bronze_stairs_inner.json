@@ -1,0 +1,9 @@
+{
+  "parent": "erydon:block/stairs/stairs/chalstrom_herringbone_bronze_stairs_inner",
+  "textures": {
+    "side": "erydon:block/chalstrom_block_bronzetrim",
+    "top": "erydon:block/chalstrom_block_bronzetrim",
+    "bottom": "erydon:block/chalstrom_block_bronzetrim",
+    "particle": "erydon:block/chalstrom_block_bronzetrim"
+  }
+}

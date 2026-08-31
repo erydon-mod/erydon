@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/outer_stairs",
+  "textures": {
+    "side": "erydon:block/hesperion_block_bronzerose",
+    "top": "erydon:block/hesperion_block_bronzerose",
+    "bottom": "erydon:block/hesperion_block_bronzerose"
+  }
+}

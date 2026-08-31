@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/slope_vertical",
+  "textures": {
+    "stone": "erydon:block/mielonyx_block_silverguilloche",
+    "particle": "#stone"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "parent": "erydon:block/stairs/stairs/portorium_herringbone_bronze_stairs",
+  "textures": {
+    "side": "erydon:block/portorium_block_bronzetrim",
+    "top": "erydon:block/portorium_block_bronzetrim",
+    "bottom": "erydon:block/portorium_block_bronzetrim",
+    "particle": "erydon:block/portorium_block_bronzetrim"
+  }
+}

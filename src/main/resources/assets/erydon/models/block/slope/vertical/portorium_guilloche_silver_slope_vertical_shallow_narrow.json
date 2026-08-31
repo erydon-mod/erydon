@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/portorium_guilloche_silver_slope_vertical_shallow_narrow_lh",
+  "textures": {
+    "stone": "erydon:block/portorium_block_silverguilloche",
+    "particle": "erydon:block/portorium_block_silverguilloche"
+  }
+}

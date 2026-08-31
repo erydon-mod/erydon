@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/chalstrom_quatrefoil_silver_slope_vertical_shallow_narrow_lh",
+  "textures": {
+    "stone": "erydon:block/chalstrom_block_silverquatrefoil",
+    "particle": "erydon:block/chalstrom_block_silverquatrefoil"
+  }
+}

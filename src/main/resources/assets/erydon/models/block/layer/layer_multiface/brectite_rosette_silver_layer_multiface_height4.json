@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/layer/layer_multiface/parent/height4",
+  "textures": {
+    "texture": "erydon:block/brectite_block_silverrose"
+  }
+}

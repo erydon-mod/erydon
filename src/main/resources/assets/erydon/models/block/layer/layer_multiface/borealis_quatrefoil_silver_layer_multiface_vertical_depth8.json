@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/layer/layer_multiface/parent/vertical_depth8",
+  "textures": {
+    "texture": "erydon:block/borealis_block_silverquatrefoil"
+  }
+}

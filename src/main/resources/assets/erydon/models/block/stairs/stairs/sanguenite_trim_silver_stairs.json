@@ -1,0 +1,9 @@
+{
+  "parent": "erydon:block/stairs/stairs/sanguenite_herringbone_bronze_stairs",
+  "textures": {
+    "side": "erydon:block/sanguenite_block_silvertrim",
+    "top": "erydon:block/sanguenite_block_silvertrim",
+    "bottom": "erydon:block/sanguenite_block_silvertrim",
+    "particle": "erydon:block/sanguenite_block_silvertrim"
+  }
+}

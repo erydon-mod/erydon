@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/brectite_trim_bronze_slope_steep_lower"
+                                    }
+                      }
+                  ]
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/selenephos_rosette_silver_slope_vertical_shallow_narrow_lh",
+  "textures": {
+    "stone": "erydon:block/selenephos_block_silverrose",
+    "particle": "erydon:block/selenephos_block_silverrose"
+  }
+}

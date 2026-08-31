@@ -17,6 +17,9 @@ import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 import com.oliver.erydon.block.CoverBlock;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 public final class ModBlocks {
     private static final String[] GEORGIAN_WALL_MATERIALS = {
             "aganite", "aterzon", "borealis", "brectite", "calacattum", "chalstrom",
@@ -63,6 +66,25 @@ public final class ModBlocks {
             "noxoplis", "porphyros", "psamatheon", "portorium", "rosinium", "sanguenite",
             "selenephos", "solistra", "striatus"
     };
+
+    private static final String[] OVERLAY_SHAPE_MATERIALS = {
+            "aganite", "aterzon", "borealis", "brectite", "calacattum", "chalstrom",
+            "chrysonyx", "etruscus", "gelastrum", "glacium", "hesperion", "imperium",
+            "kylorion", "laurentium", "mielonyx", "nerium", "noxoplis", "porphyros",
+            "portorium", "rosinium", "sanguenite", "selenephos", "solistra", "striatus"
+    };
+    private static final String[][] OVERLAY_SHAPE_INLAYS = {
+            {"trim", "bronze"},
+            {"trim", "silver"},
+            {"guilloche", "bronze"},
+            {"guilloche", "silver"},
+            {"quatrefoil", "bronze"},
+            {"quatrefoil", "silver"},
+            {"rosette", "bronze"},
+            {"rosette", "silver"}
+    };
+    private static final int OVERLAY_PRIMARY_SHAPES_PER_FAMILY = 12;
+    private static final Map<String, Block> OVERLAY_SHAPE_BLOCKS = new LinkedHashMap<>();
 
     public static Block LIGHT_PENDANT_HALO;
 
@@ -25888,6 +25910,61 @@ public final class ModBlocks {
             new WallBlock(AbstractBlock.Settings.copy(AGANITE_BLOCK)));
     }
 
+    private static void initOverlayShapeFamilies() {
+        for (String material : OVERLAY_SHAPE_MATERIALS) {
+            for (String[] inlay : OVERLAY_SHAPE_INLAYS) {
+                String prefix = material + "_" + inlay[0] + "_" + inlay[1];
+                Identifier baseId = new Identifier(Erydon.MOD_ID, prefix + "_block");
+                if (!Registries.BLOCK.containsId(baseId)) {
+                    throw new IllegalStateException("Missing overlay-family base block " + baseId);
+                }
+                registerOverlayShapeFamily(prefix, Registries.BLOCK.get(baseId));
+            }
+        }
+
+        int expected = OVERLAY_SHAPE_MATERIALS.length
+                * OVERLAY_SHAPE_INLAYS.length
+                * OVERLAY_PRIMARY_SHAPES_PER_FAMILY;
+        if (OVERLAY_SHAPE_BLOCKS.size() != expected) {
+            throw new IllegalStateException("Expected " + expected
+                    + " primary overlay shape blocks, registered " + OVERLAY_SHAPE_BLOCKS.size());
+        }
+    }
+
+    private static void registerOverlayShapeFamily(String prefix, Block base) {
+        registerOverlayShape(prefix + "_stairs",
+                new StairsBlock(base.getDefaultState(), AbstractBlock.Settings.copy(base)));
+        registerOverlayShape(prefix + "_stairs_shallow_bottom",
+                new ShallowStairsBottomBlock(base.getDefaultState(), AbstractBlock.Settings.copy(base).nonOpaque()));
+        registerOverlayShape(prefix + "_stairs_shallow_top",
+                new ShallowStairsTopBlock(base.getDefaultState(), AbstractBlock.Settings.copy(base).nonOpaque()));
+        registerOverlayShape(prefix + "_layer_multiface",
+                new LayerMultifaceBlock(AbstractBlock.Settings.copy(base).nonOpaque()));
+        registerOverlayShape(prefix + "_slope",
+                new SlopeBlock(AbstractBlock.Settings.copy(base).nonOpaque()));
+        registerOverlayShape(prefix + "_slope_shallow_lower",
+                new ShallowSlopeBlock(AbstractBlock.Settings.copy(base).nonOpaque(), ShallowSlopeBlock.Variant.LOWER));
+        registerOverlayShape(prefix + "_slope_shallow_upper",
+                new ShallowSlopeBlock(AbstractBlock.Settings.copy(base).nonOpaque(), ShallowSlopeBlock.Variant.UPPER));
+        registerOverlayShape(prefix + "_slope_steep_lower",
+                new SlopeSteepBlock(AbstractBlock.Settings.copy(base).nonOpaque(), SlopeSteepBlock.Variant.LOWER));
+        registerOverlayShape(prefix + "_slope_steep_upper",
+                new SlopeSteepBlock(AbstractBlock.Settings.copy(base).nonOpaque(), SlopeSteepBlock.Variant.UPPER));
+        registerOverlayShape(prefix + "_slope_vertical",
+                new SlopeVerticalBlock(AbstractBlock.Settings.copy(base).nonOpaque()));
+        registerOverlayShape(prefix + "_slope_vertical_shallow_broad",
+                new SlopeVerticalShallowBroadBlock(AbstractBlock.Settings.copy(base).nonOpaque()));
+        registerOverlayShape(prefix + "_slope_vertical_shallow_narrow",
+                new SlopeVerticalShallowNarrowBlock(AbstractBlock.Settings.copy(base).nonOpaque()));
+    }
+
+    private static void registerOverlayShape(String id, Block block) {
+        if (OVERLAY_SHAPE_BLOCKS.containsKey(id)) {
+            throw new IllegalStateException("Duplicate overlay shape block " + id);
+        }
+        OVERLAY_SHAPE_BLOCKS.put(id, registerBlock(id, block));
+    }
+
     private static void initSlitherBlocks() {
         java.util.List<String> slabIds = new java.util.ArrayList<>();
         for (Identifier id : Registries.BLOCK.getIds()) {
@@ -26177,6 +26254,7 @@ private static Block registerBlock(String name, Block block) {
         initRosiniumSangueniteWeave();
         initSolistraEtruscusWeave();
         initStriatusNeriumWeave();
+        initOverlayShapeFamilies();
         initSlitherBlocks();
     }
 }

@@ -1,0 +1,9 @@
+{
+  "parent": "erydon:block/stairs/stairs/solistra_herringbone_bronze_stairs_outer",
+  "textures": {
+    "side": "erydon:block/solistra_block_silvertrim",
+    "top": "erydon:block/solistra_block_silvertrim",
+    "bottom": "erydon:block/solistra_block_silvertrim",
+    "particle": "erydon:block/solistra_block_silvertrim"
+  }
+}

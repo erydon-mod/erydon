@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/slope/slope",
+  "textures": {
+    "stone": "erydon:block/imperium_block_bronzequatrefoil",
+    "particle": "#stone"
+  }
+}

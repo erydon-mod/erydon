@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/shallow/slope_shallow_upper_inner",
+  "textures": {
+    "stone": "erydon:block/porphyros_block_silverguilloche",
+    "particle": "#stone"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/layer/layer_multiface/parent/top_height12",
+  "textures": {
+    "texture": "erydon:block/chalstrom_block_bronzerose"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/layer/layer_multiface/parent/top_height14",
+  "textures": {
+    "texture": "erydon:block/nerium_block_silverguilloche"
+  }
+}

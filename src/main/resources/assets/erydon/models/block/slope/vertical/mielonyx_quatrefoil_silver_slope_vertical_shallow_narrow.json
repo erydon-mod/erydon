@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/mielonyx_quatrefoil_silver_slope_vertical_shallow_narrow_lh",
+  "textures": {
+    "stone": "erydon:block/mielonyx_block_silverquatrefoil",
+    "particle": "erydon:block/mielonyx_block_silverquatrefoil"
+  }
+}

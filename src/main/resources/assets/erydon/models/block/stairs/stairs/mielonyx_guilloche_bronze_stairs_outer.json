@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/outer_stairs",
+  "textures": {
+    "side": "erydon:block/mielonyx_block_bronzeguilloche",
+    "top": "erydon:block/mielonyx_block_bronzeguilloche",
+    "bottom": "erydon:block/mielonyx_block_bronzeguilloche"
+  }
+}

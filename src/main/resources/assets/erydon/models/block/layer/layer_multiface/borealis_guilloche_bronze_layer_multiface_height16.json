@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/layer/layer_multiface/parent/height16",
+  "textures": {
+    "texture": "erydon:block/borealis_block_bronzeguilloche"
+  }
+}

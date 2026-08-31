@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/calacattum_rosette_silver_slope"
+                                    }
+                      }
+                  ]
+}

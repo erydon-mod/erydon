@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/nerium_trim_silver_slope_shallow_lower"
+                                    }
+                      }
+                  ]
+}

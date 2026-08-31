@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/solistra_guilloche_silver_slope_vertical_shallow_broad_lh",
+  "textures": {
+    "stone": "erydon:block/solistra_block_silverguilloche",
+    "particle": "erydon:block/solistra_block_silverguilloche"
+  }
+}

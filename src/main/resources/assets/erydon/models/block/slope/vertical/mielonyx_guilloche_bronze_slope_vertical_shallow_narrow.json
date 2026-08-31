@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/mielonyx_guilloche_bronze_slope_vertical_shallow_narrow_lh",
+  "textures": {
+    "stone": "erydon:block/mielonyx_block_bronzeguilloche",
+    "particle": "erydon:block/mielonyx_block_bronzeguilloche"
+  }
+}

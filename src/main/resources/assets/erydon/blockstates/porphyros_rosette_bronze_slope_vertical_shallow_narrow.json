@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/porphyros_rosette_bronze_slope_vertical_shallow_narrow"
+                                    }
+                      }
+                  ]
+}

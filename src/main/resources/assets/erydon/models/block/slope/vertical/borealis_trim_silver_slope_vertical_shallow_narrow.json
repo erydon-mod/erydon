@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/borealis_trim_silver_slope_vertical_shallow_narrow_lh",
+  "textures": {
+    "stone": "erydon:block/borealis_block_silvertrim",
+    "particle": "erydon:block/borealis_block_silvertrim"
+  }
+}

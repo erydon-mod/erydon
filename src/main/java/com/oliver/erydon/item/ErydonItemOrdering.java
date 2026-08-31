@@ -36,6 +36,8 @@ public final class ErydonItemOrdering {
             Map.entry("layer_vertical", 42),
             Map.entry("vertical_slice", 50),
             Map.entry("horizontal_slice", 51),
+            Map.entry("slice_vertical", 50),
+            Map.entry("slice_horizontal", 51),
             Map.entry("post", 52),
             Map.entry("slope", 60),
             Map.entry("slope_shallow_lower", 61),
@@ -97,6 +99,17 @@ public final class ErydonItemOrdering {
             "silverquatrefoil", 5,
             "bronzerose", 6,
             "silverrose", 7
+    );
+
+    private static final Map<String, String> CANONICAL_DECORATION_PREFIXES = Map.ofEntries(
+            Map.entry("trim_bronze", "bronzetrim"),
+            Map.entry("trim_silver", "silvertrim"),
+            Map.entry("guilloche_bronze", "bronzeguilloche"),
+            Map.entry("guilloche_silver", "silverguilloche"),
+            Map.entry("quatrefoil_bronze", "bronzequatrefoil"),
+            Map.entry("quatrefoil_silver", "silverquatrefoil"),
+            Map.entry("rosette_bronze", "bronzerose"),
+            Map.entry("rosette_silver", "silverrose")
     );
 
     private ErydonItemOrdering() {
@@ -267,6 +280,13 @@ public final class ErydonItemOrdering {
         if (base.equals("herringbone_bronze") || base.startsWith("herringbone_bronze_")) {
             return new TextureShape(41, "herringbone_bronze", 0, ageOrder,
                     afterPrefix(base, "herringbone_bronze", "block"));
+        }
+        for (Map.Entry<String, String> entry : CANONICAL_DECORATION_PREFIXES.entrySet()) {
+            String prefix = entry.getKey();
+            if (base.equals(prefix) || base.startsWith(prefix + "_")) {
+                return new TextureShape(45, "decorated", DECORATION_ORDER.get(entry.getValue()), ageOrder,
+                        afterPrefix(base, prefix, "block"));
+            }
         }
         if (base.equals("diaphanes") || base.startsWith("diaphanes_")) {
             return new TextureShape(70, "diaphanes", 0, ageOrder, afterPrefix(base, "diaphanes", "pane"));

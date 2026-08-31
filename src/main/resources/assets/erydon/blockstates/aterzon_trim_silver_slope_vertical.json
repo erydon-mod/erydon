@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/aterzon_trim_silver_slope_vertical"
+                                    }
+                      }
+                  ]
+}

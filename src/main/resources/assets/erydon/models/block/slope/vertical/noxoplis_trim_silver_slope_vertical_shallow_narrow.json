@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/noxoplis_trim_silver_slope_vertical_shallow_narrow_lh",
+  "textures": {
+    "stone": "erydon:block/noxoplis_block_silvertrim",
+    "particle": "erydon:block/noxoplis_block_silvertrim"
+  }
+}

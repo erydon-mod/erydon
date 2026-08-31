@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/nerium_rosette_bronze_slope_vertical"
+                                    }
+                      }
+                  ]
+}

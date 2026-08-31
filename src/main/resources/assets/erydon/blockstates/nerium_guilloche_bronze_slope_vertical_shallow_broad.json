@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/nerium_guilloche_bronze_slope_vertical_shallow_broad"
+                                    }
+                      }
+                  ]
+}

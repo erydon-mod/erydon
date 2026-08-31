@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/layer/layer_multiface/parent/top_height6",
+  "textures": {
+    "texture": "erydon:block/chrysonyx_block_silverrose"
+  }
+}

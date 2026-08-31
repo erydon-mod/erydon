@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/stairs",
+  "textures": {
+    "side": "erydon:block/rosinium_block_bronzerose",
+    "top": "erydon:block/rosinium_block_bronzerose",
+    "bottom": "erydon:block/rosinium_block_bronzerose"
+  }
+}

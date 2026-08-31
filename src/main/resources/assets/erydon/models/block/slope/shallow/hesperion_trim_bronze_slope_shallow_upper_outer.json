@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/shallow/slope_shallow_upper_outer",
+  "textures": {
+    "stone": "erydon:block/hesperion_block_bronzetrim",
+    "particle": "#stone"
+  }
+}

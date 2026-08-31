@@ -1,0 +1,8 @@
+{
+  "parent": "erydon:block/stairs/shallow/shallow_stairs_outer_bottom",
+  "textures": {
+    "all": "erydon:block/solistra_block_silverrose",
+    "particle": "#all",
+    "underside": "erydon:block/solistra_block_silverrose"
+  }
+}

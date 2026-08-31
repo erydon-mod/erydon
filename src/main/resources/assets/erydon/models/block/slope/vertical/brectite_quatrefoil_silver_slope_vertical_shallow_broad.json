@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/brectite_quatrefoil_silver_slope_vertical_shallow_broad_lh",
+  "textures": {
+    "stone": "erydon:block/brectite_block_silverquatrefoil",
+    "particle": "erydon:block/brectite_block_silverquatrefoil"
+  }
+}

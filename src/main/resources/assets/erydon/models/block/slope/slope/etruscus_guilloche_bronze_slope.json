@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/slope/slope",
+  "textures": {
+    "stone": "erydon:block/etruscus_block_bronzeguilloche",
+    "particle": "#stone"
+  }
+}

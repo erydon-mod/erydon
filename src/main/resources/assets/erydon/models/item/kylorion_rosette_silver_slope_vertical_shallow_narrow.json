@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/internal/wrapped/kylorion_rosette_silver_slope_vertical_shallow_narrow",
+  "textures": {
+    "texture": "erydon:block/kylorion_block_silverrose"
+  }
+}

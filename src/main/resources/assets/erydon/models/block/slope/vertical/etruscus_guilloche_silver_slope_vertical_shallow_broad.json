@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/etruscus_guilloche_silver_slope_vertical_shallow_broad_lh",
+  "textures": {
+    "stone": "erydon:block/etruscus_block_silverguilloche",
+    "particle": "erydon:block/etruscus_block_silverguilloche"
+  }
+}

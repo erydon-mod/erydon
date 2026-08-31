@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/porphyros_guilloche_bronze_slope_shallow_upper"
+                                    }
+                      }
+                  ]
+}

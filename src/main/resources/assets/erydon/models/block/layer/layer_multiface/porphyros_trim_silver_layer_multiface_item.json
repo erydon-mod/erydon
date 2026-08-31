@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/layer/layer_multiface/parent/item",
+  "textures": {
+    "texture": "erydon:block/porphyros_block_silvertrim"
+  }
+}

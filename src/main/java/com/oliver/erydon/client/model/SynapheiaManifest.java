@@ -1,6 +1,7 @@
 package com.oliver.erydon.client.model;
 
 import com.oliver.erydon.Erydon;
+import com.oliver.erydon.migration.ErydonIdMigration;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
@@ -103,6 +104,7 @@ final class SynapheiaManifest {
                     + " tiles, found " + tiles.size());
         }
 
+        OverlayLayer overlayLayer = OverlayLayer.CUTOUT_MIPPED;
         if (method == Method.REPEAT) {
             int width = parseInt(properties.getProperty("width", "0"), "width", resourceId);
             int height = parseInt(properties.getProperty("height", "0"), "height", resourceId);
@@ -111,8 +113,10 @@ final class SynapheiaManifest {
             }
         } else {
             String layer = properties.getProperty("layer", "cutout_mipped").trim();
-            if (!"cutout_mipped".equalsIgnoreCase(layer) && !"translucent".equalsIgnoreCase(layer)) {
-                throw invalid(resourceId, "overlay_ctm layer must be cutout_mipped");
+            try {
+                overlayLayer = OverlayLayer.fromProperty(layer);
+            } catch (IllegalStateException exception) {
+                throw invalid(resourceId, exception.getMessage());
             }
         }
 
@@ -124,10 +128,29 @@ final class SynapheiaManifest {
         Set<Direction> faces = parseFaces(properties.getProperty("faces", "all"), resourceId);
         Set<Identifier> matchTiles = Set.copyOf(parseTextureIds(
                 properties.getProperty("matchTiles", ""), resourceId));
+        OverlayShape overlayShape = OverlayShape.UNIT_FACE;
+        OverlayConnection overlayConnection = OverlayConnection.BLOCK;
+        if (method == Method.OVERLAY_CTM) {
+            String value = properties.getProperty("SynapheiaOverlayShape",
+                    properties.getProperty("synapheiaOverlayShape", "unit_face"));
+            try {
+                overlayShape = OverlayShape.fromProperty(value);
+            } catch (IllegalStateException exception) {
+                throw invalid(resourceId, exception.getMessage());
+            }
+            String connectionValue = properties.getProperty("SynapheiaOverlayConnect",
+                    properties.getProperty("synapheiaOverlayConnect", "block"));
+            try {
+                overlayConnection = OverlayConnection.fromProperty(connectionValue);
+            } catch (IllegalStateException exception) {
+                throw invalid(resourceId, exception.getMessage());
+            }
+        }
         int priority = parseInt(properties.getProperty("priority", "0"), "priority", resourceId);
 
         return new Rule(resourceId, sourcePack, method, List.copyOf(tiles), faces,
-                Set.copyOf(blocks), matchTiles, innerSeams, priority);
+                Set.copyOf(blocks), matchTiles, overlayLayer, overlayShape, overlayConnection,
+                innerSeams, priority);
     }
 
     static Set<Identifier> parseBlocks(String value) {
@@ -312,6 +335,70 @@ final class SynapheiaManifest {
         }
     }
 
+    enum OverlayShape {
+        UNIT_FACE("unit_face"),
+        SOURCE("source");
+
+        private final String propertyValue;
+
+        OverlayShape(String propertyValue) {
+            this.propertyValue = propertyValue;
+        }
+
+        static OverlayShape fromProperty(String value) {
+            for (OverlayShape shape : values()) {
+                if (shape.propertyValue.equalsIgnoreCase(value.trim())) {
+                    return shape;
+                }
+            }
+            throw new IllegalStateException("unsupported SynapheiaOverlayShape " + value);
+        }
+    }
+
+    enum OverlayLayer {
+        CUTOUT_MIPPED("cutout_mipped"),
+        CUTOUT("cutout");
+
+        private final String propertyValue;
+
+        OverlayLayer(String propertyValue) {
+            this.propertyValue = propertyValue;
+        }
+
+        static OverlayLayer fromProperty(String value) {
+            if ("translucent".equalsIgnoreCase(value.trim())) {
+                return CUTOUT_MIPPED;
+            }
+            for (OverlayLayer layer : values()) {
+                if (layer.propertyValue.equalsIgnoreCase(value.trim())) {
+                    return layer;
+                }
+            }
+            throw new IllegalStateException(
+                    "overlay_ctm layer must be cutout or cutout_mipped, found " + value);
+        }
+    }
+
+    enum OverlayConnection {
+        BLOCK("block"),
+        RULE("rule");
+
+        private final String propertyValue;
+
+        OverlayConnection(String propertyValue) {
+            this.propertyValue = propertyValue;
+        }
+
+        static OverlayConnection fromProperty(String value) {
+            for (OverlayConnection connection : values()) {
+                if (connection.propertyValue.equalsIgnoreCase(value.trim())) {
+                    return connection;
+                }
+            }
+            throw new IllegalStateException("unsupported SynapheiaOverlayConnect " + value);
+        }
+    }
+
     record Prepared(List<Rule> rules,
                     String sourcePacks,
                     int bytes,
@@ -330,15 +417,73 @@ final class SynapheiaManifest {
                 Set<Direction> faces,
                 Set<Identifier> blocks,
                 Set<Identifier> matchTiles,
+                OverlayLayer overlayLayer,
+                OverlayShape overlayShape,
+                OverlayConnection overlayConnection,
                 boolean innerSeams,
                 int priority) {
+        Rule {
+            LinkedHashSet<Identifier> canonicalBlocks = new LinkedHashSet<>(blocks);
+            for (Identifier block : blocks) {
+                canonicalBlocks.add(new Identifier(block.getNamespace(),
+                        ErydonIdMigration.canonicalPath(block.getPath())));
+            }
+            blocks = Set.copyOf(canonicalBlocks);
+        }
+
+        Rule(Identifier resourceId,
+             String sourcePack,
+             Method method,
+             List<Identifier> tiles,
+             Set<Direction> faces,
+             Set<Identifier> blocks,
+             Set<Identifier> matchTiles,
+             boolean innerSeams,
+             int priority) {
+            this(resourceId, sourcePack, method, tiles, faces, blocks, matchTiles,
+                    OverlayLayer.CUTOUT_MIPPED, OverlayShape.UNIT_FACE,
+                    OverlayConnection.BLOCK, innerSeams, priority);
+        }
+
+        Rule(Identifier resourceId,
+             String sourcePack,
+             Method method,
+             List<Identifier> tiles,
+             Set<Direction> faces,
+             Set<Identifier> blocks,
+             Set<Identifier> matchTiles,
+             OverlayShape overlayShape,
+             boolean innerSeams,
+             int priority) {
+            this(resourceId, sourcePack, method, tiles, faces, blocks, matchTiles,
+                    OverlayLayer.CUTOUT_MIPPED, overlayShape,
+                    OverlayConnection.BLOCK, innerSeams, priority);
+        }
+
+        Rule(Identifier resourceId,
+             String sourcePack,
+             Method method,
+             List<Identifier> tiles,
+             Set<Direction> faces,
+             Set<Identifier> blocks,
+             Set<Identifier> matchTiles,
+             OverlayShape overlayShape,
+             OverlayConnection overlayConnection,
+             boolean innerSeams,
+             int priority) {
+            this(resourceId, sourcePack, method, tiles, faces, blocks, matchTiles,
+                    OverlayLayer.CUTOUT_MIPPED, overlayShape,
+                    overlayConnection, innerSeams, priority);
+        }
+
         String id() {
             return resourceId + "@" + sourcePack;
         }
 
         Rule withTiles(List<Identifier> replacementTiles) {
             return new Rule(resourceId, sourcePack, method, replacementTiles, faces,
-                    blocks, matchTiles, innerSeams, priority);
+                    blocks, matchTiles, overlayLayer, overlayShape, overlayConnection,
+                    innerSeams, priority);
         }
 
         boolean matches(Direction face, Identifier sourceSprite) {

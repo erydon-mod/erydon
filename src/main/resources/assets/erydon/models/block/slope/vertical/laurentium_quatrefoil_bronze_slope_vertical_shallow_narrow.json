@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/laurentium_quatrefoil_bronze_slope_vertical_shallow_narrow_lh",
+  "textures": {
+    "stone": "erydon:block/laurentium_block_bronzequatrefoil",
+    "particle": "erydon:block/laurentium_block_bronzequatrefoil"
+  }
+}

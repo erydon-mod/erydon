@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/slope/slope_outer",
+  "textures": {
+    "stone": "erydon:block/gelastrum_block_bronzequatrefoil",
+    "particle": "#stone"
+  }
+}

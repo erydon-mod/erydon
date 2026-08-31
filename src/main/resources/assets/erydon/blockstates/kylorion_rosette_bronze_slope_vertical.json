@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/kylorion_rosette_bronze_slope_vertical"
+                                    }
+                      }
+                  ]
+}

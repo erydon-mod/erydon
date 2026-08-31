@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/layer/layer_multiface/parent/vertical_depth12",
+  "textures": {
+    "texture": "erydon:block/striatus_block_silvertrim"
+  }
+}

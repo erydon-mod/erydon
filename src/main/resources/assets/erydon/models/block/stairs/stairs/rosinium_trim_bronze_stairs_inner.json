@@ -1,0 +1,9 @@
+{
+  "parent": "erydon:block/stairs/stairs/rosinium_herringbone_bronze_stairs_inner",
+  "textures": {
+    "side": "erydon:block/rosinium_block_bronzetrim",
+    "top": "erydon:block/rosinium_block_bronzetrim",
+    "bottom": "erydon:block/rosinium_block_bronzetrim",
+    "particle": "erydon:block/rosinium_block_bronzetrim"
+  }
+}

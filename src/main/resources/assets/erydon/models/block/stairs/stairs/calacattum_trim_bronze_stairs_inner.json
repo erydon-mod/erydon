@@ -1,0 +1,9 @@
+{
+  "parent": "erydon:block/stairs/stairs/calacattum_herringbone_bronze_stairs_inner",
+  "textures": {
+    "side": "erydon:block/calacattum_block_bronzetrim",
+    "top": "erydon:block/calacattum_block_bronzetrim",
+    "bottom": "erydon:block/calacattum_block_bronzetrim",
+    "particle": "erydon:block/calacattum_block_bronzetrim"
+  }
+}

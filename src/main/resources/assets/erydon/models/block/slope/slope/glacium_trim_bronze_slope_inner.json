@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/slope/slope_inner",
+  "textures": {
+    "stone": "erydon:block/glacium_block_bronzetrim",
+    "particle": "#stone"
+  }
+}

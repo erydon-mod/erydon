@@ -1,0 +1,9 @@
+{
+  "parent": "erydon:block/stairs/stairs/brectite_herringbone_bronze_stairs_outer",
+  "textures": {
+    "side": "erydon:block/brectite_block_silvertrim",
+    "top": "erydon:block/brectite_block_silvertrim",
+    "bottom": "erydon:block/brectite_block_silvertrim",
+    "particle": "erydon:block/brectite_block_silvertrim"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/inner_stairs",
+  "textures": {
+    "side": "erydon:block/calacattum_block_bronzerose",
+    "top": "erydon:block/calacattum_block_bronzerose",
+    "bottom": "erydon:block/calacattum_block_bronzerose"
+  }
+}

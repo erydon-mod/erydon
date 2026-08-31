@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/aganite_quatrefoil_silver_slope_steep_upper"
+                                    }
+                      }
+                  ]
+}

@@ -501,6 +501,45 @@ final class SynapheiaPrototypeTest {
                 "test", overlay, Set.of(block));
         assertEquals(SynapheiaManifest.Method.OVERLAY_CTM, overlayRule.method());
         assertEquals(47, overlayRule.tiles().size());
+        assertEquals(SynapheiaManifest.OverlayLayer.CUTOUT_MIPPED,
+                overlayRule.overlayLayer());
+        assertEquals(SynapheiaManifest.OverlayShape.UNIT_FACE, overlayRule.overlayShape());
+        assertEquals(SynapheiaManifest.OverlayConnection.BLOCK,
+                overlayRule.overlayConnection());
+
+        Properties sourceOverlay = new Properties();
+        sourceOverlay.putAll(overlay);
+        sourceOverlay.setProperty("SynapheiaOverlayShape", "source");
+        sourceOverlay.setProperty("SynapheiaOverlayConnect", "rule");
+        SynapheiaManifest.Rule sourceOverlayRule = SynapheiaManifest.parseRule(
+                new Identifier("minecraft", "optifine/ctm/aganite/source_overlay.properties"),
+                "test", sourceOverlay, Set.of(block));
+        assertEquals(SynapheiaManifest.OverlayShape.SOURCE, sourceOverlayRule.overlayShape());
+        assertEquals(SynapheiaManifest.OverlayConnection.RULE,
+                sourceOverlayRule.overlayConnection());
+
+        Properties fineOverlay = new Properties();
+        fineOverlay.putAll(overlay);
+        fineOverlay.setProperty("layer", "cutout");
+        SynapheiaManifest.Rule fineOverlayRule = SynapheiaManifest.parseRule(
+                new Identifier("minecraft", "optifine/ctm/aganite/fine_overlay.properties"),
+                "test", fineOverlay, Set.of(block));
+        assertEquals(SynapheiaManifest.OverlayLayer.CUTOUT,
+                fineOverlayRule.overlayLayer());
+
+        Properties invalidOverlay = new Properties();
+        invalidOverlay.putAll(overlay);
+        invalidOverlay.setProperty("SynapheiaOverlayShape", "stretched");
+        assertThrows(IllegalStateException.class, () -> SynapheiaManifest.parseRule(
+                new Identifier("minecraft", "optifine/ctm/aganite/invalid_overlay.properties"),
+                "test", invalidOverlay, Set.of(block)));
+
+        Properties invalidConnection = new Properties();
+        invalidConnection.putAll(overlay);
+        invalidConnection.setProperty("SynapheiaOverlayConnect", "appearance");
+        assertThrows(IllegalStateException.class, () -> SynapheiaManifest.parseRule(
+                new Identifier("minecraft", "optifine/ctm/aganite/invalid_connection.properties"),
+                "test", invalidConnection, Set.of(block)));
 
         Properties legacyOverlay = new Properties();
         legacyOverlay.putAll(overlay);
@@ -510,6 +549,8 @@ final class SynapheiaPrototypeTest {
                 "legacy-test", legacyOverlay, Set.of(block));
         assertEquals(SynapheiaManifest.Method.OVERLAY_CTM, legacyOverlayRule.method());
         assertEquals(47, legacyOverlayRule.tiles().size());
+        assertEquals(SynapheiaManifest.OverlayLayer.CUTOUT_MIPPED,
+                legacyOverlayRule.overlayLayer());
     }
 
     @Test
@@ -527,6 +568,10 @@ final class SynapheiaPrototypeTest {
         Path namespaceRoot = Path.of("src/main/resources/assets/minecraft");
         int repeatRules = 0;
         int overlayRules = 0;
+        int sourceOverlayRules = 0;
+        int ruleConnectedOverlays = 0;
+        int cutoutOverlays = 0;
+        int cutoutMippedOverlays = 0;
         try (var paths = Files.walk(namespaceRoot.resolve("optifine/ctm"))) {
             for (Path path : paths.filter(file -> file.toString().endsWith(".properties")).toList()) {
                 Properties properties = new Properties();
@@ -544,11 +589,27 @@ final class SynapheiaPrototypeTest {
                     repeatRules++;
                 } else {
                     overlayRules++;
+                    assertEquals(14, rule.blocks().size(), path.toString());
+                    if (rule.overlayShape() == SynapheiaManifest.OverlayShape.SOURCE) {
+                        sourceOverlayRules++;
+                    }
+                    if (rule.overlayConnection() == SynapheiaManifest.OverlayConnection.RULE) {
+                        ruleConnectedOverlays++;
+                    }
+                    if (rule.overlayLayer() == SynapheiaManifest.OverlayLayer.CUTOUT) {
+                        cutoutOverlays++;
+                    } else {
+                        cutoutMippedOverlays++;
+                    }
                 }
             }
         }
         assertEquals(1025, repeatRules);
         assertEquals(192, overlayRules);
+        assertEquals(192, sourceOverlayRules);
+        assertEquals(192, ruleConnectedOverlays);
+        assertEquals(96, cutoutOverlays);
+        assertEquals(96, cutoutMippedOverlays);
     }
 
     private static boolean isCanonicalConnectionMask(int mask) {

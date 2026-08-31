@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/shallow/slope_shallow_upper_inner",
+  "textures": {
+    "stone": "erydon:block/sanguenite_block_bronzeguilloche",
+    "particle": "#stone"
+  }
+}

@@ -30,6 +30,9 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.function.Supplier;
 
 /** Applies all active ERYDON repeat and connected-overlay rules to emitted world quads. */
@@ -37,16 +40,19 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
     private static final Object MATERIAL_LOCK = new Object();
     private static final float UNIT_EPSILON = 0.0001F;
     private static final Offset[][] FACE_TANGENT_OFFSETS = createFaceTangentOffsets();
+    private static final Set<String> WARNED_CROSS_CELL_SOURCE_OVERLAYS =
+            ConcurrentHashMap.newKeySet();
 
     private static volatile SpriteFinder spriteFinder;
-    private static volatile RenderMaterial overlayAoMaterial;
-    private static volatile RenderMaterial overlayNoAoMaterial;
+    private static final AtomicReferenceArray<RenderMaterial> OVERLAY_MATERIALS =
+            new AtomicReferenceArray<>(SynapheiaManifest.OverlayLayer.values().length * 2);
 
     private final ModelIdentifier modelId;
     private final Identifier blockId;
     private final SynapheiaBlockPlan plan;
     private final SynapheiaService.Snapshot snapshot;
     private final boolean projectedRepeatGeometry;
+    private final Identifier overlaySourceSpriteOverride;
 
     SynapheiaRepeatBakedModel(BakedModel wrapped,
                              ModelIdentifier modelId,
@@ -58,6 +64,9 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
         this.plan = plan;
         this.snapshot = snapshot;
         this.projectedRepeatGeometry = usesProjectedRepeatGeometry(this.blockId);
+        this.overlaySourceSpriteOverride = ErydonSlopeModelClassifier.isHandledSlopeId(this.blockId)
+                ? wrapped.getParticleSprite().getContents().getId()
+                : null;
     }
 
     @Override
@@ -83,14 +92,18 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
         boolean geometryPomFallback = projectedRepeatGeometry
                 && ErydonCuPomRuntimeState.requiresGeometryFallback();
         RenderCallState renderCall = new RenderCallState(plan.hasOverlay(), metricsEnabled);
-        SynapheiaNeighbourCache neighbourCache = createNeighbourCache(
-                plan.hasOverlay(), view, pos);
         context.pushTransform(quad -> {
             renderCall.recordInputSurface();
             Identifier sourceSprite = spriteFinder().find(quad).getContents().getId();
+            Identifier overlaySourceSprite = resolveOverlaySourceSprite(
+                    blockId, sourceSprite, overlaySourceSpriteOverride);
             Direction face = quad.lightFace();
-            if (renderCall.tracksOverlays() && isUnitSquare(quad)) {
-                renderCall.observeOverlays(face, plan.overlayRules(face, sourceSprite));
+            if (renderCall.tracksOverlays()) {
+                if (plan.hasSourceShapedOverlay()) {
+                    observeOverlays(renderCall, quad, plan.overlayRules(face, overlaySourceSprite));
+                } else if (isUnitSquare(quad)) {
+                    renderCall.observeUnitOverlays(face, plan.overlayRules(face, overlaySourceSprite));
+                }
             }
 
             SynapheiaManifest.Rule repeatRule = projectedRepeatGeometry
@@ -117,12 +130,20 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
 
         QuadEmitter emitter = context.getEmitter();
         int emitted = renderCall.streamedSurfaceCount();
+        SynapheiaNeighbourCache neighbourCache = createNeighbourCache(
+                renderCall.overlayCount() > 0, view, pos);
+        Map<OverlayKey, OverlayTile> selectedOverlays = renderCall.overlayCount() == 0
+                ? Map.of() : new LinkedHashMap<>(6);
         for (CapturedQuad quad : renderCall.crossCellQuads()) {
             emitted += emitRepeat(emitter, quad, quad.repeatRule(), state, pos, geometryPomFallback);
         }
         for (Map.Entry<OverlayKey, SynapheiaManifest.Rule> entry : renderCall.overlayEntries()) {
-            emitOverlay(emitter, neighbourCache, state, pos,
+            emitOverlay(emitter, neighbourCache, selectedOverlays, state, pos,
                     entry.getKey().face(), entry.getValue());
+            emitted++;
+        }
+        for (SourceOverlay overlay : renderCall.sourceOverlays()) {
+            emitSourceOverlay(emitter, neighbourCache, selectedOverlays, state, pos, overlay);
             emitted++;
         }
 
@@ -158,10 +179,68 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
                 || path.endsWith("_stairs_spiral_large_aged");
     }
 
+    static Identifier resolveOverlaySourceSprite(Identifier blockId,
+                                                 Identifier emittedSprite,
+                                                 Identifier authoredParticleSprite) {
+        return ErydonSlopeModelClassifier.isHandledSlopeId(blockId)
+                && authoredParticleSprite != null
+                ? authoredParticleSprite
+                : emittedSprite;
+    }
+
     static void clearCaches() {
         spriteFinder = null;
-        overlayAoMaterial = null;
-        overlayNoAoMaterial = null;
+        for (int index = 0; index < OVERLAY_MATERIALS.length(); index++) {
+            OVERLAY_MATERIALS.set(index, null);
+        }
+        WARNED_CROSS_CELL_SOURCE_OVERLAYS.clear();
+    }
+
+    private void observeOverlays(RenderCallState renderCall,
+                                 MutableQuadView quad,
+                                 List<SynapheiaManifest.Rule> matchingRules) {
+        if (matchingRules.isEmpty()) {
+            return;
+        }
+        boolean unitSquareChecked = false;
+        boolean unitSquare = false;
+        boolean cellChecked = false;
+        SynapheiaCellGeometry.Cell cell = null;
+        CapturedQuad source = null;
+        for (SynapheiaManifest.Rule rule : matchingRules) {
+            if (rule.overlayShape() == SynapheiaManifest.OverlayShape.UNIT_FACE) {
+                if (!unitSquareChecked) {
+                    unitSquare = isUnitSquare(quad);
+                    unitSquareChecked = true;
+                }
+                if (unitSquare) {
+                    renderCall.observeUnitOverlay(quad.lightFace(), rule);
+                }
+                continue;
+            }
+
+            if (!cellChecked) {
+                cell = SynapheiaCellGeometry.singleCell(quad.lightFace(), quad);
+                cellChecked = true;
+            }
+            if (cell == null) {
+                warnCrossCellSourceOverlay(rule, quad.lightFace());
+                continue;
+            }
+            if (source == null) {
+                source = capture(quad, null);
+            }
+            renderCall.captureSourceOverlay(new SourceOverlay(source, cell, rule));
+        }
+    }
+
+    private void warnCrossCellSourceOverlay(SynapheiaManifest.Rule rule, Direction face) {
+        String key = modelId + "|" + rule.id() + "|" + face;
+        if (WARNED_CROSS_CELL_SOURCE_OVERLAYS.add(key)) {
+            Erydon.LOGGER.warn("[{}] Synapheia skipped source-shaped overlay {} on {} face {} "
+                            + "because the source quad crosses world texture cells.",
+                    Erydon.MOD_ID, rule.resourceId(), modelId, face);
+        }
     }
 
     static Direction cullFaceForOffset(Direction sourceCullFace,
@@ -395,10 +474,63 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
 
     private void emitOverlay(QuadEmitter emitter,
                              SynapheiaNeighbourCache neighbourCache,
+                             Map<OverlayKey, OverlayTile> selectedOverlays,
                              BlockState state,
                              BlockPos pos,
                              Direction face,
                              SynapheiaManifest.Rule rule) {
+        OverlayTile overlay = selectOverlay(neighbourCache, selectedOverlays, state, face, rule);
+        emitter.square(face, 0.0F, 0.0F, 1.0F, 1.0F, 0.0F);
+        emitter.color(-1, -1, -1, -1);
+        emitter.colorIndex(-1);
+        assignOverlayUvs(emitter, overlay.sprite());
+        emitter.material(overlay.material());
+        emitter.emit();
+        recordOverlaySelection(pos, face, rule, overlay);
+    }
+
+    private void emitSourceOverlay(QuadEmitter emitter,
+                                   SynapheiaNeighbourCache neighbourCache,
+                                   Map<OverlayKey, OverlayTile> selectedOverlays,
+                                   BlockState state,
+                                   BlockPos pos,
+                                   SourceOverlay sourceOverlay) {
+        CapturedQuad source = sourceOverlay.source();
+        Direction face = source.lightFace();
+        OverlayTile overlay = selectOverlay(
+                neighbourCache, selectedOverlays, state, face, sourceOverlay.rule());
+        emitter.material(overlay.material());
+        emitter.colorIndex(-1);
+        emitter.tag(source.tag());
+        emitter.cullFace(source.cullFace());
+        emitter.nominalFace(source.nominalFace());
+        for (int vertexIndex = 0; vertexIndex < 4; vertexIndex++) {
+            SpiralStairCtmGeometry.Vertex vertex = source.vertices().get(vertexIndex);
+            emitter.pos(vertexIndex, vertex.x(), vertex.y(), vertex.z());
+            emitter.uv(vertexIndex,
+                    SynapheiaCellGeometry.u(face, vertex, sourceOverlay.cell()),
+                    SynapheiaCellGeometry.v(face, vertex, sourceOverlay.cell()));
+            emitter.color(vertexIndex, -1);
+            emitter.lightmap(vertexIndex, vertex.lightmap());
+            if (vertex.hasNormal()) {
+                emitter.normal(vertexIndex, vertex.normalX(), vertex.normalY(), vertex.normalZ());
+            }
+        }
+        emitter.spriteBake(overlay.sprite(), MutableQuadView.BAKE_NORMALIZED);
+        emitter.emit();
+        recordOverlaySelection(pos, face, sourceOverlay.rule(), overlay);
+    }
+
+    private OverlayTile selectOverlay(SynapheiaNeighbourCache neighbourCache,
+                                      Map<OverlayKey, OverlayTile> selectedOverlays,
+                                      BlockState state,
+                                      Direction face,
+                                      SynapheiaManifest.Rule rule) {
+        OverlayKey key = new OverlayKey(rule.id(), face);
+        OverlayTile selected = selectedOverlays.get(key);
+        if (selected != null) {
+            return selected;
+        }
         List<Sprite> sprites = SynapheiaService.sprites(snapshot, rule);
         if (sprites == null || sprites.size() != 47) {
             throw new IllegalStateException("Synapheia overlay sprites are unavailable for " + rule.resourceId() + ".");
@@ -406,21 +538,23 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
         if (neighbourCache == null) {
             throw new IllegalStateException("Synapheia overlay neighbour cache is unavailable.");
         }
-        int mask = connectionMask(neighbourCache, state, face, rule.innerSeams());
+        int mask = connectionMask(neighbourCache, state, face, rule);
         int tileIndex = connectedTileIndex(mask);
-        RenderMaterial material = overlayMaterial(state.getLuminance() == 0);
-        Sprite overlaySprite = sprites.get(tileIndex);
-        emitter.square(face, 0.0F, 0.0F, 1.0F, 1.0F, 0.0F);
-        emitter.color(-1, -1, -1, -1);
-        emitter.colorIndex(-1);
-        assignOverlayUvs(emitter, overlaySprite);
-        emitter.material(material);
-        emitter.emit();
+        RenderMaterial material = overlayMaterial(
+                state.getLuminance() == 0, rule.overlayLayer());
+        selected = new OverlayTile(sprites.get(tileIndex), material, tileIndex, mask);
+        selectedOverlays.put(key, selected);
+        return selected;
+    }
 
+    private void recordOverlaySelection(BlockPos pos,
+                                        Direction face,
+                                        SynapheiaManifest.Rule rule,
+                                        OverlayTile overlay) {
         if (SynapheiaMetrics.enabled()) {
             SynapheiaMetrics.event("tile_selected", SynapheiaMode.SYNAPHEIA, snapshot.generation(), fields(
-                    "stage", "overlay_ctm", "rule_id", rule.id(), "tile_index", tileIndex,
-                    "connection_mask", mask, "face_direction", face.getName(),
+                    "stage", "overlay_ctm", "rule_id", rule.id(), "tile_index", overlay.tileIndex(),
+                    "connection_mask", overlay.connectionMask(), "face_direction", face.getName(),
                     "block_pos", List.of(pos.getX(), pos.getY(), pos.getZ())
             ));
         }
@@ -429,13 +563,14 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
     static int connectionMask(SynapheiaNeighbourCache neighbourCache,
                               BlockState state,
                               Direction face,
-                              boolean innerSeams) {
+                              SynapheiaManifest.Rule rule) {
         Offset[] directions = FACE_TANGENT_OFFSETS[face.ordinal()];
+        Identifier sourceBlockId = Registries.BLOCK.getId(state.getBlock());
         int mask = 0;
         for (int index = 0; index < 4; index++) {
             Offset direction = directions[index];
-            if (connects(neighbourCache, state,
-                    direction.x(), direction.y(), direction.z(), face, innerSeams)) {
+            if (connects(neighbourCache, sourceBlockId,
+                    direction.x(), direction.y(), direction.z(), face, rule)) {
                 mask |= 1 << (index * 2);
             }
         }
@@ -446,9 +581,9 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
             Offset first = directions[index];
             Offset second = directions[next];
             if ((mask & firstBit) != 0 && (mask & nextBit) != 0 && connects(
-                    neighbourCache, state,
+                    neighbourCache, sourceBlockId,
                     first.x() + second.x(), first.y() + second.y(), first.z() + second.z(),
-                    face, innerSeams)) {
+                    face, rule)) {
                 mask |= 1 << (index * 2 + 1);
             }
         }
@@ -456,18 +591,35 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
     }
 
     private static boolean connects(SynapheiaNeighbourCache neighbourCache,
-                                    BlockState state,
+                                    Identifier sourceBlockId,
                                     int dx,
                                     int dy,
                                     int dz,
                                     Direction face,
-                                    boolean innerSeams) {
-        if (neighbourCache.get(dx, dy, dz).getBlock() != state.getBlock()) {
+                                    SynapheiaManifest.Rule rule) {
+        Identifier neighbourBlockId = Registries.BLOCK.getId(
+                neighbourCache.get(dx, dy, dz).getBlock());
+        if (!overlayBlocksConnect(rule, sourceBlockId, neighbourBlockId)) {
             return false;
         }
-        return !innerSeams || neighbourCache.get(
+        if (!rule.innerSeams()) {
+            return true;
+        }
+        Identifier seamBlockId = Registries.BLOCK.getId(neighbourCache.get(
                 dx + face.getOffsetX(), dy + face.getOffsetY(), dz + face.getOffsetZ()
-        ).getBlock() != state.getBlock();
+        ).getBlock());
+        return !overlayBlocksConnect(rule, sourceBlockId, seamBlockId);
+    }
+
+    static boolean overlayBlocksConnect(SynapheiaManifest.Rule rule,
+                                        Identifier sourceBlockId,
+                                        Identifier neighbourBlockId) {
+        if (sourceBlockId == null || neighbourBlockId == null) {
+            return false;
+        }
+        return rule.overlayConnection() == SynapheiaManifest.OverlayConnection.RULE
+                ? rule.blocks().contains(neighbourBlockId)
+                : sourceBlockId.equals(neighbourBlockId);
     }
 
     static SynapheiaNeighbourCache createNeighbourCache(boolean overlayCapable,
@@ -532,8 +684,10 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
         return current;
     }
 
-    private static RenderMaterial overlayMaterial(boolean ambientOcclusion) {
-        RenderMaterial current = ambientOcclusion ? overlayAoMaterial : overlayNoAoMaterial;
+    private static RenderMaterial overlayMaterial(boolean ambientOcclusion,
+                                                  SynapheiaManifest.OverlayLayer layer) {
+        int materialIndex = layer.ordinal() * 2 + (ambientOcclusion ? 1 : 0);
+        RenderMaterial current = OVERLAY_MATERIALS.get(materialIndex);
         if (current != null) {
             return current;
         }
@@ -542,17 +696,13 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
             throw new IllegalStateException("Synapheia requires the Fabric renderer API.");
         }
         synchronized (MATERIAL_LOCK) {
-            current = ambientOcclusion ? overlayAoMaterial : overlayNoAoMaterial;
+            current = OVERLAY_MATERIALS.get(materialIndex);
             if (current == null) {
                 current = renderer.materialFinder().clear()
-                        .blendMode(overlayBlendMode())
+                        .blendMode(overlayBlendMode(layer))
                         .ambientOcclusion(ambientOcclusion ? TriState.TRUE : TriState.FALSE)
                         .find();
-                if (ambientOcclusion) {
-                    overlayAoMaterial = current;
-                } else {
-                    overlayNoAoMaterial = current;
-                }
+                OVERLAY_MATERIALS.set(materialIndex, current);
             }
         }
         return current;
@@ -572,9 +722,11 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
         quad.uv(3, maxU, minV);
     }
 
-    static BlendMode overlayBlendMode() {
-        // Mirrors Continuity's material for layer=cutout_mipped.
-        return BlendMode.CUTOUT_MIPPED;
+    static BlendMode overlayBlendMode(SynapheiaManifest.OverlayLayer layer) {
+        return switch (layer) {
+            case CUTOUT_MIPPED -> BlendMode.CUTOUT_MIPPED;
+            case CUTOUT -> BlendMode.CUTOUT;
+        };
     }
 
     private static Map<String, Object> fields(Object... entries) {
@@ -606,6 +758,7 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
         private final boolean metricsEnabled;
         private List<CapturedQuad> crossCellQuads;
         private Map<OverlayKey, SynapheiaManifest.Rule> overlays;
+        private List<SourceOverlay> sourceOverlays;
         private int inputSurfaceCount;
         private int streamedSurfaceCount;
 
@@ -618,28 +771,48 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
             return overlayCapable;
         }
 
-        void observeOverlays(Direction face, List<SynapheiaManifest.Rule> matchingRules) {
-            if (!overlayCapable || matchingRules.isEmpty()) {
+        void observeUnitOverlay(Direction face, SynapheiaManifest.Rule rule) {
+            if (!overlayCapable
+                    || rule.overlayShape() != SynapheiaManifest.OverlayShape.UNIT_FACE) {
                 return;
             }
             if (overlays == null) {
                 overlays = new LinkedHashMap<>();
             }
+            overlays.putIfAbsent(new OverlayKey(rule.id(), face), rule);
+        }
+
+        void observeUnitOverlays(Direction face, List<SynapheiaManifest.Rule> matchingRules) {
             for (SynapheiaManifest.Rule rule : matchingRules) {
-                overlays.putIfAbsent(new OverlayKey(rule.id(), face), rule);
+                observeUnitOverlay(face, rule);
             }
         }
 
+        void captureSourceOverlay(SourceOverlay overlay) {
+            if (!overlayCapable) {
+                return;
+            }
+            if (sourceOverlays == null) {
+                sourceOverlays = new ArrayList<>(1);
+            }
+            sourceOverlays.add(overlay);
+        }
+
         boolean hasOverlayBookkeeping() {
-            return overlays != null;
+            return overlays != null || sourceOverlays != null;
         }
 
         int overlayCount() {
-            return overlays == null ? 0 : overlays.size();
+            return (overlays == null ? 0 : overlays.size())
+                    + (sourceOverlays == null ? 0 : sourceOverlays.size());
         }
 
         private Iterable<Map.Entry<OverlayKey, SynapheiaManifest.Rule>> overlayEntries() {
             return overlays == null ? List.of() : overlays.entrySet();
+        }
+
+        private Iterable<SourceOverlay> sourceOverlays() {
+            return sourceOverlays == null ? List.of() : sourceOverlays;
         }
 
         private void captureCrossCell(CapturedQuad quad) {
@@ -685,6 +858,17 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
     }
 
     private record OverlayKey(String ruleId, Direction face) {
+    }
+
+    private record SourceOverlay(CapturedQuad source,
+                                 SynapheiaCellGeometry.Cell cell,
+                                 SynapheiaManifest.Rule rule) {
+    }
+
+    private record OverlayTile(Sprite sprite,
+                               RenderMaterial material,
+                               int tileIndex,
+                               int connectionMask) {
     }
 
     record Offset(int x, int y, int z) {

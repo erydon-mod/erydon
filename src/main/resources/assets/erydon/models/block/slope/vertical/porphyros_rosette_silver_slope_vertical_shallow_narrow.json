@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/porphyros_rosette_silver_slope_vertical_shallow_narrow_lh",
+  "textures": {
+    "stone": "erydon:block/porphyros_block_silverrose",
+    "particle": "erydon:block/porphyros_block_silverrose"
+  }
+}

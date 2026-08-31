@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/inner_stairs",
+  "textures": {
+    "side": "erydon:block/hesperion_block_bronzeguilloche",
+    "top": "erydon:block/hesperion_block_bronzeguilloche",
+    "bottom": "erydon:block/hesperion_block_bronzeguilloche"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/steep/slope_steep_upper_stright",
+  "textures": {
+    "stone": "erydon:block/chrysonyx_block_silvertrim",
+    "particle": "#stone"
+  }
+}

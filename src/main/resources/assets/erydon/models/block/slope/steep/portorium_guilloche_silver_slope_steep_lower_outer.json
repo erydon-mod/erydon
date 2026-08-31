@@ -1,0 +1,8 @@
+{
+  "parent": "erydon:block/slope/steep/slope_steep_lower_outer",
+  "textures": {
+    "0": "#stone",
+    "stone": "erydon:block/portorium_block_silverguilloche",
+    "particle": "#stone"
+  }
+}

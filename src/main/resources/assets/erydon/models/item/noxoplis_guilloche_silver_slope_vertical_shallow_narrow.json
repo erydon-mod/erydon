@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/internal/wrapped/noxoplis_guilloche_silver_slope_vertical_shallow_narrow",
+  "textures": {
+    "texture": "erydon:block/noxoplis_block_silverguilloche"
+  }
+}

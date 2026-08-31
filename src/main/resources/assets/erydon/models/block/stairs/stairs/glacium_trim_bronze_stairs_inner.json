@@ -1,0 +1,9 @@
+{
+  "parent": "erydon:block/stairs/stairs/glacium_herringbone_bronze_stairs_inner",
+  "textures": {
+    "side": "erydon:block/glacium_block_bronzetrim",
+    "top": "erydon:block/glacium_block_bronzetrim",
+    "bottom": "erydon:block/glacium_block_bronzetrim",
+    "particle": "erydon:block/glacium_block_bronzetrim"
+  }
+}

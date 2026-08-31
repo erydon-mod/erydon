@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/solistra_quatrefoil_silver_slope_vertical"
+                                    }
+                      }
+                  ]
+}

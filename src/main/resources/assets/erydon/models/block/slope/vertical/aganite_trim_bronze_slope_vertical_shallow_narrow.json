@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/aganite_trim_bronze_slope_vertical_shallow_narrow_lh",
+  "textures": {
+    "stone": "erydon:block/aganite_block_bronzetrim",
+    "particle": "erydon:block/aganite_block_bronzetrim"
+  }
+}

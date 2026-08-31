@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/aganite_guilloche_silver_slope_vertical_shallow_narrow_lh",
+  "textures": {
+    "stone": "erydon:block/aganite_block_silverguilloche",
+    "particle": "erydon:block/aganite_block_silverguilloche"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "erydon:block/slope/steep/slope_steep_upper_outer",
+  "textures": {
+    "0": "#stone",
+    "stone": "erydon:block/noxoplis_block_bronzerose",
+    "particle": "#stone"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/outer_stairs",
+  "textures": {
+    "side": "erydon:block/gelastrum_block_bronzerose",
+    "top": "erydon:block/gelastrum_block_bronzerose",
+    "bottom": "erydon:block/gelastrum_block_bronzerose"
+  }
+}

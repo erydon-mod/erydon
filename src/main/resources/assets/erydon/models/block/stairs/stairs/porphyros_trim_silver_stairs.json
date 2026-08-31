@@ -1,0 +1,9 @@
+{
+  "parent": "erydon:block/stairs/stairs/porphyros_herringbone_bronze_stairs",
+  "textures": {
+    "side": "erydon:block/porphyros_block_silvertrim",
+    "top": "erydon:block/porphyros_block_silvertrim",
+    "bottom": "erydon:block/porphyros_block_silvertrim",
+    "particle": "erydon:block/porphyros_block_silvertrim"
+  }
+}

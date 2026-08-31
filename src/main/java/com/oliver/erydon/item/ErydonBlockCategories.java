@@ -39,6 +39,8 @@ public final class ErydonBlockCategories {
     public static boolean isSliceOrPost(String path) {
         return matchesSuffix(path, "_vertical_slice")
                 || matchesSuffix(path, "_horizontal_slice")
+                || matchesSuffix(path, "_slice_vertical")
+                || matchesSuffix(path, "_slice_horizontal")
                 || matchesSuffix(path, "_post");
     }
 
@@ -93,15 +95,27 @@ public final class ErydonBlockCategories {
     }
 
     public static boolean isDecoratedBlock(String path) {
-        path = ErydonIdMigration.legacyResourcePath(path);
-        return path.contains("_block_bronzetrim")
-                || path.contains("_block_silvertrim")
-                || path.contains("_block_bronzeguilloche")
-                || path.contains("_block_silverguilloche")
-                || path.contains("_block_bronzequatrefoil")
-                || path.contains("_block_silverquatrefoil")
-                || path.contains("_block_bronzerose")
-                || path.contains("_block_silverrose");
+        String legacyPath = ErydonIdMigration.legacyResourcePath(path);
+        return legacyPath.contains("_block_bronzetrim")
+                || legacyPath.contains("_block_silvertrim")
+                || legacyPath.contains("_block_bronzeguilloche")
+                || legacyPath.contains("_block_silverguilloche")
+                || legacyPath.contains("_block_bronzequatrefoil")
+                || legacyPath.contains("_block_silverquatrefoil")
+                || legacyPath.contains("_block_bronzerose")
+                || legacyPath.contains("_block_silverrose")
+                || isCanonicalDecoratedShape(path);
+    }
+
+    private static boolean isCanonicalDecoratedShape(String path) {
+        return path.contains("_trim_bronze_")
+                || path.contains("_trim_silver_")
+                || path.contains("_guilloche_bronze_")
+                || path.contains("_guilloche_silver_")
+                || path.contains("_quatrefoil_bronze_")
+                || path.contains("_quatrefoil_silver_")
+                || path.contains("_rosette_bronze_")
+                || path.contains("_rosette_silver_");
     }
 
     public static boolean isAged(String path) {

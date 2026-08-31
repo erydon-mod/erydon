@@ -40,8 +40,14 @@ final class SynapheiaService {
         Map<Identifier, List<SynapheiaManifest.Rule>> byBlock = new LinkedHashMap<>();
         mutable.forEach((block, rules) -> byBlock.put(block, List.copyOf(rules)));
         Map<Identifier, SynapheiaBlockPlan> plansByBlock = new LinkedHashMap<>();
-        byBlock.forEach((block, rules) ->
-                plansByBlock.put(block, SynapheiaBlockPlan.compile(block, rules)));
+        Map<IdentityRuleList, SynapheiaBlockPlan.CompiledRules> compiledRuleSets =
+                new LinkedHashMap<>();
+        byBlock.forEach((block, rules) -> {
+            IdentityRuleList key = new IdentityRuleList(rules);
+            SynapheiaBlockPlan.CompiledRules compiled = compiledRuleSets.computeIfAbsent(
+                    key, ignored -> SynapheiaBlockPlan.compileRules(rules));
+            plansByBlock.put(block, SynapheiaBlockPlan.create(block, compiled));
+        });
 
         Snapshot published = new Snapshot(generation, Map.copyOf(byBlock), Map.copyOf(plansByBlock),
                 prepared.repeatRuleCount(), prepared.overlayRuleCount(), prepared.sourcePacks());
@@ -55,12 +61,14 @@ final class SynapheiaService {
                     "duration_ns", prepared.durationNanos(), "rule_count", prepared.rules().size(),
                     "repeat_rule_count", prepared.repeatRuleCount(),
                     "overlay_rule_count", prepared.overlayRuleCount(),
-                    "block_count", byBlock.size(), "source_packs", prepared.sourcePacks()
+                    "block_count", byBlock.size(),
+                    "compiled_plan_layout_count", compiledRuleSets.size(),
+                    "source_packs", prepared.sourcePacks()
             ));
         }
-        Erydon.LOGGER.info("[{}] Synapheia loaded {} repeat and {} connected-overlay rules for {} blocks (generation {}).",
+        Erydon.LOGGER.info("[{}] Synapheia loaded {} repeat and {} connected-overlay rules for {} blocks using {} shared plan layouts (generation {}).",
                 Erydon.MOD_ID, prepared.repeatRuleCount(), prepared.overlayRuleCount(),
-                byBlock.size(), generation);
+                byBlock.size(), compiledRuleSets.size(), generation);
         return published;
     }
 
@@ -93,6 +101,42 @@ final class SynapheiaService {
             fields.put((String) entries[index], entries[index + 1]);
         }
         return fields;
+    }
+
+    private static final class IdentityRuleList {
+        private final List<SynapheiaManifest.Rule> rules;
+        private final int hash;
+
+        private IdentityRuleList(List<SynapheiaManifest.Rule> rules) {
+            this.rules = rules;
+            int computed = 1;
+            for (SynapheiaManifest.Rule rule : rules) {
+                computed = 31 * computed + System.identityHashCode(rule);
+            }
+            this.hash = computed;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (this == other) {
+                return true;
+            }
+            if (!(other instanceof IdentityRuleList that)
+                    || rules.size() != that.rules.size()) {
+                return false;
+            }
+            for (int index = 0; index < rules.size(); index++) {
+                if (rules.get(index) != that.rules.get(index)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
     }
 
     record Snapshot(long generation,

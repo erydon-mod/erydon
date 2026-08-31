@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/internal/wrapped/chalstrom_guilloche_bronze_slope_vertical_shallow_narrow",
+  "textures": {
+    "texture": "erydon:block/chalstrom_block_bronzeguilloche"
+  }
+}

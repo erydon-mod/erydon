@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/inner_stairs",
+  "textures": {
+    "side": "erydon:block/gelastrum_block_bronzequatrefoil",
+    "top": "erydon:block/gelastrum_block_bronzequatrefoil",
+    "bottom": "erydon:block/gelastrum_block_bronzequatrefoil"
+  }
+}

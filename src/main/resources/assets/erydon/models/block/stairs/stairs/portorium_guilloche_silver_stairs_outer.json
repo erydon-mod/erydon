@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/outer_stairs",
+  "textures": {
+    "side": "erydon:block/portorium_block_silverguilloche",
+    "top": "erydon:block/portorium_block_silverguilloche",
+    "bottom": "erydon:block/portorium_block_silverguilloche"
+  }
+}

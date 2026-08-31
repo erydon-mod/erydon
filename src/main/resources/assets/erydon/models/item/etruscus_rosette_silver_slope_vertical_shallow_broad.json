@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/internal/wrapped/etruscus_rosette_silver_slope_vertical_shallow_broad",
+  "textures": {
+    "texture": "erydon:block/etruscus_block_silverrose"
+  }
+}

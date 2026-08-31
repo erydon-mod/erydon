@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/rosinium_guilloche_bronze_slope_steep_upper"
+                                    }
+                      }
+                  ]
+}

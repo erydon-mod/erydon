@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/hesperion_trim_bronze_slope_steep_lower"
+                                    }
+                      }
+                  ]
+}

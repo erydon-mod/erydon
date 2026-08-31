@@ -1,0 +1,9 @@
+{
+  "parent": "erydon:block/stairs/stairs/chrysonyx_herringbone_bronze_stairs_inner",
+  "textures": {
+    "side": "erydon:block/chrysonyx_block_bronzetrim",
+    "top": "erydon:block/chrysonyx_block_bronzetrim",
+    "bottom": "erydon:block/chrysonyx_block_bronzetrim",
+    "particle": "erydon:block/chrysonyx_block_bronzetrim"
+  }
+}

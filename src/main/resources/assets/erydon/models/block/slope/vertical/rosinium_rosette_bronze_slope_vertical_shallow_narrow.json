@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/rosinium_rosette_bronze_slope_vertical_shallow_narrow_lh",
+  "textures": {
+    "stone": "erydon:block/rosinium_block_bronzerose",
+    "particle": "erydon:block/rosinium_block_bronzerose"
+  }
+}

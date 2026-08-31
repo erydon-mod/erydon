@@ -40,6 +40,7 @@ class SynapheiaBlockPlanTest {
         assertNotNull(plan);
         assertTrue(plan.hasRepeat());
         assertTrue(plan.hasOverlay());
+        assertFalse(plan.hasSourceShapedOverlay());
         assertSame(snapshot.repeatRuleFor(block, Direction.UP, matchedSource),
                 plan.repeatRule(Direction.UP, matchedSource));
         assertSame(snapshot.repeatRuleFor(block, Direction.NORTH, genericSource),
@@ -71,6 +72,95 @@ class SynapheiaBlockPlanTest {
                 plan.repeatRule(Direction.SOUTH, source));
         assertNull(plan.repeatRule(Direction.SOUTH, repeat.tiles().get(12)));
         assertFalse(plan.hasOverlay());
+    }
+
+    @Test
+    void blocksWithTheSameRulesShareCompiledPlanData() {
+        Identifier first = id("erydon", "nerium_trim_bronze_stairs");
+        Identifier second = id("erydon", "nerium_trim_bronze_slope");
+        SynapheiaManifest.Rule template = rule(
+                "shared-overlay", SynapheiaManifest.Method.OVERLAY_CTM, first,
+                Set.of(Direction.values()), Set.of(), 47);
+        SynapheiaManifest.Rule shared = new SynapheiaManifest.Rule(
+                template.resourceId(), template.sourcePack(), template.method(),
+                template.tiles(), template.faces(), Set.of(first, second),
+                template.matchTiles(), template.overlayShape(), template.overlayConnection(),
+                template.innerSeams(), template.priority());
+
+        SynapheiaService.Snapshot snapshot = SynapheiaService.publish(
+                new SynapheiaManifest.Prepared(List.of(shared), "test", 1, 0, 1, 1L));
+
+        assertTrue(snapshot.planFor(first).sharesRuleDataWith(snapshot.planFor(second)));
+    }
+
+    @Test
+    void sourceShapedOverlayIsFlaggedWithoutChangingUnitFaceDefaults() {
+        Identifier block = id("erydon", "nerium_trim_bronze_stairs");
+        SynapheiaManifest.Rule unitOverlay = rule(
+                "unit-overlay", SynapheiaManifest.Method.OVERLAY_CTM, block,
+                Set.of(Direction.values()), Set.of(), 47);
+        SynapheiaManifest.Rule sourceOverlay = new SynapheiaManifest.Rule(
+                unitOverlay.resourceId(), unitOverlay.sourcePack(), unitOverlay.method(),
+                unitOverlay.tiles(), unitOverlay.faces(), unitOverlay.blocks(),
+                unitOverlay.matchTiles(), SynapheiaManifest.OverlayShape.SOURCE,
+                unitOverlay.innerSeams(), unitOverlay.priority());
+
+        assertFalse(SynapheiaBlockPlan.compile(block, List.of(unitOverlay))
+                .hasSourceShapedOverlay());
+        assertTrue(SynapheiaBlockPlan.compile(block, List.of(sourceOverlay))
+                .hasSourceShapedOverlay());
+    }
+
+    @Test
+    void generatedSlopeFacesMatchOverlaysAgainstTheirAuthoredParticleTexture() {
+        Identifier slope = id("erydon", "nerium_trim_bronze_slope");
+        Identifier authoredTexture = id("erydon", "block/nerium_block_bronzetrim");
+        Identifier emittedRepeatTile = id("minecraft", "optifine/ctm/nerium/17");
+        SynapheiaManifest.Rule overlay = rule(
+                "slope-overlay", SynapheiaManifest.Method.OVERLAY_CTM, slope,
+                Set.of(Direction.UP), Set.of(authoredTexture), 47);
+        SynapheiaBlockPlan plan = SynapheiaBlockPlan.compile(slope, List.of(overlay));
+
+        Identifier matchedSource = SynapheiaRepeatBakedModel.resolveOverlaySourceSprite(
+                slope, emittedRepeatTile, authoredTexture);
+
+        assertEquals(authoredTexture, matchedSource);
+        assertEquals(List.of(overlay), plan.overlayRules(Direction.UP, matchedSource));
+        assertEquals(emittedRepeatTile, SynapheiaRepeatBakedModel.resolveOverlaySourceSprite(
+                id("erydon", "nerium_trim_bronze_stairs"),
+                emittedRepeatTile, authoredTexture));
+    }
+
+    @Test
+    void ruleConnectedOverlaysJoinListedShapesButNotOtherMotifs() {
+        Identifier fullBlock = id("erydon", "nerium_block_bronzetrim");
+        Identifier stairs = id("erydon", "nerium_trim_bronze_stairs");
+        Identifier guilloche = id("erydon", "nerium_block_bronzeguilloche");
+        SynapheiaManifest.Rule groupedOverlay = new SynapheiaManifest.Rule(
+                id("minecraft", "optifine/ctm/nerium/trim_overlay.properties"),
+                "test", SynapheiaManifest.Method.OVERLAY_CTM,
+                IntStream.range(0, 47)
+                        .mapToObj(index -> id("minecraft", "optifine/ctm/trim/" + index))
+                        .toList(),
+                Set.of(Direction.values()), Set.of(fullBlock, stairs), Set.of(),
+                SynapheiaManifest.OverlayShape.SOURCE,
+                SynapheiaManifest.OverlayConnection.RULE, true, 20);
+
+        assertTrue(SynapheiaRepeatBakedModel.overlayBlocksConnect(
+                groupedOverlay, fullBlock, stairs));
+        assertFalse(SynapheiaRepeatBakedModel.overlayBlocksConnect(
+                groupedOverlay, fullBlock, guilloche));
+
+        SynapheiaManifest.Rule exactBlockOverlay = new SynapheiaManifest.Rule(
+                groupedOverlay.resourceId(), groupedOverlay.sourcePack(), groupedOverlay.method(),
+                groupedOverlay.tiles(), groupedOverlay.faces(), groupedOverlay.blocks(),
+                groupedOverlay.matchTiles(), groupedOverlay.overlayShape(),
+                SynapheiaManifest.OverlayConnection.BLOCK,
+                groupedOverlay.innerSeams(), groupedOverlay.priority());
+        assertFalse(SynapheiaRepeatBakedModel.overlayBlocksConnect(
+                exactBlockOverlay, fullBlock, stairs));
+        assertTrue(SynapheiaRepeatBakedModel.overlayBlocksConnect(
+                exactBlockOverlay, fullBlock, fullBlock));
     }
 
     private static SynapheiaManifest.Rule rule(String name,

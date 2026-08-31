@@ -1,0 +1,9 @@
+{
+  "parent": "erydon:block/stairs/stairs/kylorion_herringbone_bronze_stairs_outer",
+  "textures": {
+    "side": "erydon:block/kylorion_block_bronzetrim",
+    "top": "erydon:block/kylorion_block_bronzetrim",
+    "bottom": "erydon:block/kylorion_block_bronzetrim",
+    "particle": "erydon:block/kylorion_block_bronzetrim"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "erydon:block/noxoplis_block_bronzeguilloche"
+  }
+}

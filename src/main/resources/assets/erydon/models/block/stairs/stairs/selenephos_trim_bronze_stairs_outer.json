@@ -1,0 +1,9 @@
+{
+  "parent": "erydon:block/stairs/stairs/selenephos_herringbone_bronze_stairs_outer",
+  "textures": {
+    "side": "erydon:block/selenephos_block_bronzetrim",
+    "top": "erydon:block/selenephos_block_bronzetrim",
+    "bottom": "erydon:block/selenephos_block_bronzetrim",
+    "particle": "erydon:block/selenephos_block_bronzetrim"
+  }
+}

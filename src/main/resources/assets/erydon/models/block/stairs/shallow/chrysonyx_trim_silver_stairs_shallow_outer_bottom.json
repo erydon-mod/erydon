@@ -1,0 +1,8 @@
+{
+  "parent": "erydon:block/stairs/shallow/shallow_stairs_outer_bottom",
+  "textures": {
+    "all": "erydon:block/chrysonyx_block_silvertrim",
+    "particle": "#all",
+    "underside": "erydon:block/chrysonyx_block_silvertrim"
+  }
+}

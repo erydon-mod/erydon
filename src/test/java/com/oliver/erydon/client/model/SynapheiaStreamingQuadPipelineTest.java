@@ -49,15 +49,25 @@ class SynapheiaStreamingQuadPipelineTest {
                 rule("overlay", SynapheiaManifest.Method.OVERLAY_CTM, 47);
         SynapheiaRepeatBakedModel.RenderCallState repeatOnly =
                 new SynapheiaRepeatBakedModel.RenderCallState(false, false);
-        repeatOnly.observeOverlays(Direction.UP, List.of(overlay));
+        repeatOnly.observeUnitOverlay(Direction.UP, overlay);
         assertFalse(repeatOnly.hasOverlayBookkeeping());
 
         SynapheiaRepeatBakedModel.RenderCallState overlayCapable =
                 new SynapheiaRepeatBakedModel.RenderCallState(true, false);
         assertFalse(overlayCapable.hasOverlayBookkeeping());
-        overlayCapable.observeOverlays(Direction.UP, List.of(overlay, overlay));
+        overlayCapable.observeUnitOverlay(Direction.UP, overlay);
+        overlayCapable.observeUnitOverlay(Direction.UP, overlay);
         assertTrue(overlayCapable.hasOverlayBookkeeping());
         assertEquals(1, overlayCapable.overlayCount());
+
+        SynapheiaManifest.Rule sourceOverlay = new SynapheiaManifest.Rule(
+                overlay.resourceId(), overlay.sourcePack(), overlay.method(), overlay.tiles(),
+                overlay.faces(), overlay.blocks(), overlay.matchTiles(),
+                SynapheiaManifest.OverlayShape.SOURCE, overlay.innerSeams(), overlay.priority());
+        SynapheiaRepeatBakedModel.RenderCallState sourceCapable =
+                new SynapheiaRepeatBakedModel.RenderCallState(true, false);
+        sourceCapable.observeUnitOverlay(Direction.UP, sourceOverlay);
+        assertFalse(sourceCapable.hasOverlayBookkeeping());
     }
 
     private static SynapheiaManifest.Rule rule(String name,

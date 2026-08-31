@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/hesperion_guilloche_bronze_slope_shallow_upper"
+                                    }
+                      }
+                  ]
+}

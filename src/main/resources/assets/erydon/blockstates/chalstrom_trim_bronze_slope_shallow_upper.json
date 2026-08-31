@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/chalstrom_trim_bronze_slope_shallow_upper"
+                                    }
+                      }
+                  ]
+}

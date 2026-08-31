@@ -57,6 +57,20 @@ final class SynapheiaCellGeometry {
         return SpiralStairCtmGeometry.v(face, localT);
     }
 
+    static float u(Direction face, SpiralStairCtmGeometry.Vertex vertex, Cell cell) {
+        float localS = SpiralStairCtmGeometry.clamp01(
+                SpiralStairCtmGeometry.snapToCell(SpiralStairCtmGeometry.textureS(
+                        face, vertex.x(), vertex.y(), vertex.z())) - cell.cellS);
+        return SpiralStairCtmGeometry.u(face, localS);
+    }
+
+    static float v(Direction face, SpiralStairCtmGeometry.Vertex vertex, Cell cell) {
+        float localT = SpiralStairCtmGeometry.clamp01(
+                SpiralStairCtmGeometry.snapToCell(SpiralStairCtmGeometry.textureT(
+                        face, vertex.x(), vertex.y(), vertex.z())) - cell.cellT);
+        return SpiralStairCtmGeometry.v(face, localT);
+    }
+
     record Cell(int cellS, int cellT) {
         int offsetX(Direction face) {
             return SpiralStairCtmGeometry.offsetX(face, cellS, cellT);

@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/imperium_rosette_silver_slope_vertical_shallow_narrow_lh",
+  "textures": {
+    "stone": "erydon:block/imperium_block_silverrose",
+    "particle": "erydon:block/imperium_block_silverrose"
+  }
+}

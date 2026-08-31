@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/sanguenite_guilloche_bronze_slope"
+                                    }
+                      }
+                  ]
+}

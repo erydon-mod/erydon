@@ -30,7 +30,6 @@ final class ErydonSwapFamilyDatabase {
     );
     private static final String DAEDALON_SPARTAN_PREFIX = "statue_spartan_promachos_";
     private static final String DAEDALON_SPARTAN_CANONICAL_FORM = "_spartan_promachos_statue";
-
     private static final List<String> BASE_MATERIALS = List.of(
             "aganite",
             "aterzon",

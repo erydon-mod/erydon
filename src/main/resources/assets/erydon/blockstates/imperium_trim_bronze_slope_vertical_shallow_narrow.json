@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/imperium_trim_bronze_slope_vertical_shallow_narrow"
+                                    }
+                      }
+                  ]
+}

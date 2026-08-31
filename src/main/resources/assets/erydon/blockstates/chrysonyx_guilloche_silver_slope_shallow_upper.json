@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/chrysonyx_guilloche_silver_slope_shallow_upper"
+                                    }
+                      }
+                  ]
+}

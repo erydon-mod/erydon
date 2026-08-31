@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/sanguenite_quatrefoil_bronze_slope_vertical_shallow_broad_lh",
+  "textures": {
+    "stone": "erydon:block/sanguenite_block_bronzequatrefoil",
+    "particle": "erydon:block/sanguenite_block_bronzequatrefoil"
+  }
+}

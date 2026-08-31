@@ -1,0 +1,9 @@
+{
+  "parent": "erydon:block/stairs/stairs/aterzon_herringbone_bronze_stairs",
+  "textures": {
+    "side": "erydon:block/aterzon_block_bronzetrim",
+    "top": "erydon:block/aterzon_block_bronzetrim",
+    "bottom": "erydon:block/aterzon_block_bronzetrim",
+    "particle": "erydon:block/aterzon_block_bronzetrim"
+  }
+}

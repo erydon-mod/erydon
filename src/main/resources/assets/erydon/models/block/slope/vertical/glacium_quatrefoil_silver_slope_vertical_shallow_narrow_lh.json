@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/slope_vertical_shallow_narrow_lh",
+  "textures": {
+    "stone": "erydon:block/glacium_block_silverquatrefoil",
+    "particle": "erydon:block/glacium_block_silverquatrefoil"
+  }
+}

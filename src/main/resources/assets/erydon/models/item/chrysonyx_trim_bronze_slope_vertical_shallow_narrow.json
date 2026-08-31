@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/internal/wrapped/chrysonyx_trim_bronze_slope_vertical_shallow_narrow",
+  "textures": {
+    "texture": "erydon:block/chrysonyx_block_bronzetrim"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/outer_stairs",
+  "textures": {
+    "side": "erydon:block/glacium_block_bronzequatrefoil",
+    "top": "erydon:block/glacium_block_bronzequatrefoil",
+    "bottom": "erydon:block/glacium_block_bronzequatrefoil"
+  }
+}

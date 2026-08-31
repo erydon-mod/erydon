@@ -1,0 +1,9 @@
+{
+  "parent": "erydon:block/stairs/stairs/nerium_herringbone_bronze_stairs",
+  "textures": {
+    "side": "erydon:block/nerium_block_bronzetrim",
+    "top": "erydon:block/nerium_block_bronzetrim",
+    "bottom": "erydon:block/nerium_block_bronzetrim",
+    "particle": "erydon:block/nerium_block_bronzetrim"
+  }
+}

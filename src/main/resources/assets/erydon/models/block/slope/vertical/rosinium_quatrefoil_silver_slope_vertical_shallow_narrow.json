@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/rosinium_quatrefoil_silver_slope_vertical_shallow_narrow_lh",
+  "textures": {
+    "stone": "erydon:block/rosinium_block_silverquatrefoil",
+    "particle": "erydon:block/rosinium_block_silverquatrefoil"
+  }
+}

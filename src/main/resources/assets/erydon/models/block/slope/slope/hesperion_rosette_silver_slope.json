@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/slope/slope",
+  "textures": {
+    "stone": "erydon:block/hesperion_block_silverrose",
+    "particle": "#stone"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/slope_vertical_shallow_broad_lh",
+  "textures": {
+    "stone": "erydon:block/brectite_block_silvertrim",
+    "particle": "erydon:block/brectite_block_silvertrim"
+  }
+}

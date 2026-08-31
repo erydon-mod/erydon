@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/stairs/shallow/shallow_stairs_top",
+  "textures": {
+    "all": "erydon:block/mielonyx_block_bronzeguilloche",
+    "particle": "#all"
+  }
+}

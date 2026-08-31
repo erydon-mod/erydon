@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/portorium_trim_bronze_slope_vertical_shallow_broad_lh",
+  "textures": {
+    "stone": "erydon:block/portorium_block_bronzetrim",
+    "particle": "erydon:block/portorium_block_bronzetrim"
+  }
+}

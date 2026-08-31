@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/layer/layer_multiface/parent/height8",
+  "textures": {
+    "texture": "erydon:block/laurentium_block_bronzerose"
+  }
+}

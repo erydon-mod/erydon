@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/slope/slope_outer",
+  "textures": {
+    "stone": "erydon:block/nerium_block_silverguilloche",
+    "particle": "#stone"
+  }
+}

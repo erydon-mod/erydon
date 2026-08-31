@@ -1,0 +1,9 @@
+{
+    "multipart":  [
+                      {
+                          "apply":  {
+                                        "model":  "erydon:block/internal/wrapped/sanguenite_quatrefoil_bronze_slope"
+                                    }
+                      }
+                  ]
+}

@@ -1,0 +1,9 @@
+{
+  "parent": "erydon:block/stairs/stairs/striatus_herringbone_bronze_stairs_inner",
+  "textures": {
+    "side": "erydon:block/striatus_block_silvertrim",
+    "top": "erydon:block/striatus_block_silvertrim",
+    "bottom": "erydon:block/striatus_block_silvertrim",
+    "particle": "erydon:block/striatus_block_silvertrim"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/slope/vertical/sanguenite_rosette_silver_slope_vertical_shallow_broad_lh",
+  "textures": {
+    "stone": "erydon:block/sanguenite_block_silverrose",
+    "particle": "erydon:block/sanguenite_block_silverrose"
+  }
+}
