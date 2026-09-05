@@ -19,6 +19,43 @@ final class AxiomFallbackQuads {
         return collect(model, 0, requestedFace, random);
     }
 
+    static List<BakedQuad> collectColumn(BakedModel model, int degrees, Direction requestedFace, Random random) {
+        if (degrees == 0) return collect(model, requestedFace, random);
+        if (degrees != 45) throw new IllegalArgumentException("Unexpected column orientation: " + degrees);
+        // Rotated geometry may overhang the block and must never be neighbour-culled.
+        // Return it once in the unculled bucket, matching the Fabric render path.
+        if (requestedFace != null) return List.of();
+        List<BakedQuad> result = new ArrayList<>();
+        for (BakedQuad quad : collect(model, null, random)) {
+            result.add(rotateColumnDiagonal(quad));
+        }
+        return result;
+    }
+
+    static BakedQuad rotateColumnDiagonal(BakedQuad quad) {
+        int[] data = quad.getVertexData().clone();
+        for (int vertex = 0; vertex < 4; vertex++) {
+            int offset = vertex * 8;
+            float x = Float.intBitsToFloat(data[offset]) - 0.5F;
+            float z = Float.intBitsToFloat(data[offset + 2]) - 0.5F;
+            data[offset] = Float.floatToRawIntBits(0.5F + WorldAlignedYRotation.diagonalX(x, z));
+            data[offset + 2] = Float.floatToRawIntBits(0.5F + WorldAlignedYRotation.diagonalZ(x, z));
+            int normal = data[offset + 7];
+            float nx = (byte) normal / 127.0F;
+            float nz = (byte) (normal >> 16) / 127.0F;
+            int rx = Math.round(WorldAlignedYRotation.diagonalX(nx, nz) * 127.0F) & 255;
+            int rz = Math.round(WorldAlignedYRotation.diagonalZ(nx, nz) * 127.0F) & 255;
+            data[offset + 7] = (normal & 0xFF00FF00) | rx | (rz << 16);
+        }
+        Direction source = quad.getFace();
+        Direction face = source == null ? null : Direction.getFacing(
+                WorldAlignedYRotation.diagonalX(source.getOffsetX(), source.getOffsetZ()),
+                source.getOffsetY(),
+                WorldAlignedYRotation.diagonalZ(source.getOffsetX(), source.getOffsetZ()));
+        return HorizontalUvLock.projectFlatHorizontal(new BakedQuad(
+                data, quad.getColorIndex(), face, quad.getSprite(), quad.hasShade()));
+    }
+
     static List<BakedQuad> collect(BakedModel model, int degrees, Direction requestedFace, Random random) {
         return collect(model, 0, degrees, requestedFace, random);
     }

@@ -91,6 +91,25 @@ public final class HorizontalUvLock {
         return quad;
     }
 
+    /** Runtime equivalent for the optional diagonal column components. */
+    static void projectFlatHorizontal(MutableQuadView quad, Sprite sprite, Direction face) {
+        if (!isHorizontal(face) || !shouldLockSprite(sprite)) return;
+        float[] u = new float[4];
+        float[] v = new float[4];
+        for (int vertex = 0; vertex < 4; vertex++) {
+            if (Math.abs(quad.y(vertex) - quad.y(0)) > POSITION_EPSILON) return;
+            u[vertex] = projectedU(face, quad.x(vertex), quad.z(vertex));
+            v[vertex] = projectedV(face, quad.x(vertex), quad.z(vertex));
+        }
+        // Keep authored UVs on boundary-crossing faces; never wrap or shift them.
+        if (!fitIntoSprite(u) || !fitIntoSprite(v)) return;
+        shrinkTowardCentre(u, sprite.getAnimationFrameDelta());
+        shrinkTowardCentre(v, sprite.getAnimationFrameDelta());
+        for (int vertex = 0; vertex < 4; vertex++) {
+            quad.uv(vertex, sprite.getFrameU(u[vertex]), sprite.getFrameV(v[vertex]));
+        }
+    }
+
     public static boolean shouldProjectAtBake(Identifier modelId) {
         if (modelId == null || !"erydon".equals(modelId.getNamespace())) {
             return false;

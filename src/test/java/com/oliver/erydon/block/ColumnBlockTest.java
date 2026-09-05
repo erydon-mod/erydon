@@ -8,6 +8,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ColumnBlockTest {
     @Test
+    void orientationCyclesBetweenExistingAppearanceAndFortyFiveDegrees() {
+        assertEquals("straight", ColumnBlock.Orientation.STRAIGHT.asString());
+        assertEquals(0, ColumnBlock.Orientation.STRAIGHT.degrees());
+        assertEquals("diagonal", ColumnBlock.Orientation.DIAGONAL.asString());
+        assertEquals(45, ColumnBlock.Orientation.STRAIGHT.next().degrees());
+        assertEquals(ColumnBlock.Orientation.STRAIGHT, ColumnBlock.Orientation.DIAGONAL.next());
+    }
+
+    @Test
     void squareColumnsCycleThroughNoCapitalWithoutNarrow() {
         assertEquals(ColumnBlock.CapitalStyle.GUILLOCHE,
                 ColumnBlock.CapitalStyle.GEORGIAN.next(false));

@@ -75,7 +75,7 @@ public final class ColumnBakedModel implements BakedModel, FabricBakedModel {
         String suffix = suffixForState(state);
         BakedModel model = MinecraftClient.getInstance().getBakedModelManager().getModel(modelId(state, suffix));
         if (model != null) {
-            SharedGeometryChildModel.emit(context, model);
+            WorldAlignedYRotation.emit(context, model, orientationDegrees(state));
         }
     }
 
@@ -109,6 +109,24 @@ public final class ColumnBakedModel implements BakedModel, FabricBakedModel {
             case NARROW -> circular ? "capital_narrow" : "capital";
             case GEORGIAN -> "capital";
             case NONE -> "pillar";
+        };
+    }
+
+    private static int orientationDegrees(BlockState state) {
+        return orientationForPart(state.get(ColumnBlock.PART), state.get(ColumnBlock.CAPITAL),
+                isGothicColumn(state), state.get(ColumnBlock.CAPITAL_ORIENTATION),
+                state.get(ColumnBlock.BASE_ORIENTATION)).degrees();
+    }
+
+    static ColumnBlock.Orientation orientationForPart(ColumnBlock.ColumnPart part,
+                                                       ColumnBlock.CapitalStyle capital,
+                                                       boolean gothic,
+                                                       ColumnBlock.Orientation capitalOrientation,
+                                                       ColumnBlock.Orientation baseOrientation) {
+        return switch (part) {
+            case PLINTH, BASE -> baseOrientation;
+            case CAPITAL -> gothic || capital.hasCapital() ? capitalOrientation : ColumnBlock.Orientation.STRAIGHT;
+            case PILLAR -> ColumnBlock.Orientation.STRAIGHT;
         };
     }
 
@@ -175,7 +193,7 @@ public final class ColumnBakedModel implements BakedModel, FabricBakedModel {
         }
 
         BakedModel model = MinecraftClient.getInstance().getBakedModelManager().getModel(modelId(state, suffixForState(state)));
-        return AxiomFallbackQuads.collect(model, face, random);
+        return AxiomFallbackQuads.collectColumn(model, orientationDegrees(state), face, random);
     }
 
     @Override

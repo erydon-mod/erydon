@@ -201,6 +201,7 @@ tasks.register('auditErydonHighStateBlocks') {
                 columnPart: enumCount('block/ColumnBlock.java', 'ColumnPart', 4),
                 columnCapital: enumCount('block/ColumnBlock.java', 'CapitalStyle', 2),
                 columnBase: enumCount('block/ColumnBlock.java', 'BaseStyle', 2),
+                columnOrientation: enumCount('block/ColumnBlock.java', 'Orientation', 2),
                 corniceShape: enumCount('block/CorniceBlock.java', 'CorniceShape', 3),
                 chimneyPart: enumCount('block/ChimneyBlock.java', 'ChimneyPart', 3),
                 postAxis: enumCount('block/PostBlock.java', 'AxisMode', 3),
@@ -356,8 +357,8 @@ tasks.register('auditErydonHighStateBlocks') {
                     return [states: 2 * 2 * 2 * 2 * 2 * 2 * 2,
                             properties: 'waterlogged(2) * six faces(2^6)']
                 case 'ColumnBlock':
-                    return [states: counts.columnPart * counts.columnCapital * counts.columnBase,
-                            properties: "part(${counts.columnPart}) * capital(${counts.columnCapital}) * base(${counts.columnBase})"]
+                    return [states: counts.columnPart * counts.columnCapital * counts.columnBase * counts.columnOrientation * counts.columnOrientation,
+                            properties: "part(${counts.columnPart}) * capital(${counts.columnCapital}) * base(${counts.columnBase}) * capital_orientation(${counts.columnOrientation}) * base_orientation(${counts.columnOrientation})"]
                 case 'CorniceBlock':
                     return [states: 4 * counts.corniceShape,
                             properties: "facing(4) * shape(${counts.corniceShape})"]

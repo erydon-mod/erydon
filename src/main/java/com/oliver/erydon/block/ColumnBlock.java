@@ -34,6 +34,9 @@ public class ColumnBlock extends Block implements ClusterRebuildableBlock {
     public static final EnumProperty<ColumnPart> PART = EnumProperty.of("part", ColumnPart.class);
     public static final EnumProperty<CapitalStyle> CAPITAL = EnumProperty.of("capital", CapitalStyle.class);
     public static final EnumProperty<BaseStyle> BASE = EnumProperty.of("base", BaseStyle.class);
+    // Runtime model choices: every orientation reuses the same baked child models.
+    public static final EnumProperty<Orientation> CAPITAL_ORIENTATION = EnumProperty.of("capital_orientation", Orientation.class);
+    public static final EnumProperty<Orientation> BASE_ORIENTATION = EnumProperty.of("base_orientation", Orientation.class);
 
     private static final VoxelShape BASE_SHAPE = VoxelShapes.union(
             VoxelShapes.cuboid(0.0, 0.0, 0.0, 1.0, 2.0/16.0, 1.0),
@@ -62,12 +65,14 @@ public class ColumnBlock extends Block implements ClusterRebuildableBlock {
                         .with(PART, ColumnPart.BASE)
                         .with(CAPITAL, CapitalStyle.GEORGIAN)
                         .with(BASE, BaseStyle.FULL)
+                        .with(CAPITAL_ORIENTATION, Orientation.STRAIGHT)
+                        .with(BASE_ORIENTATION, Orientation.STRAIGHT)
         );
     }
 
     @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        builder.add(PART, CAPITAL, BASE);
+        builder.add(PART, CAPITAL, BASE, CAPITAL_ORIENTATION, BASE_ORIENTATION);
     }
 
     @Override
@@ -100,8 +105,33 @@ public class ColumnBlock extends Block implements ClusterRebuildableBlock {
             return ActionResult.PASS;
         }
 
-        if (player.isSneaking() || hit.getSide().getAxis() == Direction.Axis.Y) {
+        if (hit.getSide().getAxis() == Direction.Axis.Y) {
             return ActionResult.PASS;
+        }
+
+        if (player.isSneaking()) {
+            if (!held.isEmpty()) {
+                return ActionResult.PASS;
+            }
+            if (!world.isClient) {
+                ColumnToggleTarget target = getToggleTarget(state, hit);
+                EnumProperty<Orientation> property = target == ColumnToggleTarget.CAPITAL
+                        ? CAPITAL_ORIENTATION : BASE_ORIENTATION;
+                BlockPos bottom = findBottom(world, pos);
+                BlockPos top = findTop(world, pos);
+                Orientation next = world.getBlockState(target == ColumnToggleTarget.CAPITAL ? top : bottom)
+                        .get(property).next();
+                for (int y = bottom.getY(); y <= top.getY(); y++) {
+                    BlockPos p = new BlockPos(bottom.getX(), y, bottom.getZ());
+                    BlockState current = world.getBlockState(p);
+                    if (current.isOf(this)) {
+                        world.setBlockState(p, current.with(property, next), Block.NOTIFY_ALL);
+                    }
+                }
+                player.sendMessage(Text.translatable("message.erydon.column." + property.getName(),
+                        Text.translatable("option.erydon.column.orientation." + next.asString())), true);
+            }
+            return ActionResult.success(world.isClient);
         }
 
         if (isFixedStyleColumn(state)) {
@@ -176,8 +206,14 @@ public class ColumnBlock extends Block implements ClusterRebuildableBlock {
         boolean sameBelow = world.getBlockState(pos.down()).isOf(this);
         boolean sameAbove = world.getBlockState(pos.up()).isOf(this);
 
-        return this.getDefaultState()
+        BlockState placement = this.getDefaultState()
                 .with(PART, RecalcSelection.automaticPart(sameBelow, sameAbove));
+        if (sameBelow || sameAbove) {
+            BlockState neighbour = world.getBlockState(sameBelow ? pos.down() : pos.up());
+            placement = placement.with(CAPITAL_ORIENTATION, neighbour.get(CAPITAL_ORIENTATION))
+                    .with(BASE_ORIENTATION, neighbour.get(BASE_ORIENTATION));
+        }
+        return placement;
     }
 
     @Override
@@ -389,6 +425,24 @@ public class ColumnBlock extends Block implements ClusterRebuildableBlock {
         public BaseStyle next() {
             return this == FULL ? NARROW : FULL;
         }
+    }
+
+    public enum Orientation implements StringIdentifiable {
+        STRAIGHT("straight", 0),
+        DIAGONAL("diagonal", 45);
+
+        private final String name;
+        private final int degrees;
+
+        Orientation(String name, int degrees) {
+            this.name = name;
+            this.degrees = degrees;
+        }
+
+        @Override public String asString() { return name; }
+        @Override public String toString() { return name; }
+        public int degrees() { return degrees; }
+        public Orientation next() { return this == STRAIGHT ? DIAGONAL : STRAIGHT; }
     }
 
     private enum ColumnToggleTarget {
