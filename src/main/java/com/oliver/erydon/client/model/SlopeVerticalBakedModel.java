@@ -5,7 +5,6 @@ import com.oliver.erydon.migration.ErydonIdMigration;
 import com.oliver.erydon.block.SlopeVerticalBlock;
 import com.oliver.erydon.block.SlopeVerticalShallowBroadBlock;
 import com.oliver.erydon.block.SlopeVerticalShallowNarrowBlock;
-import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
@@ -106,6 +105,20 @@ public final class SlopeVerticalBakedModel implements BakedModel, FabricBakedMod
                                 Direction face,
                                 Point[] points,
                                 float y) {
+        if (points.length == 4) {
+            // Preserve the trapezoid until POM decomposition; fan triangles would
+            // introduce an unnecessary diagonal and excessive subdivision.
+            emitQuad(emitter, sprites, transform, face,
+                    points[0].x, y, points[0].z,
+                    points[1].x, y, points[1].z,
+                    points[2].x, y, points[2].z,
+                    points[3].x, y, points[3].z,
+                    points[0].x * 16, points[0].z * 16,
+                    points[1].x * 16, points[1].z * 16,
+                    points[2].x * 16, points[2].z * 16,
+                    points[3].x * 16, points[3].z * 16);
+            return;
+        }
         Point first = points[0];
         for (int i = 1; i < points.length - 1; i++) {
             Point second = points[i];
@@ -159,8 +172,7 @@ public final class SlopeVerticalBakedModel implements BakedModel, FabricBakedMod
                 x3, y3, z3);
         emitter.cullFace(cullFace == null ? null : transform.mapFace(cullFace));
         emitter.nominalFace(finalFace);
-        emitter.spriteBake(sprites.sprite(finalFace), MutableQuadView.BAKE_ROTATE_NONE);
-        emitter.emit();
+        SlopePomQuads.emit(emitter, sprites.sprite(finalFace));
     }
 
     private static ShapeChoice shapeChoice(BlockState state) {
