@@ -3,7 +3,6 @@ package com.oliver.erydon.client.model;
 import com.oliver.erydon.Erydon;
 import com.oliver.erydon.migration.ErydonIdMigration;
 import com.oliver.erydon.block.SlopeSteepBlock;
-import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
@@ -820,8 +819,7 @@ public final class SlopeSteepBakedModel implements BakedModel, FabricBakedModel 
         emitter.cullFace(cullFace == null ? null : transform.mapFace(cullFace));
         emitter.nominalFace(finalFace);
         Sprite sprite = sprites.sprite(projection.spriteFace());
-        emitter.spriteBake(sprite, MutableQuadView.BAKE_ROTATE_NONE);
-        emitter.emit();
+        SlopePomQuads.emit(emitter, sprite);
     }
 
     private static float projectedU(FixedSlopeRotation transform,
