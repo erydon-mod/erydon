@@ -1,0 +1,9 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.oliver.erydon.perf.mixin",
+  "plugin": "com.oliver.erydon.perf.PerfMixinGate",
+  "compatibilityLevel": "JAVA_17",
+  "client": ["CompletedFrameMixin"],
+  "injectors": {"defaultRequire": 1}
+}

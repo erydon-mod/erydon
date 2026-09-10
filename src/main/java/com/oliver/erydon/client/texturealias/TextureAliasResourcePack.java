@@ -34,12 +34,15 @@ public class TextureAliasResourcePack implements ResourcePack {
     private final ResourcePack delegate;
     private final String namespace;
     private final Map<String, String> aliases;
+    private final AliasPrefixIndex aliasIndex;
 
     protected TextureAliasResourcePack(ResourcePack delegate, String namespace, TextureAliasManifest manifest)
             throws IOException {
         this.delegate = delegate;
         this.namespace = namespace;
         this.aliases = manifest.aliases();
+        this.aliasIndex = Boolean.getBoolean("erydon.perf.alias_index")
+                ? new AliasPrefixIndex(this.aliases) : null;
 
         Map<String, String> expectedHashesByTarget = new LinkedHashMap<>();
         for (Map.Entry<String, String> alias : aliases.entrySet()) {
@@ -260,7 +263,8 @@ public class TextureAliasResourcePack implements ResourcePack {
             consumer.accept(id, supplier);
         });
 
-        for (Map.Entry<String, String> alias : aliases.entrySet()) {
+        for (Map.Entry<String, String> alias : (aliasIndex == null
+                ? aliases.entrySet() : aliasIndex.entries(prefix))) {
             Identifier aliasId = new Identifier(namespace, alias.getKey());
             if (!matchesPrefix(aliasId.getPath(), prefix)
                     || physicalIds.contains(aliasId)

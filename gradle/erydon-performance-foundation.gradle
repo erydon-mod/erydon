@@ -1,0 +1,97 @@
+import groovy.json.JsonOutput
+
+sourceSets {
+    perf {
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+    }
+    perfTest {
+        compileClasspath += sourceSets.perf.output + sourceSets.perf.compileClasspath + configurations.testRuntimeClasspath
+        runtimeClasspath += output + compileClasspath
+    }
+}
+
+def perfFlags = [
+    'erydon.perf.pause_self_test': 'false',
+    'erydon.perf.frame_capture': 'false', 'erydon.perf.alias_index': 'false',
+    'erydon.perf.shared_stair_shapes': 'false', 'erydon.perf.sprite_handles': 'false',
+    'erydon.perf.clip_plans': 'false', 'erydon.shared_geometry.mode': 'baseline',
+    'erydon.shared_geometry.metrics': 'false', 'erydon.synapheia.metrics': 'false'
+].collectEntries { key, fallback ->
+    def value = providers.gradleProperty(key).getOrElse(fallback)
+    def choices = key == 'erydon.shared_geometry.mode' ? ['baseline', 'shared_geometry'] : ['true', 'false']
+    if (!choices.contains(value)) throw new GradleException("Invalid ${key}: ${value}")
+    if (key.endsWith('.metrics') && value != 'false') throw new GradleException('Intrusive metrics must be off for frame capture')
+    [(key): value]
+}
+def perfDirectory = providers.gradleProperty('erydon.perf.gameDir').getOrElse(layout.buildDirectory.dir('perf-instance').get().asFile.absolutePath)
+def perfHeap = providers.gradleProperty('erydon.perf.maxHeap').getOrElse('8G')
+if (!(perfHeap in ['8G', '12G', '16G', '24G'])) throw new GradleException('Unsupported performance heap')
+loom {
+    mods {
+        erydon { sourceSet sourceSets.main }
+        erydon_perf_dev { sourceSet sourceSets.perf }
+    }
+    runs {
+        perfClient {
+            client()
+            source sourceSets.perf
+            // Loom 1.6 resolves this against projectDir even on Windows.
+            runDir project.relativePath(file(perfDirectory))
+            if (file(perfDirectory + '/saves/Erydon Performance Disposable').isDirectory()) {
+                programArgs '--quickPlaySingleplayer', 'Erydon Performance Disposable'
+            }
+            ideConfigGenerated false
+            vmArgs '-Xms2G', "-Xmx${perfHeap}"
+            perfFlags.each { key, value -> property key, value }
+            ['output', 'expected', 'world', 'warmupSeconds', 'captureSeconds'].each { name ->
+                def fallback = [world: 'Erydon Performance Disposable', warmupSeconds: '5', captureSeconds: '60'][name]
+                def value = providers.gradleProperty('erydon.perf.' + name).getOrElse(fallback ?: '')
+                property 'erydon.perf.' + name, value
+            }
+        }
+    }
+}
+
+tasks.register('perfTest', Test) {
+    testClassesDirs = sourceSets.perfTest.output.classesDirs
+    classpath = sourceSets.perfTest.runtimeClasspath
+    useJUnitPlatform()
+    maxParallelForks = 1
+}
+tasks.register('verifyPerfConfiguration') {
+    doLast {
+        def arguments = tasks.named('runPerfClient').get().jvmArgs
+        perfFlags.each { key, value ->
+            assert arguments.count { it.toString().startsWith('-D' + key + '=') } == 1
+            assert arguments.contains('-D' + key + '=' + value)
+        }
+        assert !sourceSets.main.allSource.srcDirs.any { it.toPath().startsWith(file('src/perf').toPath()) }
+        assert sourceSets.main.output.files.intersect(sourceSets.perf.output.files).empty
+        logger.lifecycle("PASS: typed child-JVM flags; separate development source/output paths; fixed 2G/${perfHeap} heap")
+    }
+}
+tasks.register('writePerfLayout') {
+    dependsOn tasks.named('perfClasses')
+    doLast {
+        def destination = file(providers.gradleProperty('erydon.perf.layout').get())
+        destination.parentFile.mkdirs()
+        destination.text = JsonOutput.toJson([
+            erydon_roots: sourceSets.main.output.files.findAll { it.exists() }.collect { it.canonicalPath },
+            perf_roots: sourceSets.perf.output.files.findAll { it.exists() }.collect { it.canonicalPath },
+            classpath: sourceSets.perf.runtimeClasspath.files.findAll { it.exists() }.collect { it.canonicalPath }
+        ])
+    }
+}
+tasks.named('runPerfClient') {
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(17) }
+    dependsOn tasks.named('verifyPerfConfiguration')
+    doFirst {
+        def directory = file(perfDirectory).canonicalFile
+        if (!new File(directory, 'ERYDON_PERF_DISPOSABLE').isFile()) throw new GradleException('A dedicated instance with ERYDON_PERF_DISPOSABLE marker is required')
+        if (directory.toPath().startsWith(file('run-dev').canonicalFile.toPath())) throw new GradleException('Protected run-dev cannot be the performance instance')
+        for (String key : ['output', 'expected']) {
+            if (!providers.gradleProperty('erydon.perf.' + key).isPresent()) throw new GradleException('Missing erydon.perf.' + key)
+        }
+    }
+}

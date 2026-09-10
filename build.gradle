@@ -5,6 +5,10 @@ plugins {
 
 group = maven_group
 version = mod_version
+// The measurement module is absent from ordinary development and release builds.
+if (providers.gradleProperty('erydon.perf.foundation').getOrElse('false') == 'true') {
+    apply from: 'gradle/erydon-performance-foundation.gradle'
+}
 def familyCompatibilityGeneration = providers
         .gradleProperty('family_compatibility_generation')
         .map { it.toInteger() }
@@ -346,6 +350,10 @@ tasks.withType(Jar).configureEach {
     from('LICENSE-CODE.md') {
         into 'META-INF/licenses'
         rename { 'ERYDON-MIT.txt' }
+    }
+    from('src/perf/TOOLKIT_LICENCE.txt') {
+        into 'META-INF/licenses'
+        rename { 'ERYDON-PERFORMANCE-TOOLKIT-MIT.txt' }
     }
     from('LICENSE-ASSETS.md') {
         into 'META-INF/licenses'

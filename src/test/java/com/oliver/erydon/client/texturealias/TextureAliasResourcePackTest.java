@@ -36,6 +36,82 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TextureAliasResourcePackTest {
     @Test
+    void enumerationPreservesEncounterOrderAndAllPrefixBoundaries() {
+        var pack = new TextureAliasTestSupport.FakePack("prefix-corpus");
+        byte[] canonical = bytes("canonical");
+        Identifier blob = blobId(NAMESPACE, canonical);
+        pack.putBytes(blob, canonical);
+        List<String> paths = List.of("textures/block/z.png", "textures/blockade/sibling.png",
+                "textures/block/a.png", "textures/block//nested.png", "optifine/ctm/test/0.png");
+        var aliases = new LinkedHashMap<Identifier, Identifier>();
+        paths.forEach(path -> aliases.put(id(NAMESPACE, path), blob));
+        addManifest(pack, NAMESPACE, aliases, false);
+        try (ResourcePack wrapped = TextureAliasResourcePack.wrap(pack, NAMESPACE)) {
+            for (String prefix : List.of("", "textures", "textures/block", "textures/block/z.png",
+                    "textures/block/", "textures/blo", "optifine/ctm/test", "missing")) {
+                var found = new LinkedHashMap<Identifier, InputSupplier<InputStream>>();
+                wrapped.findResources(ResourceType.CLIENT_RESOURCES, NAMESPACE, prefix, found::put);
+                List<Identifier> expected = aliases.keySet().stream().filter(alias -> prefix.isEmpty()
+                        || alias.getPath().equals(prefix) || alias.getPath().startsWith(prefix + "/")).toList();
+                assertEquals(expected, found.keySet().stream().filter(aliases::containsKey).toList(), prefix);
+            }
+            var foreign = new LinkedHashMap<Identifier, InputSupplier<InputStream>>();
+            wrapped.findResources(ResourceType.CLIENT_RESOURCES, "foreign", "", foreign::put);
+            assertTrue(foreign.isEmpty());
+            wrapped.findResources(ResourceType.SERVER_DATA, NAMESPACE, "", foreign::put);
+            assertTrue(foreign.isEmpty());
+        }
+    }
+
+    @Test
+    void physicalMetadataRemainsAvailable() throws Exception {
+        var fixture = singleAliasPack("metadata-override", "canonical");
+        Identifier metadata = id(NAMESPACE, ALIAS_PATH + ".mcmeta");
+        fixture.pack().put(metadata, "{\"texture\":{\"blur\":true}}");
+        try (ResourcePack wrapped = TextureAliasResourcePack.wrap(fixture.pack(), NAMESPACE)) {
+            var found = new LinkedHashMap<Identifier, InputSupplier<InputStream>>();
+            wrapped.findResources(ResourceType.CLIENT_RESOURCES, NAMESPACE, "textures/block", found::put);
+            assertArrayEquals(bytes("{\"texture\":{\"blur\":true}}"), read(found.get(metadata)));
+            assertArrayEquals(bytes("canonical"), read(found.get(ALIAS)));
+        }
+    }
+
+    @Test
+    void missingTargetAfterWrappingStillFailsEnumeration() {
+        byte[] canonical = bytes("canonical");
+        Identifier blob = blobId(NAMESPACE, canonical);
+        var hidden = new java.util.concurrent.atomic.AtomicBoolean();
+        var pack = new TextureAliasTestSupport.FakePack("disappearing-target") {
+            @Override public InputSupplier<InputStream> open(ResourceType type, Identifier resource) {
+                return hidden.get() && resource.equals(blob) ? null : super.open(type, resource);
+            }
+        };
+        pack.putBytes(blob, canonical);
+        addManifest(pack, NAMESPACE, linkedAliases(ALIAS, blob), false);
+        try (ResourcePack wrapped = TextureAliasResourcePack.wrap(pack, NAMESPACE)) {
+            hidden.set(true);
+            assertThrows(IllegalStateException.class, () -> wrapped.findResources(
+                    ResourceType.CLIENT_RESOURCES, NAMESPACE, "textures", (resource, supplier) -> {}));
+        }
+        assertEquals(1, pack.closeCount());
+    }
+
+    @Test
+    void repeatedCloseAndReopenUsesFreshManifestAndStreams() throws Exception {
+        for (int reload = 0; reload < 4; reload++) {
+            String content = "reload-" + reload;
+            var fixture = singleAliasPack("same-pack-name", content);
+            try (var manager = new LifecycledResourceManagerImpl(ResourceType.CLIENT_RESOURCES,
+                    TextureAliasResourcePack.wrapAll(List.of(fixture.pack()), NAMESPACE))) {
+                for (int query = 0; query < 3; query++) {
+                    assertArrayEquals(bytes(content), read(manager.findResources("textures", ignored -> true).get(ALIAS)));
+                }
+            }
+            assertEquals(1, fixture.pack().closeCount());
+        }
+    }
+
+    @Test
     void disablePropertyKeepsPhysicalPackUnwrapped() {
         TextureAliasTestSupport.AliasFixture fixture =
                 singleAliasPack("physical-fallback", "canonical");
