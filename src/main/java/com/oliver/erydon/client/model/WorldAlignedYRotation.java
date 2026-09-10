@@ -55,6 +55,9 @@ final class WorldAlignedYRotation implements RenderContext.QuadTransform {
     @Override
     public boolean transform(MutableQuadView quad) {
         Direction sourceFace = quad.lightFace();
+        // cullFace(...) also sets nominalFace in Fabric renderers. Capture it
+        // before that setter so CTM and face classification rotate only once.
+        Direction sourceNominalFace = quad.nominalFace();
         for (int vertex = 0; vertex < 4; vertex++) {
             float x = quad.x(vertex);
             float y = quad.y(vertex);
@@ -70,7 +73,7 @@ final class WorldAlignedYRotation implements RenderContext.QuadTransform {
         }
 
         quad.cullFace(clearCullFace ? null : rotateFace(quad.cullFace()));
-        quad.nominalFace(rotateFace(quad.nominalFace()));
+        quad.nominalFace(rotateFace(sourceNominalFace));
         if (sourceFace != null && sourceFace.getAxis() == Direction.Axis.Y) {
             if (diagonal) {
                 HorizontalUvLock.projectFlatHorizontal(quad, findSprite(quad), sourceFace);
