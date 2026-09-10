@@ -104,6 +104,8 @@
     "erydon:glacium_rock_slice_horizontal",
     "erydon:glacium_hewn_layer",
     "erydon:glacium_rock_layer",
+    "erydon:glacium_hewn_layer_multiface",
+    "erydon:glacium_rock_layer_multiface",
     "erydon:glacium_hewn_layer_vertical",
     "erydon:glacium_rock_layer_vertical",
     "erydon:glacium_hewn_post",

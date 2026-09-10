@@ -38,6 +38,7 @@ EXPECTED_FORMS = {
     "arch_romanesque",
     "block",
     "layer",
+    "layer_multiface",
     "layer_vertical",
     "post",
     "slab",
@@ -59,6 +60,7 @@ BASE_CTM_FORMS = (
     "block",
     "slab",
     "layer",
+    "layer_multiface",
     "layer_vertical",
     "slope",
     "slope_shallow_lower",
@@ -116,8 +118,8 @@ def write_json(path: Path, value: dict, *, indent: int = 2) -> None:
 def hewn_ids_and_materials() -> tuple[list[str], list[str]]:
     values = load_json(HEWN_TAG)["values"]
     hewn_ids = [value for value in values if isinstance(value, str) and "_hewn_" in value]
-    if len(hewn_ids) != 594:
-        raise RuntimeError(f"Expected 594 Hewn IDs, found {len(hewn_ids)}")
+    if len(hewn_ids) != 621:
+        raise RuntimeError(f"Expected 621 Hewn IDs, found {len(hewn_ids)}")
 
     materials: list[str] = []
     forms_by_material: dict[str, set[str]] = {}
@@ -387,8 +389,8 @@ def update_languages() -> None:
         path = language_root / filename
         document = load_json(path)
         hewn_keys = [key for key in document if "_hewn_" in key]
-        if len(hewn_keys) != 594:
-            raise RuntimeError(f"Expected 594 Hewn language keys in {filename}, found {len(hewn_keys)}")
+        if len(hewn_keys) != 621:
+            raise RuntimeError(f"Expected 621 Hewn language keys in {filename}, found {len(hewn_keys)}")
 
         generated_keys = {key.replace("_hewn_", "_rock_") for key in hewn_keys}
         generated_keys.add("option.erydon.gallery.variant.rock")
@@ -491,10 +493,10 @@ def update_mod_blocks() -> None:
     )
     output = legacy_slither_helper.sub(canonical_slither_helper, output)
 
-    if len(re.findall(rb"(?m)^    public static Block [A-Z0-9_]*ROCK[A-Z0-9_]*;", output)) != 405:
-        raise RuntimeError("Rock declaration generation did not produce 405 fields")
-    if len(re.findall(rb'(?m)^        [A-Z0-9_]*ROCK[A-Z0-9_]* = registerBlock\("[a-z0-9_]*_rock_', output)) != 405:
-        raise RuntimeError("Rock registration generation did not produce 405 direct blocks")
+    if len(re.findall(rb"(?m)^    public static Block [A-Z0-9_]*ROCK[A-Z0-9_]*;", output)) != 432:
+        raise RuntimeError("Rock declaration generation did not produce 432 fields")
+    if len(re.findall(rb'(?m)^        [A-Z0-9_]*ROCK[A-Z0-9_]* = registerBlock\("[a-z0-9_]*_rock_', output)) != 432:
+        raise RuntimeError("Rock registration generation did not produce 432 direct blocks")
     path.write_bytes(output)
 
 
@@ -518,7 +520,7 @@ def validate_outputs() -> None:
     if rock_document.get("values") != expected_rock_ids:
         raise RuntimeError("rock.json is not an exact Hewn-family mirror")
 
-    expected_counts = (594, 4077, 594)
+    expected_counts = (621, 4752, 621)
     for root, expected in zip(JSON_MIRROR_ROOTS, expected_counts, strict=True):
         sources = sorted(path for path in root.rglob("*.json") if "_hewn_" in path.name)
         targets = sorted(path for path in root.rglob("*.json") if "_rock_" in path.name)
@@ -591,8 +593,8 @@ def validate_outputs() -> None:
         if document.get("option.erydon.gallery.variant.rock") != rock_word:
             raise RuntimeError(f"Missing Rock gallery translation in {filename}")
         rock_keys = [key for key in document if "_rock_" in key]
-        if len(rock_keys) != 594:
-            raise RuntimeError(f"Expected 594 Rock language keys in {filename}, found {len(rock_keys)}")
+        if len(rock_keys) != 621:
+            raise RuntimeError(f"Expected 621 Rock language keys in {filename}, found {len(rock_keys)}")
         for key, value in document.items():
             if "_hewn_" not in key:
                 continue
@@ -601,10 +603,10 @@ def validate_outputs() -> None:
                 raise RuntimeError(f"Rock language mismatch in {filename}: {rock_key}")
 
     mod_blocks = (JAVA_ROOT / "ModBlocks.java").read_text(encoding="utf-8")
-    if len(re.findall(r"^    public static Block [A-Z0-9_]*ROCK[A-Z0-9_]*;", mod_blocks, re.MULTILINE)) != 405:
-        raise RuntimeError("Expected 405 direct Rock fields")
-    if len(re.findall(r'^        [A-Z0-9_]*ROCK[A-Z0-9_]* = registerBlock\("[a-z0-9_]*_rock_', mod_blocks, re.MULTILINE)) != 405:
-        raise RuntimeError("Expected 405 direct Rock registrations")
+    if len(re.findall(r"^    public static Block [A-Z0-9_]*ROCK[A-Z0-9_]*;", mod_blocks, re.MULTILINE)) != 432:
+        raise RuntimeError("Expected 432 direct Rock fields")
+    if len(re.findall(r'^        [A-Z0-9_]*ROCK[A-Z0-9_]* = registerBlock\("[a-z0-9_]*_rock_', mod_blocks, re.MULTILINE)) != 432:
+        raise RuntimeError("Expected 432 direct Rock registrations")
     required_dynamic = (
         'registerModernArch(material + "_rock_arch_modern", material + "_rock_block");',
         'registerGothicArch(material + "_rock_arch_gothic", material + "_rock_block");',
@@ -626,13 +628,13 @@ def main() -> int:
 
     if args.check:
         validate_outputs()
-        print("Rock family outputs verified: 27 materials x 22 forms, with native CTM/PBR tiles.")
+        print("Rock family outputs verified: 27 materials x 23 forms, with native CTM/PBR tiles.")
         return 0
     if args.source is None:
         parser.error("--source is required unless --check is used")
     generate(args.source.resolve())
     validate_outputs()
-    print("Generated and verified the native ERYDON Rock family: 27 materials x 22 forms.")
+    print("Generated and verified the native ERYDON Rock family: 27 materials x 23 forms.")
     return 0
 
 

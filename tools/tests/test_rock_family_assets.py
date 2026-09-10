@@ -11,9 +11,13 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "tools"))
 
 import generate_rock_family  # noqa: E402
+import generate_hewn_multiface_layers  # noqa: E402
 
 
 class RockFamilyAssetTests(unittest.TestCase):
+    def test_hewn_and_rock_multiface_layers_are_complete(self) -> None:
+        generate_hewn_multiface_layers.validate_outputs()
+
     def test_complete_hewn_equivalent_family(self) -> None:
         generate_rock_family.validate_outputs()
 

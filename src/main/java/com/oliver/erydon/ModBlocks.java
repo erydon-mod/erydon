@@ -297,6 +297,9 @@ public final class ModBlocks {
     public static Block AGANITE_HEWN_LAYER;
     public static Block AGANITE_ROCK_LAYER;
 
+    public static Block AGANITE_HEWN_LAYER_MULTIFACE;
+    public static Block AGANITE_ROCK_LAYER_MULTIFACE;
+
     public static Block AGANITE_HEWN_LAYER_VERTICAL;
     public static Block AGANITE_ROCK_LAYER_VERTICAL;
 
@@ -624,6 +627,9 @@ public final class ModBlocks {
 
     public static Block ATERZON_HEWN_LAYER;
     public static Block ATERZON_ROCK_LAYER;
+
+    public static Block ATERZON_HEWN_LAYER_MULTIFACE;
+    public static Block ATERZON_ROCK_LAYER_MULTIFACE;
 
     public static Block ATERZON_HEWN_LAYER_VERTICAL;
     public static Block ATERZON_ROCK_LAYER_VERTICAL;
@@ -962,6 +968,9 @@ public final class ModBlocks {
     public static Block BOREALIS_HEWN_LAYER;
     public static Block BOREALIS_ROCK_LAYER;
 
+    public static Block BOREALIS_HEWN_LAYER_MULTIFACE;
+    public static Block BOREALIS_ROCK_LAYER_MULTIFACE;
+
     public static Block BOREALIS_HEWN_LAYER_VERTICAL;
     public static Block BOREALIS_ROCK_LAYER_VERTICAL;
 
@@ -1289,6 +1298,9 @@ public final class ModBlocks {
 
     public static Block BRECTITE_HEWN_LAYER;
     public static Block BRECTITE_ROCK_LAYER;
+
+    public static Block BRECTITE_HEWN_LAYER_MULTIFACE;
+    public static Block BRECTITE_ROCK_LAYER_MULTIFACE;
 
     public static Block BRECTITE_HEWN_LAYER_VERTICAL;
     public static Block BRECTITE_ROCK_LAYER_VERTICAL;
@@ -1618,6 +1630,9 @@ public final class ModBlocks {
     public static Block CALACATTUM_HEWN_LAYER;
     public static Block CALACATTUM_ROCK_LAYER;
 
+    public static Block CALACATTUM_HEWN_LAYER_MULTIFACE;
+    public static Block CALACATTUM_ROCK_LAYER_MULTIFACE;
+
     public static Block CALACATTUM_HEWN_LAYER_VERTICAL;
     public static Block CALACATTUM_ROCK_LAYER_VERTICAL;
 
@@ -1945,6 +1960,9 @@ public final class ModBlocks {
 
     public static Block CHALSTROM_HEWN_LAYER;
     public static Block CHALSTROM_ROCK_LAYER;
+
+    public static Block CHALSTROM_HEWN_LAYER_MULTIFACE;
+    public static Block CHALSTROM_ROCK_LAYER_MULTIFACE;
 
     public static Block CHALSTROM_HEWN_LAYER_VERTICAL;
     public static Block CHALSTROM_ROCK_LAYER_VERTICAL;
@@ -2274,6 +2292,9 @@ public final class ModBlocks {
     public static Block CHRYSONYX_HEWN_LAYER;
     public static Block CHRYSONYX_ROCK_LAYER;
 
+    public static Block CHRYSONYX_HEWN_LAYER_MULTIFACE;
+    public static Block CHRYSONYX_ROCK_LAYER_MULTIFACE;
+
     public static Block CHRYSONYX_HEWN_LAYER_VERTICAL;
     public static Block CHRYSONYX_ROCK_LAYER_VERTICAL;
 
@@ -2602,6 +2623,9 @@ public final class ModBlocks {
     public static Block PORPHYROS_HEWN_LAYER;
     public static Block PORPHYROS_ROCK_LAYER;
 
+    public static Block PORPHYROS_HEWN_LAYER_MULTIFACE;
+    public static Block PORPHYROS_ROCK_LAYER_MULTIFACE;
+
     public static Block PORPHYROS_HEWN_LAYER_VERTICAL;
     public static Block PORPHYROS_ROCK_LAYER_VERTICAL;
 
@@ -2929,6 +2953,9 @@ public final class ModBlocks {
 
     public static Block ETRUSCUS_HEWN_LAYER;
     public static Block ETRUSCUS_ROCK_LAYER;
+
+    public static Block ETRUSCUS_HEWN_LAYER_MULTIFACE;
+    public static Block ETRUSCUS_ROCK_LAYER_MULTIFACE;
 
     public static Block ETRUSCUS_HEWN_LAYER_VERTICAL;
     public static Block ETRUSCUS_ROCK_LAYER_VERTICAL;
@@ -3267,6 +3294,9 @@ public final class ModBlocks {
     public static Block GELASTRUM_HEWN_LAYER;
     public static Block GELASTRUM_ROCK_LAYER;
 
+    public static Block GELASTRUM_HEWN_LAYER_MULTIFACE;
+    public static Block GELASTRUM_ROCK_LAYER_MULTIFACE;
+
     public static Block GELASTRUM_HEWN_LAYER_VERTICAL;
     public static Block GELASTRUM_ROCK_LAYER_VERTICAL;
 
@@ -3594,6 +3624,9 @@ public final class ModBlocks {
 
     public static Block GLACIUM_HEWN_LAYER;
     public static Block GLACIUM_ROCK_LAYER;
+
+    public static Block GLACIUM_HEWN_LAYER_MULTIFACE;
+    public static Block GLACIUM_ROCK_LAYER_MULTIFACE;
 
     public static Block GLACIUM_HEWN_LAYER_VERTICAL;
     public static Block GLACIUM_ROCK_LAYER_VERTICAL;
@@ -3923,6 +3956,9 @@ public final class ModBlocks {
     public static Block HESPERION_HEWN_LAYER;
     public static Block HESPERION_ROCK_LAYER;
 
+    public static Block HESPERION_HEWN_LAYER_MULTIFACE;
+    public static Block HESPERION_ROCK_LAYER_MULTIFACE;
+
     public static Block HESPERION_HEWN_LAYER_VERTICAL;
     public static Block HESPERION_ROCK_LAYER_VERTICAL;
 
@@ -4251,6 +4287,9 @@ public final class ModBlocks {
     public static Block IMPERIUM_HEWN_LAYER;
     public static Block IMPERIUM_ROCK_LAYER;
 
+    public static Block IMPERIUM_HEWN_LAYER_MULTIFACE;
+    public static Block IMPERIUM_ROCK_LAYER_MULTIFACE;
+
     public static Block IMPERIUM_HEWN_LAYER_VERTICAL;
     public static Block IMPERIUM_ROCK_LAYER_VERTICAL;
 
@@ -4578,6 +4617,9 @@ public final class ModBlocks {
 
     public static Block KYLORION_HEWN_LAYER;
     public static Block KYLORION_ROCK_LAYER;
+
+    public static Block KYLORION_HEWN_LAYER_MULTIFACE;
+    public static Block KYLORION_ROCK_LAYER_MULTIFACE;
 
     public static Block KYLORION_HEWN_LAYER_VERTICAL;
     public static Block KYLORION_ROCK_LAYER_VERTICAL;
@@ -5241,6 +5283,9 @@ public final class ModBlocks {
     public static Block KELASTRION_HEWN_LAYER;
     public static Block KELASTRION_ROCK_LAYER;
 
+    public static Block KELASTRION_HEWN_LAYER_MULTIFACE;
+    public static Block KELASTRION_ROCK_LAYER_MULTIFACE;
+
     public static Block KELASTRION_HEWN_LAYER_VERTICAL;
     public static Block KELASTRION_ROCK_LAYER_VERTICAL;
 
@@ -5382,6 +5427,9 @@ public final class ModBlocks {
     public static Block LATMION_HEWN_LAYER;
     public static Block LATMION_ROCK_LAYER;
 
+    public static Block LATMION_HEWN_LAYER_MULTIFACE;
+    public static Block LATMION_ROCK_LAYER_MULTIFACE;
+
     public static Block LATMION_HEWN_LAYER_VERTICAL;
     public static Block LATMION_ROCK_LAYER_VERTICAL;
 
@@ -5522,6 +5570,9 @@ public final class ModBlocks {
 
     public static Block PSAMATHEON_HEWN_LAYER;
     public static Block PSAMATHEON_ROCK_LAYER;
+
+    public static Block PSAMATHEON_HEWN_LAYER_MULTIFACE;
+    public static Block PSAMATHEON_ROCK_LAYER_MULTIFACE;
 
     public static Block PSAMATHEON_HEWN_LAYER_VERTICAL;
     public static Block PSAMATHEON_ROCK_LAYER_VERTICAL;
@@ -5836,6 +5887,9 @@ public final class ModBlocks {
 
     public static Block LAURENTIUM_HEWN_LAYER;
     public static Block LAURENTIUM_ROCK_LAYER;
+
+    public static Block LAURENTIUM_HEWN_LAYER_MULTIFACE;
+    public static Block LAURENTIUM_ROCK_LAYER_MULTIFACE;
 
     public static Block LAURENTIUM_HEWN_LAYER_VERTICAL;
     public static Block LAURENTIUM_ROCK_LAYER_VERTICAL;
@@ -6174,6 +6228,9 @@ public final class ModBlocks {
     public static Block MIELONYX_HEWN_LAYER;
     public static Block MIELONYX_ROCK_LAYER;
 
+    public static Block MIELONYX_HEWN_LAYER_MULTIFACE;
+    public static Block MIELONYX_ROCK_LAYER_MULTIFACE;
+
     public static Block MIELONYX_HEWN_LAYER_VERTICAL;
     public static Block MIELONYX_ROCK_LAYER_VERTICAL;
 
@@ -6501,6 +6558,9 @@ public final class ModBlocks {
 
     public static Block NERIUM_HEWN_LAYER;
     public static Block NERIUM_ROCK_LAYER;
+
+    public static Block NERIUM_HEWN_LAYER_MULTIFACE;
+    public static Block NERIUM_ROCK_LAYER_MULTIFACE;
 
     public static Block NERIUM_HEWN_LAYER_VERTICAL;
     public static Block NERIUM_ROCK_LAYER_VERTICAL;
@@ -6830,6 +6890,9 @@ public final class ModBlocks {
     public static Block NOXOPLIS_HEWN_LAYER;
     public static Block NOXOPLIS_ROCK_LAYER;
 
+    public static Block NOXOPLIS_HEWN_LAYER_MULTIFACE;
+    public static Block NOXOPLIS_ROCK_LAYER_MULTIFACE;
+
     public static Block NOXOPLIS_HEWN_LAYER_VERTICAL;
     public static Block NOXOPLIS_ROCK_LAYER_VERTICAL;
 
@@ -7157,6 +7220,9 @@ public final class ModBlocks {
 
     public static Block PORTORIUM_HEWN_LAYER;
     public static Block PORTORIUM_ROCK_LAYER;
+
+    public static Block PORTORIUM_HEWN_LAYER_MULTIFACE;
+    public static Block PORTORIUM_ROCK_LAYER_MULTIFACE;
 
     public static Block PORTORIUM_HEWN_LAYER_VERTICAL;
     public static Block PORTORIUM_ROCK_LAYER_VERTICAL;
@@ -7486,6 +7552,9 @@ public final class ModBlocks {
     public static Block ROSINIUM_HEWN_LAYER;
     public static Block ROSINIUM_ROCK_LAYER;
 
+    public static Block ROSINIUM_HEWN_LAYER_MULTIFACE;
+    public static Block ROSINIUM_ROCK_LAYER_MULTIFACE;
+
     public static Block ROSINIUM_HEWN_LAYER_VERTICAL;
     public static Block ROSINIUM_ROCK_LAYER_VERTICAL;
 
@@ -7813,6 +7882,9 @@ public final class ModBlocks {
 
     public static Block SANGUENITE_HEWN_LAYER;
     public static Block SANGUENITE_ROCK_LAYER;
+
+    public static Block SANGUENITE_HEWN_LAYER_MULTIFACE;
+    public static Block SANGUENITE_ROCK_LAYER_MULTIFACE;
 
     public static Block SANGUENITE_HEWN_LAYER_VERTICAL;
     public static Block SANGUENITE_ROCK_LAYER_VERTICAL;
@@ -8151,6 +8223,9 @@ public final class ModBlocks {
     public static Block SELENEPHOS_HEWN_LAYER;
     public static Block SELENEPHOS_ROCK_LAYER;
 
+    public static Block SELENEPHOS_HEWN_LAYER_MULTIFACE;
+    public static Block SELENEPHOS_ROCK_LAYER_MULTIFACE;
+
     public static Block SELENEPHOS_HEWN_LAYER_VERTICAL;
     public static Block SELENEPHOS_ROCK_LAYER_VERTICAL;
 
@@ -8479,6 +8554,9 @@ public final class ModBlocks {
     public static Block SOLISTRA_HEWN_LAYER;
     public static Block SOLISTRA_ROCK_LAYER;
 
+    public static Block SOLISTRA_HEWN_LAYER_MULTIFACE;
+    public static Block SOLISTRA_ROCK_LAYER_MULTIFACE;
+
     public static Block SOLISTRA_HEWN_LAYER_VERTICAL;
     public static Block SOLISTRA_ROCK_LAYER_VERTICAL;
 
@@ -8806,6 +8884,9 @@ public final class ModBlocks {
 
     public static Block STRIATUS_HEWN_LAYER;
     public static Block STRIATUS_ROCK_LAYER;
+
+    public static Block STRIATUS_HEWN_LAYER_MULTIFACE;
+    public static Block STRIATUS_ROCK_LAYER_MULTIFACE;
 
     public static Block STRIATUS_HEWN_LAYER_VERTICAL;
     public static Block STRIATUS_ROCK_LAYER_VERTICAL;
@@ -10341,6 +10422,11 @@ public final class ModBlocks {
         AGANITE_ROCK_LAYER = registerBlock("aganite_rock_layer",
             new LayerBlock(AbstractBlock.Settings.copy(AGANITE_BLOCK).nonOpaque()));
 
+        AGANITE_HEWN_LAYER_MULTIFACE = registerBlock("aganite_hewn_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(AGANITE_BLOCK).nonOpaque()));
+        AGANITE_ROCK_LAYER_MULTIFACE = registerBlock("aganite_rock_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(AGANITE_BLOCK).nonOpaque()));
+
         AGANITE_HEWN_LAYER_VERTICAL = registerBlock("aganite_hewn_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(AGANITE_BLOCK).nonOpaque()));
         AGANITE_ROCK_LAYER_VERTICAL = registerBlock("aganite_rock_layer_vertical",
@@ -10860,6 +10946,11 @@ public final class ModBlocks {
             new LayerBlock(AbstractBlock.Settings.copy(ATERZON_BLOCK).nonOpaque()));
         ATERZON_ROCK_LAYER = registerBlock("aterzon_rock_layer",
             new LayerBlock(AbstractBlock.Settings.copy(ATERZON_BLOCK).nonOpaque()));
+
+        ATERZON_HEWN_LAYER_MULTIFACE = registerBlock("aterzon_hewn_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(ATERZON_BLOCK).nonOpaque()));
+        ATERZON_ROCK_LAYER_MULTIFACE = registerBlock("aterzon_rock_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(ATERZON_BLOCK).nonOpaque()));
 
         ATERZON_HEWN_LAYER_VERTICAL = registerBlock("aterzon_hewn_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(ATERZON_BLOCK).nonOpaque()));
@@ -11405,6 +11496,11 @@ public final class ModBlocks {
         BOREALIS_ROCK_LAYER = registerBlock("borealis_rock_layer",
             new LayerBlock(AbstractBlock.Settings.copy(BOREALIS_BLOCK).nonOpaque()));
 
+        BOREALIS_HEWN_LAYER_MULTIFACE = registerBlock("borealis_hewn_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(BOREALIS_BLOCK).nonOpaque()));
+        BOREALIS_ROCK_LAYER_MULTIFACE = registerBlock("borealis_rock_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(BOREALIS_BLOCK).nonOpaque()));
+
         BOREALIS_HEWN_LAYER_VERTICAL = registerBlock("borealis_hewn_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(BOREALIS_BLOCK).nonOpaque()));
         BOREALIS_ROCK_LAYER_VERTICAL = registerBlock("borealis_rock_layer_vertical",
@@ -11924,6 +12020,11 @@ public final class ModBlocks {
             new LayerBlock(AbstractBlock.Settings.copy(BRECTITE_BLOCK).nonOpaque()));
         BRECTITE_ROCK_LAYER = registerBlock("brectite_rock_layer",
             new LayerBlock(AbstractBlock.Settings.copy(BRECTITE_BLOCK).nonOpaque()));
+
+        BRECTITE_HEWN_LAYER_MULTIFACE = registerBlock("brectite_hewn_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(BRECTITE_BLOCK).nonOpaque()));
+        BRECTITE_ROCK_LAYER_MULTIFACE = registerBlock("brectite_rock_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(BRECTITE_BLOCK).nonOpaque()));
 
         BRECTITE_HEWN_LAYER_VERTICAL = registerBlock("brectite_hewn_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(BRECTITE_BLOCK).nonOpaque()));
@@ -12445,6 +12546,11 @@ public final class ModBlocks {
         CALACATTUM_ROCK_LAYER = registerBlock("calacattum_rock_layer",
             new LayerBlock(AbstractBlock.Settings.copy(CALACATTUM_BLOCK).nonOpaque()));
 
+        CALACATTUM_HEWN_LAYER_MULTIFACE = registerBlock("calacattum_hewn_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(CALACATTUM_BLOCK).nonOpaque()));
+        CALACATTUM_ROCK_LAYER_MULTIFACE = registerBlock("calacattum_rock_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(CALACATTUM_BLOCK).nonOpaque()));
+
         CALACATTUM_HEWN_LAYER_VERTICAL = registerBlock("calacattum_hewn_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(CALACATTUM_BLOCK).nonOpaque()));
         CALACATTUM_ROCK_LAYER_VERTICAL = registerBlock("calacattum_rock_layer_vertical",
@@ -12964,6 +13070,11 @@ public final class ModBlocks {
             new LayerBlock(AbstractBlock.Settings.copy(CHALSTROM_BLOCK).nonOpaque()));
         CHALSTROM_ROCK_LAYER = registerBlock("chalstrom_rock_layer",
             new LayerBlock(AbstractBlock.Settings.copy(CHALSTROM_BLOCK).nonOpaque()));
+
+        CHALSTROM_HEWN_LAYER_MULTIFACE = registerBlock("chalstrom_hewn_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(CHALSTROM_BLOCK).nonOpaque()));
+        CHALSTROM_ROCK_LAYER_MULTIFACE = registerBlock("chalstrom_rock_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(CHALSTROM_BLOCK).nonOpaque()));
 
         CHALSTROM_HEWN_LAYER_VERTICAL = registerBlock("chalstrom_hewn_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(CHALSTROM_BLOCK).nonOpaque()));
@@ -13485,6 +13596,11 @@ public final class ModBlocks {
         CHRYSONYX_ROCK_LAYER = registerBlock("chrysonyx_rock_layer",
             new LayerBlock(AbstractBlock.Settings.copy(CHRYSONYX_BLOCK).nonOpaque()));
 
+        CHRYSONYX_HEWN_LAYER_MULTIFACE = registerBlock("chrysonyx_hewn_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(CHRYSONYX_BLOCK).nonOpaque()));
+        CHRYSONYX_ROCK_LAYER_MULTIFACE = registerBlock("chrysonyx_rock_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(CHRYSONYX_BLOCK).nonOpaque()));
+
         CHRYSONYX_HEWN_LAYER_VERTICAL = registerBlock("chrysonyx_hewn_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(CHRYSONYX_BLOCK).nonOpaque()));
         CHRYSONYX_ROCK_LAYER_VERTICAL = registerBlock("chrysonyx_rock_layer_vertical",
@@ -14005,6 +14121,11 @@ public final class ModBlocks {
         PORPHYROS_ROCK_LAYER = registerBlock("porphyros_rock_layer",
             new LayerBlock(AbstractBlock.Settings.copy(PORPHYROS_BLOCK).nonOpaque()));
 
+        PORPHYROS_HEWN_LAYER_MULTIFACE = registerBlock("porphyros_hewn_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(PORPHYROS_BLOCK).nonOpaque()));
+        PORPHYROS_ROCK_LAYER_MULTIFACE = registerBlock("porphyros_rock_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(PORPHYROS_BLOCK).nonOpaque()));
+
         PORPHYROS_HEWN_LAYER_VERTICAL = registerBlock("porphyros_hewn_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(PORPHYROS_BLOCK).nonOpaque()));
         PORPHYROS_ROCK_LAYER_VERTICAL = registerBlock("porphyros_rock_layer_vertical",
@@ -14524,6 +14645,11 @@ public final class ModBlocks {
             new LayerBlock(AbstractBlock.Settings.copy(ETRUSCUS_BLOCK).nonOpaque()));
         ETRUSCUS_ROCK_LAYER = registerBlock("etruscus_rock_layer",
             new LayerBlock(AbstractBlock.Settings.copy(ETRUSCUS_BLOCK).nonOpaque()));
+
+        ETRUSCUS_HEWN_LAYER_MULTIFACE = registerBlock("etruscus_hewn_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(ETRUSCUS_BLOCK).nonOpaque()));
+        ETRUSCUS_ROCK_LAYER_MULTIFACE = registerBlock("etruscus_rock_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(ETRUSCUS_BLOCK).nonOpaque()));
 
         ETRUSCUS_HEWN_LAYER_VERTICAL = registerBlock("etruscus_hewn_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(ETRUSCUS_BLOCK).nonOpaque()));
@@ -15069,6 +15195,11 @@ public final class ModBlocks {
         GELASTRUM_ROCK_LAYER = registerBlock("gelastrum_rock_layer",
             new LayerBlock(AbstractBlock.Settings.copy(GELASTRUM_BLOCK).nonOpaque()));
 
+        GELASTRUM_HEWN_LAYER_MULTIFACE = registerBlock("gelastrum_hewn_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(GELASTRUM_BLOCK).nonOpaque()));
+        GELASTRUM_ROCK_LAYER_MULTIFACE = registerBlock("gelastrum_rock_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(GELASTRUM_BLOCK).nonOpaque()));
+
         GELASTRUM_HEWN_LAYER_VERTICAL = registerBlock("gelastrum_hewn_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(GELASTRUM_BLOCK).nonOpaque()));
         GELASTRUM_ROCK_LAYER_VERTICAL = registerBlock("gelastrum_rock_layer_vertical",
@@ -15588,6 +15719,11 @@ public final class ModBlocks {
             new LayerBlock(AbstractBlock.Settings.copy(GLACIUM_BLOCK).nonOpaque()));
         GLACIUM_ROCK_LAYER = registerBlock("glacium_rock_layer",
             new LayerBlock(AbstractBlock.Settings.copy(GLACIUM_BLOCK).nonOpaque()));
+
+        GLACIUM_HEWN_LAYER_MULTIFACE = registerBlock("glacium_hewn_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(GLACIUM_BLOCK).nonOpaque()));
+        GLACIUM_ROCK_LAYER_MULTIFACE = registerBlock("glacium_rock_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(GLACIUM_BLOCK).nonOpaque()));
 
         GLACIUM_HEWN_LAYER_VERTICAL = registerBlock("glacium_hewn_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(GLACIUM_BLOCK).nonOpaque()));
@@ -16109,6 +16245,11 @@ public final class ModBlocks {
         HESPERION_ROCK_LAYER = registerBlock("hesperion_rock_layer",
             new LayerBlock(AbstractBlock.Settings.copy(HESPERION_BLOCK).nonOpaque()));
 
+        HESPERION_HEWN_LAYER_MULTIFACE = registerBlock("hesperion_hewn_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(HESPERION_BLOCK).nonOpaque()));
+        HESPERION_ROCK_LAYER_MULTIFACE = registerBlock("hesperion_rock_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(HESPERION_BLOCK).nonOpaque()));
+
         HESPERION_HEWN_LAYER_VERTICAL = registerBlock("hesperion_hewn_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(HESPERION_BLOCK).nonOpaque()));
         HESPERION_ROCK_LAYER_VERTICAL = registerBlock("hesperion_rock_layer_vertical",
@@ -16629,6 +16770,11 @@ public final class ModBlocks {
         IMPERIUM_ROCK_LAYER = registerBlock("imperium_rock_layer",
             new LayerBlock(AbstractBlock.Settings.copy(IMPERIUM_BLOCK).nonOpaque()));
 
+        IMPERIUM_HEWN_LAYER_MULTIFACE = registerBlock("imperium_hewn_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(IMPERIUM_BLOCK).nonOpaque()));
+        IMPERIUM_ROCK_LAYER_MULTIFACE = registerBlock("imperium_rock_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(IMPERIUM_BLOCK).nonOpaque()));
+
         IMPERIUM_HEWN_LAYER_VERTICAL = registerBlock("imperium_hewn_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(IMPERIUM_BLOCK).nonOpaque()));
         IMPERIUM_ROCK_LAYER_VERTICAL = registerBlock("imperium_rock_layer_vertical",
@@ -17148,6 +17294,11 @@ public final class ModBlocks {
             new LayerBlock(AbstractBlock.Settings.copy(KYLORION_BLOCK).nonOpaque()));
         KYLORION_ROCK_LAYER = registerBlock("kylorion_rock_layer",
             new LayerBlock(AbstractBlock.Settings.copy(KYLORION_BLOCK).nonOpaque()));
+
+        KYLORION_HEWN_LAYER_MULTIFACE = registerBlock("kylorion_hewn_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(KYLORION_BLOCK).nonOpaque()));
+        KYLORION_ROCK_LAYER_MULTIFACE = registerBlock("kylorion_rock_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(KYLORION_BLOCK).nonOpaque()));
 
         KYLORION_HEWN_LAYER_VERTICAL = registerBlock("kylorion_hewn_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(KYLORION_BLOCK).nonOpaque()));
@@ -17763,6 +17914,11 @@ public final class ModBlocks {
         KELASTRION_ROCK_LAYER = registerBlock("kelastrion_rock_layer",
             new LayerBlock(AbstractBlock.Settings.copy(KELASTRION_BLOCK).nonOpaque()));
 
+        KELASTRION_HEWN_LAYER_MULTIFACE = registerBlock("kelastrion_hewn_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(KELASTRION_BLOCK).nonOpaque()));
+        KELASTRION_ROCK_LAYER_MULTIFACE = registerBlock("kelastrion_rock_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(KELASTRION_BLOCK).nonOpaque()));
+
         KELASTRION_HEWN_LAYER_VERTICAL = registerBlock("kelastrion_hewn_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(KELASTRION_BLOCK).nonOpaque()));
         KELASTRION_ROCK_LAYER_VERTICAL = registerBlock("kelastrion_rock_layer_vertical",
@@ -18259,6 +18415,11 @@ public final class ModBlocks {
             new LayerBlock(AbstractBlock.Settings.copy(PSAMATHEON_BLOCK).nonOpaque()));
         PSAMATHEON_ROCK_LAYER = registerBlock("psamatheon_rock_layer",
             new LayerBlock(AbstractBlock.Settings.copy(PSAMATHEON_BLOCK).nonOpaque()));
+
+        PSAMATHEON_HEWN_LAYER_MULTIFACE = registerBlock("psamatheon_hewn_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(PSAMATHEON_BLOCK).nonOpaque()));
+        PSAMATHEON_ROCK_LAYER_MULTIFACE = registerBlock("psamatheon_rock_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(PSAMATHEON_BLOCK).nonOpaque()));
 
         PSAMATHEON_HEWN_LAYER_VERTICAL = registerBlock("psamatheon_hewn_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(PSAMATHEON_BLOCK).nonOpaque()));
@@ -18757,6 +18918,11 @@ public final class ModBlocks {
         LATMION_ROCK_LAYER = registerBlock("latmion_rock_layer",
             new LayerBlock(AbstractBlock.Settings.copy(LATMION_BLOCK).nonOpaque()));
 
+        LATMION_HEWN_LAYER_MULTIFACE = registerBlock("latmion_hewn_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(LATMION_BLOCK).nonOpaque()));
+        LATMION_ROCK_LAYER_MULTIFACE = registerBlock("latmion_rock_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(LATMION_BLOCK).nonOpaque()));
+
         LATMION_HEWN_LAYER_VERTICAL = registerBlock("latmion_hewn_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(LATMION_BLOCK).nonOpaque()));
         LATMION_ROCK_LAYER_VERTICAL = registerBlock("latmion_rock_layer_vertical",
@@ -19159,6 +19325,11 @@ public final class ModBlocks {
             new LayerBlock(AbstractBlock.Settings.copy(LAURENTIUM_BLOCK).nonOpaque()));
         LAURENTIUM_ROCK_LAYER = registerBlock("laurentium_rock_layer",
             new LayerBlock(AbstractBlock.Settings.copy(LAURENTIUM_BLOCK).nonOpaque()));
+
+        LAURENTIUM_HEWN_LAYER_MULTIFACE = registerBlock("laurentium_hewn_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(LAURENTIUM_BLOCK).nonOpaque()));
+        LAURENTIUM_ROCK_LAYER_MULTIFACE = registerBlock("laurentium_rock_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(LAURENTIUM_BLOCK).nonOpaque()));
 
         LAURENTIUM_HEWN_LAYER_VERTICAL = registerBlock("laurentium_hewn_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(LAURENTIUM_BLOCK).nonOpaque()));
@@ -19704,6 +19875,11 @@ public final class ModBlocks {
         MIELONYX_ROCK_LAYER = registerBlock("mielonyx_rock_layer",
             new LayerBlock(AbstractBlock.Settings.copy(MIELONYX_BLOCK).nonOpaque()));
 
+        MIELONYX_HEWN_LAYER_MULTIFACE = registerBlock("mielonyx_hewn_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(MIELONYX_BLOCK).nonOpaque()));
+        MIELONYX_ROCK_LAYER_MULTIFACE = registerBlock("mielonyx_rock_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(MIELONYX_BLOCK).nonOpaque()));
+
         MIELONYX_HEWN_LAYER_VERTICAL = registerBlock("mielonyx_hewn_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(MIELONYX_BLOCK).nonOpaque()));
         MIELONYX_ROCK_LAYER_VERTICAL = registerBlock("mielonyx_rock_layer_vertical",
@@ -20223,6 +20399,11 @@ public final class ModBlocks {
             new LayerBlock(AbstractBlock.Settings.copy(NERIUM_BLOCK).nonOpaque()));
         NERIUM_ROCK_LAYER = registerBlock("nerium_rock_layer",
             new LayerBlock(AbstractBlock.Settings.copy(NERIUM_BLOCK).nonOpaque()));
+
+        NERIUM_HEWN_LAYER_MULTIFACE = registerBlock("nerium_hewn_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(NERIUM_BLOCK).nonOpaque()));
+        NERIUM_ROCK_LAYER_MULTIFACE = registerBlock("nerium_rock_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(NERIUM_BLOCK).nonOpaque()));
 
         NERIUM_HEWN_LAYER_VERTICAL = registerBlock("nerium_hewn_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(NERIUM_BLOCK).nonOpaque()));
@@ -20744,6 +20925,11 @@ public final class ModBlocks {
         NOXOPLIS_ROCK_LAYER = registerBlock("noxoplis_rock_layer",
             new LayerBlock(AbstractBlock.Settings.copy(NOXOPLIS_BLOCK).nonOpaque()));
 
+        NOXOPLIS_HEWN_LAYER_MULTIFACE = registerBlock("noxoplis_hewn_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(NOXOPLIS_BLOCK).nonOpaque()));
+        NOXOPLIS_ROCK_LAYER_MULTIFACE = registerBlock("noxoplis_rock_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(NOXOPLIS_BLOCK).nonOpaque()));
+
         NOXOPLIS_HEWN_LAYER_VERTICAL = registerBlock("noxoplis_hewn_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(NOXOPLIS_BLOCK).nonOpaque()));
         NOXOPLIS_ROCK_LAYER_VERTICAL = registerBlock("noxoplis_rock_layer_vertical",
@@ -21263,6 +21449,11 @@ public final class ModBlocks {
             new LayerBlock(AbstractBlock.Settings.copy(PORTORIUM_BLOCK).nonOpaque()));
         PORTORIUM_ROCK_LAYER = registerBlock("portorium_rock_layer",
             new LayerBlock(AbstractBlock.Settings.copy(PORTORIUM_BLOCK).nonOpaque()));
+
+        PORTORIUM_HEWN_LAYER_MULTIFACE = registerBlock("portorium_hewn_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(PORTORIUM_BLOCK).nonOpaque()));
+        PORTORIUM_ROCK_LAYER_MULTIFACE = registerBlock("portorium_rock_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(PORTORIUM_BLOCK).nonOpaque()));
 
         PORTORIUM_HEWN_LAYER_VERTICAL = registerBlock("portorium_hewn_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(PORTORIUM_BLOCK).nonOpaque()));
@@ -21784,6 +21975,11 @@ public final class ModBlocks {
         ROSINIUM_ROCK_LAYER = registerBlock("rosinium_rock_layer",
             new LayerBlock(AbstractBlock.Settings.copy(ROSINIUM_BLOCK).nonOpaque()));
 
+        ROSINIUM_HEWN_LAYER_MULTIFACE = registerBlock("rosinium_hewn_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(ROSINIUM_BLOCK).nonOpaque()));
+        ROSINIUM_ROCK_LAYER_MULTIFACE = registerBlock("rosinium_rock_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(ROSINIUM_BLOCK).nonOpaque()));
+
         ROSINIUM_HEWN_LAYER_VERTICAL = registerBlock("rosinium_hewn_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(ROSINIUM_BLOCK).nonOpaque()));
         ROSINIUM_ROCK_LAYER_VERTICAL = registerBlock("rosinium_rock_layer_vertical",
@@ -22303,6 +22499,11 @@ public final class ModBlocks {
             new LayerBlock(AbstractBlock.Settings.copy(SANGUENITE_BLOCK).nonOpaque()));
         SANGUENITE_ROCK_LAYER = registerBlock("sanguenite_rock_layer",
             new LayerBlock(AbstractBlock.Settings.copy(SANGUENITE_BLOCK).nonOpaque()));
+
+        SANGUENITE_HEWN_LAYER_MULTIFACE = registerBlock("sanguenite_hewn_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(SANGUENITE_BLOCK).nonOpaque()));
+        SANGUENITE_ROCK_LAYER_MULTIFACE = registerBlock("sanguenite_rock_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(SANGUENITE_BLOCK).nonOpaque()));
 
         SANGUENITE_HEWN_LAYER_VERTICAL = registerBlock("sanguenite_hewn_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(SANGUENITE_BLOCK).nonOpaque()));
@@ -22848,6 +23049,11 @@ public final class ModBlocks {
         SELENEPHOS_ROCK_LAYER = registerBlock("selenephos_rock_layer",
             new LayerBlock(AbstractBlock.Settings.copy(SELENEPHOS_BLOCK).nonOpaque()));
 
+        SELENEPHOS_HEWN_LAYER_MULTIFACE = registerBlock("selenephos_hewn_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(SELENEPHOS_BLOCK).nonOpaque()));
+        SELENEPHOS_ROCK_LAYER_MULTIFACE = registerBlock("selenephos_rock_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(SELENEPHOS_BLOCK).nonOpaque()));
+
         SELENEPHOS_HEWN_LAYER_VERTICAL = registerBlock("selenephos_hewn_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(SELENEPHOS_BLOCK).nonOpaque()));
         SELENEPHOS_ROCK_LAYER_VERTICAL = registerBlock("selenephos_rock_layer_vertical",
@@ -23368,6 +23574,11 @@ public final class ModBlocks {
         SOLISTRA_ROCK_LAYER = registerBlock("solistra_rock_layer",
             new LayerBlock(AbstractBlock.Settings.copy(SOLISTRA_BLOCK).nonOpaque()));
 
+        SOLISTRA_HEWN_LAYER_MULTIFACE = registerBlock("solistra_hewn_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(SOLISTRA_BLOCK).nonOpaque()));
+        SOLISTRA_ROCK_LAYER_MULTIFACE = registerBlock("solistra_rock_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(SOLISTRA_BLOCK).nonOpaque()));
+
         SOLISTRA_HEWN_LAYER_VERTICAL = registerBlock("solistra_hewn_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(SOLISTRA_BLOCK).nonOpaque()));
         SOLISTRA_ROCK_LAYER_VERTICAL = registerBlock("solistra_rock_layer_vertical",
@@ -23887,6 +24098,11 @@ public final class ModBlocks {
             new LayerBlock(AbstractBlock.Settings.copy(STRIATUS_BLOCK).nonOpaque()));
         STRIATUS_ROCK_LAYER = registerBlock("striatus_rock_layer",
             new LayerBlock(AbstractBlock.Settings.copy(STRIATUS_BLOCK).nonOpaque()));
+
+        STRIATUS_HEWN_LAYER_MULTIFACE = registerBlock("striatus_hewn_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(STRIATUS_BLOCK).nonOpaque()));
+        STRIATUS_ROCK_LAYER_MULTIFACE = registerBlock("striatus_rock_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(STRIATUS_BLOCK).nonOpaque()));
 
         STRIATUS_HEWN_LAYER_VERTICAL = registerBlock("striatus_hewn_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(STRIATUS_BLOCK).nonOpaque()));
