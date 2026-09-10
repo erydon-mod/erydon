@@ -17,7 +17,6 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.command.argument.BlockPosArgumentType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Property;
@@ -25,7 +24,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.World;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,6 +31,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.WeakHashMap;
 import java.util.concurrent.CompletableFuture;
 
 import static net.minecraft.server.command.CommandManager.argument;
@@ -47,14 +46,12 @@ public final class ErydonSwapCommand {
     private static final int MATERIAL_SWAP_FLAGS = Block.NOTIFY_LISTENERS | Block.FORCE_STATE;
     private static final String SOURCE_ARGUMENT = "source";
     private static final String TARGET_ARGUMENT = "target";
-    private static final Map<RegistryKey<World>, LastSwapUndo> LAST_UNDO_BY_WORLD = new HashMap<>();
+    private static final Map<ServerWorld, LastSwapUndo> LAST_UNDO_BY_WORLD = new WeakHashMap<>();
 
     private static final SimpleCommandExceptionType SAME_FAMILY =
             new SimpleCommandExceptionType(Text.literal("Source and target families must be different."));
-    private static final SimpleCommandExceptionType MIXED_FAMILY_GROUP =
-            new SimpleCommandExceptionType(Text.literal("Material families can only be swapped to another material family, for example \"Aganite Family\" -> \"Borealis Family\"."));
     private static final SimpleCommandExceptionType ALL_ERYDON_BLOCKS_TARGET =
-            new SimpleCommandExceptionType(Text.literal("All ERYDON Blocks can only be used as the source."));
+            new SimpleCommandExceptionType(Text.literal("All-block selectors can only be used as the source."));
     private static final SimpleCommandExceptionType NO_SWAP_TO_UNDO =
             new SimpleCommandExceptionType(Text.literal("There is no swap to undo in this world."));
     private static final DynamicCommandExceptionType NO_MATCHING_BLOCKS =
@@ -75,6 +72,8 @@ public final class ErydonSwapCommand {
 
     public static LiteralArgumentBuilder<ServerCommandSource> createCommand() {
         return literal("swap")
+                .executes(ctx -> sendHelp(ctx.getSource()))
+                .then(literal("help").executes(ctx -> sendHelp(ctx.getSource())))
                 .then(literal("undolast")
                         .executes(ctx -> executeUndoLast(ctx.getSource())))
                 .then(literal("chunk")
@@ -110,6 +109,11 @@ public final class ErydonSwapCommand {
                                                                 StringArgumentType.getString(ctx, TARGET_ARGUMENT),
                                                                 BlockPosArgumentType.getBlockPos(ctx, "from"),
                                                                 BlockPosArgumentType.getBlockPos(ctx, "to"))))))));
+    }
+
+    private static int sendHelp(ServerCommandSource source) {
+        source.sendFeedback(() -> Text.translatable("command.erydon.swap.help"), false);
+        return 1;
     }
 
     private static int executeChunk(ServerCommandSource source, String rawFromFamily, String rawToFamily) throws CommandSyntaxException {
@@ -157,28 +161,26 @@ public final class ErydonSwapCommand {
 
     private static int executeUndoLast(ServerCommandSource source) throws CommandSyntaxException {
         ServerWorld world = source.getWorld();
-        LastSwapUndo undo = LAST_UNDO_BY_WORLD.remove(world.getRegistryKey());
+        LastSwapUndo undo = LAST_UNDO_BY_WORLD.get(world);
         if (undo == null || undo.entries().isEmpty()) {
             throw NO_SWAP_TO_UNDO.create();
         }
 
         UndoOutcome outcome = undoSwap(world, undo);
+        LAST_UNDO_BY_WORLD.remove(world, undo);
         sendUndoSummary(source, outcome);
         return outcome.restoredBlocks();
     }
 
-    private static FamilyPair resolveFamilies(String rawFromFamily, String rawToFamily) throws CommandSyntaxException {
+    static FamilyPair resolveFamilies(String rawFromFamily, String rawToFamily) throws CommandSyntaxException {
         ErydonSwapFamilyDatabase.FamilySpec fromFamily = resolveFamily(rawFromFamily);
         ErydonSwapFamilyDatabase.FamilySpec toFamily = resolveFamily(rawToFamily);
 
-        if (toFamily.isAllErydonBlocks()) {
+        if (toFamily.isAllBlocks()) {
             throw ALL_ERYDON_BLOCKS_TARGET.create();
         }
         if (fromFamily.canonicalKey().equals(toFamily.canonicalKey())) {
             throw SAME_FAMILY.create();
-        }
-        if (!fromFamily.isAllErydonBlocks() && fromFamily.isMaterialGroup() != toFamily.isMaterialGroup()) {
-            throw MIXED_FAMILY_GROUP.create();
         }
 
         return new FamilyPair(fromFamily, toFamily);
@@ -246,7 +248,8 @@ public final class ErydonSwapCommand {
             Iterable<String> canonicalKeys, SuggestionsBuilder builder) {
         String remaining = normalizeSuggestionFragment(builder.getRemaining());
         for (String canonicalKey : canonicalKeys) {
-            if (remaining.isEmpty() || canonicalKey.startsWith(remaining)) {
+            String displayKey = normalizeSuggestionFragment(ErydonSwapFamilyDatabase.displayName(canonicalKey));
+            if (remaining.isEmpty() || canonicalKey.startsWith(remaining) || displayKey.startsWith(remaining)) {
                 builder.suggest(ErydonSwapFamilyDatabase.commandSuggestion(canonicalKey));
             }
         }
@@ -274,6 +277,7 @@ public final class ErydonSwapCommand {
 
         List<Replacement> replacements = new ArrayList<>();
         Map<Identifier, Optional<Block>> counterpartCache = new HashMap<>();
+        Map<Identifier, Optional<ErydonSwapFamilyDatabase.FamilyMatch>> matchCache = new HashMap<>();
         BlockPos.Mutable mutable = new BlockPos.Mutable();
 
         int matchingBlocks = 0;
@@ -285,7 +289,8 @@ public final class ErydonSwapCommand {
                     mutable.set(x, y, z);
                     BlockState sourceState = world.getBlockState(mutable);
                     Identifier sourceId = Registries.BLOCK.getId(sourceState.getBlock());
-                    Optional<ErydonSwapFamilyDatabase.FamilyMatch> match = ErydonSwapFamilyDatabase.match(sourceId, fromFamily, toFamily);
+                    Optional<ErydonSwapFamilyDatabase.FamilyMatch> match = matchCache.computeIfAbsent(sourceId,
+                            id -> ErydonSwapFamilyDatabase.match(id, fromFamily, toFamily));
                     if (match.isEmpty()) {
                         continue;
                     }
@@ -299,12 +304,23 @@ public final class ErydonSwapCommand {
                     }
 
                     BlockState targetState = copySharedProperties(sourceState, targetBlock);
+                    if (targetState.equals(sourceState)) {
+                        continue;
+                    }
+                    ErydonSwapBlockEntitySupport.validateRefresh(targetState);
                     BlockPos pos = mutable.toImmutable();
+                    NbtCompound previousNbt = createBlockEntityNbt(world, pos);
+                    NbtCompound targetNbt = ErydonSwapBlockEntitySupport.swapComponents(previousNbt, componentId ->
+                            ErydonSwapFamilyDatabase.match(componentId, fromFamily, toFamily)
+                                    .map(component -> component.targetId(toFamily))
+                                    .filter(id -> resolveTargetBlock(id, counterpartCache) != null)
+                                    .orElse(componentId));
                     replacements.add(new Replacement(
                             pos,
                             targetState,
                             sourceState,
-                            createBlockEntityNbt(world, pos)
+                            previousNbt,
+                            targetNbt
                     ));
                 }
             }
@@ -320,18 +336,25 @@ public final class ErydonSwapCommand {
                      ClusterManualLockState.beginSwapPreservation(positionsOf(replacements))) {
             for (Replacement replacement : replacements) {
                 if (world.setBlockState(replacement.pos(), replacement.state(), MATERIAL_SWAP_FLAGS)) {
-                    undoEntries.add(new UndoEntry(
-                            replacement.pos(),
-                            replacement.previousState(),
-                            replacement.previousBlockEntityNbt()
-                    ));
+                    try {
+                        restoreBlockEntityNbt(world, replacement.pos(), replacement.targetBlockEntityNbt());
+                    } finally {
+                        // Keep undo available even if a companion callback fails after a world write.
+                        undoEntries.add(new UndoEntry(
+                                replacement.pos(),
+                                replacement.previousState(),
+                                replacement.previousBlockEntityNbt(),
+                                replacement.state(),
+                                createBlockEntityNbt(world, replacement.pos())
+                        ));
+                    }
                     replacedBlocks++;
                 }
             }
-        }
-
-        if (!undoEntries.isEmpty()) {
-            LAST_UNDO_BY_WORLD.put(world.getRegistryKey(), new LastSwapUndo(List.copyOf(undoEntries)));
+        } finally {
+            if (!undoEntries.isEmpty()) {
+                LAST_UNDO_BY_WORLD.put(world, new LastSwapUndo(List.copyOf(undoEntries)));
+            }
         }
 
         return new SwapOutcome(replacedBlocks, missingCounterparts);
@@ -384,6 +407,10 @@ public final class ErydonSwapCommand {
                              .map(UndoEntry::pos)
                              .toList())) {
             for (UndoEntry entry : undo.entries()) {
+                if (!world.getBlockState(entry.pos()).equals(entry.swappedState())
+                        || !java.util.Objects.equals(createBlockEntityNbt(world, entry.pos()), entry.swappedBlockEntityNbt())) {
+                    continue;
+                }
                 if (world.setBlockState(entry.pos(), entry.state(), MATERIAL_SWAP_FLAGS)) {
                     restoredBlocks++;
                 }
@@ -448,7 +475,7 @@ public final class ErydonSwapCommand {
 
     private static NbtCompound createBlockEntityNbt(ServerWorld world, BlockPos pos) {
         BlockEntity blockEntity = world.getBlockEntity(pos);
-        return blockEntity == null ? null : blockEntity.createNbt().copy();
+        return blockEntity == null ? null : blockEntity.createNbtWithId().copy();
     }
 
     private static void restoreBlockEntityNbt(ServerWorld world, BlockPos pos, NbtCompound nbt) {
@@ -457,13 +484,15 @@ public final class ErydonSwapCommand {
         }
 
         BlockEntity blockEntity = world.getBlockEntity(pos);
-        if (blockEntity == null) {
+        if (blockEntity == null || !nbt.getString("id").equals(
+                String.valueOf(Registries.BLOCK_ENTITY_TYPE.getId(blockEntity.getType())))) {
             return;
         }
 
         blockEntity.readNbt(nbt.copy());
         blockEntity.markDirty();
         BlockState state = world.getBlockState(pos);
+        ErydonSwapBlockEntitySupport.refreshAssembly(world, pos, state);
         world.updateListeners(pos, state, state, Block.NOTIFY_LISTENERS);
     }
 
@@ -479,15 +508,17 @@ public final class ErydonSwapCommand {
         return pos.getX() + ", " + pos.getY() + ", " + pos.getZ();
     }
 
-    private record FamilyPair(ErydonSwapFamilyDatabase.FamilySpec fromFamily,
+    record FamilyPair(ErydonSwapFamilyDatabase.FamilySpec fromFamily,
                               ErydonSwapFamilyDatabase.FamilySpec toFamily) {
     }
 
     private record Replacement(BlockPos pos, BlockState state,
-                               BlockState previousState, NbtCompound previousBlockEntityNbt) {
+                               BlockState previousState, NbtCompound previousBlockEntityNbt,
+                               NbtCompound targetBlockEntityNbt) {
     }
 
-    private record UndoEntry(BlockPos pos, BlockState state, NbtCompound blockEntityNbt) {
+    private record UndoEntry(BlockPos pos, BlockState state, NbtCompound blockEntityNbt,
+                             BlockState swappedState, NbtCompound swappedBlockEntityNbt) {
     }
 
     private record LastSwapUndo(List<UndoEntry> entries) {
@@ -534,7 +565,11 @@ public final class ErydonSwapCommand {
             long width = (long) maxX - minX + 1L;
             long height = (long) maxY - minY + 1L;
             long depth = (long) maxZ - minZ + 1L;
-            return width * height * depth;
+            try {
+                return Math.multiplyExact(Math.multiplyExact(width, height), depth);
+            } catch (ArithmeticException overflow) {
+                return Long.MAX_VALUE;
+            }
         }
 
         private BlockPos minPos() {

@@ -9518,5 +9518,6 @@
     "message.erydon.column.base_orientation": "Orientación de la base: %s",
     "tooltip.erydon.family.column_square.4": "/erydon recalc reconstruye la columna y conserva el estilo y la orientación.",
     "tooltip.erydon.family.column_circular.4": "/erydon recalc reconstruye la columna y conserva el estilo y la orientación.",
-    "tooltip.erydon.family.column_gothic.4": "/erydon recalc reconstruye la columna y conserva el estilo y la orientación."
+    "tooltip.erydon.family.column_gothic.4": "/erydon recalc reconstruye la columna y conserva el estilo y la orientación.",
+    "command.erydon.swap.help": "/erydon swap chunk <origen> <destino> | radius <origen> <destino> <1-32> | box <origen> <destino> <x y z> <x y z> | undolast. Escribe entre comillas los nombres con espacios. Polished (Honed para Kelastrion, Latmion y Psamatheon) selecciona piedra lisa; Aged y cada incrustación seleccionan su propio acabado. Un origen Family incluye todos los acabados del material; un destino Family conserva el acabado actual, mientras que un destino de acabado lo sustituye. All Family Blocks incluye los bloques de material instalados de ERYDON, Daedalon y Themelios; All ERYDON Blocks, All Daedalon Blocks y All Themelios Blocks limitan el origen a un mod. Solo cambian las formas compatibles; los bloques sin equivalente permanecen intactos. Undo revierte el último cambio de este mundo y omite los bloques modificados después."
 }

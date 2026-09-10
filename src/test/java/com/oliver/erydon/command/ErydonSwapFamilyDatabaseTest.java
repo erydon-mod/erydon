@@ -22,6 +22,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ErydonSwapFamilyDatabaseTest {
     private static final Set<String> EXPECTED_MATERIAL_GROUPS = Set.of(
@@ -60,7 +61,9 @@ class ErydonSwapFamilyDatabaseTest {
                 .filter(key -> key.endsWith("_family"))
                 .collect(Collectors.toSet());
 
-        assertEquals(EXPECTED_MATERIAL_GROUPS, materialGroups);
+        assertEquals(EXPECTED_MATERIAL_GROUPS.size() + 1, materialGroups.size());
+        assertTrue(materialGroups.containsAll(EXPECTED_MATERIAL_GROUPS));
+        assertTrue(materialGroups.contains("bronze_family"));
         assertTrue(ErydonSwapFamilyDatabase.findFamily("chalstrom_family").isPresent());
     }
 
@@ -74,29 +77,23 @@ class ErydonSwapFamilyDatabaseTest {
     }
 
     @Test
-    void materialGroupTargetsOnlyOfferCompleteLiveCounterparts() throws IOException {
+    void targetsOfferPartialCataloguesAndAllowChangingFinish() throws IOException {
         Set<String> blockPaths = blockstatePaths();
-
         for (String source : EXPECTED_MATERIAL_GROUPS) {
-            NavigableSet<String> targets =
-                    ErydonSwapFamilyDatabase.targetKeysForSource(source, blockPaths);
+            NavigableSet<String> targets = ErydonSwapFamilyDatabase.targetKeysForSource(source, blockPaths);
             assertFalse(targets.isEmpty(), source);
-            assertTrue(targets.stream().allMatch(key -> key.endsWith("_family")), source);
             assertFalse(targets.contains(source), source);
+            for (String destination : EXPECTED_MATERIAL_GROUPS) {
+                if (!source.equals(destination)) {
+                    assertTrue(targets.contains(destination), source + " -> " + destination);
+                }
+            }
+            assertTrue(targets.contains("aganite_aged"), source);
+            assertTrue(targets.contains("psamatheon"), source);
         }
-
-        NavigableSet<String> chalstromTargets =
-                ErydonSwapFamilyDatabase.targetKeysForSource("chalstrom_family", blockPaths);
-        assertEquals(23, chalstromTargets.size());
-        assertTrue(chalstromTargets.stream().allMatch(key -> key.endsWith("_family")));
-        assertTrue(chalstromTargets.contains("aganite_family"));
-        assertFalse(chalstromTargets.contains("chalstrom_family"));
-        assertFalse(chalstromTargets.contains("kelastrion_family"));
-        assertFalse(chalstromTargets.contains("latmion_family"));
-        assertFalse(chalstromTargets.contains("psamatheon_family"));
-
-        assertEquals(Set.of("gelastrum_family", "mielonyx_family", "selenephos_family"),
-                ErydonSwapFamilyDatabase.targetKeysForSource("borealis_family", blockPaths));
+        assertTrue(ErydonSwapFamilyDatabase.targetKeysForSource("aganite", blockPaths).contains("aganite_aged"));
+        assertTrue(ErydonSwapFamilyDatabase.targetKeysForSource("aganite_aged", blockPaths).contains("aganite"));
+        assertTrue(ErydonSwapFamilyDatabase.targetKeysForSource("aganite_aged", blockPaths).contains("psamatheon_family"));
     }
 
     @Test
@@ -251,7 +248,7 @@ class ErydonSwapFamilyDatabaseTest {
     }
 
     @Test
-    void targetAvailabilityRequiresCompanionCounterpartsThatAreActuallyInstalled() {
+    void missingCompanionCounterpartsDoNotHideValidConversions() {
         Set<Identifier> completeRegistry = Set.of(
                 new Identifier(Erydon.MOD_ID, "aganite_block"),
                 new Identifier(Erydon.MOD_ID, "etruscus_block"),
@@ -268,17 +265,96 @@ class ErydonSwapFamilyDatabaseTest {
                 new Identifier("minecraft", "stone")
         );
 
-        assertEquals(
-                Set.of("etruscus_family"),
-                ErydonSwapFamilyDatabase.targetKeysForSourceIds("aganite_family", completeRegistry));
+        assertTrue(ErydonSwapFamilyDatabase.targetKeysForSourceIds("aganite_family", completeRegistry)
+                .contains("etruscus_family"));
 
         Set<Identifier> incompleteRegistry = new TreeSet<>(completeRegistry);
         incompleteRegistry.remove(new Identifier(
                 ErydonSwapFamilyDatabase.DAEDALON_MOD_ID,
                 "statue_spartan_promachos_etruscus_aged"));
-        assertFalse(ErydonSwapFamilyDatabase
+        assertTrue(ErydonSwapFamilyDatabase
                 .targetKeysForSourceIds("aganite_family", incompleteRegistry)
                 .contains("etruscus_family"));
+    }
+
+    @Test
+    void plainFinishNamesAreExplicitAndLegacyNamesRemainAliases() throws Exception {
+        assertEquals("Aganite Polished", ErydonSwapFamilyDatabase.displayName("aganite"));
+        for (String material : Set.of("kelastrion", "latmion", "psamatheon")) {
+            assertTrue(ErydonSwapFamilyDatabase.displayName(material).endsWith(" Honed"));
+            assertEquals(ErydonSwapFamilyDatabase.findFamily(material),
+                    ErydonSwapFamilyDatabase.findFamily(material + "_honed"));
+        }
+        assertEquals(ErydonSwapFamilyDatabase.findFamily("aganite"),
+                ErydonSwapFamilyDatabase.findFamily("aganite_polished"));
+        assertCommandParses("swap chunk \"Aganite Polished\" \"Psamatheon Honed\"");
+        assertCommandParses("swap radius \"Aganite Family\" \"Aganite Aged\" 8");
+        assertCommandParses("swap box all_family_blocks bronze ~ ~ ~ ~2 ~2 ~2");
+    }
+
+    @Test
+    void groupsAndFinishesHaveConsistentMappingInBothDirections() {
+        assertMapping("erydon", "aganite_aged_arch_gothic", "aganite_family", "aganite_polished", "aganite_arch_gothic");
+        assertMapping("erydon", "aganite_arch_gothic", "aganite_family", "aganite_aged", "aganite_aged_arch_gothic");
+        assertMapping("erydon", "aganite_aged_arch_gothic", "aganite_aged", "psamatheon_family", "psamatheon_aged_arch_gothic");
+        assertMapping("erydon", "aganite_ashlar_slab", "aganite_family", "psamatheon_honed", "psamatheon_slab");
+        assertMapping("erydon", "aganite_trim_bronze_stairs", "aganite_family", "aganite_aged", "aganite_aged_stairs");
+        assertMapping("erydon", "chalstrom_calacattum_weave_bronze_block", "chalstrom_family", "aganite_polished", "aganite_block");
+        assertMapping("erydon", "chalstrom_calacattum_weave_bronze_block", "chalstrom_family", "aganite_family", "aganite_calacattum_weave_bronze_block");
+    }
+
+    @Test
+    void commandValidationAcceptsMixedScopesAndRejectsAliasesOfTheSameFinish() throws Exception {
+        var pair = ErydonSwapCommand.resolveFamilies("Aganite Family", "Aganite Aged");
+        assertEquals("aganite_family", pair.fromFamily().canonicalKey());
+        assertEquals("aganite_aged", pair.toFamily().canonicalKey());
+        ErydonSwapCommand.resolveFamilies("Aganite Aged", "Psamatheon Family");
+        ErydonSwapCommand.resolveFamilies("All Family Blocks", "Bronze");
+        assertThrows(com.mojang.brigadier.exceptions.CommandSyntaxException.class,
+                () -> ErydonSwapCommand.resolveFamilies("aganite", "Aganite Polished"));
+        assertThrows(com.mojang.brigadier.exceptions.CommandSyntaxException.class,
+                () -> ErydonSwapCommand.resolveFamilies("Aganite Family", "All Daedalon Blocks"));
+    }
+
+    @Test
+    void polishedSourcesExcludeAgedAndDecoratedFinishes() {
+        var polished = ErydonSwapFamilyDatabase.findFamily("aganite_polished").orElseThrow();
+        for (String suffix : Set.of("aged_block", "ashlar_block", "trim_bronze_block", "guilloche_silver_stairs")) {
+            assertTrue(ErydonSwapFamilyDatabase.match(new Identifier("erydon", "aganite_" + suffix), polished).isEmpty());
+        }
+    }
+
+    @Test
+    void bronzeAndAllSourcesCoverCompanionsWithoutCrossingNamespaces() {
+        assertMapping("daedalon", "bronze_athena_statue", "bronze", "aganite_aged", "aganite_aged_athena_statue");
+        assertMapping("daedalon", "statue_spartan_promachos_aganite_aged", "aganite_aged", "bronze", "bronze_spartan_promachos_statue");
+        assertMapping("daedalon", "bronze_spartan_promachos_statue", "bronze", "aganite", "statue_spartan_promachos_aganite");
+        assertMapping("daedalon", "aganite_aged_gothic_frieze", "all_family_blocks", "psamatheon_honed", "psamatheon_gothic_frieze");
+        assertMapping("themelios", "aganite_aged_cylinder_small", "all_family_blocks", "latmion_family", "latmion_aged_cylinder_small");
+        assertMapping("themelios", "aganite_aged_cylinder_small", "all_themelios_blocks", "latmion_honed", "latmion_cylinder_small");
+        assertTrue(ErydonSwapFamilyDatabase.match(new Identifier("daedalon", "aganite_athena_statue"),
+                ErydonSwapFamilyDatabase.findFamily("all_themelios_blocks").orElseThrow()).isEmpty());
+        assertTrue(ErydonSwapFamilyDatabase.match(new Identifier("minecraft", "stone")).isEmpty());
+    }
+
+    @Test
+    void suggestionsRequireAnActualDifferentCounterpartInTheSameNamespace() {
+        Set<Identifier> ids = Set.of(new Identifier("daedalon", "aganite_athena_statue"),
+                new Identifier("themelios", "etruscus_athena_statue"),
+                new Identifier("daedalon", "bronze_athena_statue"));
+        var targets = ErydonSwapFamilyDatabase.targetKeysForSourceIds("aganite_polished", ids);
+        assertTrue(targets.contains("bronze"));
+        assertFalse(targets.contains("etruscus"));
+        assertFalse(targets.contains("aganite_family"));
+        assertTrue(ErydonSwapFamilyDatabase.targetKeysForSourceIds("all_erydon_blocks", ids).isEmpty());
+        assertTrue(ErydonSwapFamilyDatabase.targetKeysForSourceIds("all_family_blocks", ids).contains("bronze"));
+    }
+
+    private static void assertMapping(String namespace, String id, String source, String target, String expected) {
+        var from = ErydonSwapFamilyDatabase.findFamily(source).orElseThrow();
+        var to = ErydonSwapFamilyDatabase.findFamily(target).orElseThrow();
+        var match = ErydonSwapFamilyDatabase.match(new Identifier(namespace, id), from, to).orElseThrow();
+        assertEquals(new Identifier(namespace, expected), match.targetId(to));
     }
 
     private static void assertCommandParses(String command) {

@@ -20,6 +20,7 @@ import java.util.TreeSet;
 final class ErydonSwapFamilyDatabase {
 
     public static final String ALL_ERYDON_BLOCKS_KEY = "all_erydon_blocks";
+    static final String ALL_FAMILY_BLOCKS_KEY = "all_family_blocks";
     static final String DAEDALON_MOD_ID = "daedalon";
     static final String THEMELIOS_MOD_ID = "themelios";
 
@@ -118,7 +119,11 @@ final class ErydonSwapFamilyDatabase {
     );
 
     private static final Map<String, FamilySpec> FAMILIES_BY_KEY = buildFamilies();
-    private static final FamilySpec ALL_ERYDON_BLOCKS = FamilySpec.allErydonBlocks();
+    private static final Map<String, FamilySpec> ALL_SOURCES = Map.of(
+            ALL_ERYDON_BLOCKS_KEY, FamilySpec.allBlocks(ALL_ERYDON_BLOCKS_KEY, Erydon.MOD_ID),
+            ALL_FAMILY_BLOCKS_KEY, FamilySpec.allBlocks(ALL_FAMILY_BLOCKS_KEY, ""),
+            "all_daedalon_blocks", FamilySpec.allBlocks("all_daedalon_blocks", DAEDALON_MOD_ID),
+            "all_themelios_blocks", FamilySpec.allBlocks("all_themelios_blocks", THEMELIOS_MOD_ID));
     private static final List<FamilySpec> MATCH_ORDER = FAMILIES_BY_KEY.values().stream()
             .filter(family -> !family.isMaterialGroup())
             .sorted(Comparator
@@ -133,16 +138,26 @@ final class ErydonSwapFamilyDatabase {
                     .reversed()
                     .thenComparing(FamilySpec::canonicalKey))
             .toList();
-    private static final NavigableSet<String> CANONICAL_KEYS = new TreeSet<>(FAMILIES_BY_KEY.keySet());
-    private static final NavigableSet<String> MATERIAL_GROUP_KEYS = keysMatching(FamilySpec::isMaterialGroup);
-    private static final NavigableSet<String> TEXTURE_FAMILY_KEYS = keysMatching(family -> !family.isMaterialGroup());
+    private static final NavigableSet<String> CANONICAL_KEYS =
+            Collections.unmodifiableNavigableSet(new TreeSet<>(FAMILIES_BY_KEY.keySet()));
 
     private ErydonSwapFamilyDatabase() {
     }
 
     public static Optional<FamilySpec> findFamily(String canonicalKey) {
         if (ALL_ERYDON_BLOCKS_KEY.equals(canonicalKey) || "all_erydon".equals(canonicalKey) || "all".equals(canonicalKey)) {
-            return Optional.of(ALL_ERYDON_BLOCKS);
+            return Optional.of(ALL_SOURCES.get(ALL_ERYDON_BLOCKS_KEY));
+        }
+        if (ALL_SOURCES.containsKey(canonicalKey)) {
+            return Optional.of(ALL_SOURCES.get(canonicalKey));
+        }
+        for (String suffix : List.of("_polished", "_honed", "_base")) {
+            if (canonicalKey.endsWith(suffix)) {
+                String material = canonicalKey.substring(0, canonicalKey.length() - suffix.length());
+                if (BASE_MATERIALS.contains(material) || EXTRA_GROUP_MATERIALS.contains(material)) {
+                    return Optional.ofNullable(FAMILIES_BY_KEY.get(material));
+                }
+            }
         }
         return Optional.ofNullable(FAMILIES_BY_KEY.get(canonicalKey));
     }
@@ -156,7 +171,9 @@ final class ErydonSwapFamilyDatabase {
     }
 
     public static NavigableSet<String> targetKeysForSource(String canonicalSourceKey) {
-        return targetKeysForSource(canonicalSourceKey, LiveAvailability.INDEX);
+        String key = findFamily(canonicalSourceKey).map(FamilySpec::canonicalKey).orElse(canonicalSourceKey);
+        return LiveAvailability.TARGET_KEYS.computeIfAbsent(key,
+                source -> targetKeysForSource(source, LiveAvailability.INDEX));
     }
 
     static NavigableSet<String> sourceKeys(Set<String> registeredBlockPaths) {
@@ -174,7 +191,11 @@ final class ErydonSwapFamilyDatabase {
                 keys.add(family.canonicalKey());
             }
         }
-        keys.add(ALL_ERYDON_BLOCKS_KEY);
+        for (FamilySpec scope : ALL_SOURCES.values()) {
+            if (scope.isAllErydonBlocks() || !index.formsFor(scope).isEmpty()) {
+                keys.add(scope.canonicalKey());
+            }
+        }
         return Collections.unmodifiableNavigableSet(keys);
     }
 
@@ -187,29 +208,25 @@ final class ErydonSwapFamilyDatabase {
         return targetKeysForSource(canonicalSourceKey, AvailabilityIndex.fromIds(registeredBlockIds));
     }
 
-    private static NavigableSet<String> targetKeysForSource(
+    static NavigableSet<String> targetKeysForSource(
             String canonicalSourceKey, AvailabilityIndex index) {
         Optional<FamilySpec> source = findFamily(canonicalSourceKey);
-        if (source.isEmpty() || source.get().isAllErydonBlocks()) {
-            NavigableSet<String> available = new TreeSet<>(sourceKeys(index));
-            available.remove(ALL_ERYDON_BLOCKS_KEY);
-            return Collections.unmodifiableNavigableSet(available);
+        if (source.isEmpty()) {
+            return Collections.emptyNavigableSet();
         }
-
-        Set<AvailableForm> sourceForms = index.formsFor(source.get());
-        NavigableSet<String> candidates = source.get().isMaterialGroup()
-                ? MATERIAL_GROUP_KEYS
-                : TEXTURE_FAMILY_KEYS;
+        Set<FamilyMatch> sourceForms = index.formsFor(source.get());
         NavigableSet<String> available = new TreeSet<>();
-        for (String candidateKey : candidates) {
-            if (candidateKey.equals(source.get().canonicalKey())) {
+        for (FamilySpec candidate : FAMILIES_BY_KEY.values()) {
+            if (candidate.canonicalKey().equals(source.get().canonicalKey())) {
                 continue;
             }
-            FamilySpec candidate = FAMILIES_BY_KEY.get(candidateKey);
-            if (!sourceForms.isEmpty() && sourceForms.stream()
-                    .map(form -> form.targetId(candidate))
-                    .allMatch(index.registeredIds()::contains)) {
-                available.add(candidateKey);
+            // Suggestions describe possible conversions, not complete catalogue parity.
+            // Execution uses the same mapping and leaves missing counterparts untouched.
+            if (sourceForms.stream().anyMatch(form -> {
+                Identifier target = form.targetId(candidate);
+                return !target.equals(form.targetId(form.family())) && index.registeredIds().contains(target);
+            })) {
+                available.add(candidate.canonicalKey());
             }
         }
         return Collections.unmodifiableNavigableSet(available);
@@ -223,32 +240,18 @@ final class ErydonSwapFamilyDatabase {
     }
 
     public static Optional<FamilyMatch> match(Identifier blockId, FamilySpec requestedFamily, FamilySpec targetFamily) {
-        if (!isSupportedNamespace(blockId.getNamespace())
-                || (requestedFamily.isAllErydonBlocks() && !Erydon.MOD_ID.equals(blockId.getNamespace()))) {
-            return Optional.empty();
-        }
-
-        String namespace = blockId.getNamespace();
-        String canonicalPath = canonicalPath(blockId);
-        if (requestedFamily.isAllErydonBlocks()) {
-            if (!targetFamily.isMaterialGroup()) {
-                return match(namespace, canonicalPath);
-            }
-
-            Optional<FamilyMatch> materialGroupMatch = matchMaterialGroup(namespace, canonicalPath);
-            return materialGroupMatch.isPresent() ? materialGroupMatch : match(namespace, canonicalPath);
-        }
-
-        return match(namespace, canonicalPath, requestedFamily);
+        return match(blockId, requestedFamily);
     }
 
     public static Optional<FamilyMatch> match(Identifier blockId, FamilySpec requestedFamily) {
-        if (!isSupportedNamespace(blockId.getNamespace())
-                || (requestedFamily.isAllErydonBlocks() && !Erydon.MOD_ID.equals(blockId.getNamespace()))) {
+        if (!isSupportedNamespace(blockId.getNamespace()) || !requestedFamily.acceptsNamespace(blockId.getNamespace())) {
             return Optional.empty();
         }
-
-        return match(blockId.getNamespace(), canonicalPath(blockId), requestedFamily);
+        String path = canonicalPath(blockId);
+        if (requestedFamily.isAllBlocks()) {
+            return match(blockId.getNamespace(), path);
+        }
+        return match(blockId.getNamespace(), path, requestedFamily);
     }
 
     private static Optional<FamilyMatch> match(
@@ -312,17 +315,17 @@ final class ErydonSwapFamilyDatabase {
         for (String groupMaterial : EXTRA_GROUP_MATERIALS) {
             registerMaterialGroup(families, groupMaterial);
         }
-        return Map.copyOf(families);
-    }
-
-    private static NavigableSet<String> keysMatching(java.util.function.Predicate<FamilySpec> predicate) {
-        NavigableSet<String> keys = new TreeSet<>();
-        for (FamilySpec family : FAMILIES_BY_KEY.values()) {
-            if (predicate.test(family)) {
-                keys.add(family.canonicalKey());
+        // Inlays are finishes of their own, not part of the plain polished/honed set.
+        for (String material : java.util.stream.Stream.concat(BASE_MATERIALS.stream(), EXTRA_GROUP_MATERIALS.stream()).toList()) {
+            for (String motif : List.of("trim", "guilloche", "quatrefoil", "rosette")) {
+                for (String metal : List.of("bronze", "silver")) {
+                    registerPrefix(families, material + "_" + motif + "_" + metal);
+                }
             }
         }
-        return keys;
+        registerPrefix(families, "bronze");
+        registerMaterialGroup(families, "bronze");
+        return Map.copyOf(families);
     }
 
     static boolean isSupportedNamespace(String namespace) {
@@ -353,7 +356,7 @@ final class ErydonSwapFamilyDatabase {
         if (aged) {
             material = material.substring(0, material.length() - "_aged".length());
         }
-        if (!FAMILIES_BY_KEY.containsKey(material + "_family")) {
+        if (!BASE_MATERIALS.contains(material) && !EXTRA_GROUP_MATERIALS.contains(material)) {
             return path;
         }
         return material + (aged ? "_aged" : "") + DAEDALON_SPARTAN_CANONICAL_FORM;
@@ -371,13 +374,18 @@ final class ErydonSwapFamilyDatabase {
         if (aged) {
             material = material.substring(0, material.length() - "_aged".length());
         }
-        if (!FAMILIES_BY_KEY.containsKey(material + "_family")) {
+        if (!BASE_MATERIALS.contains(material) && !EXTRA_GROUP_MATERIALS.contains(material)) {
             return canonicalPath;
         }
         return DAEDALON_SPARTAN_PREFIX + material + (aged ? "_aged" : "");
     }
 
     static String displayName(String canonicalKey) {
+        if (BASE_MATERIALS.contains(canonicalKey)) {
+            canonicalKey += "_polished";
+        } else if (EXTRA_GROUP_MATERIALS.contains(canonicalKey)) {
+            canonicalKey += "_honed";
+        }
         StringBuilder display = new StringBuilder();
         for (String token : canonicalKey.split("_")) {
             if (!display.isEmpty()) {
@@ -410,9 +418,27 @@ final class ErydonSwapFamilyDatabase {
         families.put(baseMaterial + "_family", FamilySpec.materialGroup(baseMaterial));
     }
 
-    public record FamilyMatch(FamilySpec family, String namespace, String form) {
+    public record FamilyMatch(FamilySpec family, String namespace, String form,
+                              String finishForm, String materialForm) {
+        private FamilyMatch(FamilySpec family, String namespace, String form) {
+            this(family, namespace, form,
+                    family.isMaterialGroup() ? extractForm(family.buildPath(form), MATCH_ORDER) : form,
+                    family.isMaterialGroup() ? form : extractForm(family.buildPath(form), MATERIAL_GROUP_MATCH_ORDER));
+        }
+
+        private static String extractForm(String path, List<FamilySpec> order) {
+            for (FamilySpec spec : order) {
+                Optional<String> extracted = spec.extractForm(path);
+                if (extracted.isPresent()) {
+                    return extracted.get();
+                }
+            }
+            throw new IllegalArgumentException("Unmapped material path: " + path);
+        }
+
         public Identifier targetId(FamilySpec targetFamily) {
-            String canonicalTargetPath = targetFamily.buildPath(form);
+            String targetForm = targetFamily.isMaterialGroup() ? materialForm : finishForm;
+            String canonicalTargetPath = targetFamily.buildPath(targetForm);
             return new Identifier(namespace, registeredPath(namespace, canonicalTargetPath));
         }
 
@@ -444,8 +470,8 @@ final class ErydonSwapFamilyDatabase {
             return new FamilySpec(baseMaterial + "_family", MatchMode.MATERIAL_GROUP, baseMaterial);
         }
 
-        public static FamilySpec allErydonBlocks() {
-            return new FamilySpec(ALL_ERYDON_BLOCKS_KEY, MatchMode.ALL_ERYDON_BLOCKS, "");
+        private static FamilySpec allBlocks(String key, String namespace) {
+            return new FamilySpec(key, MatchMode.ALL_ERYDON_BLOCKS, namespace);
         }
 
         public String canonicalKey() {
@@ -453,7 +479,15 @@ final class ErydonSwapFamilyDatabase {
         }
 
         public boolean isAllErydonBlocks() {
+            return ALL_ERYDON_BLOCKS_KEY.equals(canonicalKey);
+        }
+
+        public boolean isAllBlocks() {
             return mode == MatchMode.ALL_ERYDON_BLOCKS;
+        }
+
+        private boolean acceptsNamespace(String namespace) {
+            return !isAllBlocks() || wireStem.isEmpty() || wireStem.equals(namespace);
         }
 
         public boolean isMaterialGroup() {
@@ -508,9 +542,6 @@ final class ErydonSwapFamilyDatabase {
         }
 
         private Optional<String> extractMaterialGroupForm(String path) {
-            if (path.contains("_weave_")) {
-                return Optional.empty();
-            }
             if (path.equals(wireStem)) {
                 return Optional.of("");
             }
@@ -531,6 +562,7 @@ final class ErydonSwapFamilyDatabase {
     private static final class LiveAvailability {
         private static final AvailabilityIndex INDEX = AvailabilityIndex.fromIds(registeredBlockIds());
         private static final NavigableSet<String> SOURCE_KEYS = sourceKeys(INDEX);
+        private static final Map<String, NavigableSet<String>> TARGET_KEYS = new java.util.concurrent.ConcurrentHashMap<>();
 
         private static Set<Identifier> registeredBlockIds() {
             Set<Identifier> ids = new LinkedHashSet<>();
@@ -543,15 +575,8 @@ final class ErydonSwapFamilyDatabase {
         }
     }
 
-    private record AvailableForm(String namespace, String form) {
-        private Identifier targetId(FamilySpec family) {
-            String canonicalTargetPath = family.buildPath(form);
-            return new Identifier(namespace, registeredPath(namespace, canonicalTargetPath));
-        }
-    }
-
-    private record AvailabilityIndex(Set<Identifier> registeredIds,
-                                     Map<String, Set<AvailableForm>> formsByFamily) {
+    record AvailabilityIndex(Set<Identifier> registeredIds,
+                                     Map<String, Set<FamilyMatch>> formsByFamily) {
         private static AvailabilityIndex fromErydonPaths(Set<String> registeredBlockPaths) {
             Set<Identifier> ids = new LinkedHashSet<>();
             for (String path : registeredBlockPaths) {
@@ -560,7 +585,7 @@ final class ErydonSwapFamilyDatabase {
             return fromIds(ids);
         }
 
-        private static AvailabilityIndex fromIds(Set<Identifier> registeredBlockIds) {
+        static AvailabilityIndex fromIds(Set<Identifier> registeredBlockIds) {
             Set<Identifier> canonicalIds = new LinkedHashSet<>();
             for (Identifier id : registeredBlockIds) {
                 if (!isSupportedNamespace(id.getNamespace())) {
@@ -571,26 +596,31 @@ final class ErydonSwapFamilyDatabase {
                         id.getNamespace(), registeredPath(id.getNamespace(), canonicalPath)));
             }
 
-            Map<String, Set<AvailableForm>> mutableForms = new LinkedHashMap<>();
+            Map<String, Set<FamilyMatch>> mutableForms = new LinkedHashMap<>();
             for (Identifier id : canonicalIds) {
                 String namespace = id.getNamespace();
                 String path = canonicalPath(id);
-                match(namespace, path).ifPresent(match -> mutableForms
-                        .computeIfAbsent(match.family().canonicalKey(), ignored -> new LinkedHashSet<>())
-                        .add(new AvailableForm(namespace, match.form())));
+                match(namespace, path).ifPresent(match -> {
+                    mutableForms.computeIfAbsent(match.family().canonicalKey(), ignored -> new LinkedHashSet<>()).add(match);
+                    for (FamilySpec scope : ALL_SOURCES.values()) {
+                        if (scope.acceptsNamespace(namespace)) {
+                            mutableForms.computeIfAbsent(scope.canonicalKey(), ignored -> new LinkedHashSet<>()).add(match);
+                        }
+                    }
+                });
                 matchMaterialGroup(namespace, path).ifPresent(match -> mutableForms
                         .computeIfAbsent(match.family().canonicalKey(), ignored -> new LinkedHashSet<>())
-                        .add(new AvailableForm(namespace, match.form())));
+                        .add(match));
             }
 
-            Map<String, Set<AvailableForm>> immutableForms = new LinkedHashMap<>();
-            for (Map.Entry<String, Set<AvailableForm>> entry : mutableForms.entrySet()) {
+            Map<String, Set<FamilyMatch>> immutableForms = new LinkedHashMap<>();
+            for (Map.Entry<String, Set<FamilyMatch>> entry : mutableForms.entrySet()) {
                 immutableForms.put(entry.getKey(), Set.copyOf(entry.getValue()));
             }
             return new AvailabilityIndex(Set.copyOf(canonicalIds), Map.copyOf(immutableForms));
         }
 
-        private Set<AvailableForm> formsFor(FamilySpec family) {
+        Set<FamilyMatch> formsFor(FamilySpec family) {
             return formsByFamily.getOrDefault(family.canonicalKey(), Set.of());
         }
     }

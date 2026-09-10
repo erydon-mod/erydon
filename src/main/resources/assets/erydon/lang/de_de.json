@@ -9518,5 +9518,6 @@
     "message.erydon.column.base_orientation": "Basisausrichtung: %s",
     "tooltip.erydon.family.column_square.4": "/erydon recalc baut die Säule neu auf; Stil und Ausrichtung bleiben erhalten.",
     "tooltip.erydon.family.column_circular.4": "/erydon recalc baut die Säule neu auf; Stil und Ausrichtung bleiben erhalten.",
-    "tooltip.erydon.family.column_gothic.4": "/erydon recalc baut die Säule neu auf; Stil und Ausrichtung bleiben erhalten."
+    "tooltip.erydon.family.column_gothic.4": "/erydon recalc baut die Säule neu auf; Stil und Ausrichtung bleiben erhalten.",
+    "command.erydon.swap.help": "/erydon swap chunk <von> <nach> | radius <von> <nach> <1-32> | box <von> <nach> <x y z> <x y z> | undolast. Namen mit Leerzeichen in Anführungszeichen setzen. Polished (Honed bei Kelastrion, Latmion und Psamatheon) wählt einfachen Stein; Aged und jede Einlage wählen ihre eigene Oberfläche. Eine Family-Quelle umfasst alle Oberflächen des Materials; ein Family-Ziel behält die Oberfläche bei, ein Oberflächenziel ersetzt sie. All Family Blocks umfasst installierte Materialblöcke aus ERYDON, Daedalon und Themelios; All ERYDON Blocks, All Daedalon Blocks und All Themelios Blocks begrenzen die Quelle auf eine Mod. Nur passende Formen werden ersetzt; fehlende Gegenstücke bleiben unverändert. Undo macht den letzten Austausch in dieser Welt rückgängig und überspringt seither bearbeitete Blöcke."
 }
