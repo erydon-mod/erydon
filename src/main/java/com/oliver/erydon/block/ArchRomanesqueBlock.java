@@ -514,7 +514,9 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
     // --- Cluster / reflow ----------------------------------------------------
 
     private boolean isArchBlock(BlockState state) {
-        return state.getBlock() == this;
+        // Materials and finishes can share a cluster, but architectural styles cannot.
+        // Use exact classes: Gothic extends Modern, which in turn extends Romanesque.
+        return state.getBlock().getClass() == getClass();
     }
 
     private Direction[] getPlaneAdjacencyDirs(Direction facing) {
