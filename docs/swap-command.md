@@ -111,11 +111,17 @@ is checked against supplied live checkouts when the corresponding environment
 variables are set. It covers Daedalon's exceptional Spartan ID ordering as well
 as canonical aged IDs and ERYDON's published aliases.
 
-The 2026-09-10 audit covers 16,643 material blocks: 9,278 in ERYDON, 4,425 in
+The 2026-09-11 audit covers 16,670 material blocks: 9,305 in ERYDON, 4,425 in
 Daedalon and 2,940 in Themelios. This includes 2,496 ERYDON inlay shapes and
 192 Themelios inlay blocks, with 465 available selectors and 212,499 valid
 source/destination combinations. Themelios 1.20.1 and 1.21.1 have the same ID
 inventory; the command itself remains part of ERYDON for Minecraft 1.20.1.
+
+Rusticated multiface layers are included for all 27 stone materials. For example,
+`/erydon swap box "Glacium Hewn" "Glacium Rusticated" 8304 68 3201 8239 99 3153`
+maps `glacium_hewn_layer_multiface` to `glacium_rusticated_layer_multiface`.
+Earlier builds lacked the Rusticated block, so the command correctly reported
+a missing counterpart and left the Hewn layer unchanged.
 
 Daedalon's `fountain_basin_part` and `monopteros_part` are internal assembly cells,
 not separate material variants. Their parent structures own them. ERYDON's 43

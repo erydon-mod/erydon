@@ -262,6 +262,7 @@ public final class ModBlocks {
     public static Block AGANITE_RUSTICATED_WALL;
 
     public static Block AGANITE_RUSTICATED_LAYER;
+    public static Block AGANITE_RUSTICATED_LAYER_MULTIFACE;
 
     public static Block AGANITE_RUSTICATED_LAYER_VERTICAL;
 
@@ -593,6 +594,7 @@ public final class ModBlocks {
     public static Block ATERZON_RUSTICATED_WALL;
 
     public static Block ATERZON_RUSTICATED_LAYER;
+    public static Block ATERZON_RUSTICATED_LAYER_MULTIFACE;
 
     public static Block ATERZON_RUSTICATED_LAYER_VERTICAL;
 
@@ -933,6 +935,7 @@ public final class ModBlocks {
     public static Block BOREALIS_RUSTICATED_WALL;
 
     public static Block BOREALIS_RUSTICATED_LAYER;
+    public static Block BOREALIS_RUSTICATED_LAYER_MULTIFACE;
 
     public static Block BOREALIS_RUSTICATED_LAYER_VERTICAL;
 
@@ -1264,6 +1267,7 @@ public final class ModBlocks {
     public static Block BRECTITE_RUSTICATED_WALL;
 
     public static Block BRECTITE_RUSTICATED_LAYER;
+    public static Block BRECTITE_RUSTICATED_LAYER_MULTIFACE;
 
     public static Block BRECTITE_RUSTICATED_LAYER_VERTICAL;
 
@@ -1595,6 +1599,7 @@ public final class ModBlocks {
     public static Block CALACATTUM_RUSTICATED_WALL;
 
     public static Block CALACATTUM_RUSTICATED_LAYER;
+    public static Block CALACATTUM_RUSTICATED_LAYER_MULTIFACE;
 
     public static Block CALACATTUM_RUSTICATED_LAYER_VERTICAL;
 
@@ -1926,6 +1931,7 @@ public final class ModBlocks {
     public static Block CHALSTROM_RUSTICATED_WALL;
 
     public static Block CHALSTROM_RUSTICATED_LAYER;
+    public static Block CHALSTROM_RUSTICATED_LAYER_MULTIFACE;
 
     public static Block CHALSTROM_RUSTICATED_LAYER_VERTICAL;
 
@@ -2257,6 +2263,7 @@ public final class ModBlocks {
     public static Block CHRYSONYX_RUSTICATED_WALL;
 
     public static Block CHRYSONYX_RUSTICATED_LAYER;
+    public static Block CHRYSONYX_RUSTICATED_LAYER_MULTIFACE;
 
     public static Block CHRYSONYX_RUSTICATED_LAYER_VERTICAL;
 
@@ -2588,6 +2595,7 @@ public final class ModBlocks {
     public static Block PORPHYROS_RUSTICATED_WALL;
 
     public static Block PORPHYROS_RUSTICATED_LAYER;
+    public static Block PORPHYROS_RUSTICATED_LAYER_MULTIFACE;
 
     public static Block PORPHYROS_RUSTICATED_LAYER_VERTICAL;
 
@@ -2919,6 +2927,7 @@ public final class ModBlocks {
     public static Block ETRUSCUS_RUSTICATED_WALL;
 
     public static Block ETRUSCUS_RUSTICATED_LAYER;
+    public static Block ETRUSCUS_RUSTICATED_LAYER_MULTIFACE;
 
     public static Block ETRUSCUS_RUSTICATED_LAYER_VERTICAL;
 
@@ -3259,6 +3268,7 @@ public final class ModBlocks {
     public static Block GELASTRUM_RUSTICATED_WALL;
 
     public static Block GELASTRUM_RUSTICATED_LAYER;
+    public static Block GELASTRUM_RUSTICATED_LAYER_MULTIFACE;
 
     public static Block GELASTRUM_RUSTICATED_LAYER_VERTICAL;
 
@@ -3590,6 +3600,7 @@ public final class ModBlocks {
     public static Block GLACIUM_RUSTICATED_WALL;
 
     public static Block GLACIUM_RUSTICATED_LAYER;
+    public static Block GLACIUM_RUSTICATED_LAYER_MULTIFACE;
 
     public static Block GLACIUM_RUSTICATED_LAYER_VERTICAL;
 
@@ -3921,6 +3932,7 @@ public final class ModBlocks {
     public static Block HESPERION_RUSTICATED_WALL;
 
     public static Block HESPERION_RUSTICATED_LAYER;
+    public static Block HESPERION_RUSTICATED_LAYER_MULTIFACE;
 
     public static Block HESPERION_RUSTICATED_LAYER_VERTICAL;
 
@@ -4252,6 +4264,7 @@ public final class ModBlocks {
     public static Block IMPERIUM_RUSTICATED_WALL;
 
     public static Block IMPERIUM_RUSTICATED_LAYER;
+    public static Block IMPERIUM_RUSTICATED_LAYER_MULTIFACE;
 
     public static Block IMPERIUM_RUSTICATED_LAYER_VERTICAL;
 
@@ -4583,6 +4596,7 @@ public final class ModBlocks {
     public static Block KYLORION_RUSTICATED_WALL;
 
     public static Block KYLORION_RUSTICATED_LAYER;
+    public static Block KYLORION_RUSTICATED_LAYER_MULTIFACE;
 
     public static Block KYLORION_RUSTICATED_LAYER_VERTICAL;
 
@@ -5248,6 +5262,7 @@ public final class ModBlocks {
     public static Block KELASTRION_RUSTICATED_WALL;
 
     public static Block KELASTRION_RUSTICATED_LAYER;
+    public static Block KELASTRION_RUSTICATED_LAYER_MULTIFACE;
 
     public static Block KELASTRION_RUSTICATED_LAYER_VERTICAL;
 
@@ -5392,6 +5407,7 @@ public final class ModBlocks {
     public static Block LATMION_RUSTICATED_WALL;
 
     public static Block LATMION_RUSTICATED_LAYER;
+    public static Block LATMION_RUSTICATED_LAYER_MULTIFACE;
 
     public static Block LATMION_RUSTICATED_LAYER_VERTICAL;
 
@@ -5536,6 +5552,7 @@ public final class ModBlocks {
     public static Block PSAMATHEON_RUSTICATED_WALL;
 
     public static Block PSAMATHEON_RUSTICATED_LAYER;
+    public static Block PSAMATHEON_RUSTICATED_LAYER_MULTIFACE;
 
     public static Block PSAMATHEON_RUSTICATED_LAYER_VERTICAL;
 
@@ -5853,6 +5870,7 @@ public final class ModBlocks {
     public static Block LAURENTIUM_RUSTICATED_WALL;
 
     public static Block LAURENTIUM_RUSTICATED_LAYER;
+    public static Block LAURENTIUM_RUSTICATED_LAYER_MULTIFACE;
 
     public static Block LAURENTIUM_RUSTICATED_LAYER_VERTICAL;
 
@@ -6193,6 +6211,7 @@ public final class ModBlocks {
     public static Block MIELONYX_RUSTICATED_WALL;
 
     public static Block MIELONYX_RUSTICATED_LAYER;
+    public static Block MIELONYX_RUSTICATED_LAYER_MULTIFACE;
 
     public static Block MIELONYX_RUSTICATED_LAYER_VERTICAL;
 
@@ -6524,6 +6543,7 @@ public final class ModBlocks {
     public static Block NERIUM_RUSTICATED_WALL;
 
     public static Block NERIUM_RUSTICATED_LAYER;
+    public static Block NERIUM_RUSTICATED_LAYER_MULTIFACE;
 
     public static Block NERIUM_RUSTICATED_LAYER_VERTICAL;
 
@@ -6855,6 +6875,7 @@ public final class ModBlocks {
     public static Block NOXOPLIS_RUSTICATED_WALL;
 
     public static Block NOXOPLIS_RUSTICATED_LAYER;
+    public static Block NOXOPLIS_RUSTICATED_LAYER_MULTIFACE;
 
     public static Block NOXOPLIS_RUSTICATED_LAYER_VERTICAL;
 
@@ -7186,6 +7207,7 @@ public final class ModBlocks {
     public static Block PORTORIUM_RUSTICATED_WALL;
 
     public static Block PORTORIUM_RUSTICATED_LAYER;
+    public static Block PORTORIUM_RUSTICATED_LAYER_MULTIFACE;
 
     public static Block PORTORIUM_RUSTICATED_LAYER_VERTICAL;
 
@@ -7517,6 +7539,7 @@ public final class ModBlocks {
     public static Block ROSINIUM_RUSTICATED_WALL;
 
     public static Block ROSINIUM_RUSTICATED_LAYER;
+    public static Block ROSINIUM_RUSTICATED_LAYER_MULTIFACE;
 
     public static Block ROSINIUM_RUSTICATED_LAYER_VERTICAL;
 
@@ -7848,6 +7871,7 @@ public final class ModBlocks {
     public static Block SANGUENITE_RUSTICATED_WALL;
 
     public static Block SANGUENITE_RUSTICATED_LAYER;
+    public static Block SANGUENITE_RUSTICATED_LAYER_MULTIFACE;
 
     public static Block SANGUENITE_RUSTICATED_LAYER_VERTICAL;
 
@@ -8188,6 +8212,7 @@ public final class ModBlocks {
     public static Block SELENEPHOS_RUSTICATED_WALL;
 
     public static Block SELENEPHOS_RUSTICATED_LAYER;
+    public static Block SELENEPHOS_RUSTICATED_LAYER_MULTIFACE;
 
     public static Block SELENEPHOS_RUSTICATED_LAYER_VERTICAL;
 
@@ -8519,6 +8544,7 @@ public final class ModBlocks {
     public static Block SOLISTRA_RUSTICATED_WALL;
 
     public static Block SOLISTRA_RUSTICATED_LAYER;
+    public static Block SOLISTRA_RUSTICATED_LAYER_MULTIFACE;
 
     public static Block SOLISTRA_RUSTICATED_LAYER_VERTICAL;
 
@@ -8850,6 +8876,7 @@ public final class ModBlocks {
     public static Block STRIATUS_RUSTICATED_WALL;
 
     public static Block STRIATUS_RUSTICATED_LAYER;
+    public static Block STRIATUS_RUSTICATED_LAYER_MULTIFACE;
 
     public static Block STRIATUS_RUSTICATED_LAYER_VERTICAL;
 
@@ -10365,6 +10392,8 @@ public final class ModBlocks {
 
         AGANITE_RUSTICATED_LAYER = registerBlock("aganite_rusticated_layer",
             new LayerBlock(AbstractBlock.Settings.copy(AGANITE_BLOCK).nonOpaque()));
+        AGANITE_RUSTICATED_LAYER_MULTIFACE = registerBlock("aganite_rusticated_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(AGANITE_BLOCK).nonOpaque()));
 
         AGANITE_RUSTICATED_LAYER_VERTICAL = registerBlock("aganite_rusticated_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(AGANITE_BLOCK).nonOpaque()));
@@ -10890,6 +10919,8 @@ public final class ModBlocks {
 
         ATERZON_RUSTICATED_LAYER = registerBlock("aterzon_rusticated_layer",
             new LayerBlock(AbstractBlock.Settings.copy(ATERZON_BLOCK).nonOpaque()));
+        ATERZON_RUSTICATED_LAYER_MULTIFACE = registerBlock("aterzon_rusticated_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(ATERZON_BLOCK).nonOpaque()));
 
         ATERZON_RUSTICATED_LAYER_VERTICAL = registerBlock("aterzon_rusticated_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(ATERZON_BLOCK).nonOpaque()));
@@ -11439,6 +11470,8 @@ public final class ModBlocks {
 
         BOREALIS_RUSTICATED_LAYER = registerBlock("borealis_rusticated_layer",
             new LayerBlock(AbstractBlock.Settings.copy(BOREALIS_BLOCK).nonOpaque()));
+        BOREALIS_RUSTICATED_LAYER_MULTIFACE = registerBlock("borealis_rusticated_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(BOREALIS_BLOCK).nonOpaque()));
 
         BOREALIS_RUSTICATED_LAYER_VERTICAL = registerBlock("borealis_rusticated_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(BOREALIS_BLOCK).nonOpaque()));
@@ -11964,6 +11997,8 @@ public final class ModBlocks {
 
         BRECTITE_RUSTICATED_LAYER = registerBlock("brectite_rusticated_layer",
             new LayerBlock(AbstractBlock.Settings.copy(BRECTITE_BLOCK).nonOpaque()));
+        BRECTITE_RUSTICATED_LAYER_MULTIFACE = registerBlock("brectite_rusticated_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(BRECTITE_BLOCK).nonOpaque()));
 
         BRECTITE_RUSTICATED_LAYER_VERTICAL = registerBlock("brectite_rusticated_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(BRECTITE_BLOCK).nonOpaque()));
@@ -12489,6 +12524,8 @@ public final class ModBlocks {
 
         CALACATTUM_RUSTICATED_LAYER = registerBlock("calacattum_rusticated_layer",
             new LayerBlock(AbstractBlock.Settings.copy(CALACATTUM_BLOCK).nonOpaque()));
+        CALACATTUM_RUSTICATED_LAYER_MULTIFACE = registerBlock("calacattum_rusticated_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(CALACATTUM_BLOCK).nonOpaque()));
 
         CALACATTUM_RUSTICATED_LAYER_VERTICAL = registerBlock("calacattum_rusticated_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(CALACATTUM_BLOCK).nonOpaque()));
@@ -13014,6 +13051,8 @@ public final class ModBlocks {
 
         CHALSTROM_RUSTICATED_LAYER = registerBlock("chalstrom_rusticated_layer",
             new LayerBlock(AbstractBlock.Settings.copy(CHALSTROM_BLOCK).nonOpaque()));
+        CHALSTROM_RUSTICATED_LAYER_MULTIFACE = registerBlock("chalstrom_rusticated_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(CHALSTROM_BLOCK).nonOpaque()));
 
         CHALSTROM_RUSTICATED_LAYER_VERTICAL = registerBlock("chalstrom_rusticated_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(CHALSTROM_BLOCK).nonOpaque()));
@@ -13539,6 +13578,8 @@ public final class ModBlocks {
 
         CHRYSONYX_RUSTICATED_LAYER = registerBlock("chrysonyx_rusticated_layer",
             new LayerBlock(AbstractBlock.Settings.copy(CHRYSONYX_BLOCK).nonOpaque()));
+        CHRYSONYX_RUSTICATED_LAYER_MULTIFACE = registerBlock("chrysonyx_rusticated_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(CHRYSONYX_BLOCK).nonOpaque()));
 
         CHRYSONYX_RUSTICATED_LAYER_VERTICAL = registerBlock("chrysonyx_rusticated_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(CHRYSONYX_BLOCK).nonOpaque()));
@@ -14064,6 +14105,8 @@ public final class ModBlocks {
 
         PORPHYROS_RUSTICATED_LAYER = registerBlock("porphyros_rusticated_layer",
             new LayerBlock(AbstractBlock.Settings.copy(PORPHYROS_BLOCK).nonOpaque()));
+        PORPHYROS_RUSTICATED_LAYER_MULTIFACE = registerBlock("porphyros_rusticated_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(PORPHYROS_BLOCK).nonOpaque()));
 
         PORPHYROS_RUSTICATED_LAYER_VERTICAL = registerBlock("porphyros_rusticated_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(PORPHYROS_BLOCK).nonOpaque()));
@@ -14589,6 +14632,8 @@ public final class ModBlocks {
 
         ETRUSCUS_RUSTICATED_LAYER = registerBlock("etruscus_rusticated_layer",
             new LayerBlock(AbstractBlock.Settings.copy(ETRUSCUS_BLOCK).nonOpaque()));
+        ETRUSCUS_RUSTICATED_LAYER_MULTIFACE = registerBlock("etruscus_rusticated_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(ETRUSCUS_BLOCK).nonOpaque()));
 
         ETRUSCUS_RUSTICATED_LAYER_VERTICAL = registerBlock("etruscus_rusticated_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(ETRUSCUS_BLOCK).nonOpaque()));
@@ -15138,6 +15183,8 @@ public final class ModBlocks {
 
         GELASTRUM_RUSTICATED_LAYER = registerBlock("gelastrum_rusticated_layer",
             new LayerBlock(AbstractBlock.Settings.copy(GELASTRUM_BLOCK).nonOpaque()));
+        GELASTRUM_RUSTICATED_LAYER_MULTIFACE = registerBlock("gelastrum_rusticated_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(GELASTRUM_BLOCK).nonOpaque()));
 
         GELASTRUM_RUSTICATED_LAYER_VERTICAL = registerBlock("gelastrum_rusticated_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(GELASTRUM_BLOCK).nonOpaque()));
@@ -15663,6 +15710,8 @@ public final class ModBlocks {
 
         GLACIUM_RUSTICATED_LAYER = registerBlock("glacium_rusticated_layer",
             new LayerBlock(AbstractBlock.Settings.copy(GLACIUM_BLOCK).nonOpaque()));
+        GLACIUM_RUSTICATED_LAYER_MULTIFACE = registerBlock("glacium_rusticated_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(GLACIUM_BLOCK).nonOpaque()));
 
         GLACIUM_RUSTICATED_LAYER_VERTICAL = registerBlock("glacium_rusticated_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(GLACIUM_BLOCK).nonOpaque()));
@@ -16188,6 +16237,8 @@ public final class ModBlocks {
 
         HESPERION_RUSTICATED_LAYER = registerBlock("hesperion_rusticated_layer",
             new LayerBlock(AbstractBlock.Settings.copy(HESPERION_BLOCK).nonOpaque()));
+        HESPERION_RUSTICATED_LAYER_MULTIFACE = registerBlock("hesperion_rusticated_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(HESPERION_BLOCK).nonOpaque()));
 
         HESPERION_RUSTICATED_LAYER_VERTICAL = registerBlock("hesperion_rusticated_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(HESPERION_BLOCK).nonOpaque()));
@@ -16713,6 +16764,8 @@ public final class ModBlocks {
 
         IMPERIUM_RUSTICATED_LAYER = registerBlock("imperium_rusticated_layer",
             new LayerBlock(AbstractBlock.Settings.copy(IMPERIUM_BLOCK).nonOpaque()));
+        IMPERIUM_RUSTICATED_LAYER_MULTIFACE = registerBlock("imperium_rusticated_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(IMPERIUM_BLOCK).nonOpaque()));
 
         IMPERIUM_RUSTICATED_LAYER_VERTICAL = registerBlock("imperium_rusticated_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(IMPERIUM_BLOCK).nonOpaque()));
@@ -17238,6 +17291,8 @@ public final class ModBlocks {
 
         KYLORION_RUSTICATED_LAYER = registerBlock("kylorion_rusticated_layer",
             new LayerBlock(AbstractBlock.Settings.copy(KYLORION_BLOCK).nonOpaque()));
+        KYLORION_RUSTICATED_LAYER_MULTIFACE = registerBlock("kylorion_rusticated_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(KYLORION_BLOCK).nonOpaque()));
 
         KYLORION_RUSTICATED_LAYER_VERTICAL = registerBlock("kylorion_rusticated_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(KYLORION_BLOCK).nonOpaque()));
@@ -17857,6 +17912,8 @@ public final class ModBlocks {
 
         KELASTRION_RUSTICATED_LAYER = registerBlock("kelastrion_rusticated_layer",
             new LayerBlock(AbstractBlock.Settings.copy(KELASTRION_BLOCK).nonOpaque()));
+        KELASTRION_RUSTICATED_LAYER_MULTIFACE = registerBlock("kelastrion_rusticated_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(KELASTRION_BLOCK).nonOpaque()));
 
         KELASTRION_RUSTICATED_LAYER_VERTICAL = registerBlock("kelastrion_rusticated_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(KELASTRION_BLOCK).nonOpaque()));
@@ -18359,6 +18416,8 @@ public final class ModBlocks {
 
         PSAMATHEON_RUSTICATED_LAYER = registerBlock("psamatheon_rusticated_layer",
             new LayerBlock(AbstractBlock.Settings.copy(PSAMATHEON_BLOCK).nonOpaque()));
+        PSAMATHEON_RUSTICATED_LAYER_MULTIFACE = registerBlock("psamatheon_rusticated_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(PSAMATHEON_BLOCK).nonOpaque()));
 
         PSAMATHEON_RUSTICATED_LAYER_VERTICAL = registerBlock("psamatheon_rusticated_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(PSAMATHEON_BLOCK).nonOpaque()));
@@ -18861,6 +18920,8 @@ public final class ModBlocks {
 
         LATMION_RUSTICATED_LAYER = registerBlock("latmion_rusticated_layer",
             new LayerBlock(AbstractBlock.Settings.copy(LATMION_BLOCK).nonOpaque()));
+        LATMION_RUSTICATED_LAYER_MULTIFACE = registerBlock("latmion_rusticated_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(LATMION_BLOCK).nonOpaque()));
 
         LATMION_RUSTICATED_LAYER_VERTICAL = registerBlock("latmion_rusticated_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(LATMION_BLOCK).nonOpaque()));
@@ -19269,6 +19330,8 @@ public final class ModBlocks {
 
         LAURENTIUM_RUSTICATED_LAYER = registerBlock("laurentium_rusticated_layer",
             new LayerBlock(AbstractBlock.Settings.copy(LAURENTIUM_BLOCK).nonOpaque()));
+        LAURENTIUM_RUSTICATED_LAYER_MULTIFACE = registerBlock("laurentium_rusticated_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(LAURENTIUM_BLOCK).nonOpaque()));
 
         LAURENTIUM_RUSTICATED_LAYER_VERTICAL = registerBlock("laurentium_rusticated_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(LAURENTIUM_BLOCK).nonOpaque()));
@@ -19818,6 +19881,8 @@ public final class ModBlocks {
 
         MIELONYX_RUSTICATED_LAYER = registerBlock("mielonyx_rusticated_layer",
             new LayerBlock(AbstractBlock.Settings.copy(MIELONYX_BLOCK).nonOpaque()));
+        MIELONYX_RUSTICATED_LAYER_MULTIFACE = registerBlock("mielonyx_rusticated_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(MIELONYX_BLOCK).nonOpaque()));
 
         MIELONYX_RUSTICATED_LAYER_VERTICAL = registerBlock("mielonyx_rusticated_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(MIELONYX_BLOCK).nonOpaque()));
@@ -20343,6 +20408,8 @@ public final class ModBlocks {
 
         NERIUM_RUSTICATED_LAYER = registerBlock("nerium_rusticated_layer",
             new LayerBlock(AbstractBlock.Settings.copy(NERIUM_BLOCK).nonOpaque()));
+        NERIUM_RUSTICATED_LAYER_MULTIFACE = registerBlock("nerium_rusticated_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(NERIUM_BLOCK).nonOpaque()));
 
         NERIUM_RUSTICATED_LAYER_VERTICAL = registerBlock("nerium_rusticated_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(NERIUM_BLOCK).nonOpaque()));
@@ -20868,6 +20935,8 @@ public final class ModBlocks {
 
         NOXOPLIS_RUSTICATED_LAYER = registerBlock("noxoplis_rusticated_layer",
             new LayerBlock(AbstractBlock.Settings.copy(NOXOPLIS_BLOCK).nonOpaque()));
+        NOXOPLIS_RUSTICATED_LAYER_MULTIFACE = registerBlock("noxoplis_rusticated_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(NOXOPLIS_BLOCK).nonOpaque()));
 
         NOXOPLIS_RUSTICATED_LAYER_VERTICAL = registerBlock("noxoplis_rusticated_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(NOXOPLIS_BLOCK).nonOpaque()));
@@ -21393,6 +21462,8 @@ public final class ModBlocks {
 
         PORTORIUM_RUSTICATED_LAYER = registerBlock("portorium_rusticated_layer",
             new LayerBlock(AbstractBlock.Settings.copy(PORTORIUM_BLOCK).nonOpaque()));
+        PORTORIUM_RUSTICATED_LAYER_MULTIFACE = registerBlock("portorium_rusticated_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(PORTORIUM_BLOCK).nonOpaque()));
 
         PORTORIUM_RUSTICATED_LAYER_VERTICAL = registerBlock("portorium_rusticated_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(PORTORIUM_BLOCK).nonOpaque()));
@@ -21918,6 +21989,8 @@ public final class ModBlocks {
 
         ROSINIUM_RUSTICATED_LAYER = registerBlock("rosinium_rusticated_layer",
             new LayerBlock(AbstractBlock.Settings.copy(ROSINIUM_BLOCK).nonOpaque()));
+        ROSINIUM_RUSTICATED_LAYER_MULTIFACE = registerBlock("rosinium_rusticated_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(ROSINIUM_BLOCK).nonOpaque()));
 
         ROSINIUM_RUSTICATED_LAYER_VERTICAL = registerBlock("rosinium_rusticated_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(ROSINIUM_BLOCK).nonOpaque()));
@@ -22443,6 +22516,8 @@ public final class ModBlocks {
 
         SANGUENITE_RUSTICATED_LAYER = registerBlock("sanguenite_rusticated_layer",
             new LayerBlock(AbstractBlock.Settings.copy(SANGUENITE_BLOCK).nonOpaque()));
+        SANGUENITE_RUSTICATED_LAYER_MULTIFACE = registerBlock("sanguenite_rusticated_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(SANGUENITE_BLOCK).nonOpaque()));
 
         SANGUENITE_RUSTICATED_LAYER_VERTICAL = registerBlock("sanguenite_rusticated_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(SANGUENITE_BLOCK).nonOpaque()));
@@ -22992,6 +23067,8 @@ public final class ModBlocks {
 
         SELENEPHOS_RUSTICATED_LAYER = registerBlock("selenephos_rusticated_layer",
             new LayerBlock(AbstractBlock.Settings.copy(SELENEPHOS_BLOCK).nonOpaque()));
+        SELENEPHOS_RUSTICATED_LAYER_MULTIFACE = registerBlock("selenephos_rusticated_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(SELENEPHOS_BLOCK).nonOpaque()));
 
         SELENEPHOS_RUSTICATED_LAYER_VERTICAL = registerBlock("selenephos_rusticated_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(SELENEPHOS_BLOCK).nonOpaque()));
@@ -23517,6 +23594,8 @@ public final class ModBlocks {
 
         SOLISTRA_RUSTICATED_LAYER = registerBlock("solistra_rusticated_layer",
             new LayerBlock(AbstractBlock.Settings.copy(SOLISTRA_BLOCK).nonOpaque()));
+        SOLISTRA_RUSTICATED_LAYER_MULTIFACE = registerBlock("solistra_rusticated_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(SOLISTRA_BLOCK).nonOpaque()));
 
         SOLISTRA_RUSTICATED_LAYER_VERTICAL = registerBlock("solistra_rusticated_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(SOLISTRA_BLOCK).nonOpaque()));
@@ -24042,6 +24121,8 @@ public final class ModBlocks {
 
         STRIATUS_RUSTICATED_LAYER = registerBlock("striatus_rusticated_layer",
             new LayerBlock(AbstractBlock.Settings.copy(STRIATUS_BLOCK).nonOpaque()));
+        STRIATUS_RUSTICATED_LAYER_MULTIFACE = registerBlock("striatus_rusticated_layer_multiface",
+            new LayerMultifaceBlock(AbstractBlock.Settings.copy(STRIATUS_BLOCK).nonOpaque()));
 
         STRIATUS_RUSTICATED_LAYER_VERTICAL = registerBlock("striatus_rusticated_layer_vertical",
             new LayerVerticalBlock(AbstractBlock.Settings.copy(STRIATUS_BLOCK).nonOpaque()));

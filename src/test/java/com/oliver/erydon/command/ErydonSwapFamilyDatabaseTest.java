@@ -25,6 +25,22 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ErydonSwapFamilyDatabaseTest {
+    @Test
+    void glaciumHewnToRusticatedHasARealMultifaceDestination() throws IOException {
+        assertCommandParses("swap box \"Glacium Hewn\" \"Glacium Rusticated\" 8304 68 3201 8239 99 3153");
+        Set<String> paths = blockstatePaths();
+        // A syntactically valid mapping is insufficient: both blocks must exist.
+        for (String hewn : paths.stream().filter(p -> p.endsWith("_hewn_layer_multiface")).toList()) {
+            String material = hewn.substring(0, hewn.length() - "_hewn_layer_multiface".length());
+            String rusticated = material + "_rusticated_layer_multiface";
+            assertTrue(paths.contains(rusticated), "Missing swap destination: " + rusticated);
+            assertMapping("erydon", hewn, material + "_hewn", material + "_rusticated", rusticated);
+            assertMapping("erydon", rusticated, material + "_rusticated", material + "_hewn", hewn);
+        }
+        assertTrue(paths.contains("glacium_rusticated_layer_multiface"));
+        assertEquals(27, paths.stream().filter(p -> p.endsWith("_rusticated_layer_multiface")).count());
+    }
+
     private static final Set<String> EXPECTED_MATERIAL_GROUPS = Set.of(
             "aganite_family",
             "aterzon_family",
