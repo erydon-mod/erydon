@@ -33,6 +33,7 @@ public final class WindowArchModelLoadingPlugin implements ModelLoadingPlugin {
 
     private static List<Identifier> extraModels() {
         List<Identifier> models = new ArrayList<>();
+        models.add(WindowArchBakedModel.MIRROR_MATERIAL_MODEL);
         for (String blockPath : ErydonModelFamilyIndex.get().archWindows()) {
             for (String suffix : WindowArchBakedModel.MODEL_SUFFIXES) {
                 models.add(WindowArchBakedModel.modelId(blockPath, suffix));

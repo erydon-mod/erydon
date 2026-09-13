@@ -8,6 +8,7 @@ import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
 import net.fabricmc.fabric.api.renderer.v1.material.BlendMode;
 import net.fabricmc.fabric.api.renderer.v1.material.MaterialFinder;
 import net.fabricmc.fabric.api.renderer.v1.material.RenderMaterial;
+import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.minecraft.block.BlockState;
@@ -31,6 +32,7 @@ import java.util.function.Supplier;
 
 public final class WindowArchBakedModel implements BakedModel, FabricBakedModel {
     private static final String MODEL_PATH = "block/window/arch/";
+    public static final Identifier MIRROR_MATERIAL_MODEL = new Identifier(Erydon.MOD_ID, MODEL_PATH + "mirror_material");
     private static final Object MATERIAL_LOCK = new Object();
     private static RenderMaterial solidMaterial;
     private static RenderMaterial translucentMaterial;
@@ -47,6 +49,8 @@ public final class WindowArchBakedModel implements BakedModel, FabricBakedModel 
 
     private final BakedModel wrapped;
     private final Sprite particle;
+    // A wrapper belongs to one model reload, so its sprite cannot outlive the atlas.
+    private volatile Sprite mirrorSprite;
 
     public WindowArchBakedModel(BakedModel wrapped) {
         this.wrapped = wrapped;
@@ -74,7 +78,7 @@ public final class WindowArchBakedModel implements BakedModel, FabricBakedModel 
             return;
         }
 
-        boolean splitLayers = pushSplitLayerTransform(context);
+        boolean splitLayers = pushSplitLayerTransform(context, state);
         try {
             int rotation = rotationForFacing(state.get(WindowArchBlock.FACING));
             WindowArchBlock.Piece piece = state.get(WindowArchBlock.PIECE);
@@ -164,16 +168,40 @@ public final class WindowArchBakedModel implements BakedModel, FabricBakedModel 
         WorldAlignedYRotation.emit(context, model, degrees, true);
     }
 
-    private static boolean pushSplitLayerTransform(RenderContext context) {
+    private boolean pushSplitLayerTransform(RenderContext context, BlockState state) {
         if (!ensureMaterials()) {
             return false;
         }
 
+        WindowArchBlock.Glass glass = state.get(WindowArchBlock.GLASS);
+        Direction outside = state.get(WindowArchBlock.FACING);
+        Sprite mirror = glass == WindowArchBlock.Glass.TWO_WAY ? mirrorSprite() : null;
         context.pushTransform(quad -> {
-            quad.material(quad.colorIndex() == 0 ? translucentMaterial : solidMaterial);
+            // The child rotation runs before this transform, including the 180-degree right upper.
+            applyGlassFinish(quad, glass, outside, mirror, solidMaterial, translucentMaterial);
             return true;
         });
         return true;
+    }
+
+    static void applyGlassFinish(MutableQuadView quad, WindowArchBlock.Glass glass, Direction outside,
+                                 Sprite mirror, RenderMaterial solid, RenderMaterial translucent) {
+        if (glass.mirrorsFace(outside, quad.lightFace(), quad.colorIndex())) {
+            quad.spriteBake(mirror, MutableQuadView.BAKE_LOCK_UV);
+            quad.colorIndex(-1);
+            quad.material(solid);
+        } else {
+            quad.material(quad.colorIndex() == 0 ? translucent : solid);
+        }
+    }
+
+    private Sprite mirrorSprite() {
+        Sprite sprite = mirrorSprite;
+        if (sprite == null) {
+            sprite = MinecraftClient.getInstance().getBakedModelManager().getModel(MIRROR_MATERIAL_MODEL).getParticleSprite();
+            mirrorSprite = sprite;
+        }
+        return sprite;
     }
 
     private static boolean ensureMaterials() {
@@ -226,7 +254,32 @@ public final class WindowArchBakedModel implements BakedModel, FabricBakedModel 
         if (state.get(WindowArchBlock.SILL)) {
             addQuads(quads, state, "sill", rotation, face, random);
         }
+        if (state.get(WindowArchBlock.GLASS) == WindowArchBlock.Glass.TWO_WAY) {
+            Sprite mirror = mirrorSprite();
+            Direction outside = state.get(WindowArchBlock.FACING);
+            for (int i = 0; i < quads.size(); i++) {
+                BakedQuad quad = quads.get(i);
+                if (WindowArchBlock.Glass.TWO_WAY.mirrorsFace(outside, quad.getFace(), quad.getColorIndex())) {
+                    quads.set(i, mirrorQuad(quad, mirror));
+                }
+            }
+        }
         return quads;
+    }
+
+    private static BakedQuad mirrorQuad(BakedQuad quad, Sprite mirror) {
+        int[] data = quad.getVertexData().clone();
+        Sprite original = quad.getSprite();
+        for (int vertex = 0; vertex < 4; vertex++) {
+            int offset = vertex * 8;
+            float u = Float.intBitsToFloat(data[offset + 4]);
+            float v = Float.intBitsToFloat(data[offset + 5]);
+            data[offset + 4] = Float.floatToRawIntBits(mirror.getFrameU(
+                    16 * (u - original.getMinU()) / (original.getMaxU() - original.getMinU())));
+            data[offset + 5] = Float.floatToRawIntBits(mirror.getFrameV(
+                    16 * (v - original.getMinV()) / (original.getMaxV() - original.getMinV())));
+        }
+        return new BakedQuad(data, -1, quad.getFace(), mirror, quad.hasShade());
     }
 
     private static void addLowerSingleQuads(List<BakedQuad> quads,

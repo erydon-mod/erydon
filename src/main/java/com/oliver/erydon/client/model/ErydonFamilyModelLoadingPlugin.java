@@ -77,6 +77,7 @@ public final class ErydonFamilyModelLoadingPlugin implements ModelLoadingPlugin 
     private static List<Identifier> extraModels() {
         ErydonModelFamilyIndex index = ErydonModelFamilyIndex.get();
         List<Identifier> models = new ArrayList<>();
+        models.add(WindowArchBakedModel.MIRROR_MATERIAL_MODEL);
 
         for (String blockPath : index.columns()) {
             for (String suffix : ColumnBakedModel.modelSuffixes(blockPath)) {

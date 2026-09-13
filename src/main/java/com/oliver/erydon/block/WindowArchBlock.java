@@ -57,6 +57,7 @@ public class WindowArchBlock extends Block implements ClusterRebuildableBlock {
 
     public static final EnumProperty<Piece> PIECE = EnumProperty.of("piece", Piece.class);
     public static final BooleanProperty SILL = BooleanProperty.of("sill");
+    public static final EnumProperty<Glass> GLASS = EnumProperty.of("glass", Glass.class);
 
     // --- Sync guard (prevents feedback loops while we setBlockState across clusters) ---
     private static final ThreadLocal<Integer> SYNC_DEPTH = ThreadLocal.withInitial(() -> 0);
@@ -80,12 +81,13 @@ public class WindowArchBlock extends Block implements ClusterRebuildableBlock {
                 .with(OPEN, false)
                 .with(PIECE, Piece.LOWER_SINGLE)
                 .with(SILL, false)
+                .with(GLASS, Glass.NORMAL)
         );
     }
 
     @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        builder.add(FACING, OPEN, PIECE, SILL);
+        builder.add(FACING, OPEN, PIECE, SILL, GLASS);
     }
 
     @Override
@@ -122,7 +124,8 @@ public class WindowArchBlock extends Block implements ClusterRebuildableBlock {
 
         return this.getDefaultState()
                 .with(FACING, facing)
-                .with(OPEN, open);
+                .with(OPEN, open)
+                .with(GLASS, inherit == null ? Glass.NORMAL : inherit.get(GLASS));
 
     }
 
@@ -165,7 +168,8 @@ public class WindowArchBlock extends Block implements ClusterRebuildableBlock {
         if (isSyncing()) return;
 
         boolean openChanged = state.get(OPEN) != oldState.get(OPEN);
-        if (!openChanged) {
+        boolean glassChanged = state.get(GLASS) != oldState.get(GLASS);
+        if (!openChanged && !glassChanged) {
             return;
         }
 
@@ -173,6 +177,9 @@ public class WindowArchBlock extends Block implements ClusterRebuildableBlock {
         try {
             if (openChanged) {
                 applyOpenToCluster(world, pos, state.get(OPEN));
+            }
+            if (glassChanged) {
+                applyGlassToCluster(world, pos, state.get(GLASS));
             }
         } finally {
             endSync(started);
@@ -292,6 +299,23 @@ public class WindowArchBlock extends Block implements ClusterRebuildableBlock {
     }
 
     // --- Auto layout: collect component (AUTO only), partition to rects, apply layout per rect ---
+    private void applyGlassToCluster(World world, BlockPos anchor, Glass glass) {
+        boolean started = beginSync();
+        try {
+            BlockState anchorState = world.getBlockState(anchor);
+            if (!anchorState.isOf(this)) return;
+            Direction facing = anchorState.get(FACING);
+            for (BlockPos p : collectPlaneComponentAnyMode(world, anchor, facing)) {
+                BlockState state = world.getBlockState(p);
+                if (state.isOf(this) && state.get(FACING) == facing && state.get(GLASS) != glass) {
+                    world.setBlockState(p, state.with(GLASS, glass), Block.NOTIFY_LISTENERS);
+                }
+            }
+        } finally {
+            endSync(started);
+        }
+    }
+
     private void reflowConnectedAutoComponent(World world, BlockPos seed) {
         reflowConnectedAutoComponent(world, seed, null);
     }
@@ -367,6 +391,7 @@ public class WindowArchBlock extends Block implements ClusterRebuildableBlock {
         if (!seedState.isOf(this)) return;
 
         boolean open = seedState.get(OPEN);
+        Glass glass = seedState.get(GLASS);
 
         int w = rect.width;
         int h = rect.height;
@@ -386,6 +411,7 @@ public class WindowArchBlock extends Block implements ClusterRebuildableBlock {
 
                 BlockState ns = s
                         .with(OPEN, open)
+                        .with(GLASS, glass)
                         .with(PIECE, piece)
                         .with(SILL, isBottom)
                         .with(FACING, rect.facing);
@@ -662,7 +688,7 @@ public class WindowArchBlock extends Block implements ClusterRebuildableBlock {
         if (placeState == null) return false;
 
         // Ensure it matches the cluster facing.
-        placeState = placeState.with(FACING, facing);
+        placeState = placeState.with(FACING, facing).with(GLASS, state.get(GLASS));
 
         if (!world.setBlockState(target, placeState, Block.NOTIFY_ALL)) return false;
 
@@ -705,6 +731,23 @@ public class WindowArchBlock extends Block implements ClusterRebuildableBlock {
     }
 
     // --- Enums ---
+    public enum Glass implements StringIdentifiable {
+        NORMAL("normal"),
+        TWO_WAY("two_way");
+
+        private final String id;
+
+        Glass(String id) { this.id = id; }
+
+        @Override
+        public String asString() { return id; }
+
+        /** Only the outward-facing glass receives the coating; stone and lead are never tinted. */
+        public boolean mirrorsFace(Direction outside, Direction face, int tintIndex) {
+            return this == TWO_WAY && tintIndex == 0 && face == outside;
+        }
+    }
+
     public enum Piece implements StringIdentifiable {
         // Top row
         UPPER_SINGLE("upper_single"),
