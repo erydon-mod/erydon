@@ -12,6 +12,7 @@
     "compat.worldedit.WorldEditBlockStateMixin"
   ],
   "client": [
+    "client.WindowArchBreakParticlesMixin",
     "client.BakedQuadFactoryMixin",
     "client.MultipartUnbakedModelMixin",
     "client.FluidRendererMixin",

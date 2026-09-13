@@ -26,7 +26,6 @@ import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
@@ -36,7 +35,6 @@ import net.minecraft.block.ShapeContext;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -47,7 +45,7 @@ import java.util.Set;
  *
  * New simplified arch window system driven by cluster/rect layout logic (similar to WindowFrenchGeorgianBlock),
  * but with a smaller piece set. Rendering is expected to be built from parent models + multipart entries,
- * including optional 180° Y-rotated parts and 'void' (empty) parts for the open state.
+ * including optional 180Â° Y-rotated parts and 'void' (empty) parts for the open state.
  */
 public class WindowArchBlock extends Block implements ClusterRebuildableBlock {
 
@@ -73,219 +71,6 @@ public class WindowArchBlock extends Block implements ClusterRebuildableBlock {
     }
     private static boolean isSyncing() {
         return SYNC_DEPTH.get() > 0;
-    }
-
-    // --- Shapes (strike/collision) ---
-    enum ShapeKey {
-        CLOSED_UPPER_SINGLE,
-        CLOSED_UPPER_LEFT,
-        CLOSED_UPPER_MID,
-        CLOSED_UPPER_RIGHT,
-
-        CLOSED_LOWER_SINGLE,
-        CLOSED_LOWER_LEFT,
-        CLOSED_LOWER_GLASS,
-        CLOSED_LOWER_RIGHT,
-
-        OPEN_LOWER_SINGLE,
-        OPEN_LOWER_LEFT,
-        OPEN_LOWER_RIGHT,
-
-        SILL
-    }
-
-    private static final double[][] WALL_BOXES = new double[][] {
-            {14.0D, 0.0D, 1.0D, 15.0D, 16.0D, 2.07143D},
-            {14.0D, 0.0D, 7.42857D, 15.0D, 16.0D, 8.5D},
-            {14.0D, 0.0D, 9.57143D, 15.0D, 16.0D, 10.64286D},
-            {14.0D, 0.0D, 3.14286D, 15.0D, 16.0D, 4.21429D},
-            {14.0D, 0.0D, 11.71429D, 15.0D, 16.0D, 12.78571D},
-            {14.0D, 0.0D, 5.28571D, 15.0D, 16.0D, 6.35714D},
-            {14.0D, 0.0D, 14.0D, 15.0D, 16.0D, 15.07143D},
-            {15.0D, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D}
-    };
-
-    private static final double[][] SILL_BOXES = new double[][] {
-            {0.0D, 0.0D, 0.0D, 16.0D, 1.478D, 16.05D}
-    };
-
-    private static final double[][] GLASS_LOWER_BOXES = new double[][] {
-            {0.0D, 0.0D, 7.67857D, 16.0D, 16.0D, 8.25D},
-            {9.125D, 0.0D, 7.574D, 9.375D, 16.0D, 8.378D},
-            {14.469D, 0.0D, 7.574D, 14.719D, 16.0D, 8.378D},
-            {11.813D, 0.0D, 7.574D, 12.063D, 16.0D, 8.378D},
-            {0.0D, 9.077D, 7.56D, 16.0D, 9.327D, 8.364D},
-            {0.0D, 11.813D, 7.56D, 16.0D, 12.063D, 8.364D},
-            {0.0D, 14.437D, 7.56D, 16.0D, 14.687D, 8.364D},
-            {0.0D, 6.453D, 7.56D, 16.0D, 6.703D, 8.364D},
-            {0.0D, 3.813D, 7.56D, 16.0D, 4.063D, 8.364D},
-            {0.0D, 1.26D, 7.56D, 16.0D, 1.51D, 8.364D},
-            {3.781D, 0.0D, 7.574D, 4.031D, 16.0D, 8.378D},
-            {6.453D, 0.0D, 7.574D, 6.703D, 16.0D, 8.378D},
-            {1.26D, 0.0D, 7.574D, 1.51D, 16.0D, 8.378D}
-    };
-
-    private static final double[][] MID_UPPER_BOXES = new double[][] {
-            {0.0D, 1.612D, 6.47286D, 16.0D, 2.112D, 9.44086D},
-            {1.26D, 0.01D, 7.574D, 1.51D, 15.99D, 8.378D},
-            {6.453D, 0.01D, 7.574D, 6.703D, 15.99D, 8.378D},
-            {3.781D, 0.01D, 7.574D, 4.031D, 15.99D, 8.378D},
-            {0.01D, 1.26D, 7.56D, 15.99D, 1.51D, 8.364D},
-            {0.01D, 3.813D, 7.56D, 15.99D, 4.063D, 8.364D},
-            {0.01D, 6.453D, 7.56D, 15.99D, 6.703D, 8.364D},
-            {0.01D, 9.077D, 7.56D, 15.99D, 9.327D, 8.364D},
-            {11.813D, 0.01D, 7.574D, 12.063D, 15.99D, 8.378D},
-            {14.469D, 0.01D, 7.574D, 14.719D, 15.99D, 8.378D},
-            {9.125D, 0.01D, 7.574D, 9.375D, 15.99D, 8.378D},
-            {0.0D, 0.0D, 7.67857D, 16.0D, 16.0D, 8.25D},
-            {0.0D, 15.0D, 0.0D, 16.0D, 16.0D, 16.0D},
-            {0.0D, 11.256D, 0.372D, 16.0D, 12.272D, 15.372D},
-            {0.0D, 12.272D, 1.0D, 16.0D, 15.0D, 15.0D}
-    };
-
-    private static final double[][] MULTI_UPPER_BOXES = new double[][] {
-            {0.0D, 1.612D, 6.47286D, 16.0D, 2.112D, 9.44086D},
-            {1.26D, 0.01D, 7.574D, 1.51D, 15.99D, 8.378D},
-            {6.453D, 0.01D, 7.574D, 6.703D, 15.99D, 8.378D},
-            {3.781D, 0.01D, 7.574D, 4.031D, 15.99D, 8.378D},
-            {0.01D, 1.26D, 7.56D, 15.99D, 1.51D, 8.364D},
-            {0.01D, 3.813D, 7.56D, 15.99D, 4.063D, 8.364D},
-            {0.01D, 6.453D, 7.56D, 15.99D, 6.703D, 8.364D},
-            {0.01D, 9.077D, 7.56D, 15.99D, 9.327D, 8.364D},
-            {11.813D, 0.01D, 7.574D, 12.063D, 15.99D, 8.378D},
-            {14.469D, 0.01D, 7.574D, 14.719D, 15.99D, 8.378D},
-            {9.125D, 0.01D, 7.574D, 9.375D, 15.99D, 8.378D},
-            {0.0D, 0.0D, 7.67857D, 16.0D, 16.0D, 8.25D},
-            {13.0D, 1.604D, 0.096D, 15.968D, 2.104D, 15.92D},
-            {15.0D, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D},
-            {0.0D, 15.0D, 0.0D, 14.992D, 16.0D, 16.0D},
-            {0.0D, 11.256D, 0.372D, 5.442D, 12.272D, 15.372D},
-            {0.0D, 11.272D, 1.0D, 15.004D, 15.0D, 15.0D},
-            {11.5D, 7.58D, 1.0D, 12.88D, 11.272D, 15.0D},
-            {7.892D, 10.332D, 1.0D, 10.12D, 11.272D, 15.0D},
-            {10.12D, 8.972D, 1.0D, 11.5D, 11.272D, 15.0D},
-            {12.88D, 5.66D, 1.0D, 13.892D, 11.272D, 15.0D},
-            {13.896D, 3.096D, 1.0D, 15.004D, 11.272D, 15.0D}
-    };
-
-    private static final double[][] SINGLE_UPPER_BOXES = new double[][] {
-            {0.01D, 1.612D, 6.47286D, 15.99D, 2.112D, 9.44086D},
-            {1.26D, 0.01D, 7.574D, 1.51D, 15.99D, 8.378D},
-            {6.453D, 0.01D, 7.574D, 6.703D, 15.99D, 8.378D},
-            {3.781D, 0.01D, 7.574D, 4.031D, 15.99D, 8.378D},
-            {0.01D, 1.26D, 7.56D, 15.99D, 1.51D, 8.364D},
-            {0.01D, 3.813D, 7.56D, 15.99D, 4.063D, 8.364D},
-            {0.01D, 6.453D, 7.56D, 15.99D, 6.703D, 8.364D},
-            {0.01D, 9.077D, 7.56D, 15.99D, 9.327D, 8.364D},
-            {11.813D, 0.01D, 7.574D, 12.063D, 15.99D, 8.378D},
-            {14.469D, 0.01D, 7.574D, 14.719D, 15.99D, 8.378D},
-            {9.125D, 0.01D, 7.574D, 9.375D, 15.99D, 8.378D},
-            {0.0D, 0.01D, 7.67857D, 16.0D, 15.99D, 8.25D},
-            {15.0D, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D},
-            {0.0D, 0.0D, 0.0D, 1.0D, 16.0D, 16.0D},
-            {1.0D, 15.0D, 0.0D, 15.0D, 16.0D, 16.0D},
-            {6.844D, 11.256D, 0.372D, 9.21D, 12.272D, 15.372D},
-            {4.5D, 11.272D, 1.0D, 11.504D, 15.272D, 15.0D},
-            {11.5D, 9.836D, 1.0D, 12.88D, 15.272D, 15.0D},
-            {12.88D, 8.428D, 1.0D, 14.004D, 15.272D, 15.0D},
-            {3.12D, 9.836D, 1.0D, 4.5D, 15.272D, 15.0D},
-            {1.996D, 8.428D, 1.0D, 3.12D, 15.272D, 15.0D},
-            {14.004D, 5.928D, 1.0D, 15.128D, 15.272D, 15.0D},
-            {14.0D, 2.0D, 1.0D, 15.0D, 6.0D, 2.07143D},
-            {14.0D, 2.0D, 3.14286D, 15.0D, 6.0D, 4.21429D},
-            {14.0D, 2.0D, 5.28571D, 15.0D, 6.0D, 6.35714D},
-            {14.0D, 2.0D, 7.42857D, 15.0D, 6.0D, 8.5D},
-            {14.0D, 2.0D, 9.57143D, 15.0D, 6.0D, 10.64286D},
-            {14.0D, 2.0D, 11.71429D, 15.0D, 6.0D, 12.78571D},
-            {14.0D, 2.0D, 14.0D, 15.0D, 6.0D, 15.07143D},
-            {13.0D, 1.604D, 0.096D, 15.968D, 2.104D, 15.92D},
-            {0.872D, 5.928D, 1.0D, 1.996D, 15.272D, 15.0D},
-            {1.0D, 2.0D, 1.0D, 2.0D, 6.0D, 2.07143D},
-            {1.0D, 2.0D, 3.14286D, 2.0D, 6.0D, 4.21429D},
-            {1.0D, 2.0D, 5.28571D, 2.0D, 6.0D, 6.35714D},
-            {1.0D, 2.0D, 7.42857D, 2.0D, 6.0D, 8.5D},
-            {1.0D, 2.0D, 9.57143D, 2.0D, 6.0D, 10.64286D},
-            {1.0D, 2.0D, 11.71429D, 2.0D, 6.0D, 12.78571D},
-            {1.0D, 2.0D, 14.0D, 2.0D, 6.0D, 15.07143D},
-            {0.032D, 1.604D, 0.096D, 3.0D, 2.104D, 15.92D}
-    };
-
-    private static final EnumMap<ShapeKey, VoxelShape[]> SHAPES = new EnumMap<>(ShapeKey.class);
-
-    static {
-        // Components (unrotated for "north" baseline). We pre-bake a few combined shapes for convenience.
-        VoxelShape wall = makeWallShape();
-        VoxelShape wall180 = rotateY180(wall);
-
-        VoxelShape glassLower = makeGlassLowerShape();
-
-        // Uppers
-        register(ShapeKey.CLOSED_UPPER_SINGLE, makeSingleUpperShape());
-        register(ShapeKey.CLOSED_UPPER_LEFT, makeMultiUpperShape());
-        register(ShapeKey.CLOSED_UPPER_MID, makeMidUpperShape());
-        register(ShapeKey.CLOSED_UPPER_RIGHT, rotateY180(makeMultiUpperShape()));
-
-        // Lowers (closed)
-        register(ShapeKey.CLOSED_LOWER_GLASS, glassLower);
-        register(ShapeKey.CLOSED_LOWER_LEFT, VoxelShapes.union(wall, glassLower).simplify());
-        register(ShapeKey.CLOSED_LOWER_RIGHT, VoxelShapes.union(glassLower, wall180).simplify());
-        register(ShapeKey.CLOSED_LOWER_SINGLE, VoxelShapes.union(wall, glassLower, wall180).simplify());
-
-        // Lowers (open) - opening is handled by returning null for Piece.LOWER_GLASS in shapeKeyForState()
-        register(ShapeKey.OPEN_LOWER_LEFT, wall);
-        register(ShapeKey.OPEN_LOWER_RIGHT, wall180);
-        register(ShapeKey.OPEN_LOWER_SINGLE, VoxelShapes.union(wall, wall180).simplify());
-
-        // Sill
-        register(ShapeKey.SILL, makeSillShape());
-    }
-
-    private static void register(ShapeKey key, VoxelShape base) {
-        VoxelShape[] arr = new VoxelShape[4];
-        arr[0] = base.simplify();
-        arr[1] = rotateYClockwise(arr[0]); // EAST
-        arr[2] = rotateYClockwise(arr[1]); // SOUTH
-        arr[3] = rotateYClockwise(arr[2]); // WEST
-        SHAPES.put(key, arr);
-    }
-
-    private static VoxelShape makeShape(double[][] boxes) {
-        VoxelShape shape = VoxelShapes.empty();
-        for (double[] box : boxes) {
-            shape = VoxelShapes.combine(
-                    shape,
-                    Block.createCuboidShape(box[0], box[1], box[2], box[3], box[4], box[5]),
-                    BooleanBiFunction.OR
-            );
-        }
-        return shape.simplify();
-    }
-
-    static VoxelShape rotateYClockwise(VoxelShape shape) {
-        final VoxelShape[] acc = new VoxelShape[]{ VoxelShapes.empty() };
-        shape.forEachBox((minX, minY, minZ, maxX, maxY, maxZ) -> {
-            // 90° clockwise around Y: (x,z) -> (1 - z, x)
-            double nMinX = 1.0 - maxZ;
-            double nMaxX = 1.0 - minZ;
-            double nMinZ = minX;
-            double nMaxZ = maxX;
-            acc[0] = VoxelShapes.combine(acc[0], VoxelShapes.cuboid(nMinX, minY, nMinZ, nMaxX, maxY, nMaxZ), BooleanBiFunction.OR);
-        });
-        return acc[0].simplify();
-    }
-
-    static VoxelShape rotateY180(VoxelShape shape) {
-        return rotateYClockwise(rotateYClockwise(shape));
-    }
-
-    private static int facingIndex(Direction facing) {
-        return switch (facing) {
-            case NORTH -> 0;
-            case EAST -> 1;
-            case SOUTH -> 2;
-            case WEST -> 3;
-            default -> 0;
-        };
     }
 
     public WindowArchBlock(Settings settings) {
@@ -357,10 +142,14 @@ public class WindowArchBlock extends Block implements ClusterRebuildableBlock {
 
         if (!state.isOf(newState.getBlock())) {
             clearManualLock(world, pos);
+            Set<BlockPos> processed = new HashSet<>();
             for (BlockPos n : planeNeighbours(pos, state.get(FACING))) {
+                if (processed.contains(n)) continue;
                 BlockState ns = world.getBlockState(n);
                 if (ns.isOf(this)) {
-                    reflowConnectedAutoComponent(world, n);
+                    Set<BlockPos> component = collectPlaneComponent(world, n, ns.get(FACING));
+                    processed.addAll(component);
+                    reflowConnectedAutoComponent(world, n, component);
                 }
             }
         }
@@ -468,39 +257,11 @@ public class WindowArchBlock extends Block implements ClusterRebuildableBlock {
     }
 
     private VoxelShape getWindowShape(BlockState state) {
-        int idx = facingIndex(state.get(FACING));
-
-        VoxelShape base = VoxelShapes.empty();
-        ShapeKey key = shapeKeyForState(state);
-
-        if (key != null) {
-            base = SHAPES.get(key)[idx];
-        }
-
-        if (state.get(SILL)) {
-            // Avoid simplify-heavy unions while Minecraft rebuilds the global shape cache.
-            base = VoxelShapes.combine(base, SHAPES.get(ShapeKey.SILL)[idx], BooleanBiFunction.OR);
-        }
-
-        return base;
+        return WindowArchShapes.shapeFor(state.get(PIECE), state.get(OPEN), state.get(SILL), state.get(FACING));
     }
 
-    private ShapeKey shapeKeyForState(BlockState state) {
-        boolean open = state.get(OPEN);
-        Piece piece = state.get(PIECE);
-
-        // Uppers do not visually change with OPEN in the table.
-        return switch (piece) {
-            case UPPER_SINGLE -> ShapeKey.CLOSED_UPPER_SINGLE;
-            case UPPER_LEFT -> ShapeKey.CLOSED_UPPER_LEFT;
-            case UPPER_MID -> ShapeKey.CLOSED_UPPER_MID;
-            case UPPER_RIGHT -> ShapeKey.CLOSED_UPPER_RIGHT;
-
-            case LOWER_SINGLE -> open ? ShapeKey.OPEN_LOWER_SINGLE : ShapeKey.CLOSED_LOWER_SINGLE;
-            case LOWER_LEFT -> open ? ShapeKey.OPEN_LOWER_LEFT : ShapeKey.CLOSED_LOWER_LEFT;
-            case LOWER_RIGHT -> open ? ShapeKey.OPEN_LOWER_RIGHT : ShapeKey.CLOSED_LOWER_RIGHT;
-            case LOWER_GLASS -> open ? null : ShapeKey.CLOSED_LOWER_GLASS; // opening ('void')
-        };
+    public VoxelShape getBreakParticleShape(BlockState state) {
+        return WindowArchShapes.particleShapeFor(state.get(PIECE), state.get(OPEN), state.get(SILL), state.get(FACING));
     }
 
     // --- Cluster sync operations (AUTO must self-heal) ---
@@ -962,28 +723,4 @@ public class WindowArchBlock extends Block implements ClusterRebuildableBlock {
         @Override public String asString() { return id; }
     }
 
-    // --- Voxel shape definitions (from provided model voxel tables) ---
-    private static VoxelShape makeWallShape() {
-        return makeShape(WALL_BOXES);
-    }
-
-    private static VoxelShape makeSillShape() {
-        return makeShape(SILL_BOXES);
-    }
-
-    private static VoxelShape makeGlassLowerShape() {
-        return makeShape(GLASS_LOWER_BOXES);
-    }
-
-    private static VoxelShape makeMidUpperShape() {
-        return makeShape(MID_UPPER_BOXES);
-    }
-
-    private static VoxelShape makeMultiUpperShape() {
-        return makeShape(MULTI_UPPER_BOXES);
-    }
-
-    private static VoxelShape makeSingleUpperShape() {
-        return makeShape(SINGLE_UPPER_BOXES);
-    }
 }
