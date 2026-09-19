@@ -35,9 +35,45 @@ class HighPolishGeometryTests(unittest.TestCase):
                     self.assertNotIn("up", wall["faces"], "Buried joint caps must not overlap")
                     self.assertNotIn("down", wall["faces"])
                     self.assertGreaterEqual(wall["to"][2] - wall["from"][2], .34)
-                for closure in top[4:8]:
-                    # Keep a substantial gap beneath the roof; tiny separations flicker with POM.
-                    self.assertLessEqual(max(v[1] for v in vertices(closure, "up")), 15.1201)
+                self.assertNotIn("up", top[7]["faces"], "Remove the buried cap, not the visible front")
+
+    def test_wide_alcoves_have_continuous_fronts_above_the_opening(self):
+        for style in ("georgian", "gothic"):
+            for size, sides in (("double", ("left", "right")),
+                                ("triple", ("left", "center", "right"))):
+                polygons = []
+                for column, side in enumerate(sides):
+                    elements = json.loads((MODELS / f"alcove/alcove_{style}_{size}_top_{side}.json").read_text())["elements"]
+                    lining = [e for e in elements if e.get("name") == "roof_inner_lining"]
+                    self.assertEqual(1, len(lining))
+                    self.assertEqual({"down"}, set(lining[0]["faces"]))
+                    self.assertLess(lining[0]["to"][1], 16, "The ceiling must remain inside the roof")
+                    for element in elements:
+                        for face in element["faces"]:
+                            points = vertices(element, face)
+                            depths = [p[2] for p in points]
+                            if min(depths) > 15.85 and max(depths) - min(depths) < .0001:
+                                polygons.append([(x + column * 16, y) for x, y, _ in points])
+                # Avoid vertices and the intentionally stepped outer jamb. A
+                # vertical ray through the facade may enter it once only; the
+                # shortened crown pieces previously left gaps > 1 model unit.
+                for sample in range(128, len(sides) * 16 * 64 - 128):
+                    x = (sample + .3) / 64
+                    intervals = []
+                    for polygon in polygons:
+                        ys = []
+                        for (x1, y1), (x2, y2) in zip(polygon, polygon[1:] + polygon[:1]):
+                            if min(x1, x2) <= x <= max(x1, x2) and abs(x2 - x1) > .000001:
+                                ys.append(y1 + (y2 - y1) * (x - x1) / (x2 - x1))
+                        if ys:
+                            intervals.append((min(ys), max(ys)))
+                    intervals.sort()
+                    self.assertTrue(intervals, (style, size, x))
+                    end = intervals[0][1]
+                    for lower, upper in intervals[1:]:
+                        # Allow authored subpixel joins (under 1/256 block).
+                        self.assertLessEqual(lower - end, .055, (style, size, x, end, lower))
+                        end = max(end, upper)
 
     def test_arch_fillers_share_curve_lighting_depth_without_coplanar_overlap(self):
         for size, count, fillers in (("small", 16, (17, 18)), ("medium", 8, (11,))):
