@@ -1,10 +1,10 @@
 # High-polish rendering investigation
 
-Status: opaque rendering and geometry were visually checked, but the user's
-restarted on/off comparison exposed a polish activation failure. Startup and
-specular-resource fixes are now implemented, with a separate Bliss adapter and
-Complementary mirror-coating adjustment. The enabled finish and large-world
-performance need a fresh in-game comparison. No test JAR was produced.
+Status: the user confirmed that CU High polish now activates and approved the
+two-way mirror finish. The stone reflection floor has been raised from 15% to
+25% in CU and Bliss to make the option more pronounced; the mirror coating is
+unchanged. The stronger stone finish, Bliss with High polish enabled and
+large-world performance still need an in-game comparison. No test JAR was produced.
 
 ## Startup failure and the corrected validation
 
@@ -49,8 +49,9 @@ file format does not require a transparent rendering pass. Iris documents the
   frames and the stone beneath inlays. Metal overlays remain cutout; their small
   separation from the base stone is retained to avoid flicker.
 - A narrowly matched in-memory CU adapter reuses the existing specular sample
-  and opaque reflection pass. Selected stone receives the transparent path's
-  angular reflection strength, without moving the geometry to that pass.
+  and opaque reflection pass. Selected stone receives full smoothness and a
+  25% reflection floor, increasing toward grazing angles, without moving the
+  geometry to a transparent pass.
 - Existing normal/height mapping and the CTM-POM bridge remain in place. Metal
   pixels and low-smoothness grout retain their authored material response.
 - Material mask 242 is unused in the inspected shader; 241 is water and must
@@ -80,7 +81,7 @@ and after. Partial shapes still have the shader's approximate voxel outlines.
 
 Bliss 2.1.2 reads the specular maps, but clamps the authored zero green channel
 on stone to only 0.02 reflectance. High polish now raises selected stone pixels
-to full smoothness and a minimum 0.15 reflectance using the existing terrain
+to full smoothness and a minimum 0.25 reflectance using the existing terrain
 sample. Its existing metal and low-smoothness grout pixels are untouched, as
 are normal/height maps and glass. An exact shader-properties fingerprint and
 unique source anchor limit this to the inspected pack. Per-stone and per-finish

@@ -6,9 +6,10 @@ new installations default to off. No test JAR is needed for an IDEA launch.
 
 ## Latest follow-up checks
 
-- The previous on/off comparison found a real startup-order bug. Use a fresh
-  launch after compiling this repair; do not count the previous enabled-session
-  performance or appearance as a test of the stronger finish.
+- Stone High polish now uses a 25% reflection floor in CU and Bliss, up from
+  15%. Repeat the same-view comparison after restarting; the approved 90%
+  two-way mirror coating is unchanged. Bliss's earlier screenshot had High
+  polish Off, so its enabled finish still needs checking.
 - Start with Complementary Unbound r5.9 dev5, labPBR and High polish On. Compare
   the same Glacium wall and alcove view with Off after a full restart. The enabled
   log should name adapted terrain, deferred and glass programs, followed by
