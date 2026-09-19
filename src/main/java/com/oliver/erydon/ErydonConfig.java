@@ -39,6 +39,7 @@ public final class ErydonConfig {
     private static final String CLIENT_CONFIG_FILE_NAME = "erydon-client.properties";
     private static final String SERVER_CONFIG_FILE_NAME = "erydon-server.properties";
     private static final String TOOLTIPS_ENABLED_KEY = "erydon.tooltips.enabled";
+    private static final String HIGH_POLISH_KEY = "erydon.high_polish.enabled";
     private static final String TOOLTIP_DELAY_KEY = "erydon.tooltip.delay_ms";
     private static final String MODERN_LIGHT_LEVEL_KEY = "erydon.light.modern.level";
     private static final String WALL_LIGHT_LEVEL_KEY = "erydon.light.wall.level";
@@ -196,13 +197,13 @@ public final class ErydonConfig {
 
     public static void setTooltipsEnabled(boolean enabled) {
         synchronized (LOCK) {
-            clientSettings = new ClientSnapshot(enabled, clientSettings.tooltipDelayMs());
+            clientSettings = new ClientSnapshot(enabled, clientSettings.tooltipDelayMs(), clientSettings.highPolishEnabled());
         }
     }
 
     public static void setTooltipDelayMs(int delayMs) {
         synchronized (LOCK) {
-            clientSettings = new ClientSnapshot(clientSettings.tooltipsEnabled(), clampTooltipDelay(delayMs));
+            clientSettings = new ClientSnapshot(clientSettings.tooltipsEnabled(), clampTooltipDelay(delayMs), clientSettings.highPolishEnabled());
         }
     }
 
@@ -272,7 +273,8 @@ public final class ErydonConfig {
     public static boolean replaceClientSettings(ClientSnapshot requested) {
         ClientSnapshot sanitized = new ClientSnapshot(
                 requested.tooltipsEnabled(),
-                requested.tooltipDelayMs()
+                requested.tooltipDelayMs(),
+                requested.highPolishEnabled()
         );
         synchronized (LOCK) {
             if (!writeClientSnapshot(sanitized, DEBUG_FILE_SETTINGS)) {
@@ -351,7 +353,8 @@ public final class ErydonConfig {
         return new ClientSnapshot(
                 readBoolean(properties, TOOLTIPS_ENABLED_KEY, true),
                 readInt(properties, TOOLTIP_DELAY_KEY, DEFAULT_TOOLTIP_DELAY_MS,
-                        MIN_TOOLTIP_DELAY_MS, MAX_TOOLTIP_DELAY_MS)
+                        MIN_TOOLTIP_DELAY_MS, MAX_TOOLTIP_DELAY_MS),
+                readBoolean(properties, HIGH_POLISH_KEY, false)
         );
     }
 
@@ -396,6 +399,7 @@ public final class ErydonConfig {
 
     private static boolean writeClientSnapshot(ClientSnapshot snapshot, DebugSnapshot debug) {
         Properties properties = new Properties();
+        properties.setProperty(HIGH_POLISH_KEY, Boolean.toString(snapshot.highPolishEnabled()));
         properties.setProperty(TOOLTIPS_ENABLED_KEY, Boolean.toString(snapshot.tooltipsEnabled()));
         properties.setProperty(TOOLTIP_DELAY_KEY, Integer.toString(snapshot.tooltipDelayMs()));
         properties.setProperty(DEBUG_MODEL_RELOAD_KEY, Boolean.toString(debug.modelReload()));
@@ -521,7 +525,7 @@ public final class ErydonConfig {
         return FabricLoader.getInstance().getConfigDir().resolve(fileName);
     }
 
-    public record ClientSnapshot(boolean tooltipsEnabled, int tooltipDelayMs) {
+    public record ClientSnapshot(boolean tooltipsEnabled, int tooltipDelayMs, boolean highPolishEnabled) {
         public ClientSnapshot {
             tooltipDelayMs = clampTooltipDelay(tooltipDelayMs);
         }

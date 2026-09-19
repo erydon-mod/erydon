@@ -60,9 +60,15 @@ public final class WindowFrenchGeorgianBakedModel implements BakedModel, FabricB
     };
 
     private final BakedModel wrapped;
+    private final boolean highPolish;
     private final Sprite particle;
 
     public WindowFrenchGeorgianBakedModel(BakedModel wrapped) {
+        this(wrapped, false);
+    }
+
+    public WindowFrenchGeorgianBakedModel(BakedModel wrapped, boolean highPolish) {
+        this.highPolish = highPolish;
         this.wrapped = wrapped;
         this.particle = wrapped.getParticleSprite();
     }
@@ -189,13 +195,14 @@ public final class WindowFrenchGeorgianBakedModel implements BakedModel, FabricB
         WorldAlignedYRotation.emit(context, model, degrees, true);
     }
 
-    private static boolean pushSplitLayerTransform(RenderContext context) {
+    private boolean pushSplitLayerTransform(RenderContext context) {
         if (!ensureMaterials()) {
             return false;
         }
 
+        RenderMaterial stone = highPolish ? translucentMaterial : solidMaterial;
         context.pushTransform(quad -> {
-            quad.material(quad.colorIndex() == 0 ? translucentMaterial : solidMaterial);
+            quad.material(quad.colorIndex() == 0 ? translucentMaterial : quad.colorIndex() < 0 ? stone : solidMaterial);
             return true;
         });
         return true;

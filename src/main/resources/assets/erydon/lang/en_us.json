@@ -9602,5 +9602,11 @@
     "tooltip.erydon.family.column_square.4": "Use /erydon recalc to rebuild; your style and orientation choices are kept.",
     "tooltip.erydon.family.column_circular.4": "Use /erydon recalc to rebuild; your style and orientation choices are kept.",
     "tooltip.erydon.family.column_gothic.4": "Use /erydon recalc to rebuild; your style and orientation choices are kept.",
-    "command.erydon.swap.help": "/erydon swap chunk <from> <to> | radius <from> <to> <1-32> | box <from> <to> <x y z> <x y z> | undolast. Put names containing spaces in quotes. Polished (Honed for Kelastrion, Latmion and Psamatheon) selects plain stone; Aged and each overlay select their own finish. A Family source selects every finish of that material; a Family target keeps the existing finish, while a finish target applies that finish. All Family Blocks includes installed ERYDON, Daedalon and Themelios material blocks; All ERYDON Blocks, All Daedalon Blocks and All Themelios Blocks limit the source to one mod. Only matching shapes change; missing counterparts stay unchanged. Undo restores the last swap in this world and skips blocks edited since it."
+    "command.erydon.swap.help": "/erydon swap chunk <from> <to> | radius <from> <to> <1-32> | box <from> <to> <x y z> <x y z> | undolast. Put names containing spaces in quotes. Polished (Honed for Kelastrion, Latmion and Psamatheon) selects plain stone; Aged and each overlay select their own finish. A Family source selects every finish of that material; a Family target keeps the existing finish, while a finish target applies that finish. All Family Blocks includes installed ERYDON, Daedalon and Themelios material blocks; All ERYDON Blocks, All Daedalon Blocks and All Themelios Blocks limit the source to one mod. Only matching shapes change; missing counterparts stay unchanged. Undo restores the last swap in this world and skips blocks edited since it.",
+  "button.erydon.high_polish": "High polish",
+  "screen.erydon.high_polish.title": "High polish",
+  "button.erydon.high_polish_on": "High polish: On",
+  "button.erydon.high_polish_off": "High polish: Off",
+  "option.erydon.high_polish.description": "Stronger shader reflections on polished stone, including patterned and inlaid variants. Requires compatible shaders. May reduce performance; polished surfaces may be missing from reflections.",
+  "option.erydon.high_polish.restart": "Off by default. Save, then restart Minecraft to apply."
 }

@@ -37,6 +37,7 @@ public final class ErydonConfigScreen extends Screen {
         addMenuButton(startX, settingsStartY, buttonWidth, 0, 0, Text.translatable("button.erydon.tooltips"), 64, 84, ErydonTooltipConfigScreen::new);
         addMenuButton(startX, settingsStartY, buttonWidth, 1, 0, Text.translatable("button.erydon.recalc_command"), 16, 42, ErydonRecalcCommandConfigScreen::new);
         addMenuButton(startX, settingsStartY, buttonWidth, 0, 1, Text.translatable("button.erydon.light_blocks"), 226, 36, ErydonLightBlocksConfigScreen::new);
+        addMenuButton(startX, settingsStartY, buttonWidth, 1, 1, Text.translatable("button.erydon.high_polish"), 64, 84, ErydonHighPolishConfigScreen::new);
         addMenuButton(startX, exploreStartY, buttonWidth, 0, 0, Text.translatable("button.erydon.texture_gallery"), 188, 306, ErydonTextureGalleryScreen::new);
         addMenuButton(startX, exploreStartY, buttonWidth, 1, 0, Text.translatable("button.erydon.inspiration"), 274, 122, ErydonInspirationConfigScreen::new);
         addMenuButton(startX, exploreStartY, buttonWidth, 0, 1, Text.translatable("button.erydon.help"), 104, 216, ErydonHelpConfigScreen::new);

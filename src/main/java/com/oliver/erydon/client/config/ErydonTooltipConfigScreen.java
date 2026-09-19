@@ -173,7 +173,8 @@ public final class ErydonTooltipConfigScreen extends Screen {
     private void saveAndClose() {
         if (ErydonConfig.replaceClientSettings(new ErydonConfig.ClientSnapshot(
                 tooltipsEnabled,
-                currentDelayMs()
+                currentDelayMs(),
+                ErydonConfig.clientSettings().highPolishEnabled()
         ))) {
             close();
         } else {

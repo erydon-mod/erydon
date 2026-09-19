@@ -572,15 +572,7 @@ public final class ErydonClient implements ClientModInitializer {
         // square column layer
         BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.AGANITE_COLUMN_SQUARE, RenderLayer.getCutout());
 
-        // Opt-in development comparison against the alcove shader pass; keep release routing unchanged.
-        if (net.fabricmc.loader.api.FabricLoader.getInstance().isDevelopmentEnvironment()
-                && (Boolean.getBoolean("erydon.debug.glacium_translucent")
-                || java.nio.file.Files.exists(net.fabricmc.loader.api.FabricLoader.getInstance()
-                        .getConfigDir().resolve("erydon-glacium-render-trial.enabled")))) {
-            BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.GLACIUM_BLOCK, RenderLayer.getTranslucent());
-            Erydon.LOGGER.info("[{}] Glacium render-layer trial enabled: actual layer={}", Erydon.MOD_ID,
-                    net.minecraft.client.render.RenderLayers.getBlockLayer(ModBlocks.GLACIUM_BLOCK.getDefaultState()));
-        }
+        com.oliver.erydon.client.ErydonHighPolish.registerLayers();
     }
 
     private static void registerSharedGeometryBenchmarkHarness() {
