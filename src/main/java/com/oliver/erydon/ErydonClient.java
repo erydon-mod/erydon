@@ -571,6 +571,13 @@ public final class ErydonClient implements ClientModInitializer {
                 .forEach(block -> BlockRenderLayerMap.INSTANCE.putBlock(block, RenderLayer.getTranslucent()));
         // square column layer
         BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.AGANITE_COLUMN_SQUARE, RenderLayer.getCutout());
+
+        // Opt-in development comparison against the alcove shader pass; keep release routing unchanged.
+        if (net.fabricmc.loader.api.FabricLoader.getInstance().isDevelopmentEnvironment()
+                && Boolean.getBoolean("erydon.debug.glacium_translucent")) {
+            BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.GLACIUM_BLOCK, RenderLayer.getTranslucent());
+            Erydon.LOGGER.info("[{}] Glacium render-layer trial enabled: plain blocks use translucent.", Erydon.MOD_ID);
+        }
     }
 
     private static void registerSharedGeometryBenchmarkHarness() {
