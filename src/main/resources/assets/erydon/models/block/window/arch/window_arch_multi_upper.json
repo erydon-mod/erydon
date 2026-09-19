@@ -558,7 +558,7 @@
       ],
       "to": [
         16,
-        16,
+        15,
         8.25
       ],
       "rotation": {
@@ -571,26 +571,7 @@
         ]
       },
       "color": 9,
-      "faces": {
-        "north": {
-          "texture": "#pane",
-          "tintindex": 0
-        },
-        "south": {
-          "texture": "#pane",
-          "tintindex": 0
-        },
-        "up": {
-          "texture": "#pane",
-          "cullface": "up",
-          "tintindex": 0
-        },
-        "down": {
-          "texture": "#pane",
-          "cullface": "down",
-          "tintindex": 0
-        }
-      }
+      "faces": {"north": {"texture": "#pane", "tintindex": 0}, "south": {"texture": "#pane", "tintindex": 0}, "down": {"texture": "#pane", "cullface": "down", "tintindex": 0}}
     },
     {
       "from": [

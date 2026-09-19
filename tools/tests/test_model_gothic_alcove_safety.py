@@ -15,6 +15,8 @@ ERYDON_ASSETS = RESOURCES / "assets" / "erydon"
 AUTHORING = ERYDON_ASSETS / "authoring_models" / "block" / "alcove"
 
 AUTHORITATIVE_GEOMETRY_SIGNATURES = {
+    "alcove_gothic_double_side_right.json": "7a68792864365f0dd4043a8d1c943fdda0aa5822adf37c63add8409895addde4",
+    "alcove_gothic_double_side_left.json": "cf3726bbabcc511578e6df0a574024c76e8c3423b425047c109dcaf92865c1ee",
     "alcove_georgian_triple_side_left.json": "61c14ada2f78425dc95e38a2aeae9930b9c46e76843c011fe9f99ffc91f5727f",
     "alcove_georgian_triple_side_center.json": "14c92e48b9fc6a65526d806f2919c9089293841218a98c8fe31f7a5c4e386d9c",
     "alcove_georgian_triple_side_right.json": "bcada60bd27fbe5e09dd09f5a716293195b130c1ef3c9d8b2a73138b4a045037",
@@ -22,8 +24,8 @@ AUTHORITATIVE_GEOMETRY_SIGNATURES = {
     "alcove_georgian_triple_top_center.json": "497bad2a64d221967e084884eb25cea9d59346dc10772f4a62b6c8e2ceba2d66",
     "alcove_georgian_triple_top_right.json": "a9d221f17b6d9a339dc087e64b478d80860918830a55aced4c69626f30fcb589",
     "alcove_gothic_single_top.json": "fbd06def03a9aecd4f6bebc65f57dd032b592c97ad814567822febd06bf538f6",
-    "alcove_gothic_double_top_left.json": "9c17b77b9b3839054fa3f2e579d8608f885d88b95e5b243e3544094b5bc2f375",
-    "alcove_gothic_double_top_right.json": "155f379b0780d76ab73c3fc247e9841966f475757466ea7c63db556f9b3a8722",
+    "alcove_gothic_double_top_left.json": "22e6462cb42d46fa2e36fd9141d06b865bd0348e4f885eab9a4abfce8f2f2ddb",
+    "alcove_gothic_double_top_right.json": "f56be6993ae33649375656d832e1facaa060e585d04f6cb1789966d397c9507e",
     "alcove_gothic_triple_side_left.json": "1c49b890c9188a1076b51ffef290769732691d18d1e9bd6d81eb13c5f6f71d1c",
     "alcove_gothic_triple_side_center.json": "06faa76bcaedb422079eeeab7e433a7ddb27126160efeb5d893df173fd5df296",
     "alcove_gothic_triple_side_right.json": "dcb545360c4c6e16bbb5a63573eab6db5bbaffe83f88d654669b4e2f2c32230e",
@@ -102,7 +104,7 @@ class AlcoveSafetyTests(unittest.TestCase):
             )
             self.assertEqual(0, counts.get("rotatedOutOfRangeFaces", 0), filename)
             self.assertEqual(geometry_signature(model), expected_signature, filename)
-        self.assertEqual(329, total_offsets)
+        self.assertEqual(341, total_offsets)
 
     def test_all_registered_variants_have_complete_assets(self) -> None:
         self.assertEqual(len(self.georgian_ids), 162)

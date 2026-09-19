@@ -401,6 +401,12 @@ final class ErydonSwapFamilyDatabase {
         return display.toString();
     }
 
+    static net.minecraft.text.Text displayText(String canonicalKey) {
+        return EXTRA_GROUP_MATERIALS.contains(canonicalKey)
+                ? net.minecraft.text.Text.translatable("command.erydon.swap.material." + canonicalKey)
+                : net.minecraft.text.Text.literal(displayName(canonicalKey));
+    }
+
     static String commandSuggestion(String canonicalKey) {
         String displayName = displayName(canonicalKey);
         return displayName.indexOf(' ') >= 0 ? '"' + displayName + '"' : displayName;

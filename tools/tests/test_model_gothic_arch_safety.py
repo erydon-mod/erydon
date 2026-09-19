@@ -16,8 +16,8 @@ AUTHORING = ERYDON_ASSETS / "authoring_models" / "block" / "arch" / "gothic"
 GEOMETRY_SIGNATURES = {
     "arch_gothic_corner_large_lower.json": "43efcace93bc40135a3f1640dd728534a0f2fec355108123ef88bac019765c47",
     "arch_gothic_corner_large_upper.json": "3e0e679d157bc87ae0071e30863dc9008a29ec23810aa2f2a1c8167673cf2865",
-    "arch_gothic_corner_medium.json": "a75973e12ec26b6b778a30a895540cd59769c56cf41f350e2c677e309f4fac59",
-    "arch_gothic_corner_small.json": "57c34215b0d2b5a5a57db93dd69736b76e9a85f81d81322c9aed5682f8d42f17",
+    "arch_gothic_corner_medium.json": "3583015e07e2621558164b7a7c39a5929f5d1f82609cf4284cecaf37c52e6c13",
+    "arch_gothic_corner_small.json": "05cf4d3e9a92831c8c5fb8b9aa8da8a25d24bc01950b53257f03b0d4426e8902",
     "arch_gothic_icon.json": "264f264859fd5a0715778904e69ea89afba42fc843fbab5a87371ce990d17685",
     "arch_gothic_side_large.json": "9f61896a7ed3fbb524b6073a18d71cea42c88f17b8f470f0c457563ce43da918",
     "arch_gothic_side_medium.json": "9dac45222c567ea9c543e8842923e88598d9ade729fe8f709a9f96b63d6b79e2",
@@ -58,11 +58,11 @@ class GothicArchSafetyTests(unittest.TestCase):
     def test_generator_is_current(self) -> None:
         self.assertEqual([], GENERATOR.generate(REPO_ROOT, check=True))
 
-    def test_medium_filler_is_flush_and_meets_cap_without_coplanar_overlap(self) -> None:
+    def test_medium_filler_is_inset_and_meets_cap_without_coplanar_overlap(self) -> None:
         model = load_json(AUTHORING / "arch_gothic_corner_medium.json")
         cap, filler = model["elements"][9], model["elements"][11]
-        self.assertEqual(cap["from"][2], filler["from"][2])
-        self.assertEqual(cap["to"][2], filler["to"][2])
+        self.assertGreater(filler["from"][2], cap["from"][2])
+        self.assertLess(filler["to"][2], cap["to"][2])
         self.assertEqual(cap["from"][1], filler["to"][1])
         self.assertEqual(cap["to"][0], filler["to"][0])
         self.assertGreaterEqual(filler["from"][0], cap["from"][0])

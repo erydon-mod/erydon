@@ -58,11 +58,11 @@ COPIED_AUTHORING_MODELS = {
     "alcove_gothic_single_back.json": "alcove_georgian_single_back.json",
     "alcove_gothic_single_sides.json": "alcove_georgian_single_sides.json",
     "alcove_gothic_single_base.json": "alcove_georgian_single_base.json",
-    "alcove_gothic_double_side_left.json": "alcove_georgian_double_side_left.json",
-    "alcove_gothic_double_side_right.json": "alcove_georgian_double_side_right.json",
 }
 
 GOTHIC_MANUAL_AUTHORING_MODELS = (
+    "alcove_gothic_double_side_left.json",
+    "alcove_gothic_double_side_right.json",
     "alcove_gothic_single_top.json",
     "alcove_gothic_double_top_left.json",
     "alcove_gothic_double_top_right.json",

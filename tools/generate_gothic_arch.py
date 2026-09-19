@@ -68,17 +68,19 @@ TOOLTIPS = {
 # Locked, sub-pixel corrections remove coplanar overlaps and align filler
 # joins. The icon uses a smaller inset to avoid meeting nearby trim.
 GEOMETRY_NUDGES = {
-    # The narrow medium-corner filler must share the cap's front/back planes.
-    # End at its underside so bringing the faces flush cannot create z-fighting.
+    # Keep fillers behind the overlapping curve surfaces, within the same
+    # lighting region. Boundary-flush fillers sample different block light.
     "corner_medium": (
-        (11, "from", 2, 0.001, 0.0),
-        (11, "to", 2, 15.999, 16.0),
+        (11, "from", 2, 0.0, 0.009),
+        (11, "to", 2, 16.0, 15.995),
         (11, "to", 1, 13.95, 13.80677),
         (11, "to", 0, 14.50184, 14.5),
     ),
     "corner_small": (
-        (17, "from", 2, 0.0, 0.001),
-        (18, "from", 2, 0.0, 0.001),
+        (17, "from", 2, 0.001, 0.029),
+        (18, "from", 2, 0.001, 0.029),
+        (17, "to", 2, 16.0, 16.024),
+        (18, "to", 2, 16.0, 16.024),
     ),
     "top_large": (
         (5, "from", 2, 0.0, 0.001),

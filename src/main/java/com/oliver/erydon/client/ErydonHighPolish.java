@@ -23,6 +23,8 @@ public final class ErydonHighPolish {
         return PolishedStoneMaterials.enabled(ACTIVE, namespace, path);
     }
 
+    public static HighPolishSettings activeSettings() { return ACTIVE; }
+
     public static boolean twoWayEnabled() { return ACTIVE.twoWayEnabled(); }
 
     public static void registerGlazingResources() {

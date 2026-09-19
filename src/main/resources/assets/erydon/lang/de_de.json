@@ -9632,5 +9632,8 @@
     "button.erydon.polish.next": "Weiter",
     "button.erydon.polish.back": "Zur Steinliste",
     "button.erydon.polish.save": "Speichern",
-    "resourcepack.erydon.high_polish_glazing": "ERYDON Hochglanz: Verglasung"
+    "resourcepack.erydon.high_polish_glazing": "ERYDON Hochglanz: Verglasung",
+  "command.erydon.swap.material.kelastrion": "Kelastrion Geschliffen",
+  "command.erydon.swap.material.latmion": "Latmion Geschliffen",
+  "command.erydon.swap.material.psamatheon": "Psamatheon Geschliffen"
 }

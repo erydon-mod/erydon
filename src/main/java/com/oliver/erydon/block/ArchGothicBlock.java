@@ -130,8 +130,8 @@ public class ArchGothicBlock extends ArchModernBlock {
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.28575298, 0.82860547, 0.00171256, 0.44373435, 0.99782223, 1.00171256));
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.38735333, 0.87381816, 0.00173753, 0.51586413, 0.9964301, 1.00173748));
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0, 0.936, 0, 1, 1, 0.9999375));
-        shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.038425, 0.62489562, 0.0000625, 0.100925, 0.9375625, 1));
-        shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.89740813, 0.62489562, 0.0000625, 0.95990813, 0.9375625, 1));
+        shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.038425, 0.62489562, 0.0018125, 0.100925, 0.9375625, 1.0015));
+        shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.89740813, 0.62489562, 0.0018125, 0.95990813, 0.9375625, 1.0015));
         return shape.simplify();
     }
 
@@ -148,7 +148,7 @@ public class ArchGothicBlock extends ArchModernBlock {
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.79927437, 0.8780025, 0.2224525, 0.79927437, 1.06583625, 1.2224525));
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.1575, 0.86292313, 0, 0.90625, 1.00033313, 1));
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(-0.0005, 0.91345813, 0, 0.1575, 1.00033313, 1));
-        shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.859605, 0.28875, 0, 0.90625, 0.86292313, 1));
+        shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.859605, 0.28875, 0.0005625, 0.90625, 0.86292313, 0.9996875));
         return shape.simplify();
     }
 

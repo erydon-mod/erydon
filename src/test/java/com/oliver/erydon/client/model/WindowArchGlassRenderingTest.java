@@ -16,6 +16,17 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class WindowArchGlassRenderingTest {
     @Test
+    void upperPaneCannotBreakThroughTheStoneRoof() throws Exception {
+        var path = Path.of("src/main/resources/assets/erydon/models/block/window/arch/window_arch_multi_upper.json");
+        var model = com.google.gson.JsonParser.parseString(java.nio.file.Files.readString(path)).getAsJsonObject();
+        var elements = model.getAsJsonArray("elements");
+        var pane = elements.get(15).getAsJsonObject();
+        var roof = elements.get(25).getAsJsonObject();
+        assertTrue(pane.getAsJsonArray("to").get(1).getAsDouble() <= roof.getAsJsonArray("from").get(1).getAsDouble());
+        assertFalse(pane.getAsJsonObject("faces").has("up"));
+    }
+
+    @Test
     void exposedCornerPostHasAnUnculledStoneTop() throws Exception {
         var path = Path.of("src/main/resources/assets/erydon/models/block/window/arch/window_arch_multi_upper.json");
         var model = com.google.gson.JsonParser.parseString(java.nio.file.Files.readString(path)).getAsJsonObject();
@@ -99,7 +110,7 @@ class WindowArchGlassRenderingTest {
         assertEquals(color.getHeight(), specular.getHeight());
         for (int y = 0; y < 16; y++) {
             for (int x = 0; x < 16; x++) {
-                assertEquals(0xFF909090, color.getRGB(x, y));
+                assertEquals(0xFF505050, color.getRGB(x, y));
                 assertEquals(0xFFFFFF00, specular.getRGB(x, y));
             }
         }

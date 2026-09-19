@@ -9632,5 +9632,8 @@
     "button.erydon.polish.next": "Siguiente",
     "button.erydon.polish.back": "Volver a piedras",
     "button.erydon.polish.save": "Guardar",
-    "resourcepack.erydon.high_polish_glazing": "ERYDON Alto brillo: acristalado"
+    "resourcepack.erydon.high_polish_glazing": "ERYDON Alto brillo: acristalado",
+  "command.erydon.swap.material.kelastrion": "Kelastrion Apomazado",
+  "command.erydon.swap.material.latmion": "Latmion Apomazado",
+  "command.erydon.swap.material.psamatheon": "Psamatheon Apomazado"
 }

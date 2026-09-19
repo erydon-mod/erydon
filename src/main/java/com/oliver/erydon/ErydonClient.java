@@ -50,6 +50,7 @@ public final class ErydonClient implements ClientModInitializer {
         ModelLoadingPlugin.register(new GothicArchCtmModelLoadingPlugin());
         ModelLoadingPlugin.register(new ModernArchCtmModelLoadingPlugin());
         SynapheiaModelLoadingPlugin.register();
+        com.oliver.erydon.client.model.HighPolishWaterModel.register();
         ErydonCtmService.registerReloadListener();
         if (ErydonLoadProfiler.isEnabled()) {
             ModelLoadingPlugin.register(new ErydonModelPerformanceProbePlugin());

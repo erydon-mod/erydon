@@ -6,12 +6,32 @@ new installations default to off. No test JAR is needed for an IDEA launch.
 
 ## Latest follow-up checks
 
+- Fully restart before testing these changes. Automated checks do not replace
+  the shader-on checks below; no new test JAR was produced.
+- Inspect the menu at several GUI scales: four stone buttons per row where space
+  permits, natural-width side borders, and space beneath Save/Cancel. With the
+  master off, saved stone/glass choices should look dimmed but remain editable.
+  Selected Stones/Glass and gallery options keep their metal frame; other options
+  do not. Re-enable the master and confirm saved preferences remain intact.
+- Submerge plain Glacium blocks and overlay slabs/slopes. Also test waterlogged
+  shapes, flowing water, the waterline, and a chunk boundary. Faces and metal holes
+  should remain correct: stone touching water intentionally uses the ordinary
+  opaque pass, while dry stone keeps High polish. Remove water and check recovery.
+- Compare plain stone and the stone beneath bronze/silver inlays under identical
+  lighting. Check full blocks, slabs and slopes; the base finish should match.
+- Toggle Kelastrion, Latmion and Psamatheon individually, restarting each time,
+  with native 16x, Collection 32x and Collection 64x. On should match polished
+  stones while preserving grout/metal details; Off should restore honed maps.
+  Swap suggestions and successful swap messages should use Polished when enabled
+  and Honed when disabled; both spellings must remain accepted.
+- Inspect the side-to-dome join and top surface of two-wide Gothic and Georgian
+  alcoves in all facings, alongside single- and three-wide controls.
 - Inner-page logos should have a clear gap below the upper frame.
 - All stone buttons should display the correct stone, with a proportional cropped
   sample rather than magenta squares or a stretched tile. Try native and Collection textures.
 - Inspect the top of both Arch Window corner pieces from above, in all facings;
-  the exposed diagonal detail should have a solid stone cap.
-- Two-way glass now uses a medium silver base between the earlier dark and pale
+  glass should no longer protrude through the stone roof as a see-through stripe.
+- Two-way glass now uses a darker silver base between the earlier dark and pale
   versions. Compare bright daylight and a darker interior before choosing a final tone.
 - Check inlays on triangular slope sides while moving the camera, including
   rotated and inverted slopes. They should keep their motif without a false repeat.
@@ -105,6 +125,7 @@ Selenephos, Solistra and Striatus.
 
 - Inspect the two thin areas beside the top of a Gothic arch, where the original
   screenshots showed darker slivers on the left and right.
+- Test in a dark room lit by blocks as well as daylight, for one- and two-wide arches.
 - View from both sides and several angles, with shaders on and off. Look for dark
   slivers, gaps, flickering overlapping faces or changes to the intended arch shape.
 
@@ -130,6 +151,10 @@ Selenephos, Solistra and Striatus.
 - No additional world-render pass was added. A large visible area using translucent
   rendering can still cost more to render, so passing automated checks is not an
   FPS guarantee.
+- The water fallback checks at most six neighbouring fluid states per polished
+  block during chunk rebuilding, with no neighbour reads for waterlogged blocks.
+  Texture substitutions run during resource loading. Compare chunk rebuild time
+  as well as steady FPS in a large build; zero performance change is not proven.
 
 For an issue report, include the block/material, facing, relevant saved switches,
 whether Minecraft was restarted, shader/pack selection, and a screenshot.

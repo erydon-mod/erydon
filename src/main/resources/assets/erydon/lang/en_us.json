@@ -9632,5 +9632,8 @@
     "button.erydon.polish.next": "Next",
     "button.erydon.polish.back": "Back to stones",
     "button.erydon.polish.save": "Save",
-    "resourcepack.erydon.high_polish_glazing": "ERYDON High polish: glazing"
+    "resourcepack.erydon.high_polish_glazing": "ERYDON High polish: glazing",
+  "command.erydon.swap.material.kelastrion": "Kelastrion Honed",
+  "command.erydon.swap.material.latmion": "Latmion Honed",
+  "command.erydon.swap.material.psamatheon": "Psamatheon Honed"
 }

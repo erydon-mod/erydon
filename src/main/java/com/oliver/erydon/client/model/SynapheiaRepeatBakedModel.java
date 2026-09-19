@@ -113,6 +113,7 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
             SynapheiaManifest.Rule repeatRule = projectedRepeatGeometry
                     ? plan.repeatRuleForProjectedGeometry(face)
                     : plan.repeatRule(face, sourceSprite);
+            if (highPolish && repeatRule != null) quad.material(HighPolishWaterModel.polished(quad.material()));
             SynapheiaCellGeometry.Cell cell = repeatRule == null || geometryPomFallback
                     ? null : SynapheiaCellGeometry.singleCell(face, quad);
             RepeatDisposition disposition = repeatDisposition(repeatRule, cell);

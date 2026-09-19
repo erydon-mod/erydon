@@ -56,7 +56,9 @@ public final class ErydonSwapCommand {
             new SimpleCommandExceptionType(Text.literal("There is no swap to undo in this world."));
     private static final DynamicCommandExceptionType NO_MATCHING_BLOCKS =
             new DynamicCommandExceptionType(family ->
-                    Text.literal("No ERYDON-family blocks in family '" + family + "' were found in the selected area."));
+                    Text.literal("No ERYDON-family blocks in family '")
+                            .append(family instanceof Text text ? text : Text.literal(String.valueOf(family)))
+                            .append("' were found in the selected area."));
     private static final DynamicCommandExceptionType INVALID_FAMILY =
             new DynamicCommandExceptionType(family ->
                     Text.literal("Invalid family '" + family + "'. Use a name such as Aganite, \"Aganite Family\", \"Aganite Aged\", or \"Borealis Rusticated\"."));
@@ -249,7 +251,8 @@ public final class ErydonSwapCommand {
         String remaining = normalizeSuggestionFragment(builder.getRemaining());
         for (String canonicalKey : canonicalKeys) {
             String displayKey = normalizeSuggestionFragment(ErydonSwapFamilyDatabase.displayName(canonicalKey));
-            if (remaining.isEmpty() || canonicalKey.startsWith(remaining) || displayKey.startsWith(remaining)) {
+            if (remaining.isEmpty() || canonicalKey.startsWith(remaining) || displayKey.startsWith(remaining)
+                    || displayKey.replace("_honed", "_polished").startsWith(remaining)) {
                 builder.suggest(ErydonSwapFamilyDatabase.commandSuggestion(canonicalKey));
             }
         }
@@ -271,7 +274,7 @@ public final class ErydonSwapCommand {
             throws CommandSyntaxException {
         Box box = requestedBox.clampY(world);
         if (box.isEmpty()) {
-            throw NO_MATCHING_BLOCKS.create(ErydonSwapFamilyDatabase.displayName(fromFamily.canonicalKey()));
+            throw NO_MATCHING_BLOCKS.create(ErydonSwapFamilyDatabase.displayText(fromFamily.canonicalKey()));
         }
         ensureVolumeWithinLimit(box.volume());
 
@@ -327,7 +330,7 @@ public final class ErydonSwapCommand {
         }
 
         if (matchingBlocks == 0) {
-            throw NO_MATCHING_BLOCKS.create(ErydonSwapFamilyDatabase.displayName(fromFamily.canonicalKey()));
+            throw NO_MATCHING_BLOCKS.create(ErydonSwapFamilyDatabase.displayText(fromFamily.canonicalKey()));
         }
 
         int replacedBlocks = 0;
@@ -369,9 +372,9 @@ public final class ErydonSwapCommand {
                 .append(" in ")
                 .append(scope)
                 .append(" (")
-                .append(ErydonSwapFamilyDatabase.displayName(families.fromFamily().canonicalKey()))
+                .append(ErydonSwapFamilyDatabase.displayText(families.fromFamily().canonicalKey()))
                 .append(" -> ")
-                .append(ErydonSwapFamilyDatabase.displayName(families.toFamily().canonicalKey()));
+                .append(ErydonSwapFamilyDatabase.displayText(families.toFamily().canonicalKey()));
 
         if (outcome.missingCounterparts() > 0) {
             message.append(", ")
