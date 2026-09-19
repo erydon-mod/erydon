@@ -23,6 +23,8 @@
     "client.compat.axiom.BlockRenderCacheMixin",
     "client.compat.continuity.SynapheiaOwnershipMixin",
     "client.compat.iris.IrisChunkProgramOverridesMixin",
+    "client.compat.iris.HighPolishBlockMaterialMixin",
+    "client.compat.iris.HighPolishIdMapMixin",
     "client.compat.iris.ProgramSetMixin",
     "client.compat.iris.ShaderPropertiesMixin",
     "client.compat.rei.ReiIdentifierArgumentTypeMixin",

@@ -84,6 +84,10 @@ public final class ComplementaryUnboundDev5SourceTransformer {
         return adaptProperties(contents, mode, EXPECTED_PROPERTIES_SHA256);
     }
 
+    public static boolean matchesSupportedProperties(String contents) {
+        return EXPECTED_PROPERTIES_SHA256.equals(sha256(contents));
+    }
+
     static Result adaptProperties(String contents, Mode mode, String expectedHash) {
         boolean exact = sha256(contents).equals(expectedHash);
         boolean eligible = mode == Mode.FORCE || (mode == Mode.AUTO && exact);

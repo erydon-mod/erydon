@@ -188,7 +188,7 @@ public final class WindowArchBakedModel implements BakedModel, FabricBakedModel 
         WindowArchBlock.Glass glass = state.get(WindowArchBlock.GLASS);
         Direction outside = state.get(WindowArchBlock.FACING);
         Sprite mirror = glass == WindowArchBlock.Glass.TWO_WAY ? mirrorSprite() : null;
-        RenderMaterial stone = highPolish ? translucentMaterial : solidMaterial;
+        RenderMaterial stone = solidMaterial;
         RenderMaterial mirrorMaterial = highPolishTwoWay ? translucentMaterial : solidMaterial;
         context.pushTransform(quad -> {
             // The child rotation runs before this transform, including the 180-degree right upper.

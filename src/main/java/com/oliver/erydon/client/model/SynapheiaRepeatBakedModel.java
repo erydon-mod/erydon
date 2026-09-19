@@ -44,9 +44,8 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
             ConcurrentHashMap.newKeySet();
 
     private static volatile SpriteFinder spriteFinder;
-    private static final int POLISHED_MATERIAL_INDEX = SynapheiaManifest.OverlayLayer.values().length * 2;
     private static final AtomicReferenceArray<RenderMaterial> OVERLAY_MATERIALS =
-            new AtomicReferenceArray<>(POLISHED_MATERIAL_INDEX + 2);
+            new AtomicReferenceArray<>(SynapheiaManifest.OverlayLayer.values().length * 2);
 
     private final ModelIdentifier modelId;
     private final Identifier blockId;
@@ -113,7 +112,6 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
             SynapheiaManifest.Rule repeatRule = projectedRepeatGeometry
                     ? plan.repeatRuleForProjectedGeometry(face)
                     : plan.repeatRule(face, sourceSprite);
-            if (highPolish && repeatRule != null) quad.material(HighPolishWaterModel.polished(quad.material()));
             SynapheiaCellGeometry.Cell cell = repeatRule == null || geometryPomFallback
                     ? null : SynapheiaCellGeometry.singleCell(face, quad);
             RepeatDisposition disposition = repeatDisposition(repeatRule, cell);
@@ -574,7 +572,7 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
         int mask = connectionMask(neighbourCache, state, face, rule);
         int tileIndex = connectedTileIndex(mask);
         RenderMaterial material = overlayMaterial(
-                state.getLuminance() == 0, rule.overlayLayer(), highPolish);
+                state.getLuminance() == 0, rule.overlayLayer());
         selected = new OverlayTile(sprites.get(tileIndex), material, tileIndex, mask);
         selectedOverlays.put(key, selected);
         return selected;
@@ -717,7 +715,7 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
         return current;
     }
 
-    /** Separate the coating from its stone in the same sorted pass without adding surfaces. */
+    /** Separate the cutout inlay from its stone without adding surfaces. */
     static void offsetPolishedOverlay(MutableQuadView quad, Direction face, boolean highPolish) {
         if (!highPolish) return;
         float offset = 1.0F / 1024.0F;
@@ -728,8 +726,8 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
     }
 
     private static RenderMaterial overlayMaterial(boolean ambientOcclusion,
-                                                  SynapheiaManifest.OverlayLayer layer, boolean highPolish) {
-        int materialIndex = (highPolish ? POLISHED_MATERIAL_INDEX : layer.ordinal() * 2) + (ambientOcclusion ? 1 : 0);
+                                                  SynapheiaManifest.OverlayLayer layer) {
+        int materialIndex = layer.ordinal() * 2 + (ambientOcclusion ? 1 : 0);
         RenderMaterial current = OVERLAY_MATERIALS.get(materialIndex);
         if (current != null) {
             return current;
@@ -742,7 +740,7 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
             current = OVERLAY_MATERIALS.get(materialIndex);
             if (current == null) {
                 current = renderer.materialFinder().clear()
-                        .blendMode(highPolish ? BlendMode.TRANSLUCENT : overlayBlendMode(layer))
+                        .blendMode(overlayBlendMode(layer))
                         .ambientOcclusion(ambientOcclusion ? TriState.TRUE : TriState.FALSE)
                         .find();
                 OVERLAY_MATERIALS.set(materialIndex, current);

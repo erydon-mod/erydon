@@ -1,60 +1,87 @@
-# High-polish reflection visibility
+# High-polish rendering investigation
 
-Status: investigation complete; proposed shader trial is not enabled or implemented.
+Status: opaque-stone trial implemented; shader-on appearance and large-world
+performance still need an in-game comparison. No test JAR was produced.
 
-The inspected combination is Minecraft 1.20.1, Iris 1.7.6 and Complementary
-Unbound r5.9 dev5, with world-space reflections enabled. The stronger polish
-uses the translucent terrain pass even though the stone texture is opaque.
+## Why the previous route caused trouble
 
-## Confirmed cause
+The inspected combination is Minecraft 1.20.1, Iris 1.7.6, Sodium 0.5.13 and
+Complementary Unbound r5.9 dev5. The previous High polish implementation moved
+opaque stone into translucent terrain even with shaders disabled.
 
-Complementary's `shaders/lib/voxelization/reflectionVoxelization.glsl`, in
-`UpdateSceneVoxelMap`, accepts only solid, cutout and cutout-mipped terrain.
-Translucent terrain returns before reflection data is written. The shadow
-program already calls this function once per quad, so an excluded stone can
-cast a shadow while being absent from world-space reflections.
+Complementary's `reflectionVoxelization.glsl` accepts solid and cutout terrain,
+but excludes translucent terrain from its world-space reflection data. A block
+can therefore cast a shadow while remaining absent from a reflection. CU also
+treats unknown or odd-numbered solid-terrain material IDs as non-occluding for
+its coloured-light volume; full stone cubes need an appropriate solid ID.
 
-This is a shader reflection-data filter, not a missing CTM rule or a missing
-model face. The 1.21.11-style authoring format does not create a separate
-Minecraft renderer here.
+The raw 1.21.11 authoring loader produces ordinary baked block geometry. Its
+file format does not require a transparent rendering pass. Iris documents the
+[terrain pass mapping](https://shaders.properties/current/reference/miscellaneous/block_properties/).
 
-## Recommended experiment
+## Implemented trial
 
-Add a narrowly matched, optional in-memory adapter for the supported
-Complementary version, using the existing Iris source-adapter infrastructure.
-Allow opaque ERYDON high-polish stone into the existing shadow-stage voxel
-update. Keep water, glazing, two-way panes and transparent metal overlays out.
+- All stone keeps its ordinary opaque/cutout layer, including alcoves, window
+  frames and the stone beneath inlays. Metal overlays remain cutout; their small
+  separation from the base stone is retained to avoid flicker.
+- A narrowly matched in-memory CU adapter reuses the existing specular sample
+  and opaque reflection pass. Selected stone receives the transparent path's
+  angular reflection strength, without moving the geometry to that pass.
+- Existing normal/height mapping and the CTM-POM bridge remain in place. Metal
+  pixels and low-smoothness grout retain their authored material response.
+- Material mask 242 is unused in the inspected shader; 241 is water and must
+  not be reused. Reserved block IDs retain CU's solid/partial-shape parity.
+- Block-state classification runs at shader loading only. The water-neighbour
+  wrapper and its chunk-rebuild fluid reads have been removed. Faces, edges and
+  corners touching water now use the same opaque stone path everywhere.
+- The shader-properties fingerprint, parsed ID collision checks and unique
+  source anchors gate the adapter. Unsupported shaders retain their normal
+  stone rendering. Both required shader stages must be recognised before block
+  states are classified. Large spiral stairs retain their existing POM bridge.
+- Glazing and two-way glass retain their approved textures and rendering path.
+  The master and individual preferences remain restart-bound and default-off.
 
-The filter needs sprite identity and opacity, not just a block identifier:
-windows contain stone and glass in the same block. Build the sprite eligibility
-lookup when resources load, then query it in the shader. The existing CTM-POM
-lookup is a useful precedent, but its repeat-family membership alone does not
-prove opacity or cover every desired sprite.
+This introduces no extra terrain surfaces, reflection render, framebuffer,
+sampler or texture lookup for the polish effect. It does add small shader
+conditions and changes which stone enters the shader's existing reflection
+work. Zero FPS cost is not established; profile the same large scene before
+and after. Partial shapes still have the shader's approximate voxel outlines.
 
-The adapter should leave unsupported shader sources unchanged and initially
-be an opt-in trial. Do not modify installed shader ZIPs or add duplicate world
-geometry. Reuse the existing shadow draw and reflection buffers.
+## Herringbone and weave height-map audit
 
-## Performance and visual limits
+Every CTM normal/height tile in the current Collection 32x and 64x sources was
+checked: 1,944 herringbone and 864 weave tiles per pack contain varying height
+alpha. The active 64x ZIP resolves the same counts through its texture aliases;
+example alpha ranges are 245–255. The active overlay test pack does not replace
+these patterned maps. No height texture was replaced or generated by this fix.
 
-This avoids an extra world render and extra block surfaces, but it adds GPU
-lookups and voxel-buffer writes for surfaces currently skipped. It cannot be
-called performance-neutral without a controlled comparison on a large build.
-The existing voxel representation also approximates partial-block shapes;
-arch openings, alcove recesses and slopes may not have exact reflected outlines.
+Sampled native 16x maps are flat (alpha 255), unlike the optional PBR packs.
+Returning the patterned stone to opaque terrain restores access to the existing
+CTM-aware POM path, but the reported loss of visible depth still needs a visual
+check at a grazing angle with the desired Collection pack and POM enabled.
 
-Returning stone to the solid pass is the available fallback, but loses the
-currently preferred shader response. Changing only a specular map cannot make
-an excluded translucent surface enter the world-space reflection data.
+## Independent CurseForge chunk-loading evidence
 
-## Trial acceptance checks
+The inspected closed session produced 26,490 incompatible chunk-heightmap
+warnings covering 6,974 chunk coordinates. Its taller-world datapack defines
+height 1,072 with minimum Y -64, while the rejected arrays use the shorter
+encoding. The server discards these heightmaps and must recreate them, which is
+a separate plausible contributor to chunk-loading delays even without shaders.
+This is not a profile proving how much time each cause takes. The live world,
+datapack, installed JAR, resource packs and options have not been modified.
 
-- Two facing high-polish stone walls reflect one another while retaining the
-  approved surface appearance; test standard blocks and both alcoves.
-- Water, ordinary glass, two-way glass and overlay transparency stay correct.
-- Verify all facings, CTM phases, partial blocks and resource reloads.
-- Disabling the trial restores the unmodified shader source.
-- Unsupported shader versions and disabled world-space reflections stay safe.
-- Compare frame times and GPU load with an identical camera, weather, shader
-  settings and complex scene; check both stationary and moving views.
-- Keep the trial opt-in until visual and performance results justify rollout.
+The inspected installed 1.5.25 JAR predates the last water wrapper despite sharing
+its version number. Compare exact builds as well as version labels during testing.
+
+## Validation and next checks
+
+Automated tests cover source recognition, disabled/unsupported behaviour, ID
+collisions, reload state, shader-mask isolation, metal/grout preservation and
+spiral predicate idempotence. A local optional test expands and preprocesses the
+installed shader with Iris, applies both adapters and parses nine resulting
+stages across the Overworld, Nether and End. This is not GPU compilation or
+visual validation. Set `ERYDON_CU_TEST_SHADER` to the shader ZIP to run that test.
+
+Use HIGH_POLISH_TEST_CHECKLIST.md for the in-game comparison, including two
+facing stone walls, overlay light blocking, patterned depth, water contact,
+wide alcove crowns, shaders-off chunk movement and shader-on frame times.

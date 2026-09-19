@@ -42,16 +42,15 @@ public final class ErydonHighPolish {
         int matched = 0;
         for (var block : Registries.BLOCK) {
             Identifier id = Registries.BLOCK.getId(block);
-            if (!PolishedStoneMaterials.includes(id.getNamespace(), id.getPath())) continue;
-            matched++;
-            if (usesHighPolish(id.getNamespace(), id.getPath())) {
-                BlockRenderLayerMap.INSTANCE.putBlock(block, RenderLayer.getTranslucent());
-            } else if (block instanceof AlcoveBlock) {
-                // Polished alcoves previously used this shader pass unconditionally.
+            // Raw-authoring alcoves are stone too. Their JSON version does not
+            // justify transparent terrain, even when the polish option is on.
+            if (block instanceof AlcoveBlock && Erydon.MOD_ID.equals(id.getNamespace())) {
                 BlockRenderLayerMap.INSTANCE.putBlock(block, RenderLayer.getSolid());
             }
+            if (!PolishedStoneMaterials.includes(id.getNamespace(), id.getPath())) continue;
+            matched++;
         }
-        Erydon.LOGGER.info("[{}] High polish {} ({} eligible blocks; changes require restart)",
+        Erydon.LOGGER.info("[{}] High polish {} using opaque stone ({} eligible blocks; changes require restart)",
                 Erydon.MOD_ID, ACTIVE.enabled() ? "on" : "off", matched);
     }
 }

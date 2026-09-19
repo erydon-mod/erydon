@@ -15,8 +15,8 @@ new installations default to off. No test JAR is needed for an IDEA launch.
   do not. Re-enable the master and confirm saved preferences remain intact.
 - Submerge plain Glacium blocks and overlay slabs/slopes. Also test waterlogged
   shapes, flowing water, the waterline, and a chunk boundary. Faces and metal holes
-  should remain correct: stone touching water intentionally uses the ordinary
-  opaque pass, while dry stone keeps High polish. Remove water and check recovery.
+  should remain correct. Include water touching only an edge or corner. Stone
+  now stays opaque everywhere, so the pool perimeter should keep one finish.
 - Compare plain stone and the stone beneath bronze/silver inlays under identical
   lighting. Check full blocks, slabs and slopes; the base finish should match.
 - Toggle Kelastrion, Latmion and Psamatheon individually, restarting each time,
@@ -35,8 +35,16 @@ new installations default to off. No test JAR is needed for an IDEA launch.
   versions. Compare bright daylight and a darker interior before choosing a final tone.
 - Check inlays on triangular slope sides while moving the camera, including
   rotated and inverted slopes. They should keep their motif without a false repeat.
-- Reflection visibility is unchanged: see HIGH_POLISH_REFLECTION_INVESTIGATION.md
-  for the proposed opt-in shader trial and its performance requirements.
+- With Complementary Unbound r5.9 dev5 and labPBR, place two polished walls facing
+  one another: both should now appear in reflections. Compare an inlay wall with
+  plain stone when a light source is behind it; a full wall should block the light.
+- Check herringbone and weave depth at a shallow viewing angle with Collection
+  32x and 64x, especially grout lines across CTM seams. Their height maps are
+  present; verify their displayed depth with High polish on and off.
+- Look upwards into two- and three-wide Gothic and Georgian alcoves. Check the
+  crown and small triangles above the arch, then inspect their roofs from above.
+- See HIGH_POLISH_REFLECTION_INVESTIGATION.md for the opaque-stone trial and
+  the separate CurseForge chunk-heightmap warning findings.
 
 ## 1. Settings and restart behaviour
 
@@ -145,16 +153,18 @@ Selenephos, Solistra and Striatus.
   the same camera, render distance, shader settings, time and weather.
 - Compare standing still, moving the camera, walking past the facade and loading
   its chunks. Note sustained FPS changes, stutter, flickering or sorting artifacts.
-- In Complementary, surfaces using the high-polish translucent path may be absent
-  from one another's reflections while their shadows remain visible. This is the
-  known shader limitation, not a failed texture or missing block.
-- No additional world-render pass was added. A large visible area using translucent
-  rendering can still cost more to render, so passing automated checks is not an
-  FPS guarantee.
-- The water fallback checks at most six neighbouring fluid states per polished
-  block during chunk rebuilding, with no neighbour reads for waterlogged blocks.
-  Texture substitutions run during resource loading. Compare chunk rebuild time
-  as well as steady FPS in a large build; zero performance change is not proven.
+- Test both shaders off and Complementary Unbound r5.9 dev5 with labPBR. Other
+  shader versions should retain their normal stone appearance without errors.
+- Turn shaders off/on, reload them, and switch dimensions. Check CTM, patterned
+  depth, large spiral stairs, glazing and the approved two-way glass finish.
+- No extra world render or polish texture lookup is added. Stone remains opaque;
+  the former water-neighbour scans during chunk rebuilding are gone. Texture
+  substitutions still run during resource loading. These implementation changes
+  are not a measured FPS or chunk-loading guarantee.
+- Compare the same saved chunks, camera, render distance, time and weather. The
+  inspected CurseForge world also has incompatible stored heightmaps for its
+  taller-world datapack; separate server loading time from client chunk meshing
+  before attributing all delays to rendering. Keep the datapack and world intact.
 
 For an issue report, include the block/material, facing, relevant saved switches,
 whether Minecraft was restarted, shader/pack selection, and a screenshot.

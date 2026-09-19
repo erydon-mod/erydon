@@ -5,6 +5,7 @@ import com.oliver.erydon.client.pom.ComplementaryUnboundDev5SourceTransformer;
 import com.oliver.erydon.client.pom.ErydonCuPomShaderBridge;
 import com.oliver.erydon.client.pom.ErydonCuPomRuntimeState;
 import com.oliver.erydon.client.pom.ErydonIrisShaderPropertiesExtension;
+import com.oliver.erydon.client.pom.HighPolishShaderAdapter;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
@@ -64,6 +65,17 @@ public abstract class ProgramSetMixin {
                 && ERYDON$FAILURE_LOGGED.compareAndSet(false, true)) {
             Erydon.LOGGER.warn("[{}] CU CTM-POM source adapter failed closed: {} {}",
                     Erydon.MOD_ID, result.status(), result.counts());
+        }
+        var polish = HighPolishShaderAdapter.adaptFragment(programName, args.get(5));
+        if (polish.changed()) {
+            args.set(5, polish.text());
+            Erydon.LOGGER.info("[erydon] Adapted CU {} for opaque high polish.", programName);
+        } else if ("UNSUPPORTED_SOURCE".equals(polish.status())) {
+            Erydon.LOGGER.warn("[erydon] Opaque high polish left unsupported {} source unchanged.", programName);
+        }
+        if ("gbuffers_terrain".equals(programName)) {
+            args.set(1, HighPolishShaderAdapter.adaptSpiralPredicate(args.get(1)));
+            args.set(5, HighPolishShaderAdapter.adaptSpiralPredicate(args.get(5)));
         }
     }
 }

@@ -208,7 +208,7 @@ public final class WindowFrenchGeorgianBakedModel implements BakedModel, FabricB
             return false;
         }
 
-        RenderMaterial stone = highPolish ? translucentMaterial : solidMaterial;
+        RenderMaterial stone = solidMaterial;
         WindowArchBlock.Glass glass = state.get(WindowFrenchGeorgianBlock.GLASS);
         Direction facing = state.get(WindowFrenchGeorgianBlock.FACING);
         boolean open = state.get(WindowFrenchGeorgianBlock.OPEN);
