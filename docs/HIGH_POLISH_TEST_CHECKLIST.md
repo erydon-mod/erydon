@@ -6,8 +6,8 @@ new installations default to off. No test JAR is needed for an IDEA launch.
 
 ## Latest follow-up checks
 
-- Stone High polish now uses a 25% reflection floor in CU and Bliss, up from
-  15%. Repeat the same-view comparison after restarting; the approved 90%
+- Stone High polish now uses a 35% reflection floor in CU and Bliss, up from
+  25%. Repeat the same-view comparison after restarting; the approved 90%
   two-way mirror coating is unchanged. Bliss's earlier screenshot had High
   polish Off, so its enabled finish still needs checking.
 - Start with Complementary Unbound r5.9 dev5, labPBR and High polish On. Compare

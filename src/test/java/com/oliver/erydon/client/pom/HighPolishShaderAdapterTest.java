@@ -38,7 +38,7 @@ class HighPolishShaderAdapterTest {
         assertTrue(terrain.contains("OSIEBCA * 242.0"));
         assertTrue(deferred.contains("materialMaskInt == 242"));
         assertFalse(terrain.contains("241"));
-        assertTrue(deferred.contains("(pow3(fresnel) * 0.75 + 0.25) * smoothnessD"));
+        assertTrue(deferred.contains("(pow3(fresnel) * 0.65 + 0.35) * smoothnessD"));
     }
 
     @Test void disabledMissingAndAmbiguousSourcesAreByteExact() {
@@ -110,7 +110,7 @@ class HighPolishShaderAdapterTest {
         assertTrue(HighPolishShaderAdapter.ready(), "Bliss needs no deferred-stage patch");
         assertEquals(1, result.text().split("texture2D_POMSwitch", -1).length - 1);
         assertTrue(result.text().contains("SpecularTex.r >= 0.68 && SpecularTex.g < 229.5 / 255.0"));
-        assertTrue(result.text().contains("SpecularTex.g = max(SpecularTex.g, 0.25)"));
+        assertTrue(result.text().contains("SpecularTex.g = max(SpecularTex.g, 0.35)"));
         assertTrue(result.text().endsWith("gl_FragData[1].rg = SpecularTex.rg;"));
         assertSame(source, HighPolishShaderAdapter.adaptFragment("gbuffers_water", source).text());
         assertSame(source, HighPolishShaderAdapter.adaptFragment("deferred1", source).text());

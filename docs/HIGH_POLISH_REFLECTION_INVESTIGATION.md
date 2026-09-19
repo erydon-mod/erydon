@@ -1,10 +1,14 @@
 # High-polish rendering investigation
 
 Status: the user confirmed that CU High polish now activates and approved the
-two-way mirror finish. The stone reflection floor has been raised from 15% to
-25% in CU and Bliss to make the option more pronounced; the mirror coating is
+two-way mirror finish. The stone reflection floor has been raised from 25% to
+35% in CU and Bliss to make the option more pronounced; the mirror coating is
 unchanged. The stronger stone finish, Bliss with High polish enabled and
 large-world performance still need an in-game comparison. No test JAR was produced.
+
+The follow-up [material and shader review](POLISH_MATERIAL_AND_SHADER_REVIEW.md)
+records the proposed Honed/Polished/Mirror choices, metal improvements and
+broader compatibility findings; those proposals are not implemented yet.
 
 ## Startup failure and the corrected validation
 
@@ -50,7 +54,7 @@ file format does not require a transparent rendering pass. Iris documents the
   separation from the base stone is retained to avoid flicker.
 - A narrowly matched in-memory CU adapter reuses the existing specular sample
   and opaque reflection pass. Selected stone receives full smoothness and a
-  25% reflection floor, increasing toward grazing angles, without moving the
+  35% reflection floor, increasing toward grazing angles, without moving the
   geometry to a transparent pass.
 - Existing normal/height mapping and the CTM-POM bridge remain in place. Metal
   pixels and low-smoothness grout retain their authored material response.
@@ -81,7 +85,7 @@ and after. Partial shapes still have the shader's approximate voxel outlines.
 
 Bliss 2.1.2 reads the specular maps, but clamps the authored zero green channel
 on stone to only 0.02 reflectance. High polish now raises selected stone pixels
-to full smoothness and a minimum 0.25 reflectance using the existing terrain
+to full smoothness and a minimum 0.35 reflectance using the existing terrain
 sample. Its existing metal and low-smoothness grout pixels are untouched, as
 are normal/height maps and glass. An exact shader-properties fingerprint and
 unique source anchor limit this to the inspected pack. Per-stone and per-finish

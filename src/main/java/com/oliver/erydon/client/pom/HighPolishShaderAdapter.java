@@ -103,7 +103,7 @@ public final class HighPolishShaderAdapter {
                     if ((blockID == 12024.0 || blockID == 12025.0 || blockID == 12027.0)
                             && SpecularTex.r >= 0.68 && SpecularTex.g < 229.5 / 255.0) {
                         SpecularTex.r = 1.0;
-                        SpecularTex.g = max(SpecularTex.g, 0.25);
+                        SpecularTex.g = max(SpecularTex.g, 0.35);
                     }
                 """;
         return new Result(source.substring(0, end) + insertion + source.substring(end), true, "TRANSFORMED");
@@ -133,10 +133,10 @@ public final class HighPolishShaderAdapter {
                 """ : """
 
                     // ERYDON opaque high polish
-                    // A 25% reflection floor, increasing toward grazing angles,
+                    // A 35% reflection floor, increasing toward grazing angles,
                     // while retaining opaque depth, voxel visibility and POM.
                     if (materialMaskInt == 242) {
-                        fresnelM = (pow3(fresnel) * 0.75 + 0.25) * smoothnessD;
+                        fresnelM = (pow3(fresnel) * 0.65 + 0.35) * smoothnessD;
                     }
                 """;
         return new Result(source.substring(0, end) + insertion + source.substring(end), true, "TRANSFORMED");
