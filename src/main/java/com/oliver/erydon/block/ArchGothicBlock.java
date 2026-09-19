@@ -148,7 +148,7 @@ public class ArchGothicBlock extends ArchModernBlock {
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.79927437, 0.8780025, 0.2224525, 0.79927437, 1.06583625, 1.2224525));
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.1575, 0.86292313, 0, 0.90625, 1.00033313, 1));
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(-0.0005, 0.91345813, 0, 0.1575, 1.00033313, 1));
-        shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.859605, 0.28875, 0.0000625, 0.906365, 0.871875, 0.9999375));
+        shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.859605, 0.28875, 0, 0.90625, 0.86292313, 1));
         return shape.simplify();
     }
 
