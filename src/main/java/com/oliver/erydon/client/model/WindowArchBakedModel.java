@@ -49,6 +49,7 @@ public final class WindowArchBakedModel implements BakedModel, FabricBakedModel 
 
     private final BakedModel wrapped;
     private final boolean highPolish;
+    private final boolean highPolishTwoWay;
     private final Sprite particle;
     // A wrapper belongs to one model reload, so its sprite cannot outlive the atlas.
     private volatile Sprite mirrorSprite;
@@ -58,6 +59,11 @@ public final class WindowArchBakedModel implements BakedModel, FabricBakedModel 
     }
 
     public WindowArchBakedModel(BakedModel wrapped, boolean highPolish) {
+        this(wrapped, highPolish, false);
+    }
+
+    public WindowArchBakedModel(BakedModel wrapped, boolean highPolish, boolean highPolishTwoWay) {
+        this.highPolishTwoWay = highPolishTwoWay;
         this.highPolish = highPolish;
         this.wrapped = wrapped;
         this.particle = wrapped.getParticleSprite();
@@ -183,9 +189,10 @@ public final class WindowArchBakedModel implements BakedModel, FabricBakedModel 
         Direction outside = state.get(WindowArchBlock.FACING);
         Sprite mirror = glass == WindowArchBlock.Glass.TWO_WAY ? mirrorSprite() : null;
         RenderMaterial stone = highPolish ? translucentMaterial : solidMaterial;
+        RenderMaterial mirrorMaterial = highPolishTwoWay ? translucentMaterial : solidMaterial;
         context.pushTransform(quad -> {
             // The child rotation runs before this transform, including the 180-degree right upper.
-            applyGlassFinish(quad, glass, outside, mirror, solidMaterial, translucentMaterial, stone);
+            applyGlassFinish(quad, glass, outside, mirror, solidMaterial, translucentMaterial, stone, mirrorMaterial);
             return true;
         });
         return true;
@@ -198,10 +205,16 @@ public final class WindowArchBakedModel implements BakedModel, FabricBakedModel 
 
     static void applyGlassFinish(MutableQuadView quad, WindowArchBlock.Glass glass, Direction outside,
                                  Sprite mirror, RenderMaterial solid, RenderMaterial translucent, RenderMaterial stone) {
+        applyGlassFinish(quad, glass, outside, mirror, solid, translucent, stone, solid);
+    }
+
+    static void applyGlassFinish(MutableQuadView quad, WindowArchBlock.Glass glass, Direction outside,
+                                 Sprite mirror, RenderMaterial solid, RenderMaterial translucent,
+                                 RenderMaterial stone, RenderMaterial mirrorMaterial) {
         if (glass.mirrorsFace(outside, quad.lightFace(), quad.colorIndex())) {
             quad.spriteBake(mirror, MutableQuadView.BAKE_LOCK_UV);
             quad.colorIndex(-1);
-            quad.material(solid);
+            quad.material(mirrorMaterial);
         } else {
             quad.material(quad.colorIndex() == 0 ? translucent : quad.colorIndex() < 0 ? stone : solid);
         }

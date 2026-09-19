@@ -26,39 +26,41 @@ class WindowArchGlassRenderingTest {
     void twoWayGlassKeepsItsMaterialWithHighPolishOnAndOff() {
         RenderMaterial solid = material();
         RenderMaterial translucent = material();
-        for (RenderMaterial stone : new RenderMaterial[]{solid, translucent}) {
-            for (Glass glass : Glass.values()) {
-                for (Direction outside : Direction.Type.HORIZONTAL) {
-                    for (Direction face : Direction.values()) {
-                        for (int originalTint : new int[]{-1, 0, 1}) {
-                            AtomicInteger tint = new AtomicInteger(originalTint);
-                            AtomicInteger rebakes = new AtomicInteger();
-                            AtomicReference<RenderMaterial> assigned = new AtomicReference<>();
-                            MutableQuadView quad = (MutableQuadView) Proxy.newProxyInstance(getClass().getClassLoader(),
-                                    new Class<?>[]{MutableQuadView.class}, (proxy, method, args) -> {
-                                        switch (method.getName()) {
-                                            case "lightFace": return face;
-                                            case "colorIndex":
-                                                if (args == null) return tint.get();
-                                                tint.set((Integer) args[0]);
-                                                return proxy;
-                                            case "spriteBake":
-                                                assertEquals(MutableQuadView.BAKE_LOCK_UV, args[1]);
-                                                rebakes.incrementAndGet();
-                                                return proxy;
-                                            case "material":
-                                                assigned.set((RenderMaterial) args[0]);
-                                                return proxy;
-                                            default: throw new AssertionError("Glass finish must not modify geometry: " + method.getName());
-                                        }
-                                    });
-                            WindowArchBakedModel.applyGlassFinish(quad, glass, outside, null, solid, translucent, stone);
-                            boolean mirrored = glass == Glass.TWO_WAY && face == outside && originalTint == 0;
-                            assertEquals(mirrored ? 1 : 0, rebakes.get());
-                            assertEquals(mirrored ? -1 : originalTint, tint.get());
-                            RenderMaterial expected = mirrored ? solid : originalTint == 0 ? translucent
-                                    : originalTint < 0 ? stone : solid;
-                            assertSame(expected, assigned.get());
+        for (RenderMaterial mirrorMaterial : new RenderMaterial[]{solid, translucent}) {
+            for (RenderMaterial stone : new RenderMaterial[]{solid, translucent}) {
+                for (Glass glass : Glass.values()) {
+                    for (Direction outside : Direction.Type.HORIZONTAL) {
+                        for (Direction face : Direction.values()) {
+                            for (int originalTint : new int[]{-1, 0, 1}) {
+                                AtomicInteger tint = new AtomicInteger(originalTint);
+                                AtomicInteger rebakes = new AtomicInteger();
+                                AtomicReference<RenderMaterial> assigned = new AtomicReference<>();
+                                MutableQuadView quad = (MutableQuadView) Proxy.newProxyInstance(getClass().getClassLoader(),
+                                        new Class<?>[]{MutableQuadView.class}, (proxy, method, args) -> {
+                                            switch (method.getName()) {
+                                                case "lightFace": return face;
+                                                case "colorIndex":
+                                                    if (args == null) return tint.get();
+                                                    tint.set((Integer) args[0]);
+                                                    return proxy;
+                                                case "spriteBake":
+                                                    assertEquals(MutableQuadView.BAKE_LOCK_UV, args[1]);
+                                                    rebakes.incrementAndGet();
+                                                    return proxy;
+                                                case "material":
+                                                    assigned.set((RenderMaterial) args[0]);
+                                                    return proxy;
+                                                default: throw new AssertionError("Glass finish must not modify geometry: " + method.getName());
+                                            }
+                                        });
+                                WindowArchBakedModel.applyGlassFinish(quad, glass, outside, null, solid, translucent, stone, mirrorMaterial);
+                                boolean mirrored = glass == Glass.TWO_WAY && face == outside && originalTint == 0;
+                                assertEquals(mirrored ? 1 : 0, rebakes.get());
+                                assertEquals(mirrored ? -1 : originalTint, tint.get());
+                                RenderMaterial expected = mirrored ? mirrorMaterial : originalTint == 0 ? translucent
+                                        : originalTint < 0 ? stone : solid;
+                                assertSame(expected, assigned.get());
+                            }
                         }
                     }
                 }

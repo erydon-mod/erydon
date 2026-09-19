@@ -9,6 +9,21 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class PolishedStoneMaterialsTest {
+    @Test
+    void overridesSelectActualVariantsAndWeavesFollowTheFirstNamedStone() {
+        var settings = com.oliver.erydon.HighPolishSettings.defaults().withEnabled(true)
+                .withStone("glacium", new com.oliver.erydon.HighPolishSettings.Stone(false,
+                        com.oliver.erydon.HighPolishSettings.Choice.ON,
+                        com.oliver.erydon.HighPolishSettings.Choice.INHERIT,
+                        com.oliver.erydon.HighPolishSettings.Choice.ON));
+        assertFalse(PolishedStoneMaterials.enabled(settings, "erydon", "glacium_block"));
+        assertTrue(PolishedStoneMaterials.enabled(settings, "erydon", "glacium_herringbone_grout_stairs"));
+        assertFalse(PolishedStoneMaterials.enabled(settings, "erydon", "glacium_nerium_weave_bronze_block"));
+        assertTrue(PolishedStoneMaterials.enabled(settings, "erydon", "hesperion_glacium_weave_grout_block"));
+        assertTrue(PolishedStoneMaterials.enabled(settings, "erydon", "glacium_trim_bronze_block"));
+        assertFalse(PolishedStoneMaterials.enabled(settings, "erydon", "glacium_aged_trim_bronze_block"));
+    }
+
     private static final List<String> STONES = List.of(
             "aganite", "aterzon", "borealis", "brectite", "calacattum", "chalstrom",
             "chrysonyx", "etruscus", "gelastrum", "glacium", "hesperion", "imperium",

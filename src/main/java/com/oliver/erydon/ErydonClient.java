@@ -30,6 +30,7 @@ public final class ErydonClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        com.oliver.erydon.client.ErydonHighPolish.registerGlazingResources();
         ErydonConfigNetworkingClient.register();
         CollectionResourcePackNotice.register();
         // Ã¢Å“â€¦ REQUIRED: register model plugin manually

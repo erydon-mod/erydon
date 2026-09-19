@@ -26,6 +26,10 @@ saves/
 screenshots/
 shaderpacks/
 resourcepacks/
+# Authored optional assets bundled with the mod, not a development install.
+!/src/main/resources/resourcepacks/
+/src/main/resources/resourcepacks/*
+!/src/main/resources/resourcepacks/high_polish_glazing/
 mods/
 mods_disabled/
 options.txt
