@@ -15,6 +15,8 @@ import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.BlockMirror;
+import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -74,6 +76,48 @@ public class DiagonalWallBlock extends WallBlock implements ClusterRebuildableBl
                 .with(SOUTH_EAST, false)
                 .with(SOUTH_WEST, false)
                 .with(NORTH_WEST, false));
+    }
+
+    // Editor transforms are state-only: never resolve neighbours or rebuild shapes here.
+    @Override
+    public BlockState rotate(BlockState state, BlockRotation rotation) {
+        BlockState rotated = super.rotate(state, rotation);
+        return switch (rotation) {
+            case NONE -> rotated;
+            case CLOCKWISE_90 -> rotated
+                    .with(NORTH_EAST, state.get(NORTH_WEST))
+                    .with(SOUTH_EAST, state.get(NORTH_EAST))
+                    .with(SOUTH_WEST, state.get(SOUTH_EAST))
+                    .with(NORTH_WEST, state.get(SOUTH_WEST));
+            case CLOCKWISE_180 -> rotated
+                    .with(NORTH_EAST, state.get(SOUTH_WEST))
+                    .with(SOUTH_EAST, state.get(NORTH_WEST))
+                    .with(SOUTH_WEST, state.get(NORTH_EAST))
+                    .with(NORTH_WEST, state.get(SOUTH_EAST));
+            case COUNTERCLOCKWISE_90 -> rotated
+                    .with(NORTH_EAST, state.get(SOUTH_EAST))
+                    .with(SOUTH_EAST, state.get(SOUTH_WEST))
+                    .with(SOUTH_WEST, state.get(NORTH_WEST))
+                    .with(NORTH_WEST, state.get(NORTH_EAST));
+        };
+    }
+
+    @Override
+    public BlockState mirror(BlockState state, BlockMirror mirror) {
+        BlockState mirrored = super.mirror(state, mirror);
+        return switch (mirror) {
+            case NONE -> mirrored;
+            case LEFT_RIGHT -> mirrored
+                    .with(NORTH_EAST, state.get(SOUTH_EAST))
+                    .with(SOUTH_EAST, state.get(NORTH_EAST))
+                    .with(SOUTH_WEST, state.get(NORTH_WEST))
+                    .with(NORTH_WEST, state.get(SOUTH_WEST));
+            case FRONT_BACK -> mirrored
+                    .with(NORTH_EAST, state.get(NORTH_WEST))
+                    .with(SOUTH_EAST, state.get(SOUTH_WEST))
+                    .with(SOUTH_WEST, state.get(SOUTH_EAST))
+                    .with(NORTH_WEST, state.get(NORTH_EAST));
+        };
     }
 
     @Override
