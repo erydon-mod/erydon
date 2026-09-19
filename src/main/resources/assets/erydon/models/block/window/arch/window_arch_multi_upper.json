@@ -884,6 +884,9 @@
       },
       "color": 4,
       "faces": {
+        "up": {
+          "texture": "#stone"
+        },
         "east": {
           "texture": "#stone"
         },

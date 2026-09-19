@@ -521,10 +521,36 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
                 emitter.normal(vertexIndex, vertex.normalX(), vertex.normalY(), vertex.normalZ());
             }
         }
+        if (overlaySourceSpriteOverride != null) restoreTriangleOverlayBounds(emitter);
         emitter.spriteBake(overlay.sprite(), MutableQuadView.BAKE_NORMALIZED);
         offsetPolishedOverlay(emitter, face, highPolish);
         emitter.emit();
         recordOverlaySelection(pos, face, sourceOverlay.rule(), overlay);
+    }
+
+    /** Reprojection must retain the invisible fourth corner used by Iris for triangle bounds. */
+    static void restoreTriangleOverlayBounds(MutableQuadView quad) {
+        for (int duplicate = 3; duplicate > 0; duplicate--) {
+            for (int other = 0; other < duplicate; other++) {
+                if (quad.x(duplicate) != quad.x(other) || quad.y(duplicate) != quad.y(other)
+                        || quad.z(duplicate) != quad.z(other)) continue;
+                float minU = Float.POSITIVE_INFINITY, minV = Float.POSITIVE_INFINITY;
+                float maxU = Float.NEGATIVE_INFINITY, maxV = Float.NEGATIVE_INFINITY;
+                float sumU = 0, sumV = 0;
+                for (int i = 0; i < 4; i++) {
+                    if (i == duplicate) continue;
+                    float u = quad.u(i), v = quad.v(i);
+                    minU = Math.min(minU, u); maxU = Math.max(maxU, u);
+                    minV = Math.min(minV, v); maxV = Math.max(maxV, v);
+                    sumU += u; sumV += v;
+                }
+                float u = 2 * (minU + maxU) - sumU;
+                float v = 2 * (minV + maxV) - sumV;
+                // Never manufacture a coordinate outside this atlas tile.
+                if (u >= 0 && u <= 1 && v >= 0 && v <= 1) quad.uv(duplicate, u, v);
+                return;
+            }
+        }
     }
 
     private OverlayTile selectOverlay(SynapheiaNeighbourCache neighbourCache,

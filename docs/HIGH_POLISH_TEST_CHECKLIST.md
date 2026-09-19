@@ -4,6 +4,20 @@ Use the IDEA development client and your usual shader/resource-pack combination.
 Enable the high-polish master switch when testing the reflective finish;
 new installations default to off. No test JAR is needed for an IDEA launch.
 
+## Latest follow-up checks
+
+- Inner-page logos should have a clear gap below the upper frame.
+- All stone buttons should display the correct stone, with a proportional cropped
+  sample rather than magenta squares or a stretched tile. Try native and Collection textures.
+- Inspect the top of both Arch Window corner pieces from above, in all facings;
+  the exposed diagonal detail should have a solid stone cap.
+- Two-way glass now uses a medium silver base between the earlier dark and pale
+  versions. Compare bright daylight and a darker interior before choosing a final tone.
+- Check inlays on triangular slope sides while moving the camera, including
+  rotated and inverted slopes. They should keep their motif without a false repeat.
+- Reflection visibility is unchanged: see HIGH_POLISH_REFLECTION_INVESTIGATION.md
+  for the proposed opt-in shader trial and its performance requirements.
+
 ## 1. Settings and restart behaviour
 
 - Inner pages should use a smaller logo, with the landing-page logo unchanged.

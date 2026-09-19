@@ -16,6 +16,26 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class WindowArchGlassRenderingTest {
     @Test
+    void exposedCornerPostHasAnUnculledStoneTop() throws Exception {
+        var path = Path.of("src/main/resources/assets/erydon/models/block/window/arch/window_arch_multi_upper.json");
+        var model = com.google.gson.JsonParser.parseString(java.nio.file.Files.readString(path)).getAsJsonObject();
+        int exposedPosts = 0;
+        for (var raw : model.getAsJsonArray("elements")) {
+            var element = raw.getAsJsonObject();
+            var rotation = element.getAsJsonObject("rotation");
+            if (rotation == null || !rotation.get("axis").getAsString().equals("y")
+                    || rotation.get("angle").getAsFloat() == 0
+                    || element.getAsJsonArray("to").get(1).getAsFloat() != 16) continue;
+            var faces = element.getAsJsonObject("faces");
+            assertTrue(faces.has("up"), "Rotated post reaching the roof needs a top face");
+            assertEquals("#stone", faces.getAsJsonObject("up").get("texture").getAsString());
+            assertFalse(faces.getAsJsonObject("up").has("cullface"));
+            exposedPosts++;
+        }
+        assertEquals(1, exposedPosts);
+    }
+
+    @Test
     void glassHasOnlyTwoStableValues() {
         assertEquals(2, Glass.values().length);
         assertEquals("normal", Glass.NORMAL.asString());
@@ -79,7 +99,7 @@ class WindowArchGlassRenderingTest {
         assertEquals(color.getHeight(), specular.getHeight());
         for (int y = 0; y < 16; y++) {
             for (int x = 0; x < 16; x++) {
-                assertEquals(0xFFD2D2D2, color.getRGB(x, y));
+                assertEquals(0xFF909090, color.getRGB(x, y));
                 assertEquals(0xFFFFFF00, specular.getRGB(x, y));
             }
         }
