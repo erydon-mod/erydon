@@ -50,7 +50,8 @@ public final class ErydonHighPolish {
             if (!PolishedStoneMaterials.includes(id.getNamespace(), id.getPath())) continue;
             matched++;
         }
-        Erydon.LOGGER.info("[{}] High polish {} using opaque stone ({} eligible blocks; changes require restart)",
-                Erydon.MOD_ID, ACTIVE.enabled() ? "on" : "off", matched);
+        Erydon.LOGGER.info("[{}] High polish {} using opaque stone ({} eligible blocks; glazing {}; two-way {}; changes require restart)",
+                Erydon.MOD_ID, ACTIVE.enabled() ? "on" : "off", matched,
+                ACTIVE.glazingEnabled() ? "on" : "off", ACTIVE.twoWayEnabled() ? "on" : "off");
     }
 }

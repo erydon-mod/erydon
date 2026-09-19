@@ -6,6 +6,22 @@ new installations default to off. No test JAR is needed for an IDEA launch.
 
 ## Latest follow-up checks
 
+- The previous on/off comparison found a real startup-order bug. Use a fresh
+  launch after compiling this repair; do not count the previous enabled-session
+  performance or appearance as a test of the stronger finish.
+- Start with Complementary Unbound r5.9 dev5, labPBR and High polish On. Compare
+  the same Glacium wall and alcove view with Off after a full restart. The enabled
+  log should name adapted terrain, deferred and glass programs, followed by
+  `Opaque high polish classified` with a non-zero count.
+- Repeat the stone/inlay comparison with Bliss 2.1.2 and Specular Reflections
+  enabled. Stone should gain the selected finish while the metal keeps its own
+  response. Sildur's Vibrant 1.51 does not read terrain specular maps and is not
+  supported by this high-polish adapter.
+- With CU, check two-way glass outside and inside on both window families,
+  including open windows. The outer coating should be strongly reflective while
+  the inner face stays clear. Disable the stone alone and confirm the mirror
+  remains strong; disable Two-way glass and restart to restore its usual finish.
+  The dark-silver texture colour is unchanged.
 - Fully restart before testing these changes. Automated checks do not replace
   the shader-on checks below; no new test JAR was produced.
 - Inspect the menu at several GUI scales: four stone buttons per row where space
@@ -31,8 +47,8 @@ new installations default to off. No test JAR is needed for an IDEA launch.
   sample rather than magenta squares or a stretched tile. Try native and Collection textures.
 - Inspect the top of both Arch Window corner pieces from above, in all facings;
   glass should no longer protrude through the stone roof as a see-through stripe.
-- Two-way glass now uses a darker silver base between the earlier dark and pale
-  versions. Compare bright daylight and a darker interior before choosing a final tone.
+- Two-way glass keeps the approved darker silver base, with a CU coating-specific
+  reflection adjustment. Compare bright daylight and a darker interior.
 - Check inlays on triangular slope sides while moving the camera, including
   rotated and inverted slopes. They should keep their motif without a false repeat.
 - With Complementary Unbound r5.9 dev5 and labPBR, place two polished walls facing

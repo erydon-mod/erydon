@@ -9607,7 +9607,7 @@
   "screen.erydon.high_polish.title": "Alto brillo",
   "button.erydon.high_polish_on": "Alto brillo: Sí",
   "button.erydon.high_polish_off": "Alto brillo: No",
-  "option.erydon.high_polish.description": "Reflejos de piedra más intensos con Complementary Unbound r5.9 dev5 y labPBR, manteniendo la piedra opaca. Otros shaders conservan su acabado habitual. Los ajustes del shader afectan al aspecto y al rendimiento.",
+  "option.erydon.high_polish.description": "Reflejos de piedra más intensos con Complementary Unbound r5.9 dev5 (labPBR) y Bliss 2.1.2, manteniendo la piedra opaca. Otros shaders conservan su acabado habitual. Los ajustes del shader afectan al aspecto y al rendimiento.",
   "option.erydon.high_polish.restart": "Guarda y reinicia Minecraft. Los cambios no afectan a la sesión actual.",
     "option.erydon.polish.master": "Alto brillo",
     "option.erydon.polish.plain": "Piedra",

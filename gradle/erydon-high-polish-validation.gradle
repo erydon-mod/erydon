@@ -1,0 +1,29 @@
+// Isolated, pre-launch-only test. No world, graphics window or test JAR is created.
+tasks.register('verifyHighPolishMixinLaunch', JavaExec) {
+    group = 'verification'
+    description = 'Applies high-polish mixins through Fabric and verifies actual Iris startup ordering.'
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'net.fabricmc.loader.impl.launch.knot.KnotClient'
+    maxHeapSize = '1G'
+    def fixture = layout.buildDirectory.dir('high-polish-mixin-probe')
+    doFirst {
+        def root = fixture.get().asFile
+        root.mkdirs()
+        workingDir root
+        def mod = new File(root, 'probe-mod')
+        mod.mkdirs()
+        new File(mod, 'fabric.mod.json').text = groovy.json.JsonOutput.toJson([
+                schemaVersion: 1, id: 'erydon_high_polish_probe', version: '1.0.0',
+                environment: 'client', entrypoints: [preLaunch: ['com.oliver.erydon.client.pom.HighPolishMixinLaunchProbe']]
+        ])
+        def config = new File(root, 'config')
+        config.mkdirs()
+        new File(config, 'erydon-client.properties').text = 'erydon.high_polish.enabled=true\n'
+        systemProperty 'fabric.development', 'true'
+        systemProperty 'fabric.addMods', mod.absolutePath
+        systemProperty 'mixin.debug.export', 'true'
+        systemProperty 'mixin.debug.export.filter', 'net.irisshaders.iris.shaderpack.ShaderPack'
+        args '--gameDir', root.absolutePath, '--version', '1.20.1', '--accessToken', '0'
+    }
+}

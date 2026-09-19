@@ -69,7 +69,7 @@ public abstract class ProgramSetMixin {
         var polish = HighPolishShaderAdapter.adaptFragment(programName, args.get(5));
         if (polish.changed()) {
             args.set(5, polish.text());
-            Erydon.LOGGER.info("[erydon] Adapted CU {} for opaque high polish.", programName);
+            Erydon.LOGGER.info("[erydon] Adapted {} {} for high polish.", HighPolishShaderAdapter.profile(), programName);
         } else if ("UNSUPPORTED_SOURCE".equals(polish.status())) {
             Erydon.LOGGER.warn("[erydon] Opaque high polish left unsupported {} source unchanged.", programName);
         }

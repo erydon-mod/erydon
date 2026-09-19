@@ -22,7 +22,7 @@ class HighPolishShaderPackTest {
             assertTrue(ComplementaryUnboundDev5SourceTransformer.matchesSupportedProperties(
                     read(zip, "shaders/shaders.properties")));
             String ids = read(zip, "shaders/block.properties");
-            for (int id : new int[]{12024, 12025, 12027}) assertFalse(ids.contains("block." + id + "="));
+            for (int id : new int[]{12024, 12025, 12027, 12029, 12031}) assertFalse(ids.matches("(?s).*block\\." + id + "\\s*=.*"));
             for (String dimension : List.of("world0", "world-1", "world1")) {
                 HighPolishShaderAdapter.beginShaderLoad(true, true);
                 HighPolishShaderAdapter.acceptMaterialIds(id -> false);
@@ -34,12 +34,15 @@ class HighPolishShaderPackTest {
                 assertTrue(pom.changed(), dimension + ": " + pom.status());
                 var terrain = HighPolishShaderAdapter.adaptFragment("gbuffers_terrain", pom.fragmentText());
                 var deferred = HighPolishShaderAdapter.adaptFragment("deferred1", source(zip, dimension, "deferred1.fsh"));
+                var water = HighPolishShaderAdapter.adaptFragment("gbuffers_water", source(zip, dimension, "gbuffers_water.fsh"));
                 assertTrue(terrain.changed(), dimension + ": " + terrain.status());
                 assertTrue(deferred.changed(), dimension + ": " + deferred.status());
+                assertTrue(water.changed(), dimension + ": " + water.status());
                 assertTrue(HighPolishShaderAdapter.ready());
                 parse(HighPolishShaderAdapter.adaptSpiralPredicate(pom.vertexText()));
                 parse(HighPolishShaderAdapter.adaptSpiralPredicate(terrain.text()));
                 parse(deferred.text());
+                parse(water.text());
             }
         } finally {
             HighPolishShaderAdapter.beginShaderLoad(false, false);
@@ -55,7 +58,7 @@ class HighPolishShaderPackTest {
                 new StringPair("IRIS_FEATURE_SSBO", "1"), new StringPair("IRIS_FEATURE_CUSTOM_IMAGES", "1")));
     }
 
-    private static String expand(ZipFile zip, String path, int depth) throws Exception {
+    static String expand(ZipFile zip, String path, int depth) throws Exception {
         if (depth > 32) throw new IllegalStateException("Recursive shader include: " + path);
         var matcher = INCLUDE.matcher(read(zip, path));
         StringBuilder result = new StringBuilder();
@@ -68,7 +71,7 @@ class HighPolishShaderPackTest {
         return matcher.appendTail(result).toString();
     }
 
-    private static String read(ZipFile zip, String path) throws Exception {
+    static String read(ZipFile zip, String path) throws Exception {
         var entry = zip.getEntry(path);
         assertNotNull(entry, path);
         try (var stream = zip.getInputStream(entry)) {
@@ -76,7 +79,7 @@ class HighPolishShaderPackTest {
         }
     }
 
-    private static void parse(String source) throws Exception {
+    static void parse(String source) throws Exception {
         // Iris's runtime parser is deliberately not added as a production compile dependency.
         Class<?> parserType = Class.forName("io.github.douira.glsl_transformer.ast.transform.ASTParser");
         Class<?> rootType = Class.forName("io.github.douira.glsl_transformer.ast.query.Root");

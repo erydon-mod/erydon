@@ -9607,7 +9607,7 @@
   "screen.erydon.high_polish.title": "Hochglanz",
   "button.erydon.high_polish_on": "Hochglanz: An",
   "button.erydon.high_polish_off": "Hochglanz: Aus",
-  "option.erydon.high_polish.description": "Stärkere Steinreflexionen mit Complementary Unbound r5.9 dev5 und labPBR; Stein bleibt undurchsichtig. Andere Shader behalten ihr gewohntes Steinfinish. Shader-Einstellungen beeinflussen Aussehen und Leistung.",
+  "option.erydon.high_polish.description": "Stärkere Steinreflexionen mit Complementary Unbound r5.9 dev5 (labPBR) und Bliss 2.1.2; Stein bleibt undurchsichtig. Andere Shader behalten ihr gewohntes Steinfinish. Shader-Einstellungen beeinflussen Aussehen und Leistung.",
   "option.erydon.high_polish.restart": "Speichern, dann Minecraft neu starten. Die laufende Sitzung bleibt unverändert.",
     "option.erydon.polish.master": "Hochglanz",
     "option.erydon.polish.plain": "Stein",

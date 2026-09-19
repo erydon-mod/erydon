@@ -42,7 +42,7 @@ public abstract class ShaderPropertiesMixin implements ErydonIrisShaderPropertie
                         ErydonCuPomAdapterConfig.configuredMode());
         erydon$cuPomEligible = result.eligible();
         com.oliver.erydon.client.pom.HighPolishShaderAdapter.beginShaderLoad(
-                ComplementaryUnboundDev5SourceTransformer.matchesSupportedProperties(contents),
+                com.oliver.erydon.client.pom.HighPolishShaderAdapter.profileForProperties(contents),
                 com.oliver.erydon.client.ErydonHighPolish.activeSettings().enabled());
         ErydonCuPomRuntimeState.beginShaderLoad(result.eligible());
         if (result.changed()) {

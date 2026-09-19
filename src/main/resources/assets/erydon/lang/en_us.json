@@ -9607,7 +9607,7 @@
   "screen.erydon.high_polish.title": "High polish",
   "button.erydon.high_polish_on": "High polish: On",
   "button.erydon.high_polish_off": "High polish: Off",
-  "option.erydon.high_polish.description": "Stronger stone reflections with Complementary Unbound r5.9 dev5 and labPBR, while stone stays opaque. Other shaders keep their usual stone finish. Shader settings affect appearance and performance.",
+  "option.erydon.high_polish.description": "Stronger stone reflections with Complementary Unbound r5.9 dev5 (labPBR) and Bliss 2.1.2, while stone stays opaque. Other shaders keep their usual stone finish. Shader settings affect appearance and performance.",
   "option.erydon.high_polish.restart": "Save, then restart Minecraft. Changes do not affect the current session.",
     "option.erydon.polish.master": "High polish",
     "option.erydon.polish.plain": "Stone",
