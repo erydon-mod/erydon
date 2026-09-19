@@ -13,8 +13,8 @@ public record HighPolishSettings(boolean enabled, boolean glazing, boolean twoWa
     public static final List<String> MATERIALS = List.of(
             "aganite", "aterzon", "borealis", "brectite", "calacattum", "chalstrom",
             "chrysonyx", "etruscus", "gelastrum", "glacium", "hesperion", "imperium",
-            "kylorion", "laurentium", "mielonyx", "nerium", "noxoplis", "porphyros",
-            "portorium", "rosinium", "sanguenite", "selenephos", "solistra", "striatus");
+            "kelastrion", "kylorion", "latmion", "laurentium", "mielonyx", "nerium", "noxoplis", "porphyros",
+            "portorium", "psamatheon", "rosinium", "sanguenite", "selenephos", "solistra", "striatus");
 
     public HighPolishSettings {
         Map<String, Stone> sanitized = new HashMap<>();

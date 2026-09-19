@@ -3,6 +3,7 @@ package com.oliver.erydon.client.model;
 import com.oliver.erydon.Erydon;
 import com.oliver.erydon.migration.ErydonIdMigration;
 import com.oliver.erydon.block.WindowFrenchGeorgianBlock;
+import com.oliver.erydon.block.WindowArchBlock;
 import net.fabricmc.fabric.api.renderer.v1.Renderer;
 import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
 import net.fabricmc.fabric.api.renderer.v1.material.BlendMode;
@@ -61,6 +62,8 @@ public final class WindowFrenchGeorgianBakedModel implements BakedModel, FabricB
 
     private final BakedModel wrapped;
     private final boolean highPolish;
+    private final boolean highPolishTwoWay;
+    private volatile Sprite mirrorSprite;
     private final Sprite particle;
 
     public WindowFrenchGeorgianBakedModel(BakedModel wrapped) {
@@ -68,7 +71,12 @@ public final class WindowFrenchGeorgianBakedModel implements BakedModel, FabricB
     }
 
     public WindowFrenchGeorgianBakedModel(BakedModel wrapped, boolean highPolish) {
+        this(wrapped, highPolish, false);
+    }
+
+    public WindowFrenchGeorgianBakedModel(BakedModel wrapped, boolean highPolish, boolean highPolishTwoWay) {
         this.highPolish = highPolish;
+        this.highPolishTwoWay = highPolishTwoWay;
         this.wrapped = wrapped;
         this.particle = wrapped.getParticleSprite();
     }
@@ -95,7 +103,7 @@ public final class WindowFrenchGeorgianBakedModel implements BakedModel, FabricB
             return;
         }
 
-        boolean splitLayers = pushSplitLayerTransform(context);
+        boolean splitLayers = pushSplitLayerTransform(context, state);
         try {
             int rotation = rotationForFacing(state.get(WindowFrenchGeorgianBlock.FACING));
             String mainSuffix = mainSuffix(state);
@@ -195,17 +203,58 @@ public final class WindowFrenchGeorgianBakedModel implements BakedModel, FabricB
         WorldAlignedYRotation.emit(context, model, degrees, true);
     }
 
-    private boolean pushSplitLayerTransform(RenderContext context) {
+    private boolean pushSplitLayerTransform(RenderContext context, BlockState state) {
         if (!ensureMaterials()) {
             return false;
         }
 
         RenderMaterial stone = highPolish ? translucentMaterial : solidMaterial;
+        WindowArchBlock.Glass glass = state.get(WindowFrenchGeorgianBlock.GLASS);
+        Direction facing = state.get(WindowFrenchGeorgianBlock.FACING);
+        boolean open = state.get(WindowFrenchGeorgianBlock.OPEN);
+        boolean leftWing = leftWing(state.get(WindowFrenchGeorgianBlock.PIECE), state.get(WindowFrenchGeorgianBlock.HINGE));
+        Sprite mirror = glass == WindowArchBlock.Glass.TWO_WAY ? mirrorSprite() : null;
+        RenderMaterial mirrorMaterial = highPolishTwoWay ? translucentMaterial : solidMaterial;
         context.pushTransform(quad -> {
-            quad.material(quad.colorIndex() == 0 ? translucentMaterial : quad.colorIndex() < 0 ? stone : solidMaterial);
+            Direction outside = facing;
+            if (glass == WindowArchBlock.Glass.TWO_WAY && open && quad.colorIndex() == 0) {
+                float min = Float.POSITIVE_INFINITY, max = Float.NEGATIVE_INFINITY;
+                for (int i = 0; i < 4; i++) {
+                    float depth = facing.getAxis() == Direction.Axis.X ? quad.x(i) : quad.z(i);
+                    min = Math.min(min, depth);
+                    max = Math.max(max, depth);
+                }
+                outside = outsideForPane(facing, leftWing, max - min);
+            }
+            WindowArchBakedModel.applyGlassFinish(quad, glass, outside, mirror,
+                    solidMaterial, translucentMaterial, stone, mirrorMaterial);
             return true;
         });
         return true;
+    }
+
+    static boolean leftWing(WindowFrenchGeorgianBlock.Piece piece, DoorHinge hinge) {
+        return switch (piece) {
+            case UPPER_SINGLE, LOWER_SINGLE -> hinge == DoorHinge.LEFT;
+            case UPPER_MULTI_LH, LOWER_MULTI_LH -> true;
+            default -> false;
+        };
+    }
+
+    static Direction outsideForPane(Direction facing, boolean leftWing, float depthSpan) {
+        // Open windows retain a fixed fanlight. Only the deep, hinged pane turns its coating.
+        return depthSpan > 0.25F
+                ? (leftWing ? facing.rotateYCounterclockwise() : facing.rotateYClockwise()) : facing;
+    }
+
+    private Sprite mirrorSprite() {
+        Sprite sprite = mirrorSprite;
+        if (sprite == null) {
+            sprite = MinecraftClient.getInstance().getBakedModelManager()
+                    .getModel(WindowArchBakedModel.MIRROR_MATERIAL_MODEL).getParticleSprite();
+            mirrorSprite = sprite;
+        }
+        return sprite;
     }
 
     private static boolean ensureMaterials() {
@@ -254,6 +303,29 @@ public final class WindowFrenchGeorgianBakedModel implements BakedModel, FabricB
             String sideSillSuffix = sideSillSuffix(state);
             if (sideSillSuffix != null) {
                 addQuads(quads, state, sideSillSuffix, rotation, face, random);
+            }
+        }
+        if (state.get(WindowFrenchGeorgianBlock.GLASS) == WindowArchBlock.Glass.TWO_WAY) {
+            Direction facing = state.get(WindowFrenchGeorgianBlock.FACING);
+            boolean open = state.get(WindowFrenchGeorgianBlock.OPEN);
+            boolean leftWing = leftWing(state.get(WindowFrenchGeorgianBlock.PIECE), state.get(WindowFrenchGeorgianBlock.HINGE));
+            Sprite mirror = mirrorSprite();
+            for (int i = 0; i < quads.size(); i++) {
+                BakedQuad quad = quads.get(i);
+                if (quad.getColorIndex() != 0) continue;
+                Direction outside = facing;
+                if (open) {
+                    int axis = facing.getAxis() == Direction.Axis.X ? 0 : 2;
+                    int[] data = quad.getVertexData();
+                    float min = Float.POSITIVE_INFINITY, max = Float.NEGATIVE_INFINITY;
+                    for (int vertex = 0; vertex < 4; vertex++) {
+                        float depth = Float.intBitsToFloat(data[vertex * 8 + axis]);
+                        min = Math.min(min, depth);
+                        max = Math.max(max, depth);
+                    }
+                    outside = outsideForPane(facing, leftWing, max - min);
+                }
+                if (quad.getFace() == outside) quads.set(i, WindowArchBakedModel.mirrorQuad(quad, mirror));
             }
         }
         return quads;

@@ -50,7 +50,8 @@ public final class ErydonFamilyModelLoadingPlugin implements ModelLoadingPlugin 
             }
             if (ErydonModelFamilyIndex.isWindowFrenchGeorgianBlock(path)) {
                 return wrap(cache, mid, model, wrapped -> new WindowFrenchGeorgianBakedModel(wrapped,
-                        com.oliver.erydon.client.ErydonHighPolish.usesHighPolish(mid.getNamespace(), path)), "french_georgian_windows", itemModel);
+                        com.oliver.erydon.client.ErydonHighPolish.usesHighPolish(mid.getNamespace(), path),
+                        com.oliver.erydon.client.ErydonHighPolish.twoWayEnabled()), "french_georgian_windows", itemModel);
             }
             if (ErydonModelFamilyIndex.isArchRomanesqueBlock(path)) {
                 return wrap(cache, mid, model, ArchRomanesqueBakedModel::new, "romanesque_arches", itemModel);

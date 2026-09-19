@@ -54,6 +54,7 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
     public static final EnumProperty<DoorHinge> HINGE = Properties.DOOR_HINGE;
     public static final EnumProperty<Piece> PIECE = EnumProperty.of("piece", Piece.class);
     public static final BooleanProperty SILL = BooleanProperty.of("sill");
+    public static final EnumProperty<WindowArchBlock.Glass> GLASS = WindowArchBlock.GLASS;
 
     // Prevent re-entrant cluster sync loops when we update many blocks at once.
     private static final ThreadLocal<Boolean> SYNCING = ThreadLocal.withInitial(() -> false);
@@ -175,12 +176,13 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
                 .with(HINGE, DoorHinge.LEFT)
                 .with(PIECE, Piece.LOWER_SINGLE)
                 .with(SILL, false)
+                .with(GLASS, WindowArchBlock.Glass.NORMAL)
         );
     }
 
     @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        builder.add(FACING, OPEN, HINGE, PIECE, SILL);
+        builder.add(FACING, OPEN, HINGE, PIECE, SILL, GLASS);
     }
 
     @Override
@@ -220,7 +222,8 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
         return this.getDefaultState()
                 .with(FACING, facing)
                 .with(OPEN, open)
-                .with(HINGE, hinge);
+                .with(HINGE, hinge)
+                .with(GLASS, inherit == null ? WindowArchBlock.Glass.NORMAL : inherit.get(GLASS));
     }
 
 
@@ -259,11 +262,13 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
         if (isSyncing()) return;
 
         boolean openChanged = state.get(OPEN) != oldState.get(OPEN);
-        if (!openChanged) return;
+        boolean glassChanged = state.get(GLASS) != oldState.get(GLASS);
+        if (!openChanged && !glassChanged) return;
 
         boolean started = beginSync();
         try {
-            applyOpenToCluster(world, pos, state.get(OPEN));
+            if (openChanged) applyOpenToCluster(world, pos, state.get(OPEN));
+            if (glassChanged) applyGlassToCluster(world, pos, state.get(GLASS));
         } finally {
             endSync(started);
         }
@@ -354,6 +359,18 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
         // Preserve player-toggled open state when unpowered; redstone only forces opening.
         if (world.isReceivingRedstonePower(pos) && !state.get(OPEN)) {
             applyOpenToCluster(world, pos, true);
+        }
+    }
+
+    private void applyGlassToCluster(World world, BlockPos anchor, WindowArchBlock.Glass glass) {
+        BlockState anchorState = world.getBlockState(anchor);
+        if (!anchorState.isOf(this)) return;
+        Direction facing = anchorState.get(FACING);
+        for (BlockPos p : collectPlaneComponentAnyMode(world, anchor, facing)) {
+            BlockState state = world.getBlockState(p);
+            if (state.isOf(this) && state.get(FACING) == facing && state.get(GLASS) != glass) {
+                world.setBlockState(p, state.with(GLASS, glass), Block.NOTIFY_LISTENERS);
+            }
         }
     }
 
@@ -534,6 +551,7 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
         if (!seedState.isOf(this)) return;
 
         boolean open = seedState.get(OPEN);
+        WindowArchBlock.Glass glass = seedState.get(GLASS);
         DoorHinge hinge = seedState.get(HINGE);
 
         int w = rect.width;
@@ -553,6 +571,7 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
 
                 BlockState ns = s
                         .with(OPEN, open)
+                        .with(GLASS, glass)
                         .with(HINGE, hinge)
                         .with(PIECE, piece)
                         .with(SILL, isBottom)

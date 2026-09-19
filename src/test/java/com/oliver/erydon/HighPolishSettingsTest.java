@@ -18,7 +18,7 @@ class HighPolishSettingsTest {
         }
         assertTrue(migrated.glazingEnabled());
         assertTrue(migrated.twoWayEnabled());
-        assertFalse(migrated.enables("kelastrion", Finish.PLAIN));
+        assertTrue(migrated.enables("kelastrion", Finish.PLAIN));
     }
 
     @Test

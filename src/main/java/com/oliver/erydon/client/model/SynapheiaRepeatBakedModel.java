@@ -44,14 +44,16 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
             ConcurrentHashMap.newKeySet();
 
     private static volatile SpriteFinder spriteFinder;
+    private static final int POLISHED_MATERIAL_INDEX = SynapheiaManifest.OverlayLayer.values().length * 2;
     private static final AtomicReferenceArray<RenderMaterial> OVERLAY_MATERIALS =
-            new AtomicReferenceArray<>(SynapheiaManifest.OverlayLayer.values().length * 2);
+            new AtomicReferenceArray<>(POLISHED_MATERIAL_INDEX + 2);
 
     private final ModelIdentifier modelId;
     private final Identifier blockId;
     private final SynapheiaBlockPlan plan;
     private final SynapheiaService.Snapshot snapshot;
     private final boolean projectedRepeatGeometry;
+    private final boolean highPolish;
     private final Identifier overlaySourceSpriteOverride;
 
     SynapheiaRepeatBakedModel(BakedModel wrapped,
@@ -61,6 +63,8 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
         this.wrapped = wrapped;
         this.modelId = modelId;
         this.blockId = plan.blockId();
+        this.highPolish = com.oliver.erydon.client.ErydonHighPolish.usesHighPolish(
+                blockId.getNamespace(), blockId.getPath());
         this.plan = plan;
         this.snapshot = snapshot;
         this.projectedRepeatGeometry = usesProjectedRepeatGeometry(this.blockId);
@@ -485,6 +489,7 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
         emitter.colorIndex(-1);
         assignOverlayUvs(emitter, overlay.sprite());
         emitter.material(overlay.material());
+        offsetPolishedOverlay(emitter, face, highPolish);
         emitter.emit();
         recordOverlaySelection(pos, face, rule, overlay);
     }
@@ -517,6 +522,7 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
             }
         }
         emitter.spriteBake(overlay.sprite(), MutableQuadView.BAKE_NORMALIZED);
+        offsetPolishedOverlay(emitter, face, highPolish);
         emitter.emit();
         recordOverlaySelection(pos, face, sourceOverlay.rule(), overlay);
     }
@@ -541,7 +547,7 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
         int mask = connectionMask(neighbourCache, state, face, rule);
         int tileIndex = connectedTileIndex(mask);
         RenderMaterial material = overlayMaterial(
-                state.getLuminance() == 0, rule.overlayLayer());
+                state.getLuminance() == 0, rule.overlayLayer(), highPolish);
         selected = new OverlayTile(sprites.get(tileIndex), material, tileIndex, mask);
         selectedOverlays.put(key, selected);
         return selected;
@@ -684,9 +690,19 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
         return current;
     }
 
+    /** Separate the coating from its stone in the same sorted pass without adding surfaces. */
+    static void offsetPolishedOverlay(MutableQuadView quad, Direction face, boolean highPolish) {
+        if (!highPolish) return;
+        float offset = 1.0F / 1024.0F;
+        for (int i = 0; i < 4; i++) {
+            quad.pos(i, quad.x(i) + face.getOffsetX() * offset,
+                    quad.y(i) + face.getOffsetY() * offset, quad.z(i) + face.getOffsetZ() * offset);
+        }
+    }
+
     private static RenderMaterial overlayMaterial(boolean ambientOcclusion,
-                                                  SynapheiaManifest.OverlayLayer layer) {
-        int materialIndex = layer.ordinal() * 2 + (ambientOcclusion ? 1 : 0);
+                                                  SynapheiaManifest.OverlayLayer layer, boolean highPolish) {
+        int materialIndex = (highPolish ? POLISHED_MATERIAL_INDEX : layer.ordinal() * 2) + (ambientOcclusion ? 1 : 0);
         RenderMaterial current = OVERLAY_MATERIALS.get(materialIndex);
         if (current != null) {
             return current;
@@ -699,7 +715,7 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
             current = OVERLAY_MATERIALS.get(materialIndex);
             if (current == null) {
                 current = renderer.materialFinder().clear()
-                        .blendMode(overlayBlendMode(layer))
+                        .blendMode(highPolish ? BlendMode.TRANSLUCENT : overlayBlendMode(layer))
                         .ambientOcclusion(ambientOcclusion ? TriState.TRUE : TriState.FALSE)
                         .find();
                 OVERLAY_MATERIALS.set(materialIndex, current);

@@ -292,7 +292,7 @@ public final class WindowArchBakedModel implements BakedModel, FabricBakedModel 
         return quads;
     }
 
-    private static BakedQuad mirrorQuad(BakedQuad quad, Sprite mirror) {
+    static BakedQuad mirrorQuad(BakedQuad quad, Sprite mirror) {
         int[] data = quad.getVertexData().clone();
         Sprite original = quad.getSprite();
         for (int vertex = 0; vertex < 4; vertex++) {

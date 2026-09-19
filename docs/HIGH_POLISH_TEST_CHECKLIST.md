@@ -1,11 +1,14 @@
 # High polish and architectural fixes: test checklist
 
 Use the IDEA development client and your usual shader/resource-pack combination.
-The high-polish master switch is enabled in the current local test configuration;
+Enable the high-polish master switch when testing the reflective finish;
 new installations default to off. No test JAR is needed for an IDEA launch.
 
 ## 1. Settings and restart behaviour
 
+- Inner pages should use a smaller logo, with the landing-page logo unchanged.
+- Stone buttons should show the matching gallery texture inside the usual metal
+  frame. The larger layout fits all 27; smaller windows retain readable paging.
 - Open Mods > ERYDON > Configure > High polish. Check the Stones and Glass tabs,
   page arrows, mouse-wheel paging, and keyboard navigation. Try your usual GUI
   scale and a smaller window; labels and the restart notice should remain readable.
@@ -21,7 +24,11 @@ new installations default to off. No test JAR is needed for an IDEA launch.
 - Turn the master switch off and restart: all high-polish enhancements should be
   off, while individual choices remain saved for when the master is enabled again.
 
-## 2. Individual polished stones and patterns
+## 2. Individual polished and honed stones and patterns
+
+- On inlays, inspect all six faces while moving past a wall, floor, stairs and slopes.
+  Test bronze and silver in all four motifs. Check for fading, flicker, sorting through
+  the stone and detached edges, with High polish on and off and after F3+T.
 
 - Place Glacium and Portorium beside matching Gothic and Georgian alcoves. Enable
   only Glacium, restart, and confirm Portorium stays at its ordinary finish.
@@ -31,12 +38,13 @@ new installations default to off. No test JAR is needed for an IDEA launch.
 - Test herringbone with both bronze and grout, two-stone weaves, and bronze/silver
   Trim, Guilloche, Quatrefoil and Rosette inlays. Check Inherit, On and Off separately.
   Colours, metal details and connected textures should remain intact.
-- Check Kelastrion, Latmion and Psamatheon, plus aged, ashlar, hewn, rusticated,
+- Check Kelastrion, Latmion and Psamatheon with their individual switches on and off.
+- Check aged, ashlar, hewn, rusticated,
   rock and Diaphanes variants. Stone high-polish switches should not change them.
 
-The 24 eligible stones are Aganite, Aterzon, Borealis, Brectite, Calacattum,
-Chalstrom, Chrysonyx, Etruscus, Gelastrum, Glacium, Hesperion, Imperium, Kylorion,
-Laurentium, Mielonyx, Nerium, Noxoplis, Porphyros, Portorium, Rosinium, Sanguenite,
+The 27 eligible stones are Aganite, Aterzon, Borealis, Brectite, Calacattum,
+Chalstrom, Chrysonyx, Etruscus, Gelastrum, Glacium, Hesperion, Imperium, Kelastrion, Kylorion, Latmion,
+Laurentium, Mielonyx, Nerium, Noxoplis, Porphyros, Portorium, Psamatheon, Rosinium, Sanguenite,
 Selenephos, Solistra and Striatus.
 
 ## 3. Glazing and ordinary window glass
@@ -52,11 +60,16 @@ Selenephos, Solistra and Striatus.
 - Repeat with native textures and the optional Collection pack you normally use.
   With shaders off, there should be no missing textures or unexpected red glass.
 
-## 4. Two-way Arch Window glass
+## 4. Two-way Arch and Georgian Window glass
 
-- Select two_way with the debug stick. With the master and Two-way glass switches
+- On Georgian Windows, test both hinges, single and wide windows, open and closed.
+  The opening wings keep the coating on their outside; fixed upper panes keep it
+  facing outwards. Extend/recalculate the cluster and check the glass choice remains.
+
+- Test both Arch Windows and French Georgian Windows. Select two_way with the debug stick. With the master and Two-way glass switches
   on, restart and check that the exterior has the stronger reflective finish while
-  the interior retains its normal glass appearance.
+  the interior retains its normal glass appearance. The exterior should now be
+  neutral silver rather than black, with High polish on or off.
 - Check north, east, south and west facings, especially the right upper arch piece,
   and check a wider connected window. The mirror must stay on the outside.
 - Toggle Two-way glass independently of Glazing & window glass and the stone

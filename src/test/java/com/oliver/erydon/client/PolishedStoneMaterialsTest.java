@@ -27,8 +27,8 @@ class PolishedStoneMaterialsTest {
     private static final List<String> STONES = List.of(
             "aganite", "aterzon", "borealis", "brectite", "calacattum", "chalstrom",
             "chrysonyx", "etruscus", "gelastrum", "glacium", "hesperion", "imperium",
-            "kylorion", "laurentium", "mielonyx", "nerium", "noxoplis", "porphyros",
-            "portorium", "rosinium", "sanguenite", "selenephos", "solistra", "striatus");
+            "kelastrion", "kylorion", "latmion", "laurentium", "mielonyx", "nerium", "noxoplis", "porphyros",
+            "portorium", "psamatheon", "rosinium", "sanguenite", "selenephos", "solistra", "striatus");
 
     @Test
     void allPolishedFormsAndInlaysAreIncluded() {
@@ -50,7 +50,7 @@ class PolishedStoneMaterialsTest {
     }
 
     @Test
-    void agedRoughHonedGlassAndOtherNamespacesStayExcluded() {
+    void agedRoughGlassAndOtherNamespacesStayExcluded() {
         for (String stone : STONES) {
             for (String finish : List.of("aged", "ashlar", "hewn", "rusticated", "rock", "diaphanes")) {
                 assertFalse(includes(stone + "_" + finish + "_block"));
@@ -60,7 +60,7 @@ class PolishedStoneMaterialsTest {
         }
         for (String stone : List.of("kelastrion", "latmion", "psamatheon")) {
             for (String form : List.of("block", "alcove_gothic", "herringbone_bronze_block", "trim_silver_block")) {
-                assertFalse(includes(stone + "_" + form));
+                assertTrue(includes(stone + "_" + form));
             }
         }
         assertFalse(includes("glazing_white"));

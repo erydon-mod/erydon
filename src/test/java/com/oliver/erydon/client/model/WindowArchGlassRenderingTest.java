@@ -79,7 +79,7 @@ class WindowArchGlassRenderingTest {
         assertEquals(color.getHeight(), specular.getHeight());
         for (int y = 0; y < 16; y++) {
             for (int x = 0; x < 16; x++) {
-                assertEquals(0xFF101010, color.getRGB(x, y));
+                assertEquals(0xFFD2D2D2, color.getRGB(x, y));
                 assertEquals(0xFFFFFF00, specular.getRGB(x, y));
             }
         }
