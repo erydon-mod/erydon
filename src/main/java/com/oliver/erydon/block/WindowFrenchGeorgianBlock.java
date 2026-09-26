@@ -4,6 +4,7 @@ import com.oliver.erydon.state.ClusterManualLockState;
 import com.oliver.erydon.util.ClusterRecalcSafety;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.enums.DoorHinge;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -55,6 +56,7 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
     public static final EnumProperty<Piece> PIECE = EnumProperty.of("piece", Piece.class);
     public static final BooleanProperty SILL = BooleanProperty.of("sill");
     public static final EnumProperty<WindowArchBlock.Glass> GLASS = WindowArchBlock.GLASS;
+    public static final EnumProperty<Corner> CORNER = EnumProperty.of("corner", Corner.class);
 
     // Prevent re-entrant cluster sync loops when we update many blocks at once.
     private static final ThreadLocal<Boolean> SYNCING = ThreadLocal.withInitial(() -> false);
@@ -177,53 +179,82 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
                 .with(PIECE, Piece.LOWER_SINGLE)
                 .with(SILL, false)
                 .with(GLASS, WindowArchBlock.Glass.NORMAL)
+                .with(CORNER, Corner.NONE)
         );
     }
 
     @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        builder.add(FACING, OPEN, HINGE, PIECE, SILL, GLASS);
+        builder.add(FACING, OPEN, HINGE, PIECE, SILL, GLASS, CORNER);
+    }
+
+    @Override
+    public boolean canReplace(BlockState state, ItemPlacementContext ctx) {
+        return ctx.getStack().isOf(asItem()) && placementCorner(state, ctx) != Corner.NONE;
+    }
+
+    private static Corner placementCorner(BlockState state, ItemPlacementContext ctx) {
+        if (state.get(CORNER) != Corner.NONE) return Corner.NONE;
+        return Corner.forPlacement(state.get(FACING), state.get(PIECE),
+                ctx.getHorizontalPlayerFacing().getOpposite(), ctx.getSide(),
+                ctx.canReplaceExisting(), ctx.shouldCancelInteraction());
     }
 
     @Override
     public BlockState getPlacementState(ItemPlacementContext ctx) {
         World world = ctx.getWorld();
         BlockPos pos = ctx.getBlockPos();
+        BlockState existing = world.getBlockState(pos);
+        if (existing.isOf(this)) {
+            Corner corner = placementCorner(existing, ctx);
+            return corner == Corner.NONE ? null : existing.with(CORNER, corner);
+        }
 
-        // Default: player-based
-        Direction facing = ctx.getHorizontalPlayerFacing().getOpposite();
+        // A supporting wall selects its own face; floor placement follows the player.
+        Direction facing = ctx.getSide().getAxis().isHorizontal()
+                ? ctx.getSide() : ctx.getHorizontalPlayerFacing().getOpposite();
         boolean open = world.isReceivingRedstonePower(pos);
         DoorHinge hinge = getDoorLikeHinge(ctx, facing);
-
-        // If we are placing against an existing window, inherit its cluster identity.
+        BlockState inherit = null;
         BlockPos clickedPos = pos.offset(ctx.getSide().getOpposite());
         BlockState clicked = world.getBlockState(clickedPos);
-
-        BlockState inherit = null;
         if (clicked.isOf(this)) {
-            inherit = clicked;
-        } else {
-            // Fallback: any adjacent window
+            Direction connected = facingForPlacement(clicked, ctx.getSide(), facing);
+            if (connected != null) {
+                facing = connected;
+                inherit = clicked;
+            }
+        }
+        if (inherit == null) {
             for (Direction d : Direction.values()) {
-                BlockState n = world.getBlockState(pos.offset(d));
-                if (n.isOf(this)) {
-                    inherit = n;
+                BlockState neighbour = world.getBlockState(pos.offset(d));
+                if (!neighbour.isOf(this)) continue;
+                Direction connected = facingForPlacement(neighbour, d.getOpposite(), facing);
+                // Nearby windows must not turn a new perpendicular run back into the old plane.
+                if (connected != null && connected.getAxis() == facing.getAxis()) {
+                    facing = connected;
+                    inherit = neighbour;
                     break;
                 }
             }
         }
-
         if (inherit != null) {
-            facing = inherit.get(FACING);
             hinge = inherit.get(HINGE);
             open = inherit.get(OPEN);
         }
-
-        return this.getDefaultState()
-                .with(FACING, facing)
-                .with(OPEN, open)
-                .with(HINGE, hinge)
+        return getDefaultState().with(FACING, facing).with(OPEN, open).with(HINGE, hinge)
                 .with(GLASS, inherit == null ? WindowArchBlock.Glass.NORMAL : inherit.get(GLASS));
+    }
+
+    private static Direction facingForPlacement(BlockState neighbour, Direction offset, Direction preferred) {
+        Direction primary = neighbour.get(FACING);
+        Direction secondary = secondaryFacing(neighbour);
+        if (offset.getAxis() == Direction.Axis.Y) {
+            return secondary != null && secondary.getAxis() == preferred.getAxis() ? secondary : primary;
+        }
+        if (offset.getAxis() != primary.getAxis()) return primary;
+        if (secondary != null && offset.getAxis() != secondary.getAxis()) return secondary;
+        return null;
     }
 
 
@@ -234,6 +265,10 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
 
         clearManualLock(world, pos);
         reflowConnectedAutoComponent(world, pos);
+        if (state.get(CORNER) != Corner.NONE) {
+            applyOpenToCluster(world, pos, state.get(OPEN));
+            applyGlassToCluster(world, pos, state.get(GLASS));
+        }
     }
 
     @Override
@@ -243,10 +278,12 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
 
         if (!state.isOf(newState.getBlock())) {
             clearManualLock(world, pos);
-            for (BlockPos n : planeNeighbours(pos, state.get(FACING))) {
-                BlockState ns = world.getBlockState(n);
-                if (ns.isOf(this)) {
-                    reflowConnectedAutoComponent(world, n);
+            for (Direction facing : facings(state)) {
+                for (BlockPos n : planeNeighbours(pos, facing)) {
+                    BlockState ns = world.getBlockState(n);
+                    if (ns.isOf(this) && occupiesFacing(ns, facing)) {
+                        reflowConnectedAutoComponent(world, n);
+                    }
                 }
             }
         }
@@ -263,12 +300,25 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
 
         boolean openChanged = state.get(OPEN) != oldState.get(OPEN);
         boolean glassChanged = state.get(GLASS) != oldState.get(GLASS);
-        if (!openChanged && !glassChanged) return;
+        boolean cornerChanged = state.get(CORNER) != oldState.get(CORNER);
+        if (!openChanged && !glassChanged && !cornerChanged) return;
 
         boolean started = beginSync();
         try {
             if (openChanged) applyOpenToCluster(world, pos, state.get(OPEN));
             if (glassChanged) applyGlassToCluster(world, pos, state.get(GLASS));
+            if (cornerChanged) {
+                reflowConnectedAutoComponent(world, pos);
+                Direction oldSecondary = secondaryFacing(oldState);
+                if (oldSecondary != null && !occupiesFacing(state, oldSecondary)) {
+                    for (BlockPos neighbour : planeNeighbours(pos, oldSecondary)) {
+                        BlockState adjacent = world.getBlockState(neighbour);
+                        if (adjacent.isOf(this) && occupiesFacing(adjacent, oldSecondary)) {
+                            reflowConnectedAutoComponent(world, neighbour);
+                        }
+                    }
+                }
+            }
         } finally {
             endSync(started);
         }
@@ -286,7 +336,7 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
                 }
 
                 boolean locked = toggleManualLock(world, pos);
-                handleManualLockChanged(world, pos, state.get(FACING), locked);
+                handleManualLockChanged(world, pos, locked);
                 player.sendMessage(Text.literal("French Georgian window mode: " + (locked ? "manual" : "auto")), true);
                 return ActionResult.CONSUME;
             }
@@ -294,40 +344,10 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
             // Let vanilla handle property selection + cycling, without opening the window.
             return ActionResult.PASS;
         }
-        boolean placementClick = player.isSneaking() || hit.getSide().getAxis() == Direction.Axis.Y;
-
-        if (placementClick && held.getItem() instanceof BlockItem bi && bi.getBlock() == this) {
-            if (world.isClient) {
-                return ActionResult.SUCCESS;
-            }
-
-            Direction facing = state.get(FACING);
-            Direction right  = facing.rotateYClockwise();
-            Direction left   = facing.rotateYCounterclockwise();
-            Direction side   = hit.getSide();
-
-            boolean inPlane = (side == Direction.UP || side == Direction.DOWN || side == left || side == right);
-
-            if (inPlane) {
-                BlockPos placePos = pos.offset(side);
-
-                BlockHitResult placeHit = new BlockHitResult(hit.getPos(), side, placePos, false);
-                ItemPlacementContext ctx = new ItemPlacementContext(world, player, hand, held, placeHit);
-
-                BlockState target = world.getBlockState(placePos);
-                if (target.canReplace(ctx)) {
-                    BlockState placed = getPlacementState(ctx);
-                    if (placed != null) {
-                        world.setBlockState(placePos, placed, Block.NOTIFY_ALL);
-                        reflowConnectedAutoComponent(world, placePos);
-                        return ActionResult.SUCCESS; // do NOT open
-                    }
-                }
-            }
-            return ActionResult.SUCCESS;
-        }
-
-        if (placementClick) {
+        // Let BlockItem handle targeting, replacement, collision, sound and item consumption.
+        // In particular, a top click must offset upward before considering a corner merge.
+        if ((held.getItem() instanceof BlockItem bi && bi.getBlock() == this)
+                || player.isSneaking() || hit.getSide().getAxis() == Direction.Axis.Y) {
             return ActionResult.PASS;
         }
 
@@ -365,12 +385,20 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
     private void applyGlassToCluster(World world, BlockPos anchor, WindowArchBlock.Glass glass) {
         BlockState anchorState = world.getBlockState(anchor);
         if (!anchorState.isOf(this)) return;
-        Direction facing = anchorState.get(FACING);
-        for (BlockPos p : collectPlaneComponentAnyMode(world, anchor, facing)) {
+        for (BlockPos p : collectConnectedComponent(world, anchor)) {
             BlockState state = world.getBlockState(p);
-            if (state.isOf(this) && state.get(FACING) == facing && state.get(GLASS) != glass) {
+            if (state.isOf(this) && state.get(GLASS) != glass) {
                 world.setBlockState(p, state.with(GLASS, glass), Block.NOTIFY_LISTENERS);
             }
+        }
+    }
+
+    @Override
+    public void afterBreak(World world, PlayerEntity player, BlockPos pos, BlockState state,
+                           BlockEntity blockEntity, ItemStack tool) {
+        super.afterBreak(world, player, pos, state, blockEntity, tool);
+        if (!world.isClient && !player.getAbilities().creativeMode && state.get(CORNER) != Corner.NONE) {
+            Block.dropStack(world, pos, new ItemStack(this));
         }
     }
 
@@ -381,15 +409,12 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
         BlockState anchorState = world.getBlockState(anchor);
         if (!anchorState.isOf(this)) return;
 
-        Direction facing = anchorState.get(FACING);
-
         // Open/closed is cluster-level (door-like), even if some blocks are MANUAL.
-        Set<BlockPos> component = collectPlaneComponentAnyMode(world, anchor, facing);
+        Set<BlockPos> component = collectConnectedComponent(world, anchor);
 
         for (BlockPos p : component) {
             BlockState s = world.getBlockState(p);
             if (!s.isOf(this)) continue;
-            if (s.get(FACING) != facing) continue;
 
             BlockState ns = s.with(OPEN, open);
             if (!Objects.equals(ns, s)) {
@@ -410,7 +435,13 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
     @Override
     public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         int idx = facingIndex(state.get(FACING));
-        return SHAPES.get(ShapeKey.CLOSED_UPPER_SINGLE)[idx]; // pane-sized outline (rotated by facing)
+        VoxelShape outline = SHAPES.get(ShapeKey.CLOSED_UPPER_SINGLE)[idx];
+        Direction secondary = secondaryFacing(state);
+        if (secondary != null) {
+            outline = VoxelShapes.combine(outline,
+                    SHAPES.get(ShapeKey.CLOSED_UPPER_SINGLE)[facingIndex(secondary)], BooleanBiFunction.OR);
+        }
+        return outline;
     }
 
     @Override
@@ -419,16 +450,29 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
     }
 
     private VoxelShape getWindowShape(BlockState state) {
-        int idx = facingIndex(state.get(FACING));
+        VoxelShape shape = getWindowFaceShape(state, state.get(FACING), state.get(PIECE),
+                state.get(HINGE), state.get(SILL));
+        Direction secondary = secondaryFacing(state);
+        if (secondary != null) {
+            shape = VoxelShapes.combine(shape, getWindowFaceShape(state, secondary,
+                    cornerPiece(state), state.get(HINGE), state.get(SILL)),
+                    BooleanBiFunction.OR);
+        }
+        return shape;
+    }
+
+    private VoxelShape getWindowFaceShape(BlockState state, Direction facing, Piece piece,
+                                          DoorHinge hinge, boolean sill) {
+        int idx = facingIndex(facing);
 
         VoxelShape base = VoxelShapes.empty();
-        ShapeKey key = shapeKeyForState(state);
+        ShapeKey key = shapeKeyForState(state.get(OPEN), piece, hinge);
 
         if (key != null) {
             base = SHAPES.get(key)[idx];
         }
 
-        if (state.get(SILL)) {
+        if (sill) {
             // Avoid simplify-heavy unions while Minecraft rebuilds the global shape cache.
             base = VoxelShapes.combine(base, SHAPES.get(ShapeKey.SILL)[idx], BooleanBiFunction.OR);
         }
@@ -436,9 +480,7 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
         return base;
     }
 
-    private ShapeKey shapeKeyForState(BlockState state) {
-        boolean open = state.get(OPEN);
-        Piece piece = state.get(PIECE);
+    private ShapeKey shapeKeyForState(boolean open, Piece piece, DoorHinge hinge) {
 
         if (!open) {
             return switch (piece) {
@@ -456,8 +498,8 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
         }
 
         return switch (piece) {
-            case UPPER_SINGLE -> (state.get(HINGE) == DoorHinge.LEFT) ? ShapeKey.OPEN_UPPER_SINGLE_LH : ShapeKey.OPEN_UPPER_SINGLE_RH;
-            case LOWER_SINGLE -> (state.get(HINGE) == DoorHinge.LEFT) ? ShapeKey.OPEN_LOWER_SINGLE_LH : ShapeKey.OPEN_LOWER_SINGLE_RH;
+            case UPPER_SINGLE -> (hinge == DoorHinge.LEFT) ? ShapeKey.OPEN_UPPER_SINGLE_LH : ShapeKey.OPEN_UPPER_SINGLE_RH;
+            case LOWER_SINGLE -> (hinge == DoorHinge.LEFT) ? ShapeKey.OPEN_LOWER_SINGLE_LH : ShapeKey.OPEN_LOWER_SINGLE_RH;
 
             case UPPER_MULTI_LH -> ShapeKey.OPEN_UPPER_MULTI_LH;
             case UPPER_MULTI_MID -> ShapeKey.OPEN_UPPER_MULTI_MID;
@@ -477,16 +519,21 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
     private void reflowConnectedAutoComponent(World world, BlockPos seed, Set<BlockPos> component) {
         boolean started = beginSync();
         try {
-
-        ClusterPartition partition = partitionComponent(world, seed, component);
-        for (Rect rect : partition.rects) {
-            applyRectLayout(world, rect);
-        }
+            BlockState seedState = world.getBlockState(seed);
+            if (!seedState.isOf(this)) return;
+            reflowPlane(world, seed, seedState.get(FACING), component);
+            Direction secondary = secondaryFacing(seedState);
+            if (secondary != null) reflowPlane(world, seed, secondary, null);
     
         } finally {
             endSync(started);
         }
 }
+
+    private void reflowPlane(World world, BlockPos seed, Direction facing, Set<BlockPos> component) {
+        ClusterPartition partition = partitionComponent(world, seed, facing, component);
+        for (Rect rect : partition.rects) applyRectLayout(world, rect);
+    }
 
     @Override
     public ClusterRecalcResult recalcCluster(World world, BlockPos seed) {
@@ -496,8 +543,12 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
         }
 
         Direction facing = seedState.get(FACING);
+        Direction secondary = secondaryFacing(seedState);
         if (isManualLocked(world, seed)) {
             Set<BlockPos> lockedComponent = collectPlaneComponentWithLock(world, seed, facing, true);
+            if (secondary != null) {
+                lockedComponent.addAll(collectPlaneComponentWithLock(world, seed, secondary, true));
+            }
             if (lockedComponent.isEmpty()) {
                 return ClusterRecalcResult.none();
             }
@@ -509,6 +560,9 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
         }
 
         Set<BlockPos> component = collectPlaneComponentWithLock(world, seed, facing, false);
+        if (secondary != null) {
+            component.addAll(collectPlaneComponentWithLock(world, seed, secondary, false));
+        }
         if (component.isEmpty()) {
             return ClusterRecalcResult.none();
         }
@@ -517,7 +571,7 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
             return unsafe;
         }
 
-        reflowConnectedAutoComponent(world, seed, component);
+        reflowConnectedAutoComponent(world, seed);
         unsafe = ClusterRecalcSafety.unsafeResult(component);
         if (unsafe != null) {
             return unsafe;
@@ -535,15 +589,18 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
         Direction facing = state.get(FACING);
         Piece piece = state.get(PIECE);
         DoorHinge hinge = state.get(HINGE);
+        Corner corner = state.get(CORNER);
 
         if (mirrorSwapsLeftRight(facing, mirror)) {
             piece = swapLeftRight(piece);
             hinge = hinge == DoorHinge.LEFT ? DoorHinge.RIGHT : DoorHinge.LEFT;
+            corner = corner == Corner.LEFT ? Corner.RIGHT : corner == Corner.RIGHT ? Corner.LEFT : Corner.NONE;
         }
 
         return rotate(state, mirror.getRotation(facing))
                 .with(PIECE, piece)
-                .with(HINGE, hinge);
+                .with(HINGE, hinge)
+                .with(CORNER, corner);
     }
 
     private void applyRectLayout(World world, Rect rect) {
@@ -566,16 +623,15 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
                 BlockPos p = rect.bottomLeft.offset(rect.rightDir, dx).withY(y);
 
                 BlockState s = world.getBlockState(p);
-                if (!s.isOf(this)) continue;
+                if (!s.isOf(this) || !occupiesFacing(s, rect.facing)) continue;
                 Piece piece = computePiece(w, isTop, dx);
 
                 BlockState ns = s
                         .with(OPEN, open)
-                        .with(GLASS, glass)
-                        .with(HINGE, hinge)
-                        .with(PIECE, piece)
-                        .with(SILL, isBottom)
-                        .with(FACING, rect.facing);
+                        .with(GLASS, glass);
+                if (rect.facing == s.get(FACING)) {
+                    ns = ns.with(HINGE, hinge).with(PIECE, piece).with(SILL, isBottom);
+                }
 
                 if (!Objects.equals(ns, s)) {
                     world.setBlockState(p, ns, ClusterRecalcSafety.updateFlags(Block.NOTIFY_ALL));
@@ -711,14 +767,12 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
 
 
 
-private ClusterPartition partitionComponent(World world, BlockPos seed) {
-        return partitionComponent(world, seed, null);
-    }
-
-private ClusterPartition partitionComponent(World world, BlockPos seed, Set<BlockPos> discoveredComponent) {
+private ClusterPartition partitionComponent(World world, BlockPos seed, Direction facing,
+                                            Set<BlockPos> discoveredComponent) {
         BlockState seedState = world.getBlockState(seed);
-
-        Direction facing   = seedState.get(FACING);
+        if (!seedState.isOf(this) || !occupiesFacing(seedState, facing)) {
+            return new ClusterPartition(List.of(), facing);
+        }
         Direction rightDir = facing.rotateYClockwise();
 
         Set<BlockPos> component = discoveredComponent == null
@@ -820,30 +874,33 @@ private ClusterPartition partitionComponent(World world, BlockPos seed, Set<Bloc
         return collectPlaneComponentWithLock(world, start, facing, false);
     }
 
-    private Set<BlockPos> collectPlaneComponentAnyMode(World world, BlockPos start, Direction facing) {
+    private Set<BlockPos> collectConnectedComponent(World world, BlockPos start) {
         Set<BlockPos> out = new HashSet<>();
-        Queue<BlockPos> q = new ArrayDeque<>();
-
-        BlockState startState = ClusterRecalcSafety.getBlockState(world, start);
-        if (!startState.isOf(this)) return out;
-        if (startState.get(FACING) != facing) return out;
-
-        if (!ClusterRecalcSafety.claim(start)) return out;
+        Queue<BlockPos> queue = new ArrayDeque<>();
+        if (!ClusterRecalcSafety.getBlockState(world, start).isOf(this)
+                || !ClusterRecalcSafety.claim(start)) return out;
         out.add(start);
-        q.add(start);
-
-        while (!q.isEmpty()) {
-            BlockPos p = q.remove();
-            for (BlockPos n : planeNeighbours(p, facing)) {
-                if (out.contains(n)) continue;
-
-                BlockState ns = ClusterRecalcSafety.getBlockState(world, n);
-                if (!ns.isOf(this)) continue;
-                if (ns.get(FACING) != facing) continue;
-
-                if (!ClusterRecalcSafety.claim(n)) return out;
-                out.add(n);
-                q.add(n);
+        queue.add(start);
+        while (!queue.isEmpty()) {
+            BlockPos pos = queue.remove();
+            BlockState state = ClusterRecalcSafety.getBlockState(world, pos);
+            for (Direction side : Direction.values()) {
+                BlockPos next = pos.offset(side);
+                if (out.contains(next)) continue;
+                BlockState neighbour = ClusterRecalcSafety.getBlockState(world, next);
+                if (!neighbour.isOf(this)) continue;
+                boolean joined = false;
+                for (Direction facing : facings(state)) {
+                    if ((side.getAxis() == Direction.Axis.Y || side.getAxis() != facing.getAxis())
+                            && occupiesFacing(neighbour, facing)) {
+                        joined = true;
+                        break;
+                    }
+                }
+                if (!joined) continue;
+                if (!ClusterRecalcSafety.claim(next)) return out;
+                out.add(next);
+                queue.add(next);
             }
         }
         return out;
@@ -855,7 +912,7 @@ private ClusterPartition partitionComponent(World world, BlockPos seed, Set<Bloc
 
         BlockState startState = ClusterRecalcSafety.getBlockState(world, start);
         if (!startState.isOf(this)) return out;
-        if (startState.get(FACING) != facing) return out;
+        if (!occupiesFacing(startState, facing)) return out;
         if (isManualLocked(world, start) != locked) return out;
 
         if (!ClusterRecalcSafety.claim(start)) return out;
@@ -869,7 +926,7 @@ private ClusterPartition partitionComponent(World world, BlockPos seed, Set<Bloc
 
                 BlockState ns = ClusterRecalcSafety.getBlockState(world, n);
                 if (!ns.isOf(this)) continue;
-                if (ns.get(FACING) != facing) continue;
+                if (!occupiesFacing(ns, facing)) continue;
                 if (isManualLocked(world, n) != locked) continue;
 
                 if (!ClusterRecalcSafety.claim(n)) return out;
@@ -880,21 +937,20 @@ private ClusterPartition partitionComponent(World world, BlockPos seed, Set<Bloc
         return out;
     }
 
-    private void handleManualLockChanged(World world, BlockPos pos, Direction facing, boolean locked) {
+    private void handleManualLockChanged(World world, BlockPos pos, boolean locked) {
         if (!locked) {
             reflowConnectedAutoComponent(world, pos);
             return;
         }
 
-        for (BlockPos neighbourPos : planeNeighbours(pos, facing)) {
-            BlockState neighbourState = world.getBlockState(neighbourPos);
-            if (!neighbourState.isOf(this) || neighbourState.get(FACING) != facing) {
-                continue;
+        BlockState state = world.getBlockState(pos);
+        for (Direction plane : facings(state)) {
+            for (BlockPos neighbourPos : planeNeighbours(pos, plane)) {
+                BlockState neighbourState = world.getBlockState(neighbourPos);
+                if (!neighbourState.isOf(this) || !occupiesFacing(neighbourState, plane)
+                        || isManualLocked(world, neighbourPos)) continue;
+                reflowConnectedAutoComponent(world, neighbourPos);
             }
-            if (isManualLocked(world, neighbourPos)) {
-                continue;
-            }
-            reflowConnectedAutoComponent(world, neighbourPos);
         }
     }
 
@@ -921,6 +977,23 @@ private ClusterPartition partitionComponent(World world, BlockPos seed, Set<Bloc
                 pos.offset(left),
                 pos.offset(right)
         );
+    }
+
+    public static Direction secondaryFacing(BlockState state) {
+        return state.get(CORNER).secondaryFacing(state.get(FACING));
+    }
+
+    public static Piece cornerPiece(BlockState state) {
+        return state.get(CORNER).pieceFor(state.get(PIECE), state.get(OPEN));
+    }
+
+    private static List<Direction> facings(BlockState state) {
+        Direction secondary = secondaryFacing(state);
+        return secondary == null ? List.of(state.get(FACING)) : List.of(state.get(FACING), secondary);
+    }
+
+    private static boolean occupiesFacing(BlockState state, Direction facing) {
+        return state.get(FACING) == facing || secondaryFacing(state) == facing;
     }
 
     private static boolean mirrorSwapsLeftRight(Direction facing, BlockMirror mirror) {
@@ -1116,6 +1189,63 @@ private ClusterPartition partitionComponent(World world, BlockPos seed, Set<Bloc
         private final String id;
         Piece(String id) { this.id = id; }
         @Override public String asString() { return id; }
+    }
+
+    public enum Corner implements StringIdentifiable {
+        NONE("none"), LEFT("left"), RIGHT("right");
+
+        private final String id;
+
+        Corner(String id) { this.id = id; }
+
+        @Override public String asString() { return id; }
+
+        public Direction secondaryFacing(Direction primary) {
+            return switch (this) {
+                case LEFT -> primary.rotateYCounterclockwise();
+                case RIGHT -> primary.rotateYClockwise();
+                case NONE -> null;
+            };
+        }
+
+        public static Corner forPlacement(Direction primary, Piece piece, Direction playerFacing,
+                                          Direction clickedSide, boolean directClick, boolean sneaking) {
+            // Direct top/bottom clicks extend the column. Sneaking explicitly extends sideways.
+            if (directClick && (clickedSide.getAxis() == Direction.Axis.Y || sneaking)) return NONE;
+            Direction requested = !directClick && clickedSide.getAxis().isHorizontal()
+                    ? clickedSide : playerFacing;
+            if (requested.getAxis() == primary.getAxis()) return NONE;
+            Corner corner = requested == primary.rotateYClockwise() ? RIGHT : LEFT;
+            return corner.accepts(piece) ? corner : NONE;
+        }
+
+        public boolean accepts(Piece primaryPiece) {
+            return switch (primaryPiece) {
+                case UPPER_SINGLE, LOWER_SINGLE -> true;
+                case UPPER_MULTI_LH, LOWER_MULTI_LH -> this == RIGHT;
+                case UPPER_MULTI_RH, LOWER_MULTI_RH -> this == LEFT;
+                default -> false;
+            };
+        }
+
+        public Piece pieceFor(Piece primaryPiece, boolean open) {
+            boolean upper = switch (primaryPiece) {
+                case UPPER_SINGLE, UPPER_MULTI_LH, UPPER_MULTI_MID, UPPER_MULTI_RH -> true;
+                default -> false;
+            };
+            Piece endPiece = this == LEFT
+                    ? (upper ? Piece.UPPER_MULTI_LH : Piece.LOWER_MULTI_LH)
+                    : (upper ? Piece.UPPER_MULTI_RH : Piece.LOWER_MULTI_RH);
+            // Open wings hinge away from the inside corner.
+            if (!open) return endPiece;
+            return switch (endPiece) {
+                case UPPER_MULTI_LH -> Piece.UPPER_MULTI_RH;
+                case UPPER_MULTI_RH -> Piece.UPPER_MULTI_LH;
+                case LOWER_MULTI_LH -> Piece.LOWER_MULTI_RH;
+                case LOWER_MULTI_RH -> Piece.LOWER_MULTI_LH;
+                default -> endPiece;
+            };
+        }
     }
 
     private static VoxelShape makeClosedLowerSingleShape() {
