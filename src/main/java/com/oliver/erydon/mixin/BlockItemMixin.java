@@ -2,6 +2,7 @@ package com.oliver.erydon.mixin;
 
 import com.oliver.erydon.Erydon;
 import com.oliver.erydon.block.ClusterRebuildableBlock;
+import com.oliver.erydon.block.LayerMultifaceBlock;
 import com.oliver.erydon.util.BlockStateTagHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -20,6 +21,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(BlockItem.class)
 public abstract class BlockItemMixin {
+    @Inject(method = "placeFromNbt", at = @At("HEAD"), cancellable = true)
+    private void erydon$preserveMultifacePlacement(BlockPos pos, World world, ItemStack stack,
+                                                  BlockState state, CallbackInfoReturnable<BlockState> cir) {
+        // Picked/Axiom palette stacks can carry faces and layers=1. Applying these
+        // after placement would undo the surface/thickness selected by the click.
+        if (state.getBlock() instanceof LayerMultifaceBlock) cir.setReturnValue(state);
+    }
+
     @Inject(method = "postPlacement", at = @At("TAIL"))
     private void erydon$restoreCopiedBlockStateAfterPlacement(
             BlockPos pos,
@@ -34,6 +43,8 @@ public abstract class BlockItemMixin {
         }
 
         BlockState current = world.getBlockState(pos);
+        // Multiface placement deliberately follows the clicked surface and supports stacking.
+        if (current.getBlock() instanceof LayerMultifaceBlock) return;
         Identifier blockId = Registries.BLOCK.getId(current.getBlock());
         if (!Erydon.MOD_ID.equals(blockId.getNamespace())) {
             return;

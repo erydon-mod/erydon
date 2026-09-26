@@ -158,6 +158,18 @@ public final class GeorgianWallSlopeResolver {
             );
         }
 
+        if (support.getBlock() instanceof LayerMultifaceBlock) {
+            return partForMultifaceLayer(
+                    support.get(LayerMultifaceBlock.LAYERS),
+                    support.get(LayerMultifaceBlock.NORTH),
+                    support.get(LayerMultifaceBlock.SOUTH),
+                    support.get(LayerMultifaceBlock.EAST),
+                    support.get(LayerMultifaceBlock.WEST),
+                    support.get(LayerMultifaceBlock.UP),
+                    support.get(LayerMultifaceBlock.DOWN)
+            );
+        }
+
         // loadedState uses void air when the chunk is not immediately
         // available. Do not pass that fallback into third-party shape hooks,
         // which may query the ServerWorld again and defeat the non-blocking
@@ -691,6 +703,14 @@ public final class GeorgianWallSlopeResolver {
             return Part.UPPER;
         }
         return Part.NONE;
+    }
+
+    static Part partForMultifaceLayer(int layers, boolean north, boolean south,
+                                      boolean east, boolean west, boolean up, boolean down) {
+        if (!down || up || north || south || east || west) {
+            return Part.NONE;
+        }
+        return partForLayer(layers, false);
     }
 
     static boolean isAlignedShallowStair(StairShape shape,

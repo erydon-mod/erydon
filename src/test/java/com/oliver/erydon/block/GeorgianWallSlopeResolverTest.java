@@ -99,6 +99,33 @@ class GeorgianWallSlopeResolverTest {
     }
 
     @Test
+    void multifaceLayersCountOnlyWhenTheyFormABottomHorizontalSlab() {
+        assertEquals(GeorgianWallSlopeResolver.Part.UPPER,
+                GeorgianWallSlopeResolver.partForMultifaceLayer(4, false, false, false, false, false, true));
+        assertEquals(GeorgianWallSlopeResolver.Part.LOWER,
+                GeorgianWallSlopeResolver.partForMultifaceLayer(8, false, false, false, false, false, true));
+
+        for (int layers : new int[]{1, 3, 5, 7}) {
+            assertEquals(GeorgianWallSlopeResolver.Part.NONE,
+                    GeorgianWallSlopeResolver.partForMultifaceLayer(layers, false, false, false, false, false, true));
+        }
+        for (int extraFace = 0; extraFace < 5; extraFace++) {
+            boolean[] faces = new boolean[5];
+            faces[extraFace] = true;
+            assertEquals(GeorgianWallSlopeResolver.Part.NONE,
+                    GeorgianWallSlopeResolver.partForMultifaceLayer(4, faces[0], faces[1], faces[2],
+                            faces[3], faces[4], true));
+            assertEquals(GeorgianWallSlopeResolver.Part.NONE,
+                    GeorgianWallSlopeResolver.partForMultifaceLayer(8, faces[0], faces[1], faces[2],
+                            faces[3], faces[4], true));
+        }
+        assertEquals(GeorgianWallSlopeResolver.Part.NONE,
+                GeorgianWallSlopeResolver.partForMultifaceLayer(4, false, false, false, false, true, false));
+        assertEquals(GeorgianWallSlopeResolver.Part.NONE,
+                GeorgianWallSlopeResolver.partForMultifaceLayer(8, false, false, false, false, false, false));
+    }
+
+    @Test
     void lowerSlabsRemainSupportedAndUpperSlabsRemainRejected() {
         assertEquals(
                 GeorgianWallSlopeResolver.Part.UPPER,

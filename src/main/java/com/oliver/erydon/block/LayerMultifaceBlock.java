@@ -55,9 +55,6 @@ public class LayerMultifaceBlock extends Block implements Waterloggable {
      */
     private static final VoxelShape TARGET_POST = Block.createCuboidShape(6, 0, 6, 10, 16, 10);
 
-    // Boundary detection tolerance
-    private static final double FACE_EPS = 1.0e-3;
-
     static {
         for (int i = 1; i <= 8; i++) {
             int d = i * 2; // 2..16 px
@@ -199,14 +196,7 @@ public class LayerMultifaceBlock extends Block implements Waterloggable {
         double ry = hit.y - pos.getY();
         double rz = hit.z - pos.getZ();
 
-        if (Math.abs(rx - 0.0) <= FACE_EPS) return Direction.WEST;
-        if (Math.abs(rx - 1.0) <= FACE_EPS) return Direction.EAST;
-        if (Math.abs(ry - 0.0) <= FACE_EPS) return Direction.DOWN;
-        if (Math.abs(ry - 1.0) <= FACE_EPS) return Direction.UP;
-        if (Math.abs(rz - 0.0) <= FACE_EPS) return Direction.NORTH;
-        if (Math.abs(rz - 1.0) <= FACE_EPS) return Direction.SOUTH;
-
-        return null;
+        return MultifacePlacement.touchingFace(ctx.getSide(), rx, ry, rz);
     }
 
     private static boolean isAdjacentFaceClick(ItemPlacementContext ctx) {
@@ -303,12 +293,12 @@ public class LayerMultifaceBlock extends Block implements Waterloggable {
 
         // Face-adding phase (layers==1, not sneaking)
         if (layers == 1 && !sneaking) {
-            if (faceCount(state) >= 6) return false;
-
             Direction implied = impliedFaceClick(ctx);
             if (implied != null && state.get(prop(implied))) {
                 return layers < 8; // allow thickening by re-clicking the same face
             }
+
+            if (faceCount(state) >= 6) return false;
 
             Direction want = requestedFace(state, ctx);
             return want != null && !state.get(prop(want));
