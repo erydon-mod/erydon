@@ -19,6 +19,10 @@ public final class PolishedStoneMaterials {
         return settings.enables(material, finish(path));
     }
 
+    public static HighPolishSettings.Level level(HighPolishSettings settings, String path) {
+        return settings.level(path.substring(0, path.indexOf('_')), finish(path));
+    }
+
     static Finish finish(String path) {
         if (path.contains("_herringbone_")) return Finish.HERRINGBONE;
         if (path.contains("_weave_")) return Finish.WEAVE;
@@ -29,12 +33,21 @@ public final class PolishedStoneMaterials {
     }
 
     public static boolean includes(String namespace, String path) {
-        if (!"erydon".equals(namespace)) return false;
+        // Companion mods share these stone textures and the same per-material finish choices.
+        if (!"erydon".equals(namespace) && !"themelios".equals(namespace) && !"daedalon".equals(namespace)) return false;
         String[] parts = path.split("_");
         if (parts.length < 2 || !MATERIALS.contains(parts[0])) return false;
         for (String part : parts) {
             if (EXCLUDED_FINISHES.contains(part)) return false;
         }
         return true;
+    }
+
+    /** The shader's inexpensive square proxy for circular, Gothic and square columns. */
+    public static boolean isReflectionColumn(String path) {
+        if (!path.contains("_column_")) return false;
+        if (!includes("erydon", path)) return false;
+        return path.endsWith("_column_circular") || path.endsWith("_column_gothic")
+                || path.endsWith("_column_square");
     }
 }

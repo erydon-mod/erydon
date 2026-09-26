@@ -14,7 +14,7 @@ class HighPolishSettingsTest {
         properties.setProperty(PREFIX + "enabled", "true");
         var migrated = read(properties);
         for (String material : MATERIALS) {
-            for (Finish finish : Finish.values()) assertTrue(migrated.enables(material, finish));
+            for (Finish finish : Finish.values()) assertEquals(Level.MIRROR, migrated.level(material, finish));
         }
         assertTrue(migrated.glazingEnabled());
         assertTrue(migrated.twoWayEnabled());
@@ -24,13 +24,14 @@ class HighPolishSettingsTest {
     @Test
     void stoneAndPatternChoicesRoundTripAndDoNotMutateTheActiveSnapshot() {
         var active = defaults().withEnabled(true);
-        var changed = active.withStone("glacium", new Stone(false, Choice.ON, Choice.INHERIT, Choice.OFF))
+        var changed = active.withStone("glacium", new Stone(Level.HONED, Choice.POLISHED, Choice.INHERIT, Choice.MIRROR))
                 .withGlass(false, true);
         assertTrue(active.enables("glacium", Finish.PLAIN));
         assertFalse(changed.enables("glacium", Finish.PLAIN));
         assertTrue(changed.enables("glacium", Finish.HERRINGBONE));
         assertFalse(changed.enables("glacium", Finish.WEAVE));
-        assertFalse(changed.enables("glacium", Finish.INLAYS));
+        assertEquals(Level.POLISHED, changed.level("glacium", Finish.HERRINGBONE));
+        assertEquals(Level.MIRROR, changed.level("glacium", Finish.INLAYS));
         assertTrue(changed.enables("portorium", Finish.PLAIN));
         assertFalse(changed.glazingEnabled());
         assertTrue(changed.twoWayEnabled());
@@ -43,14 +44,54 @@ class HighPolishSettingsTest {
     @Test
     void masterOffOverridesEverythingButPreservesSavedChoices() {
         var selected = defaults().withEnabled(true)
-                .withStone("glacium", new Stone(true, Choice.ON, Choice.ON, Choice.ON));
+                .withStone("glacium", new Stone(Level.POLISHED, Choice.MIRROR, Choice.HONED, Choice.INHERIT));
         var off = selected.withEnabled(false);
         for (String material : MATERIALS) {
-            for (Finish finish : Finish.values()) assertFalse(off.enables(material, finish));
+            for (Finish finish : Finish.values()) {
+                assertFalse(off.enables(material, finish));
+                assertEquals(Level.HONED, off.level(material, finish));
+            }
         }
         assertFalse(off.glazingEnabled());
         assertFalse(off.twoWayEnabled());
         assertEquals(selected, off.withEnabled(true));
+    }
+
+    @Test
+    void oldPerStoneBooleansAndPatternOverridesMigrateToTheEquivalentFinish() {
+        var properties = new Properties();
+        properties.setProperty(PREFIX + "enabled", "true");
+        properties.setProperty(PREFIX + "stone.glacium", "false");
+        properties.setProperty(PREFIX + "stone.glacium.herringbone", "on");
+        properties.setProperty(PREFIX + "stone.glacium.inlays", "off");
+        properties.setProperty(PREFIX + "stone.latmion", "true");
+        var migrated = read(properties);
+        assertEquals(Level.HONED, migrated.level("glacium", Finish.PLAIN));
+        assertEquals(Level.MIRROR, migrated.level("glacium", Finish.HERRINGBONE));
+        assertEquals(Level.HONED, migrated.level("glacium", Finish.INLAYS));
+        assertEquals(Level.HONED, migrated.level("glacium", Finish.WEAVE));
+        assertEquals(Level.MIRROR, migrated.level("latmion", Finish.PLAIN));
+        migrated.write(properties);
+        assertEquals("honed", properties.getProperty(PREFIX + "stone.glacium"));
+        assertEquals("mirror", properties.getProperty(PREFIX + "stone.glacium.herringbone"));
+        assertEquals(migrated, read(properties));
+    }
+
+    @Test
+    void allStonePresetsResetPatternExceptionsButPreserveGlassAndTheMasterSwitch() {
+        var mixed = defaults().withGlass(false, true)
+                .withStone("latmion", new Stone(Level.HONED, Choice.MIRROR, Choice.POLISHED, Choice.HONED));
+        for (Level level : Level.values()) {
+            var changed = mixed.withAllStones(level);
+            assertFalse(changed.enabled());
+            assertFalse(changed.glazing());
+            assertTrue(changed.twoWay());
+            for (String material : MATERIALS) {
+                assertEquals(new Stone(level, Choice.INHERIT, Choice.INHERIT, Choice.INHERIT), changed.stones().get(material));
+                for (Finish finish : Finish.values()) assertEquals(level, changed.withEnabled(true).level(material, finish));
+            }
+        }
+        assertEquals(Choice.MIRROR, mixed.stones().get("latmion").herringbone());
     }
 
     @Test

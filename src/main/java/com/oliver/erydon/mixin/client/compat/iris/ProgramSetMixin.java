@@ -77,5 +77,12 @@ public abstract class ProgramSetMixin {
             args.set(1, HighPolishShaderAdapter.adaptSpiralPredicate(args.get(1)));
             args.set(5, HighPolishShaderAdapter.adaptSpiralPredicate(args.get(5)));
         }
+        if ("shadow".equals(programName)) {
+            var columns = HighPolishShaderAdapter.adaptColumnReflections(args.get(1));
+            if (columns.changed()) {
+                args.set(1, columns.text());
+                Erydon.LOGGER.info("[erydon] Circular columns enabled in Complementary's approximate block reflections.");
+            }
+        }
     }
 }

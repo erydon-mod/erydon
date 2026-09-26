@@ -151,7 +151,7 @@ final class ErydonSwapFamilyDatabase {
         if (ALL_SOURCES.containsKey(canonicalKey)) {
             return Optional.of(ALL_SOURCES.get(canonicalKey));
         }
-        for (String suffix : List.of("_polished", "_honed", "_base")) {
+        for (String suffix : List.of("_polished", "_honed", "_mirror", "_base")) {
             if (canonicalKey.endsWith(suffix)) {
                 String material = canonicalKey.substring(0, canonicalKey.length() - suffix.length());
                 if (BASE_MATERIALS.contains(material) || EXTRA_GROUP_MATERIALS.contains(material)) {

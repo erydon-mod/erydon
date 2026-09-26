@@ -2,9 +2,9 @@
 
 ## Scope and ownership
 
-This compatibility layer is owned and distributed only by ERYDON. It covers every active 6x6 repeat-CTM tile family used by an `erydon:` block and targets the user-selected `ComplementaryUnbound_r5.9_dev5.zip`. It does not modify, repack, or redistribute Complementary Unbound source or assets.
+This compatibility layer is owned and distributed only by ERYDON. It covers every active 6x6 repeat-CTM tile family used by an `erydon:` block and targets Complementary Unbound r5.9 dev5 plus Unbound and Reimagined r5.9.3. It does not modify, repack, or redistribute Complementary source or assets.
 
-Automatic activation is limited to the exact dev5 `shaders.properties` SHA-256 `a4c4e2156ad5aeb66c0ad495a2721ea092952f2cdebfaaf89a20dfa3409ef2e8`. Unknown properties remain untouched. Every terrain-source edit also requires five unique source anchors and five exact postconditions; any mismatch returns the original source byte-for-byte.
+Automatic activation is limited to reviewed `shaders.properties` SHA-256 values: dev5 `a4c4e2156ad5aeb66c0ad495a2721ea092952f2cdebfaaf89a20dfa3409ef2e8` and both r5.9.3 styles `b29be050d6296bc5df769a66e351adbaaa9108eec801eb0442137a7a81266ab7`. Unknown properties remain untouched. Every terrain-source edit also requires unique source anchors and exact postconditions; any mismatch returns the original source byte-for-byte.
 
 ## Data flow
 

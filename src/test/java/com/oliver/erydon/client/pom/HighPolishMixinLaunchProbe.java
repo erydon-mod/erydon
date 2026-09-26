@@ -22,11 +22,11 @@ public final class HighPolishMixinLaunchProbe implements PreLaunchEntrypoint {
         try {
             Class<?> resources = Class.forName("net.minecraft.resource.LifecycledResourceManagerImpl");
             var handler = Arrays.stream(resources.getDeclaredMethods())
-                    .filter(m -> m.getName().contains("polishedSpecs")).findFirst().orElseThrow();
+                    .filter(m -> m.getName().contains("stoneFinishLabels")).findFirst().orElseThrow();
             require(Modifier.isStatic(handler.getModifiers()), "Constructor HEAD handler must be static");
             try (var manager = new LifecycledResourceManagerImpl(ResourceType.CLIENT_RESOURCES, List.of())) {
-                require(manager.streamResourcePacks().anyMatch(p -> p.getName().equals("erydon:high_polish_stone_specular")),
-                        "High-polish resource override was not installed");
+                require(manager.streamResourcePacks().anyMatch(p -> p.getName().equals("erydon:stone_finish_labels")),
+                        "Stone-finish labels were not installed");
             }
 
             // Exercise the package-private Iris constructor through the real Mixin factory.
@@ -36,6 +36,10 @@ public final class HighPolishMixinLaunchProbe implements PreLaunchEntrypoint {
             Class.forName("net.irisshaders.iris.shaderpack.ShaderPack");
             Class.forName("net.irisshaders.iris.shaderpack.programs.ProgramSet");
             Class.forName("net.irisshaders.iris.shaderpack.materialmap.BlockMaterialMapping");
+            Class<?> blockItem = Class.forName("net.minecraft.item.BlockItem", false, getClass().getClassLoader());
+            require(Arrays.stream(blockItem.getDeclaredMethods())
+                            .anyMatch(m -> m.getName().contains("preserveMultifacePlacement")),
+                    "Multiface placement mixin did not apply to BlockItem");
             var transformed = new ClassNode();
             new ClassReader(Files.readAllBytes(Path.of(".mixin.out/class/net/irisshaders/iris/shaderpack/ShaderPack.class")))
                     .accept(transformed, 0);
@@ -56,7 +60,7 @@ public final class HighPolishMixinLaunchProbe implements PreLaunchEntrypoint {
             require(check >= 0 && check < program && program < reuse,
                     "Real Iris constructor must check IDs before base shaders, then reuse that map");
             require(rawMapAllocations == 0, "Iris must not parse the ID map a second time");
-            System.out.println("ERYDON_HIGH_POLISH_MIXIN_PROBE_OK: resources installed; ID preflight precedes base programs; parsed map reused.");
+            System.out.println("ERYDON_HIGH_POLISH_MIXIN_PROBE_OK: resources installed; ID preflight precedes base programs; parsed map reused; multiface placement hook applied.");
             System.exit(0);
         } catch (Throwable failure) {
             failure.printStackTrace();

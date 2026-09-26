@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /** Reads the installed shader, without copying or redistributing its assets. */
 @EnabledIfEnvironmentVariable(named = "ERYDON_BLISS_TEST_SHADER", matches = ".+")
 class HighPolishBlissShaderPackTest {
-    @Test void installedBlissUsesItsExistingSpecularSampleInEveryDimension() throws Exception {
+    @Test void installedBlissRemainsNativeInEveryDimensionDuringTheComplementaryTrial() throws Exception {
         try (var zip = new ZipFile(System.getenv("ERYDON_BLISS_TEST_SHADER"))) {
             assertEquals(HighPolishShaderAdapter.Profile.BLISS, HighPolishShaderAdapter.profileForProperties(
                     HighPolishShaderPackTest.read(zip, "shaders/shaders.properties")));
@@ -27,8 +27,9 @@ class HighPolishBlissShaderPackTest {
                 String source = JcppProcessor.glslPreprocessSource(expanded,
                         List.of(new StringPair("MC_VERSION", "12001"), new StringPair("IS_IRIS", "1")));
                 var adapted = HighPolishShaderAdapter.adaptFragment("gbuffers_terrain", source);
-                assertTrue(adapted.changed(), dimension + ": " + adapted.status());
-                assertTrue(HighPolishShaderAdapter.ready());
+                assertFalse(adapted.changed(), dimension + ": " + adapted.status());
+                assertFalse(HighPolishShaderAdapter.ready());
+                assertSame(source, adapted.text());
                 HighPolishShaderPackTest.parse(adapted.text());
             }
         } finally {

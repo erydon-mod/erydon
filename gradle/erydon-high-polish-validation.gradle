@@ -1,3 +1,25 @@
+tasks.register('verifyErydonOverlayPbr', Exec) {
+    group = 'verification'
+    description = 'Checks shared metal-overlay depth and retained bevel/specular maps.'
+    workingDir project.projectDir
+    inputs.files(file('tools/generate_overlay_pbr.py'), file('tools/tests/test_overlay_pbr.py'))
+    inputs.dir(file('src/main/resources/assets/minecraft/textures/optifine/ctm/overlay'))
+    commandLine providers.gradleProperty('erydon.pythonExecutable').getOrElse('python'),
+            '-m', 'unittest', 'tools.tests.test_overlay_pbr', '-v'
+}
+tasks.named('check') { dependsOn tasks.named('verifyErydonOverlayPbr') }
+
+// Optional local shader audits must rerun when switching the inspected ZIP.
+tasks.named('test', Test) {
+    ['ERYDON_CU_TEST_SHADER', 'ERYDON_BLISS_TEST_SHADER'].each { variable ->
+        def shader = providers.environmentVariable(variable)
+        inputs.property(variable, shader.isPresent())
+        if (shader.isPresent()) {
+            inputs.file(shader).withPropertyName(variable + '_source').withPathSensitivity(PathSensitivity.NONE)
+        }
+    }
+}
+
 // Isolated, pre-launch-only test. No world, graphics window or test JAR is created.
 tasks.register('verifyHighPolishMixinLaunch', JavaExec) {
     group = 'verification'

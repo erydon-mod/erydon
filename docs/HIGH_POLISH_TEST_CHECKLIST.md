@@ -1,187 +1,183 @@
 # High polish and architectural fixes: test checklist
 
-Use the IDEA development client and your usual shader/resource-pack combination.
-Enable the high-polish master switch when testing the reflective finish;
-new installations default to off. No test JAR is needed for an IDEA launch.
+Use the IDEA development client first, with Complementary Unbound r5.9 dev5
+or Unbound/Reimagined r5.9.3, labPBR and your usual Collection pack. Full
+Minecraft restarts are required after saving finish or glass settings. No test
+JAR was produced.
 
-## Latest follow-up checks
+## Current follow-up checks (25 September)
 
-- Stone High polish now uses a 35% reflection floor in CU and Bliss, up from
-  25%. Repeat the same-view comparison after restarting; the approved 90%
-  two-way mirror coating is unchanged. Bliss's earlier screenshot had High
-  polish Off, so its enabled finish still needs checking.
-- Start with Complementary Unbound r5.9 dev5, labPBR and High polish On. Compare
-  the same Glacium wall and alcove view with Off after a full restart. The enabled
-  log should name adapted terrain, deferred and glass programs, followed by
-  `Opaque high polish classified` with a non-zero count.
-- Repeat the stone/inlay comparison with Bliss 2.1.2 and Specular Reflections
-  enabled. Stone should gain the selected finish while the metal keeps its own
-  response. Sildur's Vibrant 1.51 does not read terrain specular maps and is not
-  supported by this high-polish adapter.
-- With CU, check two-way glass outside and inside on both window families,
-  including open windows. The outer coating should be strongly reflective while
-  the inner face stays clear. Disable the stone alone and confirm the mirror
-  remains strong; disable Two-way glass and restart to restore its usual finish.
-  The dark-silver texture colour is unchanged.
-- Fully restart before testing these changes. Automated checks do not replace
-  the shader-on checks below; no new test JAR was produced.
-- Inspect the menu at several GUI scales: four stone buttons per row where space
-  permits, natural-width side borders, and space beneath Save/Cancel. With the
-  master off, saved stone/glass choices should look dimmed but remain editable.
-  Selected Stones/Glass and gallery options keep their metal frame; other options
-  do not. Re-enable the master and confirm saved preferences remain intact.
-- Submerge plain Glacium blocks and overlay slabs/slopes. Also test waterlogged
-  shapes, flowing water, the waterline, and a chunk boundary. Faces and metal holes
-  should remain correct. Include water touching only an edge or corner. Stone
-  now stays opaque everywhere, so the pool perimeter should keep one finish.
-- Compare plain stone and the stone beneath bronze/silver inlays under identical
-  lighting. Check full blocks, slabs and slopes; the base finish should match.
-- Toggle Kelastrion, Latmion and Psamatheon individually, restarting each time,
-  with native 16x, Collection 32x and Collection 64x. On should match polished
-  stones while preserving grout/metal details; Off should restore honed maps.
-  Swap suggestions and successful swap messages should use Polished when enabled
-  and Honed when disabled; both spellings must remain accepted.
-- Inspect the side-to-dome join and top surface of two-wide Gothic and Georgian
-  alcoves in all facings, alongside single- and three-wide controls.
-- Inner-page logos should have a clear gap below the upper frame.
-- All stone buttons should display the correct stone, with a proportional cropped
-  sample rather than magenta squares or a stretched tile. Try native and Collection textures.
-- Inspect the top of both Arch Window corner pieces from above, in all facings;
-  glass should no longer protrude through the stone roof as a see-through stripe.
-- Two-way glass keeps the approved darker silver base, with a CU coating-specific
-  reflection adjustment. Compare bright daylight and a darker interior.
-- Check inlays on triangular slope sides while moving the camera, including
-  rotated and inverted slopes. They should keep their motif without a false repeat.
-- With Complementary Unbound r5.9 dev5 and labPBR, place two polished walls facing
-  one another: both should now appear in reflections. Compare an inlay wall with
-  plain stone when a light source is behind it; a full wall should block the light.
-- Check herringbone and weave depth at a shallow viewing angle with Collection
-  32x and 64x, especially grout lines across CTM seams. Their height maps are
-  present; verify their displayed depth with High polish on and off.
-- Look upwards into two- and three-wide Gothic and Georgian alcoves. Check the
-  crown and small triangles above the arch, then inspect their roofs from above.
-- See HIGH_POLISH_REFLECTION_INVESTIGATION.md for the opaque-stone trial and
-  the separate CurseForge chunk-heightmap warning findings.
+- Circular ERYDON columns: with Complementary's world-space reflections enabled,
+  check that a circular column appears in a nearby Mirror-finish stone surface.
+  Its reflected silhouette is deliberately a square-block approximation; the
+  visible column, collision and voxel-light behaviour remain unchanged.
+- Medium alcoves: Georgian and Gothic two-wide side walls are 30% thicker
+  inward. Check the roof joins, all four facings and collision; one- and
+  three-wide alcoves should retain their existing dimensions.
+- Axiom: rotate Romanesque, Modern and Gothic arches and Arch Windows through
+  90/180/270 degrees, then mirror along each horizontal axis. Include in-place
+  overlapping edits, mixed arch materials, open windows and two-way glass.
+  Check left/right pieces, undo/redo, further placement and recalc.
+- Overlay multiface layers: place against each of six solid faces, including
+  edge/corner hits. Crouch-click with the same item to thicken up to eight
+  layers; repeat using a picked/Axiom-palette stack and a waterlogged sample.
+- Inlay slopes: join standard, shallow, steep and vertical hypotenuses where
+  their physical edges meet, including a continuation one block up/down.
+  Check straight/corner and inverted variants; separate edges must keep a border.
+- Bliss/Noble: retest POM with the corrected maps supplied by the project.
+  An obsolete overlay test pack was overriding the IDEA maps and has been
+  deselected. No replacement resource pack is needed for this check.
+- Shared stone finishes: compare Themelios plain Imperium, ERYDON plain
+  Imperium and ERYDON bronze-trim Imperium with Inlays set to Inherit. The
+  original mismatch was a Themelios block excluded from the finish controls.
+  Repeat Honed, Polished and Mirror, plus the master-off setting, after restarts.
+  Themelios shapes and Daedalon stone decor now follow the same 27 material
+  choices; include a Daedalon statue/capital and another shared stone family.
+  Check pattern overrides on Themelios herringbone/weave/inlays and all three
+  texture resolutions. Aged/rough stone and bronze sculptures remain unchanged.
 
-## 1. Settings and restart behaviour
+Earlier visual approvals include the Gothic arch sliver repair, slices,
+Mod Menu, stronger metal treatment, both Complementary styles, two-way glass
+and the latest high-polish performance trial. The items above are new checks.
 
-- Inner pages should use a smaller logo, with the landing-page logo unchanged.
-- Stone buttons should show the matching gallery texture inside the usual metal
-  frame. The larger layout fits all 27; smaller windows retain readable paging.
-- Open Mods > ERYDON > Configure > High polish. Check the Stones and Glass tabs,
-  page arrows, mouse-wheel paging, and keyboard navigation. Try your usual GUI
-  scale and a smaller window; labels and the restart notice should remain readable.
-- Open a stone to change its main switch and its Herringbone, Weave and Inlays
-  overrides. Inherit follows the main stone switch; On and Off override it.
-  Two-stone weaves follow the first named stone (Glacium-Nerium follows Glacium).
-- Change some values and press Cancel: reopening the menu should show the previous
-  saved values. Switch pages before saving to confirm edits survive navigation.
-- Save changes while in a world. The current session should keep its original
-  appearance, including after F3+T or leaving and rejoining the world.
-- Fully restart Minecraft: the saved appearance should now apply. Reopen the menu
-  and confirm the choices survived. Saving tooltip settings must not reset them.
-- Turn the master switch off and restart: all high-polish enhancements should be
-  off, while individual choices remain saved for when the master is enabled again.
+## 1. Three stone finishes
 
-## 2. Individual polished and honed stones and patterns
+- In Mods > ERYDON > Configure > High polish, enable the master. Compare the
+  same Glacium wall and Gothic/Georgian alcove view at Honed, Polished and Mirror,
+  restarting each time and keeping the camera, time, weather and shader settings
+  fixed. Honed should soften reflections, Polished should sharpen them, and
+  Mirror should make them stronger. Mirror uses a 50% floor; Polished adds no
+  reflection boost. These coefficients do not specify final screen brightness.
+- Test the All: Honed / All: Polished / All: Mirror presets. They reset pattern
+  overrides to Inherit and preserve glass preferences. Small windows may omit
+  the presets while retaining per-stone controls and paging.
+- Set different finishes on Glacium and Portorium; only the chosen material
+  should change. Compare full blocks, slabs, stairs, slopes, arches, columns,
+  walls and window frames at matching angles.
+- Test Herringbone, Weave and Inlays at Inherit, Honed, Polished and Mirror.
+  Inherit follows the main stone choice. Weaves follow their first named stone
+  (Glacium-Nerium follows Glacium). The stone grid should show Mixed when needed.
+- Repeat Kelastrion, Latmion and Psamatheon at all three levels with native 16x,
+  Collection 32x and Collection 64x. They use their original specular maps now;
+  CU selects smoothness directly. Polished and Mirror should no longer depend
+  on a separate replacement map. Grout and normal/height detail must remain.
+- Check aged, ashlar, hewn, rusticated, rock and Diaphanes controls alongside
+  the samples. These stone finishes should remain unchanged.
+- Turn the master off and restart: eligible stone should use Honed in CU and
+  glass enhancements should turn off. Re-enabling restores saved stone choices.
+- Existing true/on preferences should load as Mirror; false/off as Honed.
+  Swap suggestions and success messages should use the active plain finish.
+  Honed, Polished, Mirror and the old plain material names must all remain
+  accepted command aliases without changing block IDs.
 
-- On inlays, inspect all six faces while moving past a wall, floor, stairs and slopes.
-  Test bronze and silver in all four motifs. Check for fading, flicker, sorting through
-  the stone and detached edges, with High polish on and off and after F3+T.
+## 2. Metallic details, connected textures and depth
 
-- Place Glacium and Portorium beside matching Gothic and Georgian alcoves. Enable
-  only Glacium, restart, and confirm Portorium stays at its ordinary finish.
-  Reverse the choices and repeat.
-- Compare full blocks, slabs, stairs, slopes, arches, columns, walls and window
-  stonework. Matching materials should have a consistent finish at matching angles.
-- Test herringbone with both bronze and grout, two-stone weaves, and bronze/silver
-  Trim, Guilloche, Quatrefoil and Rosette inlays. Check Inherit, On and Off separately.
-  Colours, metal details and connected textures should remain intact.
-- Check Kelastrion, Latmion and Psamatheon with their individual switches on and off.
-- Check aged, ashlar, hewn, rusticated,
-  rock and Diaphanes variants. Stone high-polish switches should not change them.
+- Compare bronze and silver Trim, Guilloche, Quatrefoil and Rosette on walls,
+  floors, slabs, stairs and slopes. CU's metal trial uses an 85% reflection
+  floor independently of the stone finish. Its corrected final tint and 20%
+  texture preservation should give stronger contrast between dark and bright
+  reflected objects. Silver should stay neutral and bronze warm; confirm that
+  highlights do not wash out the motif. Compare a dark object reflected beside
+  the sky in each metal, and check that the surrounding stone keeps its finish.
+- Check all six faces while moving the camera. Look for flicker, disappearing
+  overlays, sorting through stone or detached edges. Include triangular slope
+  sides, rotated/inverted slopes and a resource reload.
+- Compare stone under inlays with the matching plain stone under the same light.
+  Their selected finish should match. Metal should remain visible at every
+  stone finish, including Honed and master Off.
+- Check herringbone and weave depth at shallow angles with Collection 32x/64x,
+  especially grout at CTM seams. Native 16x patterned height maps are flat;
+  the finish adapter does not add height or invent missing metallic masks.
+- Check alcove recessed backs and the narrow strip above the Gothic apex
+  against adjacent blocks, in all facings and before/after F3+T. Marble texture
+  phase must remain continuous across seams.
 
-The 27 eligible stones are Aganite, Aterzon, Borealis, Brectite, Calacattum,
-Chalstrom, Chrysonyx, Etruscus, Gelastrum, Glacium, Hesperion, Imperium, Kelastrion, Kylorion, Latmion,
-Laurentium, Mielonyx, Nerium, Noxoplis, Porphyros, Portorium, Psamatheon, Rosinium, Sanguenite,
-Selenephos, Solistra and Striatus.
+## 3. Glass and the approved two-way mirror
 
-## 3. Glazing and ordinary window glass
+- Keep the master on and compare ordinary Crystal, Silver, Bronze and Tinted
+  glazing with its switch on/off after restart. Include panes, full blocks,
+  vertical layers, framed slopes and both window families, open and closed.
+  Transparency and glass colour should remain correct.
+- On Arch and French Georgian Windows, select two_way with the debug stick.
+  The approved CU exterior mirror keeps its 90% target. Test all facings, wide
+  windows, both Georgian hinges and opened wings; the inside should stay glass.
+- Change the surrounding stone between Honed, Polished and Mirror while leaving
+  Two-way glass enabled. The exterior mirror should remain equally strong.
+- Toggle Two-way glass independently of ordinary glazing, then restart. Off
+  restores the ordinary coating response without deleting the two_way mode.
+  Extend/recalculate the window and verify its mode and exterior side survive.
 
-- With the master on, enable Glazing & window glass and restart. Compare Crystal,
-  Silver, Bronze and Tinted glazing in panes, full blocks, vertical layers and framed
-  slopes. Check the thin edges as well as the broad faces.
-- Check ordinary Arch Windows and French Georgian Windows, both open and closed.
-  Glass should have stronger shader reflections while keeping its colour and
-  transparency; stonework should follow its own stone setting.
-- Disable only Glazing & window glass and restart. The added pure-red specular
-  maps should no longer be active. Glass must remain transparent.
-- Repeat with native textures and the optional Collection pack you normally use.
-  With shaders off, there should be no missing textures or unexpected red glass.
+## 4. Opaque stone, lighting and water
 
-## 4. Two-way Arch and Georgian Window glass
+- Place two stone walls facing each other. Each should appear in the other's
+  CU reflection where the shader can see it. Put light behind full overlay
+  blocks and compare with plain blocks: both must block light normally.
+- Submerge plain Glacium plus overlay slabs/slopes. Include waterlogged shapes,
+  flowing water, the waterline, chunk boundaries, and water touching only an
+  edge or corner. Check for missing-looking faces or a mixed finish at the pool
+  perimeter. Wet and dry stone use the same opaque path.
 
-- On Georgian Windows, test both hinges, single and wide windows, open and closed.
-  The opening wings keep the coating on their outside; fixed upper panes keep it
-  facing outwards. Extend/recalculate the cluster and check the glass choice remains.
+## 5. Menu and persistence
 
-- Test both Arch Windows and French Georgian Windows. Select two_way with the debug stick. With the master and Two-way glass switches
-  on, restart and check that the exterior has the stronger reflective finish while
-  the interior retains its normal glass appearance. The exterior should now be
-  neutral silver rather than black, with High polish on or off.
-- Check north, east, south and west facings, especially the right upper arch piece,
-  and check a wider connected window. The mirror must stay on the outside.
-- Toggle Two-way glass independently of Glazing & window glass and the stone
-  setting, restarting each time. Off restores the previous mirror rendering path;
-  it does not remove the block's two_way glass mode.
-- Extend the window or run recalc: its glass mode and correct outside face should
-  survive. Check again after a resource reload.
+- Inspect usual and smaller GUI scales: four stone buttons per row where space
+  permits, readable finish labels, well-spaced logo, and room below Save/Cancel.
+  Stone buttons should show their gallery texture at the correct proportions.
+- Master Off should dim saved stone/glass choices without erasing them. Selected
+  Stones/Glass and gallery tabs retain the metal frame; unselected tabs do not.
+- Check page arrows, wheel scrolling and keyboard navigation. Visit a stone,
+  return to the grid and switch tabs without losing unsaved choices.
+- Cancel must discard edits; Save must retain them on restart. Saving tooltip
+  options must not reset polish. Saving in-world, F3+T or rejoining must not
+  apply new finish choices before a full restart.
 
-## 5. Alcove connected textures
+## 6. Architectural regressions
 
-- Check the recessed back of both Gothic and Georgian alcoves against adjacent
-  standard blocks. The large marble pattern should continue across block seams.
-- Inspect the narrow strip above the Gothic alcove's apex (the strip highlighted
-  earlier in this task). It should share the surrounding texture phase.
-- Check all four facings, tops and undersides, before and after F3+T. Changing High
-  polish must not reintroduce the repeated individual tiles or displaced strip.
+- Inspect one-, two- and three-wide Gothic and Georgian alcoves from above and
+  below. Check side-to-dome joins, crown holes, small triangles above the arch,
+  top-surface artefacts and all facings.
+- Inspect both Arch Window corner roofs for the formerly see-through stripe.
+- Check both Gothic arch lighting slivers in daylight and a dark room lit by
+  blocks, from both sides, with shaders on/off. Check for gaps or overlapping faces.
+  In particular, check a three-wide opening at least two blocks tall: its long
+  corner gap filler now belongs to the upper row, with its exposed world position
+  unchanged. The removed lower overlap is covered on both sides by an existing
+  curved panel; this correction was visually approved and remains a regression check.
+- With Axiom, rotate a Georgian wall by 90/180/270 degrees and mirror it along
+  each horizontal axis. Include straight, corner and diagonal sections. Compare
+  joins and piers with a normally placed wall; check undo, further edits and recalc.
+- With Axiom, yaw-rotate horizontal and vertical slices by 90/180/270 degrees,
+  then mirror along X and Z. Include all eight thicknesses, each corner, top/bottom
+  horizontal slices and waterlogged examples. Vertical slices should reflect into
+  the matching corner. Flip horizontal slices upside down along Y and check that
+  top/bottom swaps; flipping twice and undo/redo should restore the original state.
+  Slice families, materials and thicknesses must stay unchanged.
 
-## 6. Gothic arch lighting slivers
+## 7. Performance and shader switching
 
-- Inspect the two thin areas beside the top of a Gothic arch, where the original
-  screenshots showed darker slivers on the left and right.
-- Test in a dark room lit by blocks as well as daylight, for one- and two-wide arches.
-- View from both sides and several angles, with shaders on and off. Look for dark
-  slivers, gaps, flickering overlapping faces or changes to the intended arch shape.
+- Compare the same small sample, then a large facade at Honed/Polished/Mirror.
+  Keep camera, render distance, weather, time and shader settings fixed. Compare
+  standing still, turning, walking past it and loading its chunks.
+- Repeat with shaders off. Check sustained FPS, frame-time spikes, chunk-loading
+  delays and visible sorting errors. No new draw pass, specular sample, faces or
+  fluid-neighbour scans are added; shader arithmetic and existing reflection
+  work still need measured comparison before claiming no performance cost.
+- Reload/switch shaders and visit all three dimensions. Check CTM, large spiral
+  stairs, patterned depth, inlays, glazing and two-way mirrors afterward.
+- Compare both Complementary r5.9.3 styles with labPBR enabled. Their default
+  visual styles differ, but both should receive the same material treatment.
+  The macOS/Distant Horizons low-sampler profile retains CU's ordinary texture
+  preservation so the patch does not add a sampler on that constrained path.
+- Bliss/Noble finish adapters remain deferred; their native materials should
+  remain. With POM enabled, check bronze and silver in all four overlay motifs
+  on full blocks, slabs and slope sides. The surface-height correction should
+  keep metal visible at close and grazing angles without removing its bevel
+  lighting. Compare Complementary Unbound/Reimagined for retained shine and no
+  flicker, with high polish both on and off. Underlying patterned/rough stone
+  should retain its height effect. Include native, Collection 32x and 64x.
+- The previously inspected CurseForge world also had incompatible saved
+  heightmaps for its taller-world datapack. Separate server loading from client
+  meshing when profiling; preserve the world and datapack.
 
-## 7. Georgian walls with Axiom
-
-- Make a small wall with straight sections, corners and diagonal connections.
-- Rotate copies by 90, 180 and 270 degrees, then mirror across each horizontal
-  axis. Diagonal connections and their slope direction should transform along
-  with the straight connections.
-- Check joins and piers against an equivalent wall placed normally. Test undo,
-  subsequent editing and recalc for unwanted disconnections or changed orientation.
-
-## 8. Rendering and performance
-
-- First test a small sample, then a larger facade with repeated polished blocks,
-  patterned shapes and glass. Compare master off and on after full restarts, using
-  the same camera, render distance, shader settings, time and weather.
-- Compare standing still, moving the camera, walking past the facade and loading
-  its chunks. Note sustained FPS changes, stutter, flickering or sorting artifacts.
-- Test both shaders off and Complementary Unbound r5.9 dev5 with labPBR. Other
-  shader versions should retain their normal stone appearance without errors.
-- Turn shaders off/on, reload them, and switch dimensions. Check CTM, patterned
-  depth, large spiral stairs, glazing and the approved two-way glass finish.
-- No extra world render or polish texture lookup is added. Stone remains opaque;
-  the former water-neighbour scans during chunk rebuilding are gone. Texture
-  substitutions still run during resource loading. These implementation changes
-  are not a measured FPS or chunk-loading guarantee.
-- Compare the same saved chunks, camera, render distance, time and weather. The
-  inspected CurseForge world also has incompatible stored heightmaps for its
-  taller-world datapack; separate server loading time from client chunk meshing
-  before attributing all delays to rendering. Keep the datapack and world intact.
-
-For an issue report, include the block/material, facing, relevant saved switches,
-whether Minecraft was restarted, shader/pack selection, and a screenshot.
+For reports, include the material/shape, facing, saved finish, restart status,
+shader/pack selection and screenshot. See POLISH_MATERIAL_AND_SHADER_REVIEW.md
+for the implementation and HIGH_POLISH_REFLECTION_INVESTIGATION.md for history.

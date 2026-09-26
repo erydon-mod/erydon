@@ -303,7 +303,15 @@ class ErydonSwapFamilyDatabaseTest {
         }
         assertEquals(ErydonSwapFamilyDatabase.findFamily("aganite"),
                 ErydonSwapFamilyDatabase.findFamily("aganite_polished"));
+        for (String material : com.oliver.erydon.HighPolishSettings.MATERIALS) {
+            for (String suffix : Set.of("honed", "polished", "mirror")) {
+                assertEquals(ErydonSwapFamilyDatabase.findFamily(material),
+                        ErydonSwapFamilyDatabase.findFamily(material + "_" + suffix));
+            }
+        }
         assertCommandParses("swap chunk \"Aganite Polished\" \"Psamatheon Honed\"");
+        assertCommandParses("swap chunk \"Glacium Mirror\" \"Kelastrion Polished\"");
+        assertMapping("erydon", "glacium_block", "glacium_mirror", "kelastrion_polished", "kelastrion_block");
         assertCommandParses("swap radius \"Aganite Family\" \"Aganite Aged\" 8");
         assertCommandParses("swap box all_family_blocks bronze ~ ~ ~ ~2 ~2 ~2");
     }

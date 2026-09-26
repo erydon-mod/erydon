@@ -1,13 +1,10 @@
 # Stone finish and metal review
 
-Investigated 2026-09-19. The implemented change from this review is the existing
-High polish stone reflection floor increasing from 25% to 35% in the supported
-CU and Bliss profiles. Compilation and all 20 targeted HighPolish tests passed,
-including source checks against the installed shader packs. The approved CU
-two-way coating remains at 90%. No test JAR was produced.
-
-The three-finish menu, revised baseline maps, metal enhancement and additional
-shader adapters below are proposals, not implemented features.
+Updated 2026-09-25. Honed, Polished and Mirror are now implemented for the
+exact Complementary Unbound r5.9 dev5 and Unbound/Reimagined r5.9.3 labPBR
+profiles. Other shader adapters are paused for this trial. The stone Mirror
+finish, 90% two-way glass coating and stronger metal blend were visually approved,
+as was the latest shader-enabled performance trial. No test JAR was produced.
 
 ## Why plain stone can disappear from Noble reflections
 
@@ -20,7 +17,7 @@ The inspected installed `Noble-master.zip` reads green directly as F0 in
 `programs/gbuffers/opaque.glsl` and returns without tracing a reflection when
 F0 is zero in `programs/composite/reflections_pass.glsl:107`. Photon 1.3b instead
 retains a default dielectric F0 of 0.02 when the sampled green is zero. CU and
-Bliss have their own fallback/adapter handling. Thus pure red does not have a
+Bliss have different native fallback handling. Thus pure red does not have a
 consistent reflective meaning across these shaders.
 
 The Collection Glacium herringbone-bronze and Calacattum/Portorium weave-bronze
@@ -36,68 +33,152 @@ The test session logged this mismatch followed by repeated OpenGL errors.
 uses `ivec2`. Retest an appropriate current release before introducing an ERYDON
 workaround for that old shader error. Upstream was inspected, not installed.
 
-## Recommended finish design
+## Implemented three-finish trial
 
-Use the same three choices globally and per stone, with Inherit for pattern and
-inlay overrides. Keep the master switch and separate glass controls. Provisional
-artistic targets are:
+Mod Menu offers all-stone presets and per-stone choices for all 27 families.
+Herringbone, weave and inlays can inherit or select any of the three levels.
+The master remains default-off; Off selects Honed in CU and disables the glass
+extras. Existing true/on stone preferences migrate to Mirror; false/off migrate
+to Honed. Saving still requires a full restart. English, German and Spanish
+labels and swap aliases have been updated together.
 
-| Finish | Smoothness | Base reflection target |
+| Finish | Smoothness input | Reflection adjustment |
 | --- | --- | --- |
-| Honed | Existing K/L/P red 175 | A valid dielectric baseline, initially about 4% |
-| Polished | Full smoothness | Standard dielectric baseline; no extra reflection boost |
-| Mirror | Full smoothness | 35%, as requested for the strongest stone setting |
+| Honed | Red 175/255, matching the old K/L/P maps | Ordinary CU dielectric response, with valid F0 of at least 10/255 |
+| Polished | Red 1.0 | Ordinary CU dielectric response; 0% extra reflection boost |
+| Mirror | Red 1.0 | 50% floor before smoothness weighting, rising toward grazing angles |
 
-These are material targets, not percentages of the final screen colour. Light,
-viewing angle and shader implementation still affect the result. Stone Mirror
-would be a stronger stone finish; the separate two-way glass coating stays at
-its approved 90% target.
+CU squares the red input when calculating smoothness. The adapter sets the
+selected input before that calculation, using the specular sample CU already
+read. A dull source map therefore does not weaken Polished or Mirror. The 50%
+Mirror floor is an artistic starting point, not compensation for the old map.
+These are material coefficients, not percentages of final screen colour.
 
-Polished intentionally adds no reflection boost: full smoothness already makes
-its reflections sharper than Honed. This does not mean zero base reflectivity;
-both need a valid dielectric baseline for consistent shader compatibility.
+The K/L/P image replacement has been removed. Every finish uses the same
+original specular texture at native 16x, Collection 32x or Collection 64x; no
+PNG decoding, generated polished texture or per-resolution alternate is needed.
+The adapter changes only eligible stone pixels' sampled red/green values. Blue,
+alpha, normal/height maps, metal pixels and low-red grout are preserved. Aged,
+hewn, ashlar, rusticated, rock and Diaphanes stone stay outside this change.
+The tiny generated resource pack now supplies command labels only.
 
-Correct the baseline maps to encode a nonzero dielectric F0, rather than copying
-the old K/L/P colour wholesale. The [labPBR standard](https://shaderlabs.org/wiki/LabPBR_Material_Standard)
-assigns smoothness to red and base reflectivity to green. Green 10 is about 4%;
-blue and alpha have separate porosity/scattering and emission meanings.
-Preserve those channels, metal pixels, grout masks and all normal/height maps.
-Apply the same policy to native 16x and the actual Collection 32x/64x sources,
-including both CTM and fallback sprites. Do not resize or overwrite pack artwork.
+For this CU-first trial the PNG files themselves are unchanged. Native material
+behaviour in other shaders is therefore unchanged by these finish controls;
+future cross-shader work can address their different F0 handling separately.
 
-The existing reload-only image override is a useful basis, but currently covers
-only K/L/P plain/herringbone and still writes green zero. A broader solution
-needs explicit material/mask coverage. Shared sprites can be used by several
-block families, so resource replacement alone cannot promise independent
-per-shape choices. Preserve the existing per-block shader classification where
-needed, and audit shared aliases before changing a baseline texture. Keep aged,
-hewn and other intentionally rough finishes outside the smooth-stone scope.
-
-Migrate saved boolean choices explicitly and update all three languages and
-swap labels together; retain command aliases. The user-facing default should
-be Honed only when this proposed baseline change is implemented. It is not the
-current behaviour of every stone with the master off.
-
-## Metal: improve reflectivity, not only smoothness
+## Implemented metal trial
 
 All visible pixels in the eight shared in-world overlay families (four motifs,
 bronze/silver, 47 tiles per family) already use specular `(255, 255, 0, 255)`.
-The slight red-252 differences in some old composite block sprites therefore
-do not explain the in-world overlay response. Collection release packs defer
-these shared overlay textures to the mods.
+Increasing red alone cannot polish them further. In the inspected CU source,
+changing green 255 to the standard silver code would actually lower its
+reflection weighting, so that earlier proposal was not applied.
 
-Green 255 asks labPBR shaders to derive metal reflection colour from albedo.
-The sampled silver colour averages 206-212 per channel, which is substantially
-below polished silver reflectivity once interpreted in linear colour space.
-The bronze colours have almost no blue, so increasing white reflection blindly
-would change their intended warm appearance.
+CU tags metallic pixels on the eligible ERYDON stone families separately
+and gives them an 85% reflection floor, weighted by their existing smoothness.
+The initial trial assigned reflection tint in `deferred1`, where the variable
+does not reach the output. The corrected adapter restores the albedo-normalised
+tint in `composite`, immediately before it multiplies the traced reflection.
+Bronze therefore keeps its warm tint and silver stays neutral.
 
-Trial the standard silver material code (green 237) on silver specular pixels,
-keeping the existing albedo/normal detail. For bronze, tune a conductor response
-that preserves its tint; do not silently substitute pure copper or gold, neither
-of which is bronze. Start with one silver and one bronze comparison under CU,
-Bliss, Photon and Noble before rolling out across overlays and embedded inlays.
-No additional Mod Menu toggle is needed for the proposed metal improvement.
+CU's final solid blend also preserves 70% of the base texture wherever the
+reflection is darker than that texture. This reduces an 85% reflection weight
+to 25.5% effective influence for those colour channels. In `composite1`, only
+tagged metal now uses 20% preservation, making that influence 68%. These are
+blend coefficients before subsequent fog/tonemapping, not measured brightness.
+The approved stone and two-way glass blends are unchanged.
+
+The material tag comes from the blur filter's existing `colortex6` fetch and is
+returned through an output parameter; no texture fetch, filtering loop, ray,
+framebuffer or draw pass is added. CU's macOS/Distant Horizons low-sampler
+profile omits that fetch, so it retains native preservation rather than adding
+a sampler. The tint correction still applies there.
+
+This includes overlay and embedded pattern metal when
+the active texture identifies it as metal. There is no extra setting; the
+adjustment is independent of Honed/Polished/Mirror and remains active in CU when
+the stone master is off. Native flat/non-metallic pattern maps are not invented
+or reclassified as metal.
+
+Material mask 242 is reserved for Mirror stone and 243 for this metal trial;
+241 remains water. Their branches reuse the existing deferred reflection pass.
+The window coating has its separate existing handling and is unchanged.
+Readiness now requires the terrain, deferred, water, composite and composite1
+stages before assigning ERYDON material IDs.
+
+The supplied Unbound and Reimagined r5.9.3 ZIPs differ in exactly one line:
+the default `SHADER_STYLE` (4 versus 1). All reflection/PBR code is identical.
+Their shared properties fingerprint is recognised alongside dev5, for both
+the polish and CTM-POM adapters. Unknown releases still require review.
+
+The user approved the stronger metal treatment and both Complementary styles.
+The latest high-polish build's shader-enabled performance was also approved.
+
+On 2026-09-24 the user confirmed that disabling POM restores missing overlays
+in both Bliss and Noble; Noble's AO switch alone did not restore them. All
+visible metal texels had height 250/255, below the uncut stone backing. Both
+inspected packs write this recessed POM depth, so the separate overlay can fail
+the depth test against the stone. This is independent of their polish adapters:
+Bliss's previous polish patch remains disabled, and Noble was never patched.
+
+The shared overlay generator now writes surface height 255 throughout each
+overlay normal map, retaining the exact RGB bevel normals, material AO, albedo,
+specular maps and dimensions. Underlying stone and embedded herringbone/weave
+heightmaps are unchanged. ERYDON and Themelios 1.20.1 ship the same corrected
+maps; Collection 32x/64x deliberately inherit these native overlay images.
+No Java render path, shader source, surface offset, sample or pass was changed.
+The existing high-polish offset is retained to avoid reintroducing flicker.
+
+`verifyErydonOverlayPbr` checks all 376 tile companions and the bevel-normal
+orientation. The correction is in the project itself. An older overlay test
+pack was overriding 368 corrected maps in IDEA; that exact pack was deselected
+while the development client was closed. Visual confirmation with POM enabled
+remains required for Bliss, Noble and the previously approved Complementary
+treatment; no override pack is required.
+
+## Circular columns and material parity
+
+The inspected Complementary world-space reflection voxelizer discards ordinary
+odd-numbered partial-block material IDs. Circular columns therefore remain
+absent even though their visible surface uses the correct opaque finish.
+The approved workaround assigns four dedicated odd column IDs and admits
+only those IDs through the existing reflection voxelizer's solid-block filter.
+Their lighting classification remains odd, and the visible model is unchanged.
+Reflections use the shader's square-block approximation, not curved geometry.
+
+The adapter changes only recognised source with a unique filter anchor and
+falls back to the existing behaviour otherwise. It adds no texture sample,
+draw pass, reflection ray or Java frame callback. The existing voxel writes
+now include columns previously skipped, so this is not a measured promise of
+zero GPU cost. The installed Unbound r5.9.4 dev1 source and recognised
+Reimagined r5.9.3 source pass the focused parser checks; visual confirmation
+of the column approximation is still required.
+
+The plain-versus-trim Imperium discrepancy was a cross-mod classification gap.
+The user confirmed that the dark plain block was `themelios:imperium_block`,
+while the trim was ERYDON. The Themelios model references the same ERYDON stone
+texture, but both the material selector and Iris state-map hook previously
+excluded every non-ERYDON namespace. Changing position or POM could therefore
+not resolve the finish mismatch.
+
+The selector now accepts the 27 shared stone families in ERYDON, Themelios and
+Daedalon. Their stone and pattern preferences use the same existing controls.
+Aged, ashlar, hewn, rusticated, rock and Diaphanes remain excluded; pure bronze
+sculptures are not stone. ERYDON's special window, circular-column and spiral
+handling remains scoped to its own namespace. Daedalon's existing panel hook
+preserves explicit material IDs, so it does not overwrite these assignments.
+No companion-mod source change or dependency is required.
+
+This only extends the existing shader-load classification to additional block
+states; it introduces no extra texture, draw pass, reflection ray or per-frame
+Java work. The original native and Collection specular maps remain in use.
+Cross-mod Honed/Polished/Mirror visual comparisons are still required.
+
+Validation passed: compilation, 29 focused material/settings/shader tests,
+the three-language Mod Menu source audit and the real Fabric/Iris mixin
+launch probe. The companion source catalogues contain all 27 shared materials;
+1,401 Themelios and 2,133 Daedalon blockstate files qualify for the controls.
+No test JAR was produced.
 
 ## Shader support scope
 
@@ -108,12 +189,12 @@ adapter are separate capabilities.
 
 | Candidate | Evidence and current ERYDON status |
 | --- | --- |
-| Complementary Reimagined | Shares the Complementary codebase; its selected release still needs fingerprint, stage and visual validation. |
-| Complementary Unbound | Existing adapter targets r5.9 dev5 with labPBR; user confirmed stone/mirror visuals before the 35% adjustment. |
+| Complementary Reimagined | r5.9.3 is recognised and source-validated with labPBR; user approved the in-game appearance. Recheck the overlay depth correction. |
+| Complementary Unbound | r5.9 dev5 and r5.9.3 are recognised with labPBR; user approved the stronger metallic blend. Recheck the overlay depth correction. |
 | BSL | Official project advertises PBR; no ERYDON polish adapter or local visual validation in this review. |
 | Photon | Installed 1.3b reads labPBR and the user reports good baseline rendering; current polish menu does not add the CU/Bliss reflection boost. |
 | Solas | Official project documents labPBR/oldPBR and requires PBR Resourcepack enabled; additional adapter/testing needed. |
-| Bliss | Existing adapter targets 2.1.2; Specular Reflections must be enabled. Enabled-polish visual comparison remains outstanding. |
+| Bliss | Previous 2.1.2 adapter is paused; native specular materials remain. POM-off comparison confirmed the missing-overlay cause; corrected overlay maps await visual validation with POM on. |
 | Rethinking Voxels | Inspected upstream has the Complementary-derived custom-PBR path; requires its own release validation. |
 | MakeUp Ultra Fast | Inspected upstream contains no normal/specular-map samplers or labPBR path. Matching these material controls would require a larger shader feature, outside a cheap compatibility patch. |
 | Super Duper Vanilla | Inspected upstream reads both maps and offers Resource PBR; explicitly requires current labPBR. No ERYDON polish adapter yet. |
@@ -138,8 +219,22 @@ Primary sources: [Modrinth download catalogue](https://modrinth.com/shaders?s=do
 
 Keep stone opaque and reuse existing material samples/reflection passes. Resolve
 settings at load time; do not restore water-neighbour scans, translucent stone,
-duplicate faces or per-frame Java decisions. The 25%-to-35% patch changes only
-coefficients in the existing shader work. Future material changes still need
-same-scene GPU comparisons: some shaders spend more work on rough reflections,
+duplicate faces or per-frame Java decisions. The finish trial adds bounded material conditions and changes
+coefficients in the existing shader work. It still needs same-scene GPU comparisons: some shaders spend more work on rough reflections,
 and improved compatibility can enable reflections that were previously skipped.
 Do not equate no extra render pass with a measured guarantee of zero FPS cost.
+
+## Validation of the three-finish trial
+
+Compilation, all 265 Java tests, the three-language Mod Menu source audit
+and the isolated Fabric/Iris startup probe passed on 2026-09-20. The installed
+Unbound r5.9 dev5 and Unbound/Reimagined r5.9.3 archives each passed the focused
+source checks: 18 expanded, preprocessed and parsed stages across all three
+dimensions, plus the macOS/Distant Horizons low-sampler fallback. The tests
+verify tint reaches the final reflection, the metal blend reuses an existing
+material sample, and the inspected Bliss source stays unchanged. No test JAR
+was built.
+
+These checks do not establish GPU performance or the final appearance. Use
+HIGH_POLISH_TEST_CHECKLIST.md for the restart-based CU comparisons before
+expanding support to other shaders.

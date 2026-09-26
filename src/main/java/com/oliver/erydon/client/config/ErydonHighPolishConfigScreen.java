@@ -3,6 +3,7 @@ package com.oliver.erydon.client.config;
 import com.oliver.erydon.ErydonConfig;
 import com.oliver.erydon.HighPolishSettings;
 import com.oliver.erydon.HighPolishSettings.Choice;
+import com.oliver.erydon.HighPolishSettings.Level;
 import com.oliver.erydon.HighPolishSettings.Stone;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -24,8 +25,9 @@ public final class ErydonHighPolishConfigScreen extends Screen {
         this.parent = parent;
     }
 
-    private int panelWidth() { return Math.min(460, Math.max(260, width - 24)); }
-    private int panelHeight() { return Math.max(238, Math.min(330, height - 16)); }
+    private int panelWidth() { return Math.min(540, Math.max(260, width - 24)); }
+    private int panelHeight() { return Math.max(238, Math.min(400, height - 16)); }
+    private int stoneGridOffset() { return panelHeight() >= 264 ? 148 : 122; }
     private int left() { return (width - panelWidth()) / 2; }
     private int top() { return Math.max(0, (height - panelHeight()) / 2); }
 
@@ -36,68 +38,83 @@ public final class ErydonHighPolishConfigScreen extends Screen {
         int w = panelWidth() - 40;
         int half = (w - 8) / 2;
         if (selectedStone != null) {
-            button(x, y + 76, w, Text.translatable("button.erydon.polish.back"), () -> {
+            button(x, y + 70, w, Text.translatable("button.erydon.polish.back"), () -> {
                 selectedStone = null;
                 rebuild();
             });
             Stone stone = draft.stones().get(selectedStone);
-            button(x, y + 102, w, label("plain", stone.base()), () -> {
-                setStone(new Stone(!stone.base(), stone.herringbone(), stone.weave(), stone.inlays()));
-            });
-            choiceButton(x, y + 130, half, "herringbone", stone.herringbone(), () ->
+            button(x, y + 96, w, Text.translatable("option.erydon.polish.plain").append(": ")
+                    .append(Text.translatable("option.erydon.polish." + stone.base().key())), () -> {
+                setStone(new Stone(stone.base().next(), stone.herringbone(), stone.weave(), stone.inlays()));
+            }).withMuted(!draft.enabled()).setTooltip(Tooltip.of(Text.translatable("option.erydon.polish.level_hint")));
+            choiceButton(x, y + 124, half, "herringbone", stone.herringbone(), () ->
                     setStone(new Stone(stone.base(), stone.herringbone().next(), stone.weave(), stone.inlays())));
-            choiceButton(x + half + 8, y + 130, half, "weave", stone.weave(), () ->
+            choiceButton(x + half + 8, y + 124, half, "weave", stone.weave(), () ->
                     setStone(new Stone(stone.base(), stone.herringbone(), stone.weave().next(), stone.inlays())));
-            choiceButton(x, y + 156, w, "inlays", stone.inlays(), () ->
+            choiceButton(x, y + 150, w, "inlays", stone.inlays(), () ->
                     setStone(new Stone(stone.base(), stone.herringbone(), stone.weave(), stone.inlays().next())));
         } else {
-            button(x, y + 76, w, label("master", draft.enabled()), () -> {
+            button(x, y + 70, w, label("master", draft.enabled()), () -> {
                 draft = draft.withEnabled(!draft.enabled());
                 rebuild();
             }).setTooltip(Tooltip.of(Text.translatable("option.erydon.high_polish.description")));
-            var stonesTab = button(x, y + 104, half, Text.translatable("button.erydon.polish.stones"), () -> {
+            var stonesTab = button(x, y + 96, half, Text.translatable("button.erydon.polish.stones"), () -> {
                 glassPage = false;
                 rebuild();
             });
-            var glassTab = button(x + half + 8, y + 104, half, Text.translatable("button.erydon.polish.glass"), () -> {
+            var glassTab = button(x + half + 8, y + 96, half, Text.translatable("button.erydon.polish.glass"), () -> {
                 glassPage = true;
                 rebuild();
             });
-            stonesTab.active = glassPage;
-            glassTab.active = !glassPage;
+            stonesTab.withSelection(!glassPage);
+            glassTab.withSelection(glassPage);
             if (glassPage) {
-                button(x, y + 132, w, label("glazing", draft.glazing()), () -> {
+                button(x, y + 122, w, label("glazing", draft.glazing()), () -> {
                     draft = draft.withGlass(!draft.glazing(), draft.twoWay());
                     rebuild();
-                }).setTooltip(Tooltip.of(Text.translatable("option.erydon.polish.glazing_hint")));
-                button(x, y + 158, w, label("two_way", draft.twoWay()), () -> {
+                }).withMuted(!draft.enabled()).setTooltip(Tooltip.of(Text.translatable("option.erydon.polish.glazing_hint")));
+                button(x, y + 148, w, label("two_way", draft.twoWay()), () -> {
                     draft = draft.withGlass(draft.glazing(), !draft.twoWay());
                     rebuild();
-                }).setTooltip(Tooltip.of(Text.translatable("option.erydon.polish.two_way_hint")));
+                }).withMuted(!draft.enabled()).setTooltip(Tooltip.of(Text.translatable("option.erydon.polish.two_way_hint")));
             } else {
-                int rows = Math.max(1, Math.min(4, (panelHeight() - 218) / 24));
-                int perPage = rows * 2;
+                int presetWidth = (w - 12) / 3;
+                for (Level level : panelHeight() >= 264 ? Level.values() : new Level[0]) {
+                    boolean selected = draft.stones().values().stream().allMatch(stone ->
+                            java.util.Arrays.stream(HighPolishSettings.Finish.values()).allMatch(finish -> stone.level(finish) == level));
+                    button(x + level.ordinal() * (presetWidth + 6), y + 122, presetWidth,
+                            Text.translatable("option.erydon.polish.all", Text.translatable("option.erydon.polish." + level.key())), () -> {
+                                draft = draft.withAllStones(level);
+                                rebuild();
+                            }).withSelection(selected).withMuted(!draft.enabled())
+                            .setTooltip(Tooltip.of(Text.translatable("option.erydon.polish.all_hint")));
+                }
+                int columns = w >= 440 ? 4 : w >= 330 ? 3 : 2;
+                int rows = Math.max(1, (panelHeight() - stoneGridOffset() - 80) / 22);
+                int perPage = rows * columns;
+                int cellWidth = (w - (columns - 1) * 6) / columns;
                 pageCount = (HighPolishSettings.MATERIALS.size() + perPage - 1) / perPage;
                 page = Math.min(page, pageCount - 1);
                 for (int i = 0; i < perPage && page * perPage + i < HighPolishSettings.MATERIALS.size(); i++) {
                     String material = HighPolishSettings.MATERIALS.get(page * perPage + i);
                     Stone stone = draft.stones().get(material);
                     boolean mixed = java.util.Arrays.stream(HighPolishSettings.Finish.values())
-                            .anyMatch(finish -> stone.enabled(finish) != stone.base());
+                            .anyMatch(finish -> stone.level(finish) != stone.base());
                     Text status = Text.translatable(mixed ? "option.erydon.polish.mixed" :
-                            stone.base() ? "option.erydon.polish.on" : "option.erydon.polish.off");
-                    button(x + (i % 2) * (half + 8), y + 132 + (i / 2) * 24, half,
+                            "option.erydon.polish." + stone.base().key());
+                    button(x + (i % columns) * (cellWidth + 6), y + stoneGridOffset() + (i / columns) * 22, cellWidth,
                             Text.literal(materialName(material) + ": ").append(status), () -> {
                                 selectedStone = material;
                                 rebuild();
-                            }).setTooltip(Tooltip.of(Text.translatable("option.erydon.polish.stone_hint")));
+                            }).withStoneTexture(material).withMuted(!draft.enabled()).setTooltip(Tooltip.of(Text.literal(materialName(material) + ": ").append(status)
+                                    .append("\n").append(Text.translatable("option.erydon.polish.stone_hint"))));
                 }
                 int pagerY = y + panelHeight() - 76;
                 button(x, pagerY, 80, Text.translatable("button.erydon.polish.previous"), () -> changePage(-1)).active = page > 0;
                 button(x + w - 80, pagerY, 80, Text.translatable("button.erydon.polish.next"), () -> changePage(1)).active = page + 1 < pageCount;
             }
         }
-        int bottomY = y + panelHeight() - 26;
+        int bottomY = y + panelHeight() - 34;
         button(x, bottomY, half, Text.translatable("gui.cancel"), this::close);
         button(x + half + 8, bottomY, half, Text.translatable("button.erydon.polish.save"), () -> {
             var current = ErydonConfig.clientSettings();
@@ -114,6 +131,7 @@ public final class ErydonHighPolishConfigScreen extends Screen {
     private void choiceButton(int x, int y, int w, String key, Choice choice, Runnable action) {
         button(x, y, w, Text.translatable("option.erydon.polish." + key).append(": ")
                 .append(Text.translatable("option.erydon.polish." + choice.key())), action)
+                .withMuted(!draft.enabled())
                 .setTooltip(Tooltip.of(Text.translatable("option.erydon.polish.inherit_hint")));
     }
 
@@ -134,7 +152,7 @@ public final class ErydonHighPolishConfigScreen extends Screen {
     @Override
     public boolean mouseScrolled(double x, double y, double amount) {
         if (selectedStone == null && !glassPage && x >= left() && x <= left() + panelWidth()
-                && y >= top() + 132 && y < top() + panelHeight() - 76 && amount != 0) {
+                && y >= top() + stoneGridOffset() && y < top() + panelHeight() - 76 && amount != 0) {
             changePage(amount < 0 ? 1 : -1);
             return true;
         }
@@ -154,10 +172,10 @@ public final class ErydonHighPolishConfigScreen extends Screen {
         }
         if (selectedStone != null && h >= 280) {
             ErydonConfigUi.drawWrappedScaledText(context, Text.translatable("option.erydon.polish.inherit_hint"),
-                    x + 20, y + 185, w - 40, 3, 0.85F, ErydonConfigUi.MUTED_TEXT_COLOR);
+                    x + 20, y + 181, w - 40, 3, 0.85F, ErydonConfigUi.MUTED_TEXT_COLOR);
         } else if (glassPage && h >= 280) {
             ErydonConfigUi.drawWrappedScaledText(context, Text.translatable("option.erydon.polish.glass_hint"),
-                    x + 20, y + 190, w - 40, 3, 0.85F, ErydonConfigUi.MUTED_TEXT_COLOR);
+                    x + 20, y + 184, w - 40, 3, 0.85F, ErydonConfigUi.MUTED_TEXT_COLOR);
         }
         ErydonConfigUi.drawWrappedScaledText(context, Text.translatable(saveFailed
                         ? "message.erydon.config.status.save_failed" : "option.erydon.high_polish.restart"),

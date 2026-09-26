@@ -2,6 +2,7 @@ package com.oliver.erydon.mixin.client.compat.iris;
 
 import com.oliver.erydon.Erydon;
 import com.oliver.erydon.client.ErydonHighPolish;
+import com.oliver.erydon.client.PolishedStoneMaterials;
 import com.oliver.erydon.client.pom.HighPolishShaderAdapter;
 import com.oliver.erydon.block.WindowArchBlock;
 import com.oliver.erydon.block.WindowFrenchGeorgianBlock;
@@ -31,35 +32,43 @@ abstract class HighPolishBlockMaterialMixin {
         }
         Object2IntMap<BlockState> ids = cir.getReturnValue();
         // Refuse a colliding shader mapping rather than changing another mod's material.
-        if (ids.containsValue(HighPolishShaderAdapter.SOLID_ID)
-                || ids.containsValue(HighPolishShaderAdapter.SHAPE_ID)
-                || ids.containsValue(HighPolishShaderAdapter.SPIRAL_ID)
-                || ids.containsValue(HighPolishShaderAdapter.MIRROR_POLISHED_FRAME_ID)
-                || ids.containsValue(HighPolishShaderAdapter.MIRROR_NORMAL_FRAME_ID)) {
-            Erydon.LOGGER.warn("[erydon] Opaque high polish skipped: reserved shader material ID collision.");
-            return;
+        var mappedIds = ids.values().iterator();
+        while (mappedIds.hasNext()) {
+            if (HighPolishShaderAdapter.isReservedMaterial(mappedIds.nextInt())) {
+                Erydon.LOGGER.warn("[erydon] Opaque high polish skipped: reserved shader material ID collision.");
+                return;
+            }
         }
         int count = 0;
         for (var block : Registries.BLOCK) {
             var id = Registries.BLOCK.getId(block);
-            if (!Erydon.MOD_ID.equals(id.getNamespace())) continue;
-            boolean stone = ErydonHighPolish.usesHighPolish(id.getNamespace(), id.getPath());
+            boolean erydon = Erydon.MOD_ID.equals(id.getNamespace());
+            boolean stone = PolishedStoneMaterials.includes(id.getNamespace(), id.getPath());
+            var level = stone ? PolishedStoneMaterials.level(ErydonHighPolish.activeSettings(), id.getPath()) : null;
+            boolean window = erydon && (block instanceof WindowArchBlock || block instanceof WindowFrenchGeorgianBlock);
             boolean mirror = HighPolishShaderAdapter.profile() == HighPolishShaderAdapter.Profile.COMPLEMENTARY
-                    && ErydonHighPolish.twoWayEnabled()
-                    && (block instanceof WindowArchBlock || block instanceof WindowFrenchGeorgianBlock);
-            if (!stone && !mirror) continue;
-            boolean spiral = id.getPath().endsWith("_stairs_spiral_large");
+                    && ErydonHighPolish.twoWayEnabled() && window;
+            boolean column = erydon && HighPolishShaderAdapter.columnsReady()
+                    && PolishedStoneMaterials.isReflectionColumn(id.getPath());
+            if (!stone && !mirror && !column) continue;
+            boolean spiral = erydon && id.getPath().endsWith("_stairs_spiral_large");
             for (BlockState state : block.getStateManager().getStates()) {
                 // Preserve specialised light-source shader classifications.
                 if (state.getLuminance() > 0) continue;
-                if (mirror && state.get(WindowArchBlock.GLASS) == WindowArchBlock.Glass.TWO_WAY) {
-                    ids.put(state, stone ? HighPolishShaderAdapter.MIRROR_POLISHED_FRAME_ID
+                if (column) {
+                    ids.put(state, HighPolishShaderAdapter.columnMaterialId(level));
+                    count++;
+                    continue;
+                }
+                // Keep frames separate from inlay-bearing shapes even with glass polish off.
+                if (stone && window || mirror && state.get(WindowArchBlock.GLASS) == WindowArchBlock.Glass.TWO_WAY) {
+                    ids.put(state, stone ? HighPolishShaderAdapter.mirrorFrameId(level)
                             : HighPolishShaderAdapter.MIRROR_NORMAL_FRAME_ID);
                     count++;
                     continue;
                 }
                 if (!stone) continue;
-                ids.put(state, HighPolishShaderAdapter.materialId(
+                ids.put(state, HighPolishShaderAdapter.materialId(level,
                         state.isOpaqueFullCube(EmptyBlockView.INSTANCE, BlockPos.ORIGIN), spiral));
                 count++;
             }

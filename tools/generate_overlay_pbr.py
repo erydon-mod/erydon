@@ -16,13 +16,12 @@ DEFAULT_ROOT = (
     / "src/main/resources/assets/minecraft/textures/optifine/ctm/overlay"
 )
 
-# ERYDON's authored overlay companions treat the metal as a shallow inlay:
-# transparent stone remains at height 255 and opaque metal sits at 250. Keep
-# that established polarity and specular encoding, adding only the missing RGB
-# normal detail. The CTM rules use Continuity's cutout-mipped overlay layer so
-# transparent texels do not overwrite the stone's PBR response.
+# Overlays are separate cutout surfaces above an uncut stone face. Their POM
+# height must stay at the surface (255): a recessed height lets depth-writing
+# shaders such as Bliss and Noble bury the metal behind the stone. Keep the
+# existing recessed-edge RGB normals and specular encoding; only the separate
+# overlay's depth is flat. Heightmaps on the underlying stone are unaffected.
 NORMAL_STRENGTH = 0.50
-INLAY_DEPTH = 5
 SMOOTHNESS = 255
 METAL_VALUE = 255
 METALS = {"bronze", "silver"}
@@ -46,19 +45,18 @@ def make_normal(albedo: Image.Image) -> Image.Image:
             next_x = min(width - 1, x + 1)
             dx = (profile_pixels[next_x, y] - profile_pixels[previous_x, y]) / 255
             dy = (profile_pixels[x, next_y] - profile_pixels[x, previous_y]) / 255
-            # The visible motif is lower than the surrounding stone, matching
-            # the polarity of ERYDON's original overlay height companions.
+            # Preserve the existing bevel lighting without moving the separate
+            # overlay surface behind its uncut stone backing.
             nx = dx * NORMAL_STRENGTH
             ny = dy * NORMAL_STRENGTH
             inverse_length = 1.0 / math.sqrt(nx * nx + ny * ny + 1.0)
             nx *= inverse_length
             ny *= inverse_length
-            height = round(255 - profile_pixels[x, y] * INLAY_DEPTH / 255)
             output_pixels[x, y] = (
                 round((nx * 0.5 + 0.5) * 255),
                 round((ny * 0.5 + 0.5) * 255),
                 255,  # LabPBR material AO: unoccluded.
-                height,
+                255,  # LabPBR height: flush with the supporting surface.
             )
     return output
 

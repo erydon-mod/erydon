@@ -43,10 +43,10 @@ public abstract class ShaderPropertiesMixin implements ErydonIrisShaderPropertie
         erydon$cuPomEligible = result.eligible();
         com.oliver.erydon.client.pom.HighPolishShaderAdapter.beginShaderLoad(
                 com.oliver.erydon.client.pom.HighPolishShaderAdapter.profileForProperties(contents),
-                com.oliver.erydon.client.ErydonHighPolish.activeSettings().enabled());
+                true); // CU also supplies the common Honed baseline when the master is off.
         ErydonCuPomRuntimeState.beginShaderLoad(result.eligible());
         if (result.changed()) {
-            Erydon.LOGGER.info("[{}] Enabled the exact Complementary Unbound dev5 CTM-POM adapter in memory.",
+            Erydon.LOGGER.info("[{}] Enabled the supported Complementary CTM-POM adapter in memory.",
                     Erydon.MOD_ID);
         }
         return result.text();

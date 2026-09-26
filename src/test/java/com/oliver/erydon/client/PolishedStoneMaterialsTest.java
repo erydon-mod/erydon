@@ -10,18 +10,36 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class PolishedStoneMaterialsTest {
     @Test
+    void polishedColumnsShareTheLowCostReflectionProxy() {
+        for (String stone : STONES) {
+            for (String shape : List.of("circular", "gothic", "square")) {
+                assertTrue(PolishedStoneMaterials.isReflectionColumn(stone + "_column_" + shape));
+            }
+            assertFalse(PolishedStoneMaterials.isReflectionColumn(stone + "_column_square_aged"));
+            assertFalse(PolishedStoneMaterials.isReflectionColumn(stone + "_aged_column_gothic"));
+            assertFalse(PolishedStoneMaterials.isReflectionColumn(stone + "_block"));
+        }
+    }
+
+    @Test
     void overridesSelectActualVariantsAndWeavesFollowTheFirstNamedStone() {
         var settings = com.oliver.erydon.HighPolishSettings.defaults().withEnabled(true)
-                .withStone("glacium", new com.oliver.erydon.HighPolishSettings.Stone(false,
-                        com.oliver.erydon.HighPolishSettings.Choice.ON,
+                .withStone("glacium", new com.oliver.erydon.HighPolishSettings.Stone(com.oliver.erydon.HighPolishSettings.Level.HONED,
+                        com.oliver.erydon.HighPolishSettings.Choice.POLISHED,
                         com.oliver.erydon.HighPolishSettings.Choice.INHERIT,
-                        com.oliver.erydon.HighPolishSettings.Choice.ON));
-        assertFalse(PolishedStoneMaterials.enabled(settings, "erydon", "glacium_block"));
-        assertTrue(PolishedStoneMaterials.enabled(settings, "erydon", "glacium_herringbone_grout_stairs"));
-        assertFalse(PolishedStoneMaterials.enabled(settings, "erydon", "glacium_nerium_weave_bronze_block"));
-        assertTrue(PolishedStoneMaterials.enabled(settings, "erydon", "hesperion_glacium_weave_grout_block"));
-        assertTrue(PolishedStoneMaterials.enabled(settings, "erydon", "glacium_trim_bronze_block"));
-        assertFalse(PolishedStoneMaterials.enabled(settings, "erydon", "glacium_aged_trim_bronze_block"));
+                        com.oliver.erydon.HighPolishSettings.Choice.MIRROR));
+        for (String namespace : List.of("erydon", "themelios", "daedalon")) {
+            assertFalse(PolishedStoneMaterials.enabled(settings, namespace, "glacium_block"));
+            assertTrue(PolishedStoneMaterials.enabled(settings, namespace, "glacium_herringbone_grout_stairs"));
+            assertFalse(PolishedStoneMaterials.enabled(settings, namespace, "glacium_nerium_weave_bronze_block"));
+            assertTrue(PolishedStoneMaterials.enabled(settings, namespace, "hesperion_glacium_weave_grout_block"));
+            assertTrue(PolishedStoneMaterials.enabled(settings, namespace, "glacium_trim_bronze_block"));
+            assertFalse(PolishedStoneMaterials.enabled(settings, namespace, "glacium_aged_trim_bronze_block"));
+        }
+        assertEquals(com.oliver.erydon.HighPolishSettings.Level.POLISHED,
+                PolishedStoneMaterials.level(settings, "glacium_herringbone_grout_stairs"));
+        assertEquals(com.oliver.erydon.HighPolishSettings.Level.MIRROR,
+                PolishedStoneMaterials.level(settings, "glacium_trim_silver_slope"));
     }
 
     private static final List<String> STONES = List.of(
@@ -29,6 +47,42 @@ class PolishedStoneMaterialsTest {
             "chrysonyx", "etruscus", "gelastrum", "glacium", "hesperion", "imperium",
             "kelastrion", "kylorion", "latmion", "laurentium", "mielonyx", "nerium", "noxoplis", "porphyros",
             "portorium", "psamatheon", "rosinium", "sanguenite", "selenephos", "solistra", "striatus");
+
+    @Test
+    void sharedThemeliosStoneFamiliesUseTheSameControls() {
+        var settings = com.oliver.erydon.HighPolishSettings.defaults().withEnabled(true);
+        for (String stone : STONES) {
+            for (String form : List.of("block", "slab", "stairs", "layer", "layer_vertical",
+                    "slice_horizontal", "slice_vertical", "post", "cylinder_large", "cornice_small",
+                    "herringbone_grout_block", "trim_bronze_block", "rosette_silver_block")) {
+                String path = stone + "_" + form;
+                assertTrue(PolishedStoneMaterials.includes("themelios", path), path);
+                assertTrue(PolishedStoneMaterials.enabled(settings, "themelios", path), path);
+                assertFalse(PolishedStoneMaterials.enabled(settings.withEnabled(false), "themelios", path), path);
+            }
+        }
+    }
+
+    @Test
+    void daedalonDecorFollowsEachStonesFinishWithoutIncludingAgedOrBronzeSculptures() {
+        var settings = com.oliver.erydon.HighPolishSettings.defaults().withEnabled(true);
+        for (String stone : STONES) {
+            for (String form : List.of("aphrodite_statue", "zeus_bust", "amphora_urn", "exedra",
+                    "gothic_capital", "corinthian_frieze", "gothic_wall_panel", "kion_plinth",
+                    "monopteros_dome", "gothic_fountain_basin", "anthophoros_planter")) {
+                String path = stone + "_" + form;
+                assertTrue(PolishedStoneMaterials.enabled(settings, "daedalon", path), path);
+                var honed = settings.withStone(stone, new com.oliver.erydon.HighPolishSettings.Stone(
+                        com.oliver.erydon.HighPolishSettings.Level.HONED,
+                        com.oliver.erydon.HighPolishSettings.Choice.INHERIT,
+                        com.oliver.erydon.HighPolishSettings.Choice.INHERIT,
+                        com.oliver.erydon.HighPolishSettings.Choice.INHERIT));
+                assertFalse(PolishedStoneMaterials.enabled(honed, "daedalon", path), path);
+                assertFalse(PolishedStoneMaterials.includes("daedalon", stone + "_aged_" + form));
+                assertFalse(PolishedStoneMaterials.includes("daedalon", "bronze_" + form));
+            }
+        }
+    }
 
     @Test
     void allPolishedFormsAndInlaysAreIncluded() {
@@ -55,8 +109,14 @@ class PolishedStoneMaterialsTest {
             for (String finish : List.of("aged", "ashlar", "hewn", "rusticated", "rock", "diaphanes")) {
                 assertFalse(includes(stone + "_" + finish + "_block"));
                 assertFalse(includes(stone + "_block_" + finish));
+                assertFalse(PolishedStoneMaterials.includes("themelios", stone + "_" + finish + "_block"));
+                assertFalse(PolishedStoneMaterials.includes("themelios", stone + "_block_" + finish));
+                assertFalse(PolishedStoneMaterials.includes("daedalon", stone + "_" + finish + "_block"));
+                assertFalse(PolishedStoneMaterials.includes("daedalon", stone + "_block_" + finish));
             }
-            assertFalse(PolishedStoneMaterials.includes("themelios", stone + "_block"));
+            for (String namespace : List.of("minecraft", "unrelated", "erydon_addon")) {
+                assertFalse(PolishedStoneMaterials.includes(namespace, stone + "_block"));
+            }
         }
         for (String stone : List.of("kelastrion", "latmion", "psamatheon")) {
             for (String form : List.of("block", "alcove_gothic", "herringbone_bronze_block", "trim_silver_block")) {
