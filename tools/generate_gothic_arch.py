@@ -372,7 +372,7 @@ public class ArchGothicBlock extends ArchModernBlock {{
     private static final VoxelShape SHAPE_SIDE_MEDIUM = makeSideMediumShape();
     private static final VoxelShape SHAPE_SIDE_LARGE = makeSideLargeShape();
     private static final VoxelShape SHAPE_TOP_LARGE = makeTopLargeShape();
-    private static final VoxelShape[] GOTHIC_SHAPE_CACHE = new VoxelShape[Arrangement.values().length * 4];
+    private static final VoxelShape[] GOTHIC_SHAPE_CACHE = new VoxelShape[Arrangement.values().length * 8];
 
     public ArchGothicBlock(Settings settings) {{
         super(settings);
@@ -397,7 +397,8 @@ public class ArchGothicBlock extends ArchModernBlock {{
     private static VoxelShape getGothicWorldSpaceShape(BlockState state) {{
         Direction facing = state.get(FACING);
         Arrangement arrangement = state.get(ARRANGEMENT);
-        int index = arrangement.ordinal() * 4 + facingTurns(facing);
+        boolean reflected = state.get(REFLECTED);
+        int index = arrangement.ordinal() * 8 + facingTurns(facing) * 2 + (reflected ? 1 : 0);
         VoxelShape cached = GOTHIC_SHAPE_CACHE[index];
         if (cached != null) {{
             return cached;
@@ -411,7 +412,11 @@ public class ArchGothicBlock extends ArchModernBlock {{
             shape = VoxelShapes.union(shape, SHAPE_TOP_LARGE);
         }}
 
-        VoxelShape rotated = rotateShapeY(shape, facingTurns(facing)).simplify();
+        VoxelShape rotated = rotateShapeY(shape, facingTurns(facing));
+        if (reflected) {{
+            rotated = reflectWorldShape(rotated, facing, arrangement.hasTopLarge());
+        }}
+        rotated = rotated.simplify();
         GOTHIC_SHAPE_CACHE[index] = rotated;
         return rotated;
     }}

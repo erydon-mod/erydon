@@ -15,8 +15,8 @@ ERYDON_ASSETS = RESOURCES / "assets" / "erydon"
 AUTHORING = ERYDON_ASSETS / "authoring_models" / "block" / "alcove"
 
 AUTHORITATIVE_GEOMETRY_SIGNATURES = {
-    "alcove_gothic_double_side_right.json": "7a68792864365f0dd4043a8d1c943fdda0aa5822adf37c63add8409895addde4",
-    "alcove_gothic_double_side_left.json": "cf3726bbabcc511578e6df0a574024c76e8c3423b425047c109dcaf92865c1ee",
+    "alcove_gothic_double_side_right.json": "badeee420105ac434544fce556a744baf9809cfc0752f1448aa38b81feb66c35",
+    "alcove_gothic_double_side_left.json": "a57f7f1fe17730d91c21b2dbc791086e99be5701d05d4fbb81cdc80104392b7e",
     "alcove_georgian_triple_side_left.json": "61c14ada2f78425dc95e38a2aeae9930b9c46e76843c011fe9f99ffc91f5727f",
     "alcove_georgian_triple_side_center.json": "14c92e48b9fc6a65526d806f2919c9089293841218a98c8fe31f7a5c4e386d9c",
     "alcove_georgian_triple_side_right.json": "bcada60bd27fbe5e09dd09f5a716293195b130c1ef3c9d8b2a73138b4a045037",
@@ -106,6 +106,15 @@ class AlcoveSafetyTests(unittest.TestCase):
             self.assertEqual(geometry_signature(model), expected_signature, filename)
         self.assertEqual(339, total_offsets)
 
+    def test_gothic_double_side_walls_are_wider_than_georgian(self) -> None:
+        for style in ("georgian", "gothic"):
+            for side in ("left", "right"):
+                model = load_json(AUTHORING / f"alcove_{style}_double_side_{side}.json")
+                straight = next(e for e in model["elements"] if e.get("name") == "straight")
+                self.assertAlmostEqual(1.573 if style == "gothic" else 1.3,
+                                       straight["to"][2] - straight["from"][2])
+                self.assertEqual(straight["from"][2], 2.16643 if side == "left" else -1.95981)
+
     def test_all_registered_variants_have_complete_assets(self) -> None:
         self.assertEqual(len(self.georgian_ids), 162)
         self.assertEqual(len(set(self.gothic_ids)), 162)
@@ -125,7 +134,7 @@ class AlcoveSafetyTests(unittest.TestCase):
                     filename = GENERATOR._component_filename(block_id, suffix)
                     self.assertTrue((component_root / filename).is_file(), filename)
 
-    def test_triple_components_use_the_existing_back_base_and_texture_pipeline(self) -> None:
+    def test_triple_components_use_the_existing_back_and_texture_pipeline(self) -> None:
         triple_suffixes = set(GENERATOR.TRIPLE_MODEL_SUFFIXES)
         self.assertEqual(
             triple_suffixes,
@@ -163,7 +172,7 @@ class AlcoveSafetyTests(unittest.TestCase):
             / "AlcoveBakedModel.java"
         ).read_text(encoding="utf-8")
         self.assertIn('suffixes.add("back")', baked_source)
-        self.assertIn('suffixes.add("base")', baked_source)
+        self.assertNotIn('suffixes.add("base")', baked_source)
         self.assertIn('case TRIPLE_CENTER -> "triple_side_center"', baked_source)
         self.assertIn('case TRIPLE_CENTER -> "triple_top_center"', baked_source)
         self.assertIn("suffixes.addAll(TRIPLE_MODEL_SUFFIXES);", baked_source)

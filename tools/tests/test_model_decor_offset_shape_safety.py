@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import re
 import unittest
 from pathlib import Path
@@ -8,7 +9,15 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 JAVA_ROOT = REPO_ROOT / "src/main/java/com/oliver/erydon"
 OIL_SOURCE = JAVA_ROOT / "block/OilBurnerBlock.java"
+ALCOVE_SOURCE = JAVA_ROOT / "block/AlcoveBlock.java"
 TRANSFORM_SOURCE = JAVA_ROOT / "block/DecorShapeTransforms.java"
+GEORGIAN_BASE_MODEL = (
+    REPO_ROOT
+    / "src/main/resources/assets/erydon/authoring_models/block/alcove/alcove_georgian_single_base.json"
+)
+OFFSET_OIL_BURNER_MODEL = (
+    REPO_ROOT / "src/main/resources/assets/erydon/models/block/light/fire/oil_burner_offset.json"
+)
 
 
 def calls(source: str, call_name: str, argument_count: int) -> list[tuple[float, ...]]:
@@ -113,6 +122,25 @@ class DecorOffsetShapeContractTests(unittest.TestCase):
         self.assertIn("getCullingShape(", self.oil)
         self.assertIn("return VoxelShapes.empty();", self.oil)
         self.assertIn("includeFlameAndTarget && offset", self.oil)
+
+    def test_georgian_alcove_floor_and_offset_burner_share_zero_height(self) -> None:
+        base = json.loads(GEORGIAN_BASE_MODEL.read_text(encoding="utf-8"))
+        self.assertEqual([0, 0, 0], base["elements"][0]["from"])
+        self.assertEqual([16, 0, 16], base["elements"][0]["to"])
+        self.assertEqual({"up", "down"}, set(base["elements"][0]["faces"]))
+
+        self.assertEqual(0.0, self.constant(self.transform, "OFFSET_BASE_Y"))
+        offset_burner = json.loads(OFFSET_OIL_BURNER_MODEL.read_text(encoding="utf-8"))
+        self.assertEqual(
+            0.0,
+            min(float(element["from"][1]) for element in offset_burner["elements"]),
+        )
+
+        alcove = ALCOVE_SOURCE.read_text(encoding="utf-8")
+        self.assertNotIn(
+            "cuboidUnits(minX, 0.0, 0.0, maxX, 0.6415, 16.0)",
+            alcove,
+        )
 
 
 if __name__ == "__main__":

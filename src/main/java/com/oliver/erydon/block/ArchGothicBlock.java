@@ -18,7 +18,7 @@ public class ArchGothicBlock extends ArchModernBlock {
     private static final VoxelShape SHAPE_SIDE_MEDIUM = makeSideMediumShape();
     private static final VoxelShape SHAPE_SIDE_LARGE = makeSideLargeShape();
     private static final VoxelShape SHAPE_TOP_LARGE = makeTopLargeShape();
-    private static final VoxelShape[] GOTHIC_SHAPE_CACHE = new VoxelShape[Arrangement.values().length * 4];
+    private static final VoxelShape[] GOTHIC_SHAPE_CACHE = new VoxelShape[Arrangement.values().length * 8];
 
     public ArchGothicBlock(Settings settings) {
         super(settings);
@@ -43,7 +43,8 @@ public class ArchGothicBlock extends ArchModernBlock {
     private static VoxelShape getGothicWorldSpaceShape(BlockState state) {
         Direction facing = state.get(FACING);
         Arrangement arrangement = state.get(ARRANGEMENT);
-        int index = arrangement.ordinal() * 4 + facingTurns(facing);
+        boolean reflected = state.get(REFLECTED);
+        int index = arrangement.ordinal() * 8 + facingTurns(facing) * 2 + (reflected ? 1 : 0);
         VoxelShape cached = GOTHIC_SHAPE_CACHE[index];
         if (cached != null) {
             return cached;
@@ -57,7 +58,11 @@ public class ArchGothicBlock extends ArchModernBlock {
             shape = VoxelShapes.union(shape, SHAPE_TOP_LARGE);
         }
 
-        VoxelShape rotated = rotateShapeY(shape, facingTurns(facing)).simplify();
+        VoxelShape rotated = rotateShapeY(shape, facingTurns(facing));
+        if (reflected) {
+            rotated = reflectWorldShape(rotated, facing, arrangement.hasTopLarge());
+        }
+        rotated = rotated.simplify();
         GOTHIC_SHAPE_CACHE[index] = rotated;
         return rotated;
     }
@@ -159,6 +164,7 @@ public class ArchGothicBlock extends ArchModernBlock {
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.09377281, 0.30395997, 0.00042498, 0.71204901, 0.98258215, 0.99979997));
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(-0.11151432, 0.45700455, 0.00045002, 0.38829181, 0.99721009, 0.999825));
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(-0.26499875, 0.79547188, 0, 0.85218812, 1.00049688, 1));
+        shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.78259062, 0, 0.0000625, 0.85236, 0.80882875, 0.9999375));
         return shape.simplify();
     }
 
@@ -166,7 +172,6 @@ public class ArchGothicBlock extends ArchModernBlock {
         VoxelShape shape = VoxelShapes.empty();
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.7843135, 0.50767308, 0.00032496, 0.97956675, 0.82312512, 0.99970001));
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.64627361, 0.74336493, 0.00035, 0.98373312, 1.10596871, 0.99972498));
-        shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.78259062, 0.938765, 0.0000625, 0.85236, 1.80882875, 0.9999375));
         return shape.simplify();
     }
 

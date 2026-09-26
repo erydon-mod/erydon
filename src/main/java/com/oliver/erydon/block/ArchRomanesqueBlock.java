@@ -55,6 +55,9 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
     public static final EnumProperty<Arrangement> ARRANGEMENT = EnumProperty.of("arr", Arrangement.class);
     public static final IntProperty WIDTH = IntProperty.of("width", 1, 3);
     public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
+    // A horizontal reflection is not a half-turn for the asymmetric arch details.
+    // Keep its parity in the state so Axiom can preview and paste the same geometry.
+    public static final BooleanProperty REFLECTED = BooleanProperty.of("reflected");
     private static final String WIDTH_OVERRIDE_SCOPE = ClusterManualLockState.ROMANESQUE_ARCH_SCOPE + "_width";
     private static final int DEFAULT_WIDTH = 3;
 
@@ -109,7 +112,7 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
 
     private static final VoxelShape SHAPE_TOP_LARGE = makeTopLargeShape();
 
-    private static final VoxelShape[] SHAPE_CACHE = new VoxelShape[Arrangement.values().length * 4];
+    private static final VoxelShape[] SHAPE_CACHE = new VoxelShape[Arrangement.values().length * 8];
 
     // --- Enums / properties --------------------------------------------------
 
@@ -275,6 +278,46 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
         public boolean plinthR() { return plinthR; }
         public boolean hasTopLarge() { return topLarge; }
         public boolean isVoid() { return isVoid; }
+
+        public Arrangement mirrored() {
+            String[] tokens = name().split("_");
+            boolean changed = false;
+
+            for (int i = 0; i < tokens.length; i++) {
+                switch (tokens[i]) {
+                    case "L" -> {
+                        tokens[i] = "R";
+                        changed = true;
+                    }
+                    case "R" -> {
+                        tokens[i] = "L";
+                        changed = true;
+                    }
+                    case "LH" -> {
+                        tokens[i] = "RH";
+                        changed = true;
+                    }
+                    case "RH" -> {
+                        tokens[i] = "LH";
+                        changed = true;
+                    }
+                    default -> {
+                    }
+                }
+            }
+
+            if (!changed) {
+                return this;
+            }
+
+            String mirroredName = String.join("_", tokens);
+            try {
+                return Arrangement.valueOf(mirroredName);
+            } catch (IllegalArgumentException ignored) {
+                return this;
+            }
+        }
+
     }
 
     public ArchRomanesqueBlock(Settings settings) {
@@ -284,6 +327,7 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
                 .with(ARRANGEMENT, Arrangement.SMALL_TOP)
                 .with(WIDTH, DEFAULT_WIDTH)
                 .with(WATERLOGGED, false)
+                .with(REFLECTED, false)
         );
     }
 
@@ -293,7 +337,7 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
 
     @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        builder.add(FACING, ARRANGEMENT, WIDTH, WATERLOGGED);
+        builder.add(FACING, ARRANGEMENT, WIDTH, WATERLOGGED, REFLECTED);
     }
 
     @Override
@@ -307,16 +351,18 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
         Arrangement arrangement = state.get(ARRANGEMENT);
 
         if (mirror != BlockMirror.NONE) {
-            arrangement = mirrorArrangement(arrangement);
+            arrangement = arrangement.mirrored();
         }
 
-        return rotate(state, mirror.getRotation(facing)).with(ARRANGEMENT, arrangement);
+        BlockState result = rotate(state, mirror.getRotation(facing)).with(ARRANGEMENT, arrangement);
+        return mirror == BlockMirror.NONE ? result : result.with(REFLECTED, !state.get(REFLECTED));
     }
 
     @Override
     public BlockState getPlacementState(ItemPlacementContext ctx) {
         Direction facing = ctx.getHorizontalPlayerFacing();
         int width = DEFAULT_WIDTH;
+        boolean reflected = false;
 
         // If we're attaching to an existing arch cluster, inherit its facing.
         World world = ctx.getWorld();
@@ -327,6 +373,7 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
             if (isArchBlock(neighbour)) {
                 facing = neighbour.get(FACING);
                 width = neighbour.get(WIDTH);
+                reflected = neighbour.get(REFLECTED);
                 break;
             }
         }
@@ -338,6 +385,7 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
                 .with(FACING, facing)
                 .with(ARRANGEMENT, Arrangement.SMALL_TOP)
                 .with(WIDTH, width)
+                .with(REFLECTED, reflected)
                 .with(WATERLOGGED, fluid.getFluid() == Fluids.WATER);
     }
 
@@ -369,9 +417,7 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
 
         boolean widthChanged = state.get(WIDTH) != oldState.get(WIDTH);
         boolean waterloggedChanged = state.get(WATERLOGGED) != oldState.get(WATERLOGGED);
-        boolean arrangementChanged = state.get(ARRANGEMENT) != oldState.get(ARRANGEMENT);
-
-        if (!widthChanged && !waterloggedChanged && !arrangementChanged) {
+        if (!widthChanged && !waterloggedChanged) {
             return;
         }
 
@@ -383,12 +429,9 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
             if (waterloggedChanged) {
                 applyWaterloggedToSubmergedCluster(world, pos);
             }
-            if (arrangementChanged && !widthChanged) {
-                ClusterInfo cluster = discoverCluster(world, pos);
-                if (cluster != null && !cluster.blocks.isEmpty()) {
-                    reflowCluster(world, cluster);
-                }
-            }
+            // Axiom writes rotated and mirrored pieces one at a time. Arrangement
+            // changes must keep the tool's transformed left/right layout intact.
+            // Placement/removal and explicit recalc still rebuild whole clusters.
         } finally {
             endClusterStateSync(started);
         }
@@ -1001,45 +1044,6 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
         return StyleSet.BASE;
     }
 
-    private static Arrangement mirrorArrangement(Arrangement arrangement) {
-        String[] tokens = arrangement.name().split("_");
-        boolean changed = false;
-
-        for (int i = 0; i < tokens.length; i++) {
-            switch (tokens[i]) {
-                case "L" -> {
-                    tokens[i] = "R";
-                    changed = true;
-                }
-                case "R" -> {
-                    tokens[i] = "L";
-                    changed = true;
-                }
-                case "LH" -> {
-                    tokens[i] = "RH";
-                    changed = true;
-                }
-                case "RH" -> {
-                    tokens[i] = "LH";
-                    changed = true;
-                }
-                default -> {
-                }
-            }
-        }
-
-        if (!changed) {
-            return arrangement;
-        }
-
-        String mirroredName = String.join("_", tokens);
-        try {
-            return Arrangement.valueOf(mirroredName);
-        } catch (IllegalArgumentException ignored) {
-            return arrangement;
-        }
-    }
-
     private static StyleSet styleFromArrangement(Arrangement arrangement) {
         return isColumnStyleArrangement(arrangement) ? StyleSet.COLUMN : StyleSet.BASE;
     }
@@ -1212,7 +1216,8 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
         Direction facing = state.get(FACING);
         Arrangement arrangement = state.get(ARRANGEMENT);
 
-        int idx = shapeCacheIndex(arrangement, facing);
+        boolean reflected = state.get(REFLECTED);
+        int idx = shapeCacheIndex(arrangement, facing, reflected);
         VoxelShape cached = SHAPE_CACHE[idx];
         if (cached != null) {
             return cached;
@@ -1252,7 +1257,11 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
         }
 
         // Rotate NORTH-authored shapes into the block's actual FACING.
-        VoxelShape rotated = rotateShapeFromNorthToFacing(shape, facing).simplify();
+        VoxelShape rotated = rotateShapeFromNorthToFacing(shape, facing);
+        if (reflected) {
+            rotated = reflectWorldShape(rotated, facing, arrangement.hasTopLarge());
+        }
+        rotated = rotated.simplify();
         SHAPE_CACHE[idx] = rotated;
         return rotated;
     }
@@ -1284,8 +1293,23 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
         };
     }
 
-    private static int shapeCacheIndex(Arrangement arrangement, Direction facing) {
-        return arrangement.ordinal() * 4 + facingIndex(facing);
+    private static int shapeCacheIndex(Arrangement arrangement, Direction facing, boolean reflected) {
+        return arrangement.ordinal() * 8 + facingIndex(facing) * 2 + (reflected ? 1 : 0);
+    }
+
+    protected static VoxelShape reflectWorldShape(VoxelShape shape, Direction facing, boolean centre) {
+        // Side pieces use a half-turn for handedness, so a reflected assembly
+        // needs its front/back axis reversed. The centre keystone has no pair
+        // and instead needs a left/right reflection.
+        boolean reflectX = (facing.getAxis() == Direction.Axis.X) != centre;
+        final VoxelShape[] result = { VoxelShapes.empty() };
+        shape.forEachBox((minX, minY, minZ, maxX, maxY, maxZ) -> {
+            VoxelShape box = reflectX
+                    ? VoxelShapes.cuboid(1.0 - maxX, minY, minZ, 1.0 - minX, maxY, maxZ)
+                    : VoxelShapes.cuboid(minX, minY, 1.0 - maxZ, maxX, maxY, 1.0 - minZ);
+            result[0] = VoxelShapes.union(result[0], box);
+        });
+        return result[0];
     }
 
     private static int facingIndex(Direction facing) {

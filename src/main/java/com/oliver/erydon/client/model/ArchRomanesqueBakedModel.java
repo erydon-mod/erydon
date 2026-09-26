@@ -98,17 +98,26 @@ public final class ArchRomanesqueBakedModel implements BakedModel, FabricBakedMo
 
         ArchRomanesqueBlock.Arrangement arrangement = state.get(ArchRomanesqueBlock.ARRANGEMENT);
         Direction facing = state.get(ArchRomanesqueBlock.FACING);
-
-        emitCorner(state, context, arrangement.corner(), arrangement.cornerFlip(), facing);
-        emitSide(state, context, arrangement.sideL(), false, facing);
-        emitSide(state, context, arrangement.sideR(), true, facing);
-        emitUpper(state, context, arrangement.upperL(), false, facing);
-        emitUpper(state, context, arrangement.upperR(), true, facing);
-        emitIf(state, context, arrangement.columnL(), "side_column", leftRotation(facing));
-        emitIf(state, context, arrangement.columnR(), "side_column", rightRotation(facing));
-        emitIf(state, context, arrangement.plinthL(), "plinth", leftRotation(facing));
-        emitIf(state, context, arrangement.plinthR(), "plinth", rightRotation(facing));
-        emitIf(state, context, arrangement.hasTopLarge(), "top_large", rightRotation(facing));
+        boolean reflected = state.get(ArchRomanesqueBlock.REFLECTED);
+        if (reflected) {
+            context.pushTransform(ArchHorizontalReflection.forState(facing, arrangement.hasTopLarge()));
+        }
+        try {
+            emitCorner(state, context, arrangement.corner(), arrangement.cornerFlip(), facing);
+            emitSide(state, context, arrangement.sideL(), false, facing);
+            emitSide(state, context, arrangement.sideR(), true, facing);
+            emitUpper(state, context, arrangement.upperL(), false, facing);
+            emitUpper(state, context, arrangement.upperR(), true, facing);
+            emitIf(state, context, arrangement.columnL(), "side_column", leftRotation(facing));
+            emitIf(state, context, arrangement.columnR(), "side_column", rightRotation(facing));
+            emitIf(state, context, arrangement.plinthL(), "plinth", leftRotation(facing));
+            emitIf(state, context, arrangement.plinthR(), "plinth", rightRotation(facing));
+            emitIf(state, context, arrangement.hasTopLarge(), "top_large", rightRotation(facing));
+        } finally {
+            if (reflected) {
+                context.popTransform();
+            }
+        }
     }
 
     @Override
@@ -263,18 +272,24 @@ public final class ArchRomanesqueBakedModel implements BakedModel, FabricBakedMo
 
         ArchRomanesqueBlock.Arrangement arrangement = state.get(ArchRomanesqueBlock.ARRANGEMENT);
         Direction facing = state.get(ArchRomanesqueBlock.FACING);
+        ArchHorizontalReflection reflection = state.get(ArchRomanesqueBlock.REFLECTED)
+                ? ArchHorizontalReflection.forState(facing, arrangement.hasTopLarge()) : null;
+        Direction sourceFace = reflection == null ? face : reflection.face(face);
         List<BakedQuad> quads = new ArrayList<>();
 
-        addCornerQuads(quads, state, arrangement.corner(), arrangement.cornerFlip(), facing, face, random);
-        addSideQuads(quads, state, arrangement.sideL(), false, facing, face, random);
-        addSideQuads(quads, state, arrangement.sideR(), true, facing, face, random);
-        addUpperQuads(quads, state, arrangement.upperL(), false, facing, face, random);
-        addUpperQuads(quads, state, arrangement.upperR(), true, facing, face, random);
-        addIfQuads(quads, state, arrangement.columnL(), "side_column", leftRotation(facing), face, random);
-        addIfQuads(quads, state, arrangement.columnR(), "side_column", rightRotation(facing), face, random);
-        addIfQuads(quads, state, arrangement.plinthL(), "plinth", leftRotation(facing), face, random);
-        addIfQuads(quads, state, arrangement.plinthR(), "plinth", rightRotation(facing), face, random);
-        addIfQuads(quads, state, arrangement.hasTopLarge(), "top_large", rightRotation(facing), face, random);
+        addCornerQuads(quads, state, arrangement.corner(), arrangement.cornerFlip(), facing, sourceFace, random);
+        addSideQuads(quads, state, arrangement.sideL(), false, facing, sourceFace, random);
+        addSideQuads(quads, state, arrangement.sideR(), true, facing, sourceFace, random);
+        addUpperQuads(quads, state, arrangement.upperL(), false, facing, sourceFace, random);
+        addUpperQuads(quads, state, arrangement.upperR(), true, facing, sourceFace, random);
+        addIfQuads(quads, state, arrangement.columnL(), "side_column", leftRotation(facing), sourceFace, random);
+        addIfQuads(quads, state, arrangement.columnR(), "side_column", rightRotation(facing), sourceFace, random);
+        addIfQuads(quads, state, arrangement.plinthL(), "plinth", leftRotation(facing), sourceFace, random);
+        addIfQuads(quads, state, arrangement.plinthR(), "plinth", rightRotation(facing), sourceFace, random);
+        addIfQuads(quads, state, arrangement.hasTopLarge(), "top_large", rightRotation(facing), sourceFace, random);
+        if (reflection != null) {
+            quads.replaceAll(reflection::reflect);
+        }
         return quads;
     }
 

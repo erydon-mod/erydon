@@ -139,7 +139,26 @@ public class VerticalSliceBlock extends Block implements Waterloggable {
 
     @Override
     public BlockState mirror(BlockState state, BlockMirror mirror) {
-        return state.rotate(mirror.getRotation(state.get(FACING)));
+        // Facing labels corners clockwise: NORTH=NW, EAST=NE, SOUTH=SE, WEST=SW.
+        // A corner reflection differs from reflecting an axis-aligned face.
+        Direction facing = state.get(FACING);
+        return switch (mirror) {
+            case NONE -> state;
+            case LEFT_RIGHT -> state.with(FACING, switch (facing) {
+                case NORTH -> Direction.WEST;
+                case EAST -> Direction.SOUTH;
+                case SOUTH -> Direction.EAST;
+                case WEST -> Direction.NORTH;
+                default -> facing;
+            });
+            case FRONT_BACK -> state.with(FACING, switch (facing) {
+                case NORTH -> Direction.EAST;
+                case EAST -> Direction.NORTH;
+                case SOUTH -> Direction.WEST;
+                case WEST -> Direction.SOUTH;
+                default -> facing;
+            });
+        };
     }
 
     @Override

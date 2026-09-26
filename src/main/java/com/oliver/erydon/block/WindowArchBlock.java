@@ -379,8 +379,9 @@ public class WindowArchBlock extends Block implements ClusterRebuildableBlock {
         Direction facing = state.get(FACING);
         Piece piece = state.get(PIECE);
 
-        if (mirrorSwapsLeftRight(facing, mirror)) {
-            piece = swapLeftRight(piece);
+        // Reflection reverses local handedness even when it also reverses FACING.
+        if (mirror != BlockMirror.NONE) {
+            piece = piece.mirrored();
         }
 
         return rotate(state, mirror.getRotation(facing)).with(PIECE, piece);
@@ -516,21 +517,6 @@ public class WindowArchBlock extends Block implements ClusterRebuildableBlock {
                 pos.offset(left),
                 pos.offset(right)
         );
-    }
-
-    private static boolean mirrorSwapsLeftRight(Direction facing, BlockMirror mirror) {
-        return (mirror == BlockMirror.LEFT_RIGHT && facing.getAxis() == Direction.Axis.X)
-                || (mirror == BlockMirror.FRONT_BACK && facing.getAxis() == Direction.Axis.Z);
-    }
-
-    private static Piece swapLeftRight(Piece piece) {
-        return switch (piece) {
-            case UPPER_LEFT -> Piece.UPPER_RIGHT;
-            case UPPER_RIGHT -> Piece.UPPER_LEFT;
-            case LOWER_LEFT -> Piece.LOWER_RIGHT;
-            case LOWER_RIGHT -> Piece.LOWER_LEFT;
-            default -> piece;
-        };
     }
 
     // --- Rectangle partitioning (same approach as WindowFrenchGeorgianBlock) ---
@@ -763,6 +749,15 @@ public class WindowArchBlock extends Block implements ClusterRebuildableBlock {
 
         private final String id;
         Piece(String id) { this.id = id; }
+        public Piece mirrored() {
+            return switch (this) {
+                case UPPER_LEFT -> UPPER_RIGHT;
+                case UPPER_RIGHT -> UPPER_LEFT;
+                case LOWER_LEFT -> LOWER_RIGHT;
+                case LOWER_RIGHT -> LOWER_LEFT;
+                default -> this;
+            };
+        }
         @Override public String asString() { return id; }
     }
 

@@ -11,13 +11,10 @@
       ],
       "to": [
         16,
-        0.6415,
+        0,
         16
       ],
       "faces": {
-        "south": {
-          "texture": "#missing"
-        },
         "up": {
           "texture": "#missing"
         },

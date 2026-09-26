@@ -83,48 +83,6 @@
         }
       },
       "color": 6
-    },
-    {
-      "from": [
-        12.52145,
-        15.02024,
-        0.001
-      ],
-      "to": [
-        13.63776,
-        28.94126,
-        15.999
-      ],
-      "rotation": {
-        "angle": 0,
-        "axis": "y",
-        "origin": [
-          -7.11705,
-          23.59571,
-          8.0
-        ]
-      },
-      "faces": {
-        "north": {
-          "texture": "#stone"
-        },
-        "east": {
-          "texture": "#stone"
-        },
-        "south": {
-          "texture": "#stone"
-        },
-        "west": {
-          "texture": "#stone"
-        },
-        "up": {
-          "texture": "#stone"
-        },
-        "down": {
-          "texture": "#stone"
-        }
-      },
-      "color": 6
     }
   ],
   "groups": [
@@ -139,8 +97,7 @@
       "color": 6,
       "children": [
         0,
-        1,
-        2
+        1
       ]
     }
   ]

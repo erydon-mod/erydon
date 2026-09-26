@@ -78,7 +78,8 @@ public final class ArchRepeatCtmRenderer extends ForwardingBakedModel {
         StateKey key = new StateKey(
                 family,
                 state.get(ArchRomanesqueBlock.ARRANGEMENT),
-                state.get(ArchRomanesqueBlock.FACING)
+                state.get(ArchRomanesqueBlock.FACING),
+                state.get(ArchRomanesqueBlock.REFLECTED)
         );
         List<QuadTemplate> templates = geometryForState(
                 key, state, randomSupplier, context.getEmitter());
@@ -717,7 +718,8 @@ public final class ArchRepeatCtmRenderer extends ForwardingBakedModel {
 
     private record StateKey(Family family,
                             ArchRomanesqueBlock.Arrangement arrangement,
-                            Direction facing) {
+                            Direction facing,
+                            boolean reflected) {
     }
 
     private record SourceProperties(Direction lightFace,

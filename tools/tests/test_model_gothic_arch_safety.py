@@ -14,8 +14,8 @@ ERYDON_ASSETS = RESOURCES / "assets" / "erydon"
 AUTHORING = ERYDON_ASSETS / "authoring_models" / "block" / "arch" / "gothic"
 
 GEOMETRY_SIGNATURES = {
-    "arch_gothic_corner_large_lower.json": "43efcace93bc40135a3f1640dd728534a0f2fec355108123ef88bac019765c47",
-    "arch_gothic_corner_large_upper.json": "3e0e679d157bc87ae0071e30863dc9008a29ec23810aa2f2a1c8167673cf2865",
+    "arch_gothic_corner_large_lower.json": "1b6e35dd246ce7406ef691f7538d3fc66ed6ea439ded4257c0b760fc9616417c",
+    "arch_gothic_corner_large_upper.json": "b139a4cd0568bfa01dd7189cc8f96fe1845a3143cfefac924f8123a7ce9f91a1",
     "arch_gothic_corner_medium.json": "3583015e07e2621558164b7a7c39a5929f5d1f82609cf4284cecaf37c52e6c13",
     "arch_gothic_corner_small.json": "05cf4d3e9a92831c8c5fb8b9aa8da8a25d24bc01950b53257f03b0d4426e8902",
     "arch_gothic_icon.json": "264f264859fd5a0715778904e69ea89afba42fc843fbab5a87371ce990d17685",
@@ -77,6 +77,39 @@ class GothicArchSafetyTests(unittest.TestCase):
         self.assertFalse((AUTHORING / "arch_gothic_side_medium_upper.json").exists())
         self.assertFalse((AUTHORING / "arch_gothic_side_large_upper.json").exists())
         self.assertFalse((AUTHORING / "arch_gothic_large_assembly_preview.json").exists())
+
+    def test_large_gap_filler_belongs_to_upper_row_and_keeps_arch_closed(self) -> None:
+        lower = load_json(AUTHORING / "arch_gothic_corner_large_lower.json")
+        upper = load_json(AUTHORING / "arch_gothic_corner_large_upper.json")
+        filler = next(e for e in upper["elements"]
+                      if e.get("name") == "gothic_large_upper_gap_filler")
+        self.assertEqual([12.52145, 0, 0.001], filler["from"])
+        self.assertEqual([13.63776, 12.94126, 15.999], filler["to"])
+        # The formerly exposed upper strip retains its exact world bounds,
+        # now rendered and lit by the upper block rather than its lower neighbour.
+        self.assertAlmostEqual(28.94126, filler["to"][1] + 16)
+        self.assertEqual(2, len(lower["elements"]))
+        self.assertEqual(6, len(upper["elements"]))
+        self.assertEqual(28, sum(len(e["faces"]) for model in (lower, upper)
+                                 for e in model["elements"]))
+        for model in (lower, upper):
+            self.assertEqual(list(range(len(model["elements"]))),
+                             model["groups"][0]["children"])
+
+        # The only removed area (below the row boundary) is fully covered by
+        # an existing curved panel. Both are convex, so checking the rectangle's
+        # corners proves the entire removed strip is covered on front and back.
+        panel = lower["elements"][1]
+        rotation = GENERATOR.raw_uv.RawRotation.parse(panel["rotation"], (8, 8, 8), "panel")
+        for face in ("east", "west"):
+            polygon = [rotation.transform(v)[:2] for v in GENERATOR.raw_uv._face_vertices(
+                panel["from"], panel["to"], face)]
+            for x in (12.52145, 13.63776):
+                for y in (15.02024, 16):
+                    sides = [(b[0] - a[0]) * (y - a[1]) - (b[1] - a[1]) * (x - a[0])
+                             for a, b in zip(polygon, polygon[1:] + polygon[:1])]
+                    self.assertTrue(all(s >= -1e-6 for s in sides) or all(s <= 1e-6 for s in sides),
+                                    (face, x, y))
 
     def test_authoring_geometry_texture_and_uv_contract(self) -> None:
         explicit_counts = {}

@@ -32,7 +32,6 @@ public final class AlcoveBakedModel implements BakedModel, FabricBakedModel {
     private static final List<String> BASE_MODEL_SUFFIXES = List.of(
             "back",
             "sides",
-            "base",
             "top",
             "icon",
             "double_side_left",
@@ -104,9 +103,6 @@ public final class AlcoveBakedModel implements BakedModel, FabricBakedModel {
         suffixes.add(sideSuffix(span));
 
         AlcoveBlock.AlcovePart part = state.get(AlcoveBlock.PART);
-        if (part == AlcoveBlock.AlcovePart.SINGLE || part == AlcoveBlock.AlcovePart.BASE) {
-            suffixes.add("base");
-        }
         if (part == AlcoveBlock.AlcovePart.SINGLE || part == AlcoveBlock.AlcovePart.TOP) {
             suffixes.add(topSuffix(span));
         }

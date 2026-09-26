@@ -24,6 +24,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -120,12 +121,20 @@ public final class ErydonSharedGeometryBenchmarkHarness {
         private ItemStack originalHotbarStack = ItemStack.EMPTY;
         private boolean originalHudHidden;
         private boolean visualHudPrepared;
+        private boolean failed;
+        private boolean directoryVerified;
 
         private void tick(MinecraftClient client) {
             if (finished) {
                 return;
             }
             try {
+                if (!directoryVerified) {
+                    if (!Files.isRegularFile(client.runDirectory.toPath().resolve("ERYDON_PERF_DISPOSABLE"))) {
+                        throw new IllegalStateException("Disposable performance instance marker is missing");
+                    }
+                    directoryVerified = true;
+                }
                 switch (scenario) {
                     case LAUNCH -> tickLaunch(client);
                     case RELOAD -> tickReload(client);
@@ -709,6 +718,18 @@ public final class ErydonSharedGeometryBenchmarkHarness {
                 return;
             }
             finished = true;
+            if (!failed) {
+                System.gc();
+                System.runFinalization();
+                System.gc();
+                writeSample(
+                        "post_gc_used_heap",
+                        ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed(),
+                        "bytes",
+                        "completed_after_explicit_gc",
+                        processIteration
+                );
+            }
             restoreClientState(client);
             client.scheduleStop();
         }
@@ -731,6 +752,7 @@ public final class ErydonSharedGeometryBenchmarkHarness {
         }
 
         private void fail(MinecraftClient client, Throwable throwable) {
+            failed = true;
             Erydon.LOGGER.error(
                     "[{}] Shared-geometry benchmark failed in scenario {}.",
                     Erydon.MOD_ID,

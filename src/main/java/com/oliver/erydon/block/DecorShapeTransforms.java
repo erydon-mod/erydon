@@ -12,7 +12,7 @@ import net.minecraft.util.shape.VoxelShapes;
 public final class DecorShapeTransforms {
     public static final float OIL_BURNER_OFFSET_SCALE = 0.6156F;
     public static final float OFFSET_DISTANCE = 0.8003375F;
-    public static final float OFFSET_BASE_Y = 0.04335284F;
+    public static final float OFFSET_BASE_Y = 0.0F;
 
     /*
      * The outline must retain something inside the owning cell: Minecraft

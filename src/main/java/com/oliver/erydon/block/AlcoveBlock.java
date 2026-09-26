@@ -48,16 +48,18 @@ public class AlcoveBlock extends HorizontalFacingBlock implements Waterloggable,
     public static final EnumProperty<AlcoveSpan> SPAN = EnumProperty.of("span", AlcoveSpan.class);
     public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
 
-    private static final VoxelShape[] SHAPES = new VoxelShape[AlcovePart.values().length * AlcoveSpan.values().length * 4];
+    private static final VoxelShape[] SHAPES = new VoxelShape[2 * AlcovePart.values().length * AlcoveSpan.values().length * 4];
     private static final ThreadLocal<Boolean> SYNCING = ThreadLocal.withInitial(() -> false);
     private final int maxClusterWidth;
+    private final boolean gothic;
 
-    public AlcoveBlock(Settings settings, int maxClusterWidth) {
+    public AlcoveBlock(Settings settings, int maxClusterWidth, boolean gothic) {
         super(settings);
         if (maxClusterWidth != 2 && maxClusterWidth != 3) {
             throw new IllegalArgumentException("Alcove maxClusterWidth must be 2 or 3");
         }
         this.maxClusterWidth = maxClusterWidth;
+        this.gothic = gothic;
         this.setDefaultState(this.stateManager.getDefaultState()
                 .with(FACING, Direction.SOUTH)
                 .with(PART, AlcovePart.SINGLE)
@@ -127,7 +129,13 @@ public class AlcoveBlock extends HorizontalFacingBlock implements Waterloggable,
 
     @Override
     public BlockState mirror(BlockState state, BlockMirror mirror) {
-        return rotate(state, mirror.getRotation(state.get(FACING)));
+        if (mirror == BlockMirror.NONE) {
+            return state;
+        }
+        // A reflection reverses left/right relative to the new facing on either
+        // horizontal axis. Axiom previews and places these states without reflow.
+        return state.with(FACING, mirror.apply(state.get(FACING)))
+                .with(SPAN, state.get(SPAN).mirrored());
     }
 
     @Override
@@ -472,20 +480,21 @@ public class AlcoveBlock extends HorizontalFacingBlock implements Waterloggable,
         };
     }
 
-    private static VoxelShape getShape(BlockState state) {
+    private VoxelShape getShape(BlockState state) {
         AlcovePart part = state.get(PART);
         AlcoveSpan span = state.get(SPAN);
         int turns = turnsFromSouth(state.get(FACING));
-        int index = (part.ordinal() * AlcoveSpan.values().length + span.ordinal()) * 4 + turns;
+        int index = ((gothic ? 1 : 0) * AlcovePart.values().length * AlcoveSpan.values().length
+                + part.ordinal() * AlcoveSpan.values().length + span.ordinal()) * 4 + turns;
         VoxelShape shape = SHAPES[index];
         if (shape == null) {
-            shape = rotateShapeY(makeSouthShape(part, span), turns).simplify();
+            shape = rotateShapeY(makeSouthShape(part, span, gothic), turns).simplify();
             SHAPES[index] = shape;
         }
         return shape;
     }
 
-    private static VoxelShape makeSouthShape(AlcovePart part, AlcoveSpan span) {
+    private static VoxelShape makeSouthShape(AlcovePart part, AlcoveSpan span, boolean gothic) {
         double minX = switch (span) {
             case RIGHT, TRIPLE_CENTER -> -16.0;
             case TRIPLE_RIGHT -> -32.0;
@@ -497,15 +506,15 @@ public class AlcoveBlock extends HorizontalFacingBlock implements Waterloggable,
             default -> 16.0;
         };
 
+        boolean doubleWidth = span == AlcoveSpan.LEFT || span == AlcoveSpan.RIGHT;
+        double leftWall = doubleWidth ? (gothic ? 1.573 : 1.3) : 0.6148;
+        double rightWall = doubleWidth ? (gothic ? 1.573 : 1.3) : 0.64147;
         VoxelShape shape = VoxelShapes.union(
                 cuboidUnits(minX, 0.0, 0.0, maxX, 16.0, 0.125),
                 cuboidUnits(minX + 0.0467, 0.0, 6.58509, maxX - 0.0479, 16.0, 6.60389),
-                cuboidUnits(minX, 0.0, 0.03978, minX + 0.6148, 16.0, 16.0),
-                cuboidUnits(maxX - 0.64147, 0.0, 0.05984, maxX, 16.0, 16.0));
+                cuboidUnits(minX, 0.0, 0.03978, minX + leftWall, 16.0, 16.0),
+                cuboidUnits(maxX - rightWall, 0.0, 0.05984, maxX, 16.0, 16.0));
 
-        if (part == AlcovePart.SINGLE || part == AlcovePart.BASE) {
-            shape = VoxelShapes.union(shape, cuboidUnits(minX, 0.0, 0.0, maxX, 0.6415, 16.0));
-        }
         if (part == AlcovePart.SINGLE || part == AlcovePart.TOP) {
             shape = VoxelShapes.union(shape, cuboidUnits(minX, 14.976, 0.0, maxX, 16.0, 16.0));
         }
@@ -590,6 +599,16 @@ public class AlcoveBlock extends HorizontalFacingBlock implements Waterloggable,
 
         public boolean isTriple() {
             return this == TRIPLE_LEFT || this == TRIPLE_CENTER || this == TRIPLE_RIGHT;
+        }
+
+        public AlcoveSpan mirrored() {
+            return switch (this) {
+                case LEFT -> RIGHT;
+                case RIGHT -> LEFT;
+                case TRIPLE_LEFT -> TRIPLE_RIGHT;
+                case TRIPLE_RIGHT -> TRIPLE_LEFT;
+                case SINGLE, TRIPLE_CENTER -> this;
+            };
         }
     }
 

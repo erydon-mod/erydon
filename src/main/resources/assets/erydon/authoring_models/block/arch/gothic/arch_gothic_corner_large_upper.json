@@ -205,6 +205,49 @@
         }
       },
       "color": 4
+    },
+    {
+      "from": [
+        12.52145,
+        0,
+        0.001
+      ],
+      "to": [
+        13.63776,
+        12.94126,
+        15.999
+      ],
+      "rotation": {
+        "angle": 0,
+        "axis": "y",
+        "origin": [
+          -7.11705,
+          7.59571,
+          8.0
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      },
+      "color": 4,
+      "name": "gothic_large_upper_gap_filler"
     }
   ],
   "groups": [
@@ -222,7 +265,8 @@
         1,
         2,
         3,
-        4
+        4,
+        5
       ]
     }
   ]

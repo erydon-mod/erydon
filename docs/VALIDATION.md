@@ -30,3 +30,11 @@ Additional model geometry tooling remains available through:
 
 In-game visual and lighting validation remains a release test; it is not
 represented as a clean-clone CI assertion.
+
+`verifyAlcoveTransforms` checks Gothic and Georgian alcoves through Minecraft's
+actual block-state transform entry points under Fabric. It covers widths one to
+three, both flip/rotation orders, and the resulting whole-cluster shape bounds,
+without opening a game window or world. The task runs as part of `check`.
+An optional `erydon.alcoveTestMods` Gradle property accepts locally remapped Axiom
+and dependency JAR paths, separated by the platform path separator, to exercise
+the Move Builder Tool's actual region transformations instead.

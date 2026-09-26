@@ -26365,7 +26365,7 @@ public final class ModBlocks {
     private static void registerAlcove(String name, String sourceBlockName, int maxClusterWidth) {
         registerBlock(name, new AlcoveBlock(
                 AbstractBlock.Settings.copy(sourceBlock(sourceBlockName)).nonOpaque(),
-                maxClusterWidth));
+                maxClusterWidth, name.endsWith("_alcove_gothic")));
     }
 
     private static void registerGothicCornices() {

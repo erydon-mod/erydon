@@ -26,7 +26,7 @@ public class ArchModernBlock extends ArchRomanesqueBlock {
     private static final VoxelShape SHAPE_SIDE_MEDIUM_UPPER = makeSideMediumUpperShape();
     private static final VoxelShape SHAPE_SIDE_LARGE_UPPER = makeSideLargeUpperShape();
     private static final VoxelShape SHAPE_TOP_LARGE = makeTopLargeShape();
-    private static final VoxelShape[] MODERN_SHAPE_CACHE = new VoxelShape[Arrangement.values().length * 4];
+    private static final VoxelShape[] MODERN_SHAPE_CACHE = new VoxelShape[Arrangement.values().length * 8];
 
     public ArchModernBlock(Settings settings) {
         super(settings);
@@ -61,7 +61,8 @@ public class ArchModernBlock extends ArchRomanesqueBlock {
     private static VoxelShape getModernWorldSpaceShape(BlockState state) {
         Direction facing = state.get(FACING);
         Arrangement arrangement = state.get(ARRANGEMENT);
-        int index = shapeCacheIndex(arrangement, facing);
+        boolean reflected = state.get(REFLECTED);
+        int index = shapeCacheIndex(arrangement, facing, reflected);
         VoxelShape cached = MODERN_SHAPE_CACHE[index];
         if (cached != null) {
             return cached;
@@ -77,7 +78,11 @@ public class ArchModernBlock extends ArchRomanesqueBlock {
             shape = VoxelShapes.union(shape, SHAPE_TOP_LARGE);
         }
 
-        VoxelShape rotated = rotateShapeY(shape, facingTurns(facing)).simplify();
+        VoxelShape rotated = rotateShapeY(shape, facingTurns(facing));
+        if (reflected) {
+            rotated = reflectWorldShape(rotated, facing, arrangement.hasTopLarge());
+        }
+        rotated = rotated.simplify();
         MODERN_SHAPE_CACHE[index] = rotated;
         return rotated;
     }
@@ -112,8 +117,8 @@ public class ArchModernBlock extends ArchRomanesqueBlock {
         return rotateShapeY(shape, right ? 0 : 2);
     }
 
-    private static int shapeCacheIndex(Arrangement arrangement, Direction facing) {
-        return arrangement.ordinal() * 4 + facingTurns(facing);
+    private static int shapeCacheIndex(Arrangement arrangement, Direction facing, boolean reflected) {
+        return arrangement.ordinal() * 8 + facingTurns(facing) * 2 + (reflected ? 1 : 0);
     }
 
     private static int facingTurns(Direction facing) {
