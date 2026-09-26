@@ -13,6 +13,10 @@
 - Modification status: no ERYDON modification is documented
 - Licence text: `LICENSES/OFL-1.1.txt`
 
+The Portorium logo and emblem also contain rendered Cinzel SemiBold lettering
+from the Cinzel Project Authors under SIL OFL 1.1. These PNG exports do not
+embed an additional font file. See `BRANDING.md` for the marble provenance.
+
 ## Gradle wrapper
 
 - Component: Gradle wrapper

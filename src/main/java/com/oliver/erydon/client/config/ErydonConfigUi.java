@@ -1,6 +1,7 @@
 package com.oliver.erydon.client.config;
 
 import net.minecraft.client.MinecraftClient;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
@@ -13,6 +14,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RotationAxis;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -35,7 +37,7 @@ final class ErydonConfigUi {
     static final int FORM_PANEL_HEIGHT = 220;
     static final int TEXT_COLOR = 0xFF050505;
     static final int MUTED_TEXT_COLOR = 0xFF1F1F1F;
-    static final int PAGE_TITLE_Y_OFFSET = 52;
+    static final int PAGE_TITLE_Y_OFFSET = 48;
     static final float TITLE_TEXT_SCALE = 1.2F;
     static final float BODY_TEXT_SCALE = 0.95F;
     static final float DESCRIPTION_TEXT_SCALE = 0.85F;
@@ -55,15 +57,17 @@ final class ErydonConfigUi {
             "textures/gui/glacium_config_background.png"
     );
     private static final int NERIUM_TILE_SIZE = 1024;
-    private static final int NERIUM_SOURCE_SCALE = 2;
     private static final int SAMPLE_VARIATION = 96;
     private static final Identifier NERIUM_TEXTURE = new Identifier(
             "erydon",
             "textures/gui/nerium_control_background.png"
     );
     private static final Identifier CINZEL_FONT = new Identifier("erydon", "cinzel");
+    private static final Identifier PORTORIUM_TEXTURE = new Identifier("erydon", "textures/gui/portorium_control_background.png");
+    private static final Identifier PORTORIUM_FRAME = new Identifier("erydon", "textures/gui/portorium_control_frame.png");
+    private static final int PORTORIUM_SOURCE_SCALE = 4;
     private static final int BUTTON_TEXT_COLOR = 0xFFF8F3E8;
-    private static final int BRONZE = 0xFFE5A01D;
+    private static final int BRONZE = 0xFFC9AB70;
     private static final int DISABLED_BUTTON_TEXT_COLOR = 0xFFB8B0A2;
     private static final int DISABLED_BODY_TEXT_COLOR = 0xFF6E6A63;
     private static final int FOCUS_COLOR = 0xFFFFE8A8;
@@ -128,11 +132,20 @@ final class ErydonConfigUi {
     }
 
     static void drawPanelBackground(DrawContext context, int left, int top, int right, int bottom) {
+        drawPanelBackground(context, left, top, right, bottom, 14, true);
+    }
+
+    static void drawPanelBackground(DrawContext context, int left, int top, int right, int bottom, int logoTop) {
+        drawPanelBackground(context, left, top, right, bottom, logoTop, false);
+    }
+
+    private static void drawPanelBackground(DrawContext context, int left, int top, int right, int bottom,
+                                            int logoTop, boolean compactLogo) {
         int width = right - left;
         int height = bottom - top;
         int middleHeight = Math.max(1, height - PANEL_HEADER_HEIGHT - PANEL_FOOTER_HEIGHT);
         int middleSourceHeight = PANEL_TEXTURE_HEIGHT - PANEL_HEADER_SOURCE_HEIGHT - PANEL_FOOTER_SOURCE_HEIGHT;
-        int centerWidth = Math.min(PANEL_CENTER_WIDTH, width);
+        int centerWidth = Math.max(0, width - 2 * (PANEL_SIDE_SOURCE_WIDTH / 2));
         int leftWidth = Math.max(0, (width - centerWidth) / 2);
         int rightWidth = Math.max(0, width - centerWidth - leftWidth);
 
@@ -161,6 +174,15 @@ final class ErydonConfigUi {
                 PANEL_TEXTURE_HEIGHT - PANEL_FOOTER_SOURCE_HEIGHT,
                 PANEL_FOOTER_SOURCE_HEIGHT
         );
+        if (compactLogo) {
+            context.getMatrices().push();
+            context.getMatrices().translate(left + width / 2.0F, top + logoTop, 0);
+            context.getMatrices().scale(0.62F, 0.62F, 1);
+            PortoriumLogo.draw(context, 0, 0, width - 24);
+            context.getMatrices().pop();
+        } else {
+            PortoriumLogo.draw(context, left + width / 2, top + logoTop, width - 24);
+        }
     }
 
     private static void drawPanelRow(
@@ -216,12 +238,12 @@ final class ErydonConfigUi {
     }
 
     static void drawNeriumControlTexture(DrawContext context, int left, int top, int right, int bottom, int sourceX, int sourceY) {
-        int sourceWidth = Math.min((right - left) * NERIUM_SOURCE_SCALE, NERIUM_TILE_SIZE);
-        int sourceHeight = Math.min((bottom - top) * NERIUM_SOURCE_SCALE, NERIUM_TILE_SIZE);
-        int scaledSourceX = variedSource(sourceX * NERIUM_SOURCE_SCALE, left, top, sourceWidth, 17, 7);
-        int scaledSourceY = variedSource(sourceY * NERIUM_SOURCE_SCALE, left, top, sourceHeight, 5, 13);
+        int sourceWidth = Math.min((right - left) * PORTORIUM_SOURCE_SCALE, NERIUM_TILE_SIZE);
+        int sourceHeight = Math.min((bottom - top) * PORTORIUM_SOURCE_SCALE, NERIUM_TILE_SIZE);
+        int scaledSourceX = variedSource(sourceX * PORTORIUM_SOURCE_SCALE, left, top, sourceWidth, 17, 7);
+        int scaledSourceY = variedSource(sourceY * PORTORIUM_SOURCE_SCALE, left, top, sourceHeight, 5, 13);
         context.drawTexture(
-                NERIUM_TEXTURE,
+                PORTORIUM_TEXTURE,
                 left,
                 top,
                 right - left,
@@ -254,7 +276,7 @@ final class ErydonConfigUi {
         drawNeriumControlTexture(context, left, top, right, bottom, sourceX, sourceY);
         int overlay = switch (style) {
             case PRIMARY -> highlighted ? 0x46000000 : 0x60000000;
-            case NEUTRAL -> highlighted ? CONTROL_HOVER_OVERLAY : CONTROL_OVERLAY;
+            case NEUTRAL, SELECTED, UNSELECTED -> highlighted ? CONTROL_HOVER_OVERLAY : CONTROL_OVERLAY;
             case QUIET -> highlighted ? 0x70000000 : CONTROL_QUIET_OVERLAY;
         };
         context.fill(left, top, right, bottom, overlay);
@@ -264,20 +286,13 @@ final class ErydonConfigUi {
         if (pressed) {
             context.fill(left, top, right, bottom, 0x36000000);
         }
-        drawFineNeriumBevel(context, left, top, right, bottom, highlighted && !pressed);
-        if (style != Button.Style.QUIET || highlighted) {
-            drawInsetBronzeOutline(context, left, top, right, bottom);
-        }
-        if (style == Button.Style.PRIMARY) {
-            drawSolidBronzeOutline(context, left, top, right, bottom);
-        }
+        if (style != Button.Style.UNSELECTED) drawPortoriumFrame(context, left, top, right, bottom);
     }
 
     static void drawNeriumSliderTrack(DrawContext context, int left, int top, int right, int bottom, int sourceX, int sourceY) {
         drawNeriumControlTexture(context, left, top, right, bottom, sourceX, sourceY);
         context.fill(left, top, right, bottom, CONTROL_OVERLAY);
-        drawFineNeriumBevel(context, left, top, right, bottom, false);
-        drawInsetBronzeOutline(context, left, top, right, bottom);
+        drawPortoriumFrame(context, left, top, right, bottom);
     }
 
     private static int variedSource(int base, int left, int top, int sourceSize, int xFactor, int yFactor) {
@@ -361,6 +376,18 @@ final class ErydonConfigUi {
 
     static void drawCenteredScaledText(DrawContext context, Text text, int centerX, int y, float scale, int color) {
         drawCenteredReadableText(context, text, centerX, y, scale, color);
+    }
+
+    static void drawVerticalSectionTitle(DrawContext context, Text text, int centerX, int centerY, int availableHeight, float preferredScale) {
+        Text message = cinzel(text);
+        float scale = Math.min(preferredScale, (availableHeight - 4.0F) / Math.max(1, textWidth(message)));
+        context.getMatrices().push();
+        context.getMatrices().translate(centerX, centerY, 0.0F);
+        // GUI Y increases downwards: negative Z rotation reads from bottom to top.
+        context.getMatrices().multiply(RotationAxis.POSITIVE_Z.rotationDegrees(-90.0F));
+        context.getMatrices().scale(scale, scale, 1.0F);
+        context.drawText(textRenderer(), message, -textWidth(message) / 2, 0, MUTED_TEXT_COLOR, false);
+        context.getMatrices().pop();
     }
 
     static void drawCenteredReadableText(DrawContext context, Text text, int centerX, int y, float scale, int color) {
@@ -565,14 +592,18 @@ final class ErydonConfigUi {
         enum Style {
             PRIMARY,
             NEUTRAL,
-            QUIET
+            QUIET,
+            SELECTED,
+            UNSELECTED
         }
 
         private final int textureX;
         private final int textureY;
         private Text displayMessage;
+        private Identifier[] stoneTextures;
         private Style style = Style.NEUTRAL;
         private boolean overflowTooltip;
+        private boolean muted;
         private long pressedUntilMs;
 
         Button(int x, int y, int width, int height, Text message, int textureX, int textureY, PressAction onPress) {
@@ -586,8 +617,25 @@ final class ErydonConfigUi {
             this.displayMessage = displayMessage;
         }
 
+        Button withStoneTexture(String material) {
+            stoneTextures = new Identifier[6];
+            for (int i = 0; i < stoneTextures.length; i++) {
+                stoneTextures[i] = new Identifier("minecraft", "textures/optifine/ctm/" + material + "/" + i + ".png");
+            }
+            return this;
+        }
+
         Button withStyle(Style style) {
             this.style = style == null ? Style.NEUTRAL : style;
+            return this;
+        }
+
+        Button withSelection(boolean selected) {
+            return withStyle(selected ? Style.SELECTED : Style.UNSELECTED);
+        }
+
+        Button withMuted(boolean muted) {
+            this.muted = muted;
             return this;
         }
 
@@ -616,8 +664,20 @@ final class ErydonConfigUi {
             boolean highlighted = hovered || isFocused();
             boolean pressed = active && Util.getMeasuringTimeMs() < pressedUntilMs;
 
-            drawNeriumButtonFrame(context, left, top, right, bottom, textureX, textureY, style, highlighted, pressed);
-            if (!active) {
+            if (stoneTextures == null) {
+                drawNeriumButtonFrame(context, left, top, right, bottom, textureX, textureY, style, highlighted, pressed);
+            } else {
+                // Full CTM tiles at gallery scale, with only the last tile cropped to the button edge.
+                for (int offset = 0, tile = 0; offset < width; offset += height, tile++) {
+                    int partWidth = Math.min(height, width - offset);
+                    context.drawTexture(stoneTextures[tile % stoneTextures.length], left + offset, top,
+                            partWidth, height, 0, 0, partWidth, height, height, height);
+                }
+                context.fill(left, top, right, bottom, highlighted ? 0x58000000 : 0x78000000);
+                if (pressed) context.fill(left, top, right, bottom, 0x30000000);
+                drawPortoriumFrame(context, left, top, right, bottom);
+            }
+            if (!active || muted) {
                 context.fill(left, top, right, bottom, CONTROL_DISABLED_OVERLAY);
             }
             int textTop = pressed ? top + 1 : top;
@@ -630,7 +690,7 @@ final class ErydonConfigUi {
                             textTop,
                             width,
                             textHeight,
-                            active ? BUTTON_TEXT_COLOR : DISABLED_BUTTON_TEXT_COLOR
+                            active && !muted ? BUTTON_TEXT_COLOR : DISABLED_BUTTON_TEXT_COLOR
                     )
                     : drawButtonText(
                             context,
@@ -639,7 +699,7 @@ final class ErydonConfigUi {
                             textTop,
                             width,
                             textHeight,
-                            active ? BUTTON_TEXT_COLOR : DISABLED_BUTTON_TEXT_COLOR
+                            active && !muted ? BUTTON_TEXT_COLOR : DISABLED_BUTTON_TEXT_COLOR
                     );
             if (truncated && getTooltip() == null) {
                 setTooltip(Tooltip.of(displayMessage));
@@ -748,6 +808,7 @@ final class ErydonConfigUi {
 
     abstract static class Slider extends SliderWidget {
         private boolean overflowTooltip;
+        private boolean muted;
 
         Slider(int x, int y, int width, int height, Text message, double value) {
             super(x, y, width, height, message, value);
@@ -784,7 +845,7 @@ final class ErydonConfigUi {
                     SLIDER_HANDLE_TEXTURE_WIDTH,
                     SLIDER_HANDLE_TEXTURE_HEIGHT
             );
-            if (!active) {
+            if (!active || muted) {
                 context.fill(left, top, right, bottom, CONTROL_DISABLED_OVERLAY);
             }
             boolean truncated = drawReadableButtonText(
@@ -794,7 +855,7 @@ final class ErydonConfigUi {
                     top,
                     width,
                     height,
-                    active ? BUTTON_TEXT_COLOR : DISABLED_BUTTON_TEXT_COLOR
+                    active && !muted ? BUTTON_TEXT_COLOR : DISABLED_BUTTON_TEXT_COLOR
             );
             if (truncated && getTooltip() == null) {
                 setTooltip(Tooltip.of(getMessage()));
@@ -960,35 +1021,28 @@ final class ErydonConfigUi {
     record FittedText(Text text, boolean truncated) {
     }
 
-    private static void drawFineNeriumBevel(DrawContext context, int left, int top, int right, int bottom, boolean hovered) {
-        int highlight = hovered ? 0x55C99B56 : 0x40B8894D;
-        int innerHighlight = hovered ? 0x30E0BB7B : 0x24C09964;
-        int shadow = hovered ? 0x8A150A02 : 0x74150A02;
-        int innerShadow = hovered ? 0x55150A02 : 0x44150A02;
-
-        context.getMatrices().push();
-        context.getMatrices().scale(0.5F, 0.5F, 1.0F);
-
-        int l = left * 2;
-        int t = top * 2;
-        int r = right * 2;
-        int b = bottom * 2;
-
-        context.fill(l + 2, t + 1, r - 2, t + 2, highlight);
-        context.fill(l + 4, t + 3, r - 4, t + 4, innerHighlight);
-        context.fill(l + 1, t + 2, l + 2, b - 2, highlight);
-        context.fill(l + 3, t + 4, l + 4, b - 4, innerHighlight);
-
-        context.fill(l + 2, b - 2, r - 2, b - 1, shadow);
-        context.fill(l + 4, b - 4, r - 4, b - 3, innerShadow);
-        context.fill(r - 2, t + 2, r - 1, b - 2, shadow);
-        context.fill(r - 4, t + 4, r - 3, b - 4, innerShadow);
-
-        context.fill(l, t, l + 3, t + 3, 0x5A000000);
-        context.fill(r - 3, t, r, t + 3, 0x5A000000);
-        context.fill(l, b - 3, l + 3, b, 0x5A000000);
-        context.fill(r - 3, b - 3, r, b, 0x5A000000);
-
-        context.getMatrices().pop();
+    private static void drawPortoriumFrame(DrawContext context, int left, int top, int right, int bottom) {
+        // Nine-slice the rendered chamfer and inlay so the edge never stretches with the button.
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        int borderX = Math.min(4, (right - left) / 2);
+        int borderY = Math.min(4, (bottom - top) / 2);
+        for (int row = 0; row < 3; row++) {
+            int y = row == 0 ? top : row == 1 ? top + borderY : bottom - borderY;
+            int h = row == 1 ? bottom - top - borderY * 2 : borderY;
+            int v = row == 0 ? 0 : row == 1 ? 16 : 64;
+            int sourceHeight = row == 1 ? 48 : 16;
+            for (int column = 0; column < 3; column++) {
+                if (row == 1 && column == 1) continue;
+                int x = column == 0 ? left : column == 1 ? left + borderX : right - borderX;
+                int w = column == 1 ? right - left - borderX * 2 : borderX;
+                int u = column == 0 ? 0 : column == 1 ? 16 : 112;
+                int sourceWidth = column == 1 ? 96 : 16;
+                if (w > 0 && h > 0) {
+                    context.drawTexture(PORTORIUM_FRAME, x, y, w, h, (float) u, (float) v,
+                            sourceWidth, sourceHeight, 128, 80);
+                }
+            }
+        }
     }
 }

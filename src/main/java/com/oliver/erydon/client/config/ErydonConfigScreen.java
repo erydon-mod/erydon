@@ -9,10 +9,8 @@ public final class ErydonConfigScreen extends Screen {
     private static final int BUTTON_HEIGHT = 20;
     private static final int BUTTON_GAP_X = 10;
     private static final int BUTTON_GAP_Y = 8;
-    private static final int SETTINGS_HEADING_OFFSET_Y = 49;
-    private static final int SETTINGS_BUTTON_OFFSET_Y = 61;
-    private static final int EXPLORE_HEADING_OFFSET_Y = 117;
-    private static final int EXPLORE_BUTTON_OFFSET_Y = 129;
+    private static final int SETTINGS_BUTTON_OFFSET_Y = 66;
+    private static final int EXPLORE_BUTTON_OFFSET_Y = 124;
     private static final float SECTION_HEADING_SCALE = 0.82F;
 
     private final Screen parent;
@@ -71,22 +69,25 @@ public final class ErydonConfigScreen extends Screen {
         int left = ErydonConfigUi.panelLeft(width);
         int top = ErydonConfigUi.panelTop(height);
         int panelWidth = ErydonConfigUi.panelWidth(width);
-        ErydonConfigUi.drawPanelBackground(context, left, top, left + panelWidth, top + ErydonConfigUi.PANEL_HEIGHT);
-        ErydonConfigUi.drawCenteredScaledText(
+        ErydonConfigUi.drawPanelBackground(context, left, top, left + panelWidth, top + ErydonConfigUi.PANEL_HEIGHT, 10);
+        int buttonWidth = Math.min(142, (panelWidth - 74) / 2);
+        int gridLeft = left + (panelWidth - (buttonWidth * 2 + BUTTON_GAP_X)) / 2;
+        int groupHeight = BUTTON_HEIGHT * 2 + BUTTON_GAP_Y;
+        ErydonConfigUi.drawVerticalSectionTitle(
                 context,
                 Text.translatable("section.erydon.config.settings"),
-                left + panelWidth / 2,
-                top + SETTINGS_HEADING_OFFSET_Y,
-                SECTION_HEADING_SCALE,
-                ErydonConfigUi.MUTED_TEXT_COLOR
+                gridLeft - 14,
+                top + SETTINGS_BUTTON_OFFSET_Y + groupHeight / 2,
+                groupHeight,
+                SECTION_HEADING_SCALE
         );
-        ErydonConfigUi.drawCenteredScaledText(
+        ErydonConfigUi.drawVerticalSectionTitle(
                 context,
                 Text.translatable("section.erydon.config.explore"),
-                left + panelWidth / 2,
-                top + EXPLORE_HEADING_OFFSET_Y,
-                SECTION_HEADING_SCALE,
-                ErydonConfigUi.MUTED_TEXT_COLOR
+                gridLeft - 14,
+                top + EXPLORE_BUTTON_OFFSET_Y + groupHeight / 2,
+                groupHeight,
+                SECTION_HEADING_SCALE
         );
     }
 

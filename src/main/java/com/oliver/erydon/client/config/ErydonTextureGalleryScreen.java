@@ -370,7 +370,7 @@ public final class ErydonTextureGalleryScreen extends Screen {
                     34,
                     262,
                     button -> selectVariation(entryIndex, selectedIndex)
-            ).withStyle(ErydonConfigUi.Button.Style.QUIET);
+            ).withSelection(optionIndex == selectedVariationIndexes[entryIndex]);
             optionButtons.add(addDrawableChild(option));
         }
         if (maxOptionScroll(entryIndex) > 0) {

@@ -18,6 +18,10 @@ def requiredStaticResources = [
         'assets/erydon/icon.png',
         'assets/erydon/textures/gui/glacium_config_background.png',
         'assets/erydon/textures/gui/nerium_control_background.png',
+        'assets/erydon/textures/gui/portorium_control_background.png',
+        'assets/erydon/textures/gui/portorium_control_background.png.mcmeta',
+        'assets/erydon/textures/gui/portorium_control_frame.png',
+        'assets/erydon/textures/gui/portorium_control_frame.png.mcmeta',
         'assets/erydon/textures/gui/slider_handle_slim.png',
         'assets/erydon/font/cinzel.json',
         'assets/erydon/font/cinzel.ttf'

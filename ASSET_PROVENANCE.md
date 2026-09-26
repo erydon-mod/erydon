@@ -34,9 +34,6 @@ and copyright notice are in `LICENSES/OFL-1.1.txt`.
 
 - The separate ERYDON Collection 32x and 64x downloadable pack ZIPs are not
   source-repository inputs and are distributed separately.
-- Three former inspiration-gallery screenshots were excluded because their
-  rendered scenes credited third-party foliage and shaders. The public
-  candidate uses ERYDON-owned material swatches in that screen instead.
 - No Minecraft worlds, player data, logs, screenshots, or historical authoring
   meshes were imported.
 
