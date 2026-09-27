@@ -98,7 +98,8 @@ public final class MetalReflectionResponse {
                         float erydonMaterialWord = floor(clamp(texture6.a, 0.0, 1.0) * 65535.0 + 0.5);
                         float erydonMaterialByte = floor(erydonMaterialWord / 256.0);
                         float erydonCoverage = floor(erydonMaterialByte / 4.0) / 63.0;
-                        vec3 erydonF0 = materialMaskInt == 243 ? vec3(0.92, 0.70, 0.30) : vec3(0.95, 0.93, 0.88);
+                        // Same authored-gold colour ratios as erydonConductorF0.
+                        vec3 erydonF0 = materialMaskInt == 243 ? vec3(0.92, 0.41262, 0.0) : vec3(0.95, 0.93, 0.88);
                         float erydonGrazing = clamp(fresnel, 0.0, 1.0);
                         float erydonGrazingFifth = erydonGrazing * erydonGrazing * erydonGrazing * erydonGrazing * erydonGrazing;
                         vec3 erydonFresnel = erydonF0 + (vec3(1.0) - erydonF0) * erydonGrazingFifth;

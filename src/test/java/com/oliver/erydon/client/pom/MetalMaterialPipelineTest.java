@@ -212,7 +212,7 @@ class MetalMaterialPipelineTest {
                 int produce = gpu.program(producer), transport = gpu.program(strength);
                 int reflect = gpu.program(tint), compose = gpu.program(composition);
                 for (int alloy : new int[]{1, 2}) {
-                    float[] f0 = alloy == 1 ? new float[]{0.92f, 0.70f, 0.30f} : new float[]{0.95f, 0.93f, 0.88f};
+                    float[] f0 = alloy == 1 ? new float[]{0.92f, 0.41262f, 0.0f} : new float[]{0.95f, 0.93f, 0.88f};
                     for (float roughness : new float[]{0, 3.0f / 255, 0.22f, 0.65f}) {
                       for (int finishCase : new int[]{0, 1, 2, 3, 4}) {
                         int finish = finishCase == 4 ? 3 : finishCase;
@@ -295,6 +295,12 @@ class MetalMaterialPipelineTest {
                                     vector(compose, "surfaceEncoded", surface); vector(compose, "metalComponent", metal);
                                     vector(compose, "directEncoded", directValue);
                                     float[] actual = gpu.draw();
+                                    if (alloy == 1 && coverage == 1 && environment == 1 && directLight == 0) {
+                                        assertEquals(166.0 / 239.0, Math.pow(actual[1] / actual[0], 1.0 / 2.2), 0.005,
+                                                "Deferred reflections must preserve the same authored gold hue as surface lighting");
+                                        assertEquals(0, actual[2], 0.0001,
+                                                "Neutral reflected light must not introduce blue into authored gold");
+                                    }
                                     for (int channel = 0; channel < 3; channel++) {
                                         double expected;
                                         if (coverage == 0) {

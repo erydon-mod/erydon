@@ -78,8 +78,15 @@ The complete native catalogue is covered by a data test.
 
 Bronze and silver use separate colored Schlick conductor Fresnel responses and
 finite GGX roughness. The shared linear RGB F0 starting points are bronze
-`(0.92, 0.70, 0.30)` and silver `(0.95, 0.93, 0.88)`; these are rendering choices,
-not a measurement of a particular alloy. Reflected roughness preserves the authored
+`(0.92, 0.41262, 0.0)` and silver `(0.95, 0.93, 0.88)`. Bronze preserves the
+linear colour ratios of the shared authored sRGB gold `(239, 166, 0)`, scaled to
+the existing 0.92 peak reflectance. The earlier `(0.92, 0.70, 0.30)` override
+introduced blue and excess green, turning reflected gold into pale cream.
+This is one shared alloy palette, not a per-texture adjustment or a measured
+physical bronze alloy. Direct lighting and opaque/translucent reflections use
+the same palette; grazing Fresnel can still approach white. Resource packs keep
+their artwork and wear, but do not supply a separate per-pixel deferred F0.
+Reflected roughness preserves the authored
 polish with a minimum of 2/255; authored rougher metal and the 0.65 matte-cover
 fallback remain rougher. Direct sun/moon highlights use a separate finite 0.12
 roughness minimum so tiny highlights do not require point-sized sampling.
@@ -98,7 +105,7 @@ Raising the broad-light share to 0.30 hid this problem behind a milky base.
 Authored polish now reaches CU's sharp-reflection range and both reflection paths
 reserve 94% for resolved reflections on polished metal. The small remaining
 lighting-dependent contribution vanishes at zero illumination. Matte materials
-keep their roughness and lighting split. The golden bronze colour is unchanged.
+keep their roughness and lighting split.
 Fractional stone/metal pixels recover the base smoothness and evaluate CU's
 active SSR/WSR Fresnel curve, instead of merely undoing its final multiplier.
 Only an actually applied Mirror mask selects the Mirror reflection floor.
@@ -191,7 +198,15 @@ The reflection-sharpness correction passed 19 focused tests with zero failures
 or skips, including all eight complete dev1 programs under the same active WSR
 profile. GPU checks verify that authored polished metal reaches smoothness above
 0.97 independently of the stone finish, retains coloured reflections and keeps
-only a small light-dependent fill. The revised appearance awaits user testing.
+only a small light-dependent fill. The user confirmed that metal reflections are
+now visible; their Noble/Complementary/Bliss comparison exposed the remaining
+pale bronze colour mismatch addressed by the shared palette above.
+
+The shared bronze palette correction also passed those 19 focused tests with
+zero failures or skips. GPU assertions now compare the authored gold hue against
+both surface colour and the completed deferred reflection, including fractional
+coverage and the independent stone finishes. All eight complete dev1 programs
+compile under the active WSR profile. Visual approval remains with the user.
 
 Validation tasks: `compileJava test verifyErydonOverlayPbr
  auditErydonModMenuSources verifyHighPolishMixinLaunch`. No packaging task ran.
