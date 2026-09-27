@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 public final class MetalLightingTransform {
     private static final String MARKER = "// ERYDON conductor direct lighting";
     private static final Pattern LIGHTING_FUNCTION = Pattern.compile("void\\s+DoLighting\\s*\\(");
+    private static final Pattern SUN_DISC_FUNCTION = Pattern.compile("float\\s+GetNoHSquared\\s*\\(");
     private static final Pattern NATIVE_HIGHLIGHT = Pattern.compile(
             "float\\s+specularHighlight\\s*=\\s*GGX\\(normalM,\\s*nViewPos,\\s*lightVec,\\s*NdotLmax0,\\s*smoothnessG\\)\\s*;");
     private static final Pattern HIGHLIGHT_MIX = Pattern.compile(
@@ -33,7 +34,8 @@ public final class MetalLightingTransform {
         boolean nativeHighlight = NATIVE_HIGHLIGHT.matcher(source).find();
         boolean highlightMix = HIGHLIGHT_MIX.matcher(source).find();
         if (nativeHighlight != highlightMix || nativeHighlight
-                && (!unique(NATIVE_HIGHLIGHT, source) || !unique(HIGHLIGHT_MIX, source)))
+                && (!unique(NATIVE_HIGHLIGHT, source) || !unique(HIGHLIGHT_MIX, source)
+                    || !unique(SUN_DISC_FUNCTION, source)))
             return new Result(source, false, "UNSUPPORTED_SOURCE");
 
         String diffuse = """
@@ -59,18 +61,26 @@ public final class MetalLightingTransform {
 
                     vec3 halfVector = lightDirection - viewDirection;
                     halfVector *= inversesqrt(max(dot(halfVector, halfVector), 0.00000001));
-                    float noH = clamp(dot(shadingNormal, halfVector), 0.0, 1.0);
                     float voH = clamp(dot(-viewDirection, halfVector), 0.0, 1.0);
 
-                    // GGX distribution and correlated Smith visibility. Keep a finite
-                    // direct-light lobe for subpixel sun glints without blurring the
-                    // separate authored environment reflection.
-                    float roughness = clamp(erydonMetalRoughness, 0.12, 1.0);
+                    // Use CU's finite sun disc, preserving the authored polish. A
+                    // material roughness floor would spread its glint into a dull halo.
+                    float roughness = clamp(erydonMetalRoughness, 2.0 / 255.0, 1.0);
                     float alpha = roughness * roughness;
                     float alphaSquared = alpha * alpha;
-                    float distributionDenominator = noH * noH * (alphaSquared - 1.0) + 1.0;
-                    float distribution = alphaSquared / max(3.14159265359
-                            * distributionDenominator * distributionDenominator, 0.00000001);
+                    float noHSquared = GetNoHSquared(0.01, noL, noV,
+                            clamp(dot(-viewDirection, lightDirection), -1.0, 1.0));
+                    // Closest-disc GGX with area normalization: widen alpha by the
+                    // half-vector disc radius, then conserve its peak energy. This
+                    // rearrangement avoids cancellation and clipping at tiny alpha.
+                    float areaAlpha = alpha + 0.005;
+                    float distributionDenominator = (1.0 - noHSquared) + noHSquared * alphaSquared;
+                    // Since noHSquared is in [0,1], this denominator is never
+                    // smaller than alphaSquared. Enforce that bound even if a
+                    // driver reassociates the expression and cancels tiny alpha.
+                    float distributionRatio = alphaSquared / max(distributionDenominator, alphaSquared);
+                    float distribution = distributionRatio * distributionRatio
+                            / (3.14159265359 * areaAlpha * areaAlpha);
                     float smithV = noL * sqrt(noV * noV * (1.0 - alphaSquared) + alphaSquared);
                     float smithL = noV * sqrt(noL * noL * (1.0 - alphaSquared) + alphaSquared);
                     float visibility = 0.5 / max(smithV + smithL, 0.000001);

@@ -78,8 +78,8 @@ The complete native catalogue is covered by a data test.
 
 Bronze and silver use separate colored Schlick conductor Fresnel responses and
 finite GGX roughness. The shared linear RGB F0 starting points are bronze
-`(0.92, 0.41262, 0.0)` and silver `(0.95, 0.93, 0.88)`. Bronze preserves the
-linear colour ratios of the shared authored sRGB gold `(239, 166, 0)`, scaled to
+`(0.92, 0.418036, 0.00975945)` and silver `(0.95, 0.93, 0.88)`. Bronze preserves the
+linear colour ratios of canonical ERYDON sRGB bronze `#e5a01d` (229, 160, 29), scaled to
 the existing 0.92 peak reflectance. The earlier `(0.92, 0.70, 0.30)` override
 introduced blue and excess green, turning reflected gold into pale cream.
 This is one shared alloy palette, not a per-texture adjustment or a measured
@@ -88,8 +88,13 @@ the same palette; grazing Fresnel can still approach white. Resource packs keep
 their artwork and wear, but do not supply a separate per-pixel deferred F0.
 Reflected roughness preserves the authored
 polish with a minimum of 2/255; authored rougher metal and the 0.65 matte-cover
-fallback remain rougher. Direct sun/moon highlights use a separate finite 0.12
-roughness minimum so tiny highlights do not require point-sized sampling.
+fallback remain rougher. Direct sun/moon highlights preserve that same roughness
+and use CU's finite sun-disc helper with its existing 0.01 tangent radius. The
+closest-disc GGX distribution is area-normalized with `alpha + 0.005`, preventing
+an unbounded point-light peak as authored roughness approaches zero. This removes
+the old 0.12 direct-light roughness floor that spread polished glints into a halo.
+The denominator is bounded by its mathematical minimum `alphaSquared`, including
+when a driver reassociates the expression at a mirror highlight.
 
 Direct sun/moon highlights use a colored conductor lobe within CU's existing
 lighting gates. The reflected color tends toward neutral at grazing angles.
@@ -109,6 +114,9 @@ keep their roughness and lighting split.
 Fractional stone/metal pixels recover the base smoothness and evaluate CU's
 active SSR/WSR Fresnel curve, instead of merely undoing its final multiplier.
 Only an actually applied Mirror mask selects the Mirror reflection floor.
+Fully covered metal keeps a fully metallic reflection tint even if the stored
+reflection strength rounds upward in CU's SNORM buffer; that rounding must not
+introduce a white substrate contribution into dark bronze channels.
 The unknown substrate reflectivity and shared base-colour attenuation remain
 bounded approximations; pure material endpoints are exact for this model.
 Later CU rain/snow changes remain native; this is not a separate layered wet-metal
@@ -206,7 +214,17 @@ The shared bronze palette correction also passed those 19 focused tests with
 zero failures or skips. GPU assertions now compare the authored gold hue against
 both surface colour and the completed deferred reflection, including fractional
 coverage and the independent stone finishes. All eight complete dev1 programs
-compile under the active WSR profile. Visual approval remains with the user.
+compile under the active WSR profile. The user confirmed richer colour, requested
+stronger sunlight glints and preferred canonical ERYDON bronze for the final pass.
+
+The finite sun-disc and canonical-bronze pass passed 20 focused tests with zero
+failures or skips, including all eight complete dev1 programs in the active WSR
+profile. Its new GPU test executes the actual transformed sun-disc and conductor
+functions, checking a bounded HDR peak, sharp falloff outside the reflected sun,
+broader authored roughness, bronze colour ratios and disabled/back-facing light.
+The reflection transport test also checks that full metal cannot inherit a white
+substrate tint from buffer rounding. These checks do not replace the user's
+final in-game comparison or establish identical tone mapping across shader packs.
 
 Validation tasks: `compileJava test verifyErydonOverlayPbr
  auditErydonModMenuSources verifyHighPolishMixinLaunch`. No packaging task ran.

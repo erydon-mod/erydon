@@ -98,13 +98,15 @@ public final class MetalReflectionResponse {
                         float erydonMaterialWord = floor(clamp(texture6.a, 0.0, 1.0) * 65535.0 + 0.5);
                         float erydonMaterialByte = floor(erydonMaterialWord / 256.0);
                         float erydonCoverage = floor(erydonMaterialByte / 4.0) / 63.0;
-                        // Same authored-gold colour ratios as erydonConductorF0.
-                        vec3 erydonF0 = materialMaskInt == 243 ? vec3(0.92, 0.41262, 0.0) : vec3(0.95, 0.93, 0.88);
+                        // Same canonical bronze colour ratios as erydonConductorF0.
+                        vec3 erydonF0 = materialMaskInt == 243 ? vec3(0.92, 0.418036, 0.00975945) : vec3(0.95, 0.93, 0.88);
                         float erydonGrazing = clamp(fresnel, 0.0, 1.0);
                         float erydonGrazingFifth = erydonGrazing * erydonGrazing * erydonGrazing * erydonGrazing * erydonGrazing;
                         vec3 erydonFresnel = erydonF0 + (vec3(1.0) - erydonF0) * erydonGrazingFifth;
                         float erydonMetalReflection = max(erydonFresnel.r, max(erydonFresnel.g, erydonFresnel.b));
-                        float erydonMetalShare = clamp(erydonCoverage * erydonMetalReflection
+                        // SNORM reflection strength may round upward. A fully metal
+                        // pixel must not acquire a white substrate share from that error.
+                        float erydonMetalShare = erydonCoverage > 0.999 ? 1.0 : clamp(erydonCoverage * erydonMetalReflection
                                 / max(fresnelM * fresnelM, 0.000001), 0.0, 1.0);
                         float erydonRoughness = mod(erydonMaterialWord, 256.0) / 255.0;
                         float erydonBroadShare = max(erydonRoughness * erydonRoughness, 0.06);

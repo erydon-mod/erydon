@@ -93,7 +93,7 @@ class MetalReflectionResponseTest {
 
     @Test void compositeTintUsesWeightedReflectionEnergyAndBecomesWhiteAtGrazing() {
         String result = MetalReflectionResponse.adapt("composite", COMPOSITE).text();
-        assertTrue(result.contains("vec3(0.92, 0.41262, 0.0) : vec3(0.95, 0.93, 0.88)"));
+        assertTrue(result.contains("vec3(0.92, 0.418036, 0.00975945) : vec3(0.95, 0.93, 0.88)"));
         assertTrue(result.contains("erydonF0 + (vec3(1.0) - erydonF0) * erydonGrazingFifth"));
         assertTrue(result.contains("max(fresnelM * fresnelM, 0.000001)"));
         assertTrue(result.contains("erydonFresnel / max(erydonMetalReflection, 0.000001), erydonMetalShare"));

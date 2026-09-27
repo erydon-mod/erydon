@@ -209,7 +209,7 @@ class MetalShaderNumericalTest {
                     "The compatibility constructor must also write its default mean colour");
 
             float[] stone = {0.35f, 0.4f, 0.45f};
-            float[] f0 = {0.92f, 0.41262f, 0.0f};
+            float[] f0 = {0.92f, 0.418036f, 0.00975945f};
             for (float[] tint : List.of(new float[]{1, 1, 1}, new float[]{0.6f, 0.8f, 0.9f})) {
                 for (float coverage : new float[]{0, 0.25f, 1}) {
                     float[] sampled = new float[3];
@@ -227,10 +227,10 @@ class MetalShaderNumericalTest {
                             "Replace only the metal contribution; retain stone and apply tint once at coverage " + coverage);
                     if (coverage == 1) {
                         double red = corrected[0] / tint[0], green = corrected[1] / tint[1];
-                        assertEquals(166.0 / 239.0, green / red, 0.0001,
+                        assertEquals(160.0 / 229.0, green / red, 0.0001,
                                 "Bronze must retain the authored gold hue instead of a pale cream replacement");
-                        assertEquals(0, corrected[2], 0.00001,
-                                "The shared gold artwork contains no blue to add to its normal-incidence reflectance");
+                        assertEquals(29.0 / 229.0, (corrected[2] / tint[2]) / red, 0.0001,
+                                "Bronze must retain the blue proportion of canonical #e5a01d");
                     }
                     if (coverage == 0) {
                         for (int channel = 0; channel < 3; channel++) {

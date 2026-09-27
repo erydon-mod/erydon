@@ -117,10 +117,10 @@ vec2 erydonMetalBevel(vec2 uv, ivec4 bounds, ivec4 info, float footprint) {
 }
 
 vec3 erydonConductorF0(int alloy, vec3 albedo) {
-    // Shared bronze artwork is sRGB (239, 166, 0). Preserve its linear colour
+    // ERYDON bronze is sRGB #e5a01d (229, 160, 29). Preserve its linear colour
     // ratios at the existing .92 peak reflectance; adding blue makes it cream.
     // Keep this palette synchronized with the deferred conductor tint.
-    if (alloy == 1) return vec3(0.92, 0.41262, 0.0);
+    if (alloy == 1) return vec3(0.92, 0.418036, 0.00975945);
     if (alloy == 2) return vec3(0.95, 0.93, 0.88);
     return clamp(pow(max(albedo, vec3(0.0)), vec3(2.2)), vec3(0.04), vec3(0.98));
 }

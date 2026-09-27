@@ -74,6 +74,77 @@ class MetalMaterialPipelineTest {
         }
     }
 
+    @Test @EnabledIf("driverConfigured")
+    void actualConductorSunDiscProducesFiniteColoredGlintsWithoutLiftingOffHighlightMetal() throws Exception {
+        InstalledShaderTestSupport.ensureContext();
+        try (var zip = new ZipFile(InstalledShaderTestSupport.shaderPaths().get(0).toFile());
+             var gpu = new TransportGpu()) {
+            String terrain = fixture(zip, "world0").fragments().get("gbuffers_terrain");
+            String areaLight = blockAt(terrain, terrain.indexOf("float GetNoHSquared("), false);
+            String conductor = blockAt(terrain, terrain.indexOf("vec3 ErydonConductorHighlight("), false);
+            String palette;
+            try (var input = getClass().getResourceAsStream("/assets/erydon/shaders/include/erydon_metal_fragment.glsl")) {
+                assertNotNull(input);
+                String helper = new String(input.readAllBytes(), StandardCharsets.UTF_8);
+                palette = blockAt(helper, helper.indexOf("vec3 erydonConductorF0("), false);
+            }
+            int program = gpu.program("""
+                    uniform float erydonMetalRoughness;
+                    uniform float testGate;
+                    uniform vec3 testView;
+                    uniform vec3 testLight;
+                    vec3 erydonMetalF0;
+                    """ + palette + areaLight + conductor + """
+                    void main() {
+                        erydonMetalF0 = erydonConductorF0(1, vec3(1.0));
+                        vec3 encoded = ErydonConductorHighlight(vec3(0.0, 0.0, 1.0),
+                                testView, testLight, testGate);
+                        gl_FragData[0] = vec4(pow(max(encoded, vec3(0.0)), vec3(2.2)), 1.0);
+                    }
+                    """);
+            gpu.target(gpu.texture(InternalTextureFormat.RGBA32F), 0, 0);
+            GL20.glUseProgram(program);
+            java.util.function.BiFunction<Float, Float, float[]> sample = (angle, roughness) -> {
+                uniform(program, "erydonMetalRoughness", roughness);
+                uniform(program, "testGate", 1.0f);
+                vector(program, "testView", new float[]{0, 0, -1});
+                vector(program, "testLight", new float[]{(float) Math.sin(angle), 0, (float) Math.cos(angle)});
+                return gpu.draw();
+            };
+
+            float polished = 2.0f / 255.0f;
+            float[] peak = sample.apply(0.0f, polished);
+            assertTrue(peak[0] > 2000 && peak[0] < 4000,
+                    "Polished metal must retain a finite HDR sun-disc glint, rather than the old broad .12-roughness peak: "
+                            + java.util.Arrays.toString(peak));
+            assertEquals(160.0 / 229.0, Math.pow(peak[1] / peak[0], 1.0 / 2.2), 0.0002,
+                    "Direct sunlight preserves canonical bronze #e5a01d colour ratios");
+            assertEquals(29.0 / 229.0, Math.pow(peak[2] / peak[0], 1.0 / 2.2), 0.0002);
+            assertTrue(sample.apply(0.005f, polished)[0] > peak[0] * 0.9f,
+                    "The finite sun disc must cover nearby rays instead of becoming a single-pixel singularity");
+            float outside = sample.apply(0.02f, polished)[0];
+            assertTrue(outside < peak[0] * 0.01f,
+                    "Polished metal outside the reflected sun stays dark enough to retain highlight contrast");
+            float roughPeak = sample.apply(0.0f, 0.3f)[0];
+            assertTrue(roughPeak < peak[0] * 0.02f);
+            assertTrue(sample.apply(0.02f, 0.3f)[0] > outside * 10,
+                    "Authored rough metal retains a broader, weaker highlight");
+            assertArrayEquals(peak, sample.apply(0.0f, 0.0f), 0.001f,
+                    "Zero authored roughness must share the finite polished limit");
+
+            uniform(program, "testGate", 0);
+            assertArrayEquals(new float[]{0, 0, 0, 1}, gpu.draw(), 0.000001f,
+                    "Disabled native lighting must never produce a glint");
+            uniform(program, "testGate", 1);
+            vector(program, "testView", new float[]{0, 0, 1});
+            assertArrayEquals(new float[]{0, 0, 0, 1}, gpu.draw(), 0.000001f);
+            vector(program, "testView", new float[]{0, 0, -1});
+            vector(program, "testLight", new float[]{0, 0, -1});
+            assertArrayEquals(new float[]{0, 0, 0, 1}, gpu.draw(), 0.000001f,
+                    "Light behind the surface must never produce a glint");
+        }
+    }
+
     private void verifyMaterialTransport(ZipFile zip, boolean worldSpace) throws Exception {
             Fixture fixture = fixture(zip, "world0", Map.of("WORLD_SPACE_REFLECTIONS", worldSpace ? "1" : "-1", "COLORED_LIGHTING", "1"));
             var formats = fixture.programs().getPackDirectives().getRenderTargetDirectives().getRenderTargetSettings();
@@ -212,7 +283,7 @@ class MetalMaterialPipelineTest {
                 int produce = gpu.program(producer), transport = gpu.program(strength);
                 int reflect = gpu.program(tint), compose = gpu.program(composition);
                 for (int alloy : new int[]{1, 2}) {
-                    float[] f0 = alloy == 1 ? new float[]{0.92f, 0.41262f, 0.0f} : new float[]{0.95f, 0.93f, 0.88f};
+                    float[] f0 = alloy == 1 ? new float[]{0.92f, 0.418036f, 0.00975945f} : new float[]{0.95f, 0.93f, 0.88f};
                     for (float roughness : new float[]{0, 3.0f / 255, 0.22f, 0.65f}) {
                       for (int finishCase : new int[]{0, 1, 2, 3, 4}) {
                         int finish = finishCase == 4 ? 3 : finishCase;
@@ -270,7 +341,7 @@ class MetalMaterialPipelineTest {
                                 gpu.draw();
                                 float[] reflected = gpu.sampleStored(g7, output);
                                 for (int channel = 0; channel < 3; channel++) {
-                                    double metalShare = Math.min(1, c * f0[0] / storedStrength);
+                                    double metalShare = c > 0.999 ? 1 : Math.min(1, c * f0[0] / storedStrength);
                                     double coefficient = 1 - metalShare + metalShare * (1 - broadShare) * f0[channel] / f0[0];
                                     assertEquals(Math.pow(environment * coefficient, 1.0 / 2.2), reflected[channel], 0.009,
                                             label + "/env=" + environment + "/channel=" + channel
@@ -295,11 +366,11 @@ class MetalMaterialPipelineTest {
                                     vector(compose, "surfaceEncoded", surface); vector(compose, "metalComponent", metal);
                                     vector(compose, "directEncoded", directValue);
                                     float[] actual = gpu.draw();
-                                    if (alloy == 1 && coverage == 1 && environment == 1 && directLight == 0) {
-                                        assertEquals(166.0 / 239.0, Math.pow(actual[1] / actual[0], 1.0 / 2.2), 0.005,
-                                                "Deferred reflections must preserve the same authored gold hue as surface lighting");
-                                        assertEquals(0, actual[2], 0.0001,
-                                                "Neutral reflected light must not introduce blue into authored gold");
+                                    if (alloy == 1 && coverage == 1 && environment > 0 && directLight == 0) {
+                                        assertEquals(160.0 / 229.0, Math.pow(actual[1] / actual[0], 1.0 / 2.2), 0.005,
+                                                "Deferred reflections must preserve the canonical bronze hue of surface lighting");
+                                        assertEquals(29.0 / 229.0, Math.pow(actual[2] / actual[0], 1.0 / 2.2), 0.005,
+                                                label + "/env=" + environment + ": neutral reflection preserves canonical bronze blue");
                                     }
                                     for (int channel = 0; channel < 3; channel++) {
                                         double expected;

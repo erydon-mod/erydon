@@ -17,6 +17,7 @@ class MetalLightingTransformTest {
             float erydonMetalRoughness = 0.22;
             """;
     private static final String LIGHTING = """
+            float GetNoHSquared(float radiusTan, float NoL, float NoV, float VoL) { return 1.0; }
             void DoLighting(inout vec4 color) {
                 vec3 lightHighlight = vec3(0.0);
                 float specularHighlight = GGX(normalM, nViewPos, lightVec, NdotLmax0, smoothnessG);
@@ -53,7 +54,9 @@ class MetalLightingTransformTest {
         String helper = result.substring(result.indexOf("vec3 ErydonConductorHighlight"), result.indexOf("void DoLighting"));
         assertTrue(helper.contains("clamp(erydonMetalF0"));
         assertTrue(helper.contains("vec3 fresnel = f0 + (vec3(1.0) - f0) * fresnelWeight;"));
-        assertTrue(helper.contains("clamp(erydonMetalRoughness, 0.12, 1.0)"));
+        assertTrue(helper.contains("GetNoHSquared(0.01, noL, noV,"));
+        assertTrue(helper.contains("float areaAlpha = alpha + 0.005;"));
+        assertTrue(helper.contains("clamp(erydonMetalRoughness, 2.0 / 255.0, 1.0)"));
         assertTrue(helper.contains("nativeLightGate <= 0.0 || noV <= 0.0 || noL <= 0.0"));
         assertTrue(helper.contains("return pow(max(fresnel * distribution * visibility, vec3(0.0)), vec3(1.0 / 2.2));"));
         assertFalse(helper.contains("highlightMult"));
@@ -80,6 +83,7 @@ class MetalLightingTransformTest {
 
     @Test void mismatchedOrDuplicateSourcesFailBeforeAnyModification() {
         for (String source : List.of("unknown shader", LIGHTING + LIGHTING,
+                LIGHTING.replace("GetNoHSquared", "MissingSunDisc"),
                 LIGHTING.replace("lightHighlight *= (subsurfaceHighlight + specularHighlight) * highlightColor;", ""),
                 LIGHTING.replace("float specularHighlight = GGX(normalM, nViewPos, lightVec, NdotLmax0, smoothnessG);", ""))) {
             var result = MetalLightingTransform.adapt("gbuffers_terrain", source);
