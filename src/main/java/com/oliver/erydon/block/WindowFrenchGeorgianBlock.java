@@ -17,7 +17,6 @@ import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
-import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
@@ -330,18 +329,7 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
         ItemStack held = player.getStackInHand(hand);
 
         if (held.isOf(Items.DEBUG_STICK)) {
-            if (player.isSneaking()) {
-                if (world.isClient) {
-                    return ActionResult.SUCCESS;
-                }
-
-                boolean locked = toggleManualLock(world, pos);
-                handleManualLockChanged(world, pos, locked);
-                player.sendMessage(Text.literal("French Georgian window mode: " + (locked ? "manual" : "auto")), true);
-                return ActionResult.CONSUME;
-            }
-
-            // Let vanilla handle property selection + cycling, without opening the window.
+            // Let vanilla handle visible property selection and cycling, without opening the window.
             return ActionResult.PASS;
         }
         // Let BlockItem handle targeting, replacement, collision, sound and item consumption.

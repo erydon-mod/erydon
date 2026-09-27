@@ -626,14 +626,8 @@ public class SurroundBlock extends HorizontalFacingBlock implements ClusterRebui
             return ActionResult.SUCCESS;
         }
 
-        // Client: just show hand animation, server does the logic
-        if (world.isClient) {
-            return ActionResult.SUCCESS;
-        }
-
-        Section next = getNextManualSection(state.get(SECTION));
-        world.setBlockState(pos, state.with(SECTION, next), Block.NOTIFY_LISTENERS);
-        return ActionResult.SUCCESS;
+        // Let the debug stick handle the visible properties; section is internal.
+        return ActionResult.PASS;
     }
 
     private boolean isDebugStick(ItemStack stack) {

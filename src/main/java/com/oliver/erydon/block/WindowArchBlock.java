@@ -17,7 +17,6 @@ import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
-import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
@@ -193,18 +192,7 @@ public class WindowArchBlock extends Block implements ClusterRebuildableBlock {
         ItemStack held = player.getStackInHand(hand);
 
         if (held.isOf(Items.DEBUG_STICK)) {
-            if (player.isSneaking()) {
-                if (world.isClient) {
-                    return ActionResult.SUCCESS;
-                }
-
-                boolean locked = toggleManualLock(world, pos);
-                handleManualLockChanged(world, pos, state.get(FACING), locked);
-                player.sendMessage(Text.literal("Arch window mode: " + (locked ? "manual" : "auto")), true);
-                return ActionResult.CONSUME;
-            }
-
-            // Let vanilla handle property selection + cycling, without consuming the click.
+            // Let vanilla handle visible property selection and cycling.
             return ActionResult.PASS;
         }
 
