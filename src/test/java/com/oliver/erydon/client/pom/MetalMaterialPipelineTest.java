@@ -212,7 +212,7 @@ class MetalMaterialPipelineTest {
                 int produce = gpu.program(producer), transport = gpu.program(strength);
                 int reflect = gpu.program(tint), compose = gpu.program(composition);
                 for (int alloy : new int[]{1, 2}) {
-                    float[] f0 = alloy == 1 ? new float[]{0.72f, 0.42f, 0.16f} : new float[]{0.95f, 0.93f, 0.88f};
+                    float[] f0 = alloy == 1 ? new float[]{0.92f, 0.70f, 0.30f} : new float[]{0.95f, 0.93f, 0.88f};
                     for (float roughness : new float[]{0.22f, 0.65f}) {
                       for (int finishCase : new int[]{0, 1, 2, 3, 4}) {
                         int finish = finishCase == 4 ? 3 : finishCase;
@@ -221,6 +221,7 @@ class MetalMaterialPipelineTest {
                                 : finishCase == 2 || finishCase == 3 ? 1.0 : square(sourceSmoothness);
                         int expectedFinish = finishCase == 4 ? 0 : finish;
                         float r = Math.max(57, Math.min(229, Math.round(roughness * 255))) / 255.0f;
+                        double broadShare = Math.max(r * r, 0.30);
                         for (float coverage : new float[]{0, 0.25f, 1}) {
                             float c = Math.round(coverage * 63) / 63.0f;
                             String label = (worldSpace ? "WSR" : "SSR") + "/alloy=" + alloy + "/r=" + roughness
@@ -266,7 +267,7 @@ class MetalMaterialPipelineTest {
                                 float[] reflected = gpu.sampleStored(g7, output);
                                 for (int channel = 0; channel < 3; channel++) {
                                     double metalShare = Math.min(1, c * f0[0] / storedStrength);
-                                    double coefficient = 1 - metalShare + metalShare * (1 - r * r) * f0[channel] / f0[0];
+                                    double coefficient = 1 - metalShare + metalShare * (1 - broadShare) * f0[channel] / f0[0];
                                     assertEquals(Math.pow(environment * coefficient, 1.0 / 2.2), reflected[channel], 0.009,
                                             label + "/env=" + environment + "/channel=" + channel
                                                     + ": metal reflection roughness must remain independent of stone finish");
@@ -285,7 +286,7 @@ class MetalMaterialPipelineTest {
                                         surface[channel] = (1 - c) * 0.4f + metal[channel];
                                         directValue[channel] = directLight;
                                         surfaceAfterLighting[channel] = (1 - c) * 0.4
-                                                + metal[channel] * Math.pow(r * r, 1.0 / 2.2) + directLight;
+                                                + metal[channel] * Math.pow(broadShare, 1.0 / 2.2) + directLight;
                                     }
                                     vector(compose, "surfaceEncoded", surface); vector(compose, "metalComponent", metal);
                                     vector(compose, "directEncoded", directValue);
@@ -306,10 +307,14 @@ class MetalMaterialPipelineTest {
                                                 label + "/env=" + environment + "/direct=" + directLight + "/channel=" + channel
                                                         + ": final composition preserves direct lighting and native zero coverage");
                                         if (coverage == 1 && directLight == 0) {
-                                            double expectedEnergy = f0[channel] * r * r
-                                                    + f0[channel] * (1 - r * r) * environment;
+                                            double expectedEnergy = f0[channel] * broadShare
+                                                    + f0[channel] * (1 - broadShare) * environment;
                                             assertEquals(expectedEnergy, actual[channel], 0.017,
                                                     "Metal absorption must remain absorption; gamma conversion must not darken F0 twice");
+                                            if (environment == 0 && roughness < 0.3f) {
+                                                assertTrue(actual[channel] >= 0.25 * f0[channel],
+                                                        "Front-facing polished metal must retain illumination when reflected surroundings are dark");
+                                            }
                                         }
                                         if (coverage == 1 && environment == 0) {
                                             assertEquals(Math.pow(surfaceAfterLighting[channel], 2.2), actual[channel], 0.0004,

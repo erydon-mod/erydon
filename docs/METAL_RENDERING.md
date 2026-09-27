@@ -78,7 +78,7 @@ The complete native catalogue is covered by a data test.
 
 Bronze and silver use separate colored Schlick conductor Fresnel responses and
 finite GGX roughness. The shared linear RGB F0 starting points are bronze
-`(0.72, 0.42, 0.16)` and silver `(0.95, 0.93, 0.88)`; these are rendering choices,
+`(0.92, 0.70, 0.30)` and silver `(0.95, 0.93, 0.88)`; these are rendering choices,
 not a measurement of a particular alloy. Perceptual roughness has a 0.22 floor;
 authored rougher metal and the 0.65 matte-cover fallback remain rougher.
 
@@ -88,7 +88,13 @@ Linear reflectance coefficients are encoded before multiplication into CU's
 encoded scene RGB; the final metal reflection is added in linear light. This
 avoids applying gamma twice to alloy colour or replacing absorbed light with
 brightly lit albedo. Direct highlights are retained separately from the broad
-rough-metal light approximation, whose weight is perceptual roughness squared.
+metal illumination approximation, whose weight is the greater of perceptual
+roughness squared and 0.30. The previous roughly 0.05 weight at polished roughness
+left lit metal too dark when CU could not supply the reflected surroundings.
+This minimum follows existing scene lighting, so zero illumination stays zero.
+Both reflection paths reserve the same share; polished metal retains 70% for
+resolved reflections, while the existing 0.65 matte lighting split stays unchanged.
+The brighter golden bronze reflectance follows the user's polished-gold target.
 Fractional stone/metal pixels recover the base smoothness and evaluate CU's
 active SSR/WSR Fresnel curve, instead of merely undoing its final multiplier.
 Only an actually applied Mirror mask selects the Mirror reflection floor.
@@ -105,7 +111,7 @@ RGBA8_SNORM quantization. The native low-sampler blend keeps its fallback.
 
 Complementary still supplies the rays, visibility, lighting and color pipeline.
 Block lights do not become physically traced point lights: their existing diffuse
-lighting supplies a roughness-weighted broad proxy, and available reflected geometry
+lighting supplies the broad proxy above, and available reflected geometry
 supplies detail. This is not a full spectral or energy-conserving renderer. A dark
 room can legitimately have dark reflections; there is no emission or brightness
 floor added to make metal glow.
@@ -139,7 +145,8 @@ not visual acceptance. No Minecraft world or test JAR is required.
 
 ## Verification (27 September 2026)
 
-The full Java run reported 363 tests: 362 passed, zero failures/errors and one
+Before the golden-bronze illumination tuning, the full Java run reported
+363 tests: 362 passed, zero failures/errors and one
 optional Bliss archive check skipped because that archive was not configured.
 The numerical GPU tests exercised the real packed lookup, one-pixel coverage,
 authored albedo decoding, mixed stone/metal color, recessed floors and stone
@@ -168,6 +175,13 @@ reflections and coloured lighting enabled. That profile used AF8, normal strengt
 declarations and translucent reflection replacement in addition to the numerical
 shader slices. Iris supplies the test's actual render-stage definitions.
 These checks do not establish visual quality or frame rate in a Minecraft scene.
+
+The subsequent golden-bronze illumination tuning passed 14 focused tests with
+zero failures or skips, including the actual GPU material pipeline, one-pixel
+and recessed-surface fixtures, and all eight full dev1 programs with the WSR
+profile above. Tests check retained illumination at normal incidence with dark
+reflections, zero-light behavior and the independent stone finish. The user has
+approved the groove appearance; the brighter metallic finish awaits comparison.
 
 Validation tasks: `compileJava test verifyErydonOverlayPbr
  auditErydonModMenuSources verifyHighPolishMixinLaunch`. No packaging task ran.

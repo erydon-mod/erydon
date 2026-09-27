@@ -108,7 +108,7 @@ class MetalShaderNumericalTest {
                             result = vec4(erydonMetalAlbedoMean, 1.0);
                         } else if (testMode == 3) {
                             result = vec4(erydonMetalAlbedo(testSampledAlbedo, erydonMetalAlbedoMean,
-                                    vec3(0.72, 0.42, 0.16), testCoverage, testTint), 1.0);
+                                    erydonConductorF0(1, testSampledAlbedo), testCoverage, testTint), 1.0);
                         } else if (testMode == 4) {
                             result = vec4(erydonMetalBroadLighting(testSampledAlbedo, testMetalComponent,
                                     testLight, testRoughness), 1.0);
@@ -209,7 +209,7 @@ class MetalShaderNumericalTest {
                     "The compatibility constructor must also write its default mean colour");
 
             float[] stone = {0.35f, 0.4f, 0.45f};
-            float[] f0 = {0.72f, 0.42f, 0.16f};
+            float[] f0 = {0.92f, 0.70f, 0.30f};
             for (float[] tint : List.of(new float[]{1, 1, 1}, new float[]{0.6f, 0.8f, 0.9f})) {
                 for (float coverage : new float[]{0, 0.25f, 1}) {
                     float[] sampled = new float[3];
@@ -239,7 +239,7 @@ class MetalShaderNumericalTest {
                 for (float coverage : new float[]{0, 0.25f, 1}) {
                     for (float[] light : List.of(new float[]{0, 0, 0}, new float[]{0.4f, 0.7f, 0.9f})) {
                         float[] component = new float[3], lit = new float[3], expected = {0, 0, 0, 1};
-                        float broad = (float) Math.pow(roughness * roughness, 1.0 / 2.2);
+                        float broad = (float) Math.pow(Math.max(roughness * roughness, 0.30), 1.0 / 2.2);
                         for (int channel = 0; channel < 3; channel++) {
                             component[channel] = coverage * metal[channel];
                             lit[channel] = ((1 - coverage) * stone[channel] + component[channel]) * light[channel];

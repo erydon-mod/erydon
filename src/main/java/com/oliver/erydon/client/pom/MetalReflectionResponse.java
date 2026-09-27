@@ -74,7 +74,7 @@ public final class MetalReflectionResponse {
                         if (erydonBaseFinish > 2.5) {
                             erydonBaseReflection = (pow3(fresnel) * 0.5 + 0.5) * erydonBaseSmoothness;
                         }
-                        float erydonMetalF0Max = materialMaskInt == 243 ? 0.72 : 0.95;
+                        float erydonMetalF0Max = materialMaskInt == 243 ? 0.92 : 0.95;
                         float erydonGrazing = clamp(fresnel, 0.0, 1.0);
                         float erydonGrazingFifth = erydonGrazing * erydonGrazing * erydonGrazing * erydonGrazing * erydonGrazing;
                         float erydonMetalReflection = erydonMetalF0Max + (1.0 - erydonMetalF0Max) * erydonGrazingFifth;
@@ -98,7 +98,7 @@ public final class MetalReflectionResponse {
                         float erydonMaterialWord = floor(clamp(texture6.a, 0.0, 1.0) * 65535.0 + 0.5);
                         float erydonMaterialByte = floor(erydonMaterialWord / 256.0);
                         float erydonCoverage = floor(erydonMaterialByte / 4.0) / 63.0;
-                        vec3 erydonF0 = materialMaskInt == 243 ? vec3(0.72, 0.42, 0.16) : vec3(0.95, 0.93, 0.88);
+                        vec3 erydonF0 = materialMaskInt == 243 ? vec3(0.92, 0.70, 0.30) : vec3(0.95, 0.93, 0.88);
                         float erydonGrazing = clamp(fresnel, 0.0, 1.0);
                         float erydonGrazingFifth = erydonGrazing * erydonGrazing * erydonGrazing * erydonGrazing * erydonGrazing;
                         vec3 erydonFresnel = erydonF0 + (vec3(1.0) - erydonF0) * erydonGrazingFifth;
@@ -106,8 +106,8 @@ public final class MetalReflectionResponse {
                         float erydonMetalShare = clamp(erydonCoverage * erydonMetalReflection
                                 / max(fresnelM * fresnelM, 0.000001), 0.0, 1.0);
                         float erydonRoughness = mod(erydonMaterialWord, 256.0) / 255.0;
-                        float erydonBroadShare = erydonRoughness * erydonRoughness;
-                        // Surface lighting already supplies the broad rough-metal lobe.
+                        float erydonBroadShare = max(erydonRoughness * erydonRoughness, 0.30);
+                        // Match the broad illumination proxy used by surface lighting.
                         // CU carries encoded scene RGB until composite1: encode this
                         // linear reflectance coefficient too, so it is not gamma-squared.
                         vec3 erydonLinearTint = mix(vec3(1.0), (1.0 - erydonBroadShare)
@@ -140,7 +140,7 @@ public final class MetalReflectionResponse {
                             float erydonMaterialWord = floor(clamp(texture6.a, 0.0, 1.0) * 65535.0 + 0.5);
                             float erydonMaterialByte = floor(erydonMaterialWord / 256.0);
                             float erydonCoverage = floor(erydonMaterialByte / 4.0) / 63.0;
-                            float erydonF0Max = erydonBlendMask == 243 ? 0.72 : 0.95;
+                            float erydonF0Max = erydonBlendMask == 243 ? 0.92 : 0.95;
                             float erydonGrazing = clamp(1.0 + dot(mat3(gbufferModelView) * texture4.rgb, nViewPos), 0.0, 1.0);
                             float erydonGrazingFifth = erydonGrazing * erydonGrazing * erydonGrazing * erydonGrazing * erydonGrazing;
                             erydonMetalBlend = vec2(erydonCoverage, erydonF0Max + (1.0 - erydonF0Max) * erydonGrazingFifth);
@@ -162,7 +162,7 @@ public final class MetalReflectionResponse {
         result = replace(FINAL_BLEND, result, """
                 if (erydonMetalBlend.x > 0.0) {
                     // Surface lighting has removed only metal diffuse, retaining direct
-                    // highlights and the r^2 broad-light approximation. Absorption is not
+                    // highlights and the broad illumination approximation. Absorption is not
                     // replaced with a coat of lit albedo. At fractional coverage we use
                     // one bounded attenuation for the shared base; endpoints are exact.
                     float erydonStoneFresnelShare = clamp(fresnelM - erydonMetalBlend.x * erydonMetalBlend.y,
@@ -219,7 +219,7 @@ public final class MetalReflectionResponse {
                         float erydonCombined = mix(clamp(fresnelM, 0.0, 1.0), erydonMetalStrength, erydonCoverage);
                         float erydonMetalShare = clamp(erydonCoverage * erydonMetalStrength / max(erydonCombined, 0.000001), 0.0, 1.0);
                         float erydonRoughness = clamp(erydonMetalRoughness, 0.22, 0.9);
-                        float erydonBroadShare = erydonRoughness * erydonRoughness;
+                        float erydonBroadShare = max(erydonRoughness * erydonRoughness, 0.30);
                         vec3 erydonLinearTint = mix(vec3(1.0), (1.0 - erydonBroadShare)
                                 * erydonFresnel / max(erydonMetalReflection, 0.000001), erydonMetalShare);
                         erydonWaterMetalTint = pow(max(erydonLinearTint, vec3(0.0)), vec3(1.0 / 2.2));

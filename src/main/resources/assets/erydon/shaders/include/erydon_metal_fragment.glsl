@@ -12,10 +12,12 @@ float erydonMetalTag = 0.0;
 
 // CU carries gamma-encoded working RGB until composite1. Remove only the
 // metal's diffuse contribution; conductor absorption is not a painted base.
-// A roughness-squared broad-light proxy supplies the unresolved rough lobe.
+// CU has incomplete reflected illumination, especially from block lights.
+// Keep a lighting-dependent broad contribution even on polished metal.
+// Match this share in both opaque and translucent reflection composition.
 vec3 erydonMetalBroadLighting(vec3 litColor, vec3 metalComponent, vec3 light, float roughness) {
     vec3 metalLit = min(max(metalComponent * light, vec3(0.0)), max(litColor, vec3(0.0)));
-    float broadWeight = clamp(roughness * roughness, 0.0, 1.0);
+    float broadWeight = clamp(max(roughness * roughness, 0.30), 0.0, 1.0);
     return litColor - metalLit + metalLit * pow(broadWeight, 1.0 / 2.2);
 }
 
@@ -115,7 +117,7 @@ vec2 erydonMetalBevel(vec2 uv, ivec4 bounds, ivec4 info, float footprint) {
 }
 
 vec3 erydonConductorF0(int alloy, vec3 albedo) {
-    if (alloy == 1) return vec3(0.72, 0.42, 0.16);
+    if (alloy == 1) return vec3(0.92, 0.70, 0.30);
     if (alloy == 2) return vec3(0.95, 0.93, 0.88);
     return clamp(pow(max(albedo, vec3(0.0)), vec3(2.2)), vec3(0.04), vec3(0.98));
 }
