@@ -235,11 +235,11 @@ class MetalShaderNumericalTest {
             }
 
             float[] metal = {0.7f, 0.5f, 0.25f};
-            for (float roughness : new float[]{0.22f, 0.65f}) {
+            for (float roughness : new float[]{2.0f / 255, 0.22f, 0.65f}) {
                 for (float coverage : new float[]{0, 0.25f, 1}) {
                     for (float[] light : List.of(new float[]{0, 0, 0}, new float[]{0.4f, 0.7f, 0.9f})) {
                         float[] component = new float[3], lit = new float[3], expected = {0, 0, 0, 1};
-                        float broad = (float) Math.pow(Math.max(roughness * roughness, 0.30), 1.0 / 2.2);
+                        float broad = (float) Math.pow(Math.max(roughness * roughness, 0.06), 1.0 / 2.2);
                         for (int channel = 0; channel < 3; channel++) {
                             component[channel] = coverage * metal[channel];
                             lit[channel] = ((1 - coverage) * stone[channel] + component[channel]) * light[channel];

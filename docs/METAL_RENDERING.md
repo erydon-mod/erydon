@@ -79,8 +79,10 @@ The complete native catalogue is covered by a data test.
 Bronze and silver use separate colored Schlick conductor Fresnel responses and
 finite GGX roughness. The shared linear RGB F0 starting points are bronze
 `(0.92, 0.70, 0.30)` and silver `(0.95, 0.93, 0.88)`; these are rendering choices,
-not a measurement of a particular alloy. Perceptual roughness has a 0.22 floor;
-authored rougher metal and the 0.65 matte-cover fallback remain rougher.
+not a measurement of a particular alloy. Reflected roughness preserves the authored
+polish with a minimum of 2/255; authored rougher metal and the 0.65 matte-cover
+fallback remain rougher. Direct sun/moon highlights use a separate finite 0.12
+roughness minimum so tiny highlights do not require point-sized sampling.
 
 Direct sun/moon highlights use a colored conductor lobe within CU's existing
 lighting gates. The reflected color tends toward neutral at grazing angles.
@@ -89,12 +91,14 @@ encoded scene RGB; the final metal reflection is added in linear light. This
 avoids applying gamma twice to alloy colour or replacing absorbed light with
 brightly lit albedo. Direct highlights are retained separately from the broad
 metal illumination approximation, whose weight is the greater of perceptual
-roughness squared and 0.30. The previous roughly 0.05 weight at polished roughness
-left lit metal too dark when CU could not supply the reflected surroundings.
-This minimum follows existing scene lighting, so zero illumination stays zero.
-Both reflection paths reserve the same share; polished metal retains 70% for
-resolved reflections, while the existing 0.65 matte lighting split stays unchanged.
-The brighter golden bronze reflectance follows the user's polished-gold target.
+roughness squared and 0.06. A previous 0.22 roughness floor forced even fully
+polished metal to CU smoothness 0.603: CU then applied nearly four times Mirror's
+spatial blur radius, rough reflection normals and blurred reflection mip levels.
+Raising the broad-light share to 0.30 hid this problem behind a milky base.
+Authored polish now reaches CU's sharp-reflection range and both reflection paths
+reserve 94% for resolved reflections on polished metal. The small remaining
+lighting-dependent contribution vanishes at zero illumination. Matte materials
+keep their roughness and lighting split. The golden bronze colour is unchanged.
 Fractional stone/metal pixels recover the base smoothness and evaluate CU's
 active SSR/WSR Fresnel curve, instead of merely undoing its final multiplier.
 Only an actually applied Mirror mask selects the Mirror reflection floor.
@@ -181,7 +185,13 @@ zero failures or skips, including the actual GPU material pipeline, one-pixel
 and recessed-surface fixtures, and all eight full dev1 programs with the WSR
 profile above. Tests check retained illumination at normal incidence with dark
 reflections, zero-light behavior and the independent stone finish. The user has
-approved the groove appearance; the brighter metallic finish awaits comparison.
+approved the groove appearance but rejected the resulting milky metallic finish.
+
+The reflection-sharpness correction passed 19 focused tests with zero failures
+or skips, including all eight complete dev1 programs under the same active WSR
+profile. GPU checks verify that authored polished metal reaches smoothness above
+0.97 independently of the stone finish, retains coloured reflections and keeps
+only a small light-dependent fill. The revised appearance awaits user testing.
 
 Validation tasks: `compileJava test verifyErydonOverlayPbr
  auditErydonModMenuSources verifyHighPolishMixinLaunch`. No packaging task ran.

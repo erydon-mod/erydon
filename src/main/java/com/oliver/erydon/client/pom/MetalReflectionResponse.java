@@ -106,7 +106,7 @@ public final class MetalReflectionResponse {
                         float erydonMetalShare = clamp(erydonCoverage * erydonMetalReflection
                                 / max(fresnelM * fresnelM, 0.000001), 0.0, 1.0);
                         float erydonRoughness = mod(erydonMaterialWord, 256.0) / 255.0;
-                        float erydonBroadShare = max(erydonRoughness * erydonRoughness, 0.30);
+                        float erydonBroadShare = max(erydonRoughness * erydonRoughness, 0.06);
                         // Match the broad illumination proxy used by surface lighting.
                         // CU carries encoded scene RGB until composite1: encode this
                         // linear reflectance coefficient too, so it is not gamma-squared.
@@ -218,8 +218,8 @@ public final class MetalReflectionResponse {
                         float erydonMetalStrength = erydonMetalReflection;
                         float erydonCombined = mix(clamp(fresnelM, 0.0, 1.0), erydonMetalStrength, erydonCoverage);
                         float erydonMetalShare = clamp(erydonCoverage * erydonMetalStrength / max(erydonCombined, 0.000001), 0.0, 1.0);
-                        float erydonRoughness = clamp(erydonMetalRoughness, 0.22, 0.9);
-                        float erydonBroadShare = max(erydonRoughness * erydonRoughness, 0.30);
+                        float erydonRoughness = clamp(erydonMetalRoughness, 2.0 / 255.0, 229.0 / 255.0);
+                        float erydonBroadShare = max(erydonRoughness * erydonRoughness, 0.06);
                         vec3 erydonLinearTint = mix(vec3(1.0), (1.0 - erydonBroadShare)
                                 * erydonFresnel / max(erydonMetalReflection, 0.000001), erydonMetalShare);
                         erydonWaterMetalTint = pow(max(erydonLinearTint, vec3(0.0)), vec3(1.0 / 2.2));

@@ -162,8 +162,10 @@ public final class MetallicShaderAdapter {
                     if (erydonMetalCoverage >= 1.0 / 126.0 && erydonInfo.x > 0) {
                         erydonMetalF0 = erydonConductorF0(erydonInfo.y, color.rgb);
                         float erydonRoughness = erydonMetalCoverage > 0.95 && erydonHasAuthoredMetal ? erydonAuthoredRoughness : float(erydonInfo.z) / 255.0;
-                        // Quantize once, before either lighting lobe uses roughness.
-                        erydonMetalRoughness = clamp(floor(erydonRoughness * 255.0 + 0.5), 57.0, 229.0) / 255.0;
+                        // Preserve authored polish: a .22 floor turns CU's reflection
+                        // sampling into a rough, heavily blurred surface. Keep only a
+                        // minimum of 2/255; direct sun highlights have their own finite width.
+                        erydonMetalRoughness = clamp(floor(erydonRoughness * 255.0 + 0.5), 2.0, 229.0) / 255.0;
                         float erydonMetalSmoothness = (1.0 - erydonMetalRoughness) * (1.0 - erydonMetalRoughness);
                         smoothnessG = mix(smoothnessG, erydonMetalSmoothness, erydonMetalCoverage);
                         smoothnessD = mix(smoothnessD, erydonMetalSmoothness, erydonMetalCoverage);

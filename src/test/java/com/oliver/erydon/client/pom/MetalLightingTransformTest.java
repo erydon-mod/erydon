@@ -53,7 +53,7 @@ class MetalLightingTransformTest {
         String helper = result.substring(result.indexOf("vec3 ErydonConductorHighlight"), result.indexOf("void DoLighting"));
         assertTrue(helper.contains("clamp(erydonMetalF0"));
         assertTrue(helper.contains("vec3 fresnel = f0 + (vec3(1.0) - f0) * fresnelWeight;"));
-        assertTrue(helper.contains("clamp(erydonMetalRoughness, 0.18, 1.0)"));
+        assertTrue(helper.contains("clamp(erydonMetalRoughness, 0.12, 1.0)"));
         assertTrue(helper.contains("nativeLightGate <= 0.0 || noV <= 0.0 || noL <= 0.0"));
         assertTrue(helper.contains("return pow(max(fresnel * distribution * visibility, vec3(0.0)), vec3(1.0 / 2.2));"));
         assertFalse(helper.contains("highlightMult"));

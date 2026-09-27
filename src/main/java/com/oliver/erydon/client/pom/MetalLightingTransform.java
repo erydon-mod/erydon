@@ -62,9 +62,10 @@ public final class MetalLightingTransform {
                     float noH = clamp(dot(shadingNormal, halfVector), 0.0, 1.0);
                     float voH = clamp(dot(-viewDirection, halfVector), 0.0, 1.0);
 
-                    // GGX distribution and correlated Smith visibility. The finite
-                    // roughness floor prevents singular point glints on thin detail.
-                    float roughness = clamp(erydonMetalRoughness, 0.18, 1.0);
+                    // GGX distribution and correlated Smith visibility. Keep a finite
+                    // direct-light lobe for subpixel sun glints without blurring the
+                    // separate authored environment reflection.
+                    float roughness = clamp(erydonMetalRoughness, 0.12, 1.0);
                     float alpha = roughness * roughness;
                     float alphaSquared = alpha * alpha;
                     float distributionDenominator = noH * noH * (alphaSquared - 1.0) + 1.0;

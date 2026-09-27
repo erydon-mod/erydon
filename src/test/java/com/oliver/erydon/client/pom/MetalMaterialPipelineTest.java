@@ -213,15 +213,15 @@ class MetalMaterialPipelineTest {
                 int reflect = gpu.program(tint), compose = gpu.program(composition);
                 for (int alloy : new int[]{1, 2}) {
                     float[] f0 = alloy == 1 ? new float[]{0.92f, 0.70f, 0.30f} : new float[]{0.95f, 0.93f, 0.88f};
-                    for (float roughness : new float[]{0.22f, 0.65f}) {
+                    for (float roughness : new float[]{0, 3.0f / 255, 0.22f, 0.65f}) {
                       for (int finishCase : new int[]{0, 1, 2, 3, 4}) {
                         int finish = finishCase == 4 ? 3 : finishCase;
                         float sourceSmoothness = finishCase == 4 ? 0.5f : 0.8f;
                         double baseSmoothness = finishCase == 1 ? square(175.0 / 255.0)
                                 : finishCase == 2 || finishCase == 3 ? 1.0 : square(sourceSmoothness);
                         int expectedFinish = finishCase == 4 ? 0 : finish;
-                        float r = Math.max(57, Math.min(229, Math.round(roughness * 255))) / 255.0f;
-                        double broadShare = Math.max(r * r, 0.30);
+                        float r = Math.max(2, Math.min(229, Math.round(roughness * 255))) / 255.0f;
+                        double broadShare = Math.max(r * r, 0.06);
                         for (float coverage : new float[]{0, 0.25f, 1}) {
                             float c = Math.round(coverage * 63) / 63.0f;
                             String label = (worldSpace ? "WSR" : "SSR") + "/alloy=" + alloy + "/r=" + roughness
@@ -240,6 +240,10 @@ class MetalMaterialPipelineTest {
                                     (int) (packed[1] * 255.1f), label + ": material identity");
                             assertEquals(baseSmoothness * (1 - c) + square(1 - r) * c, packed[0], 0.00002,
                                     label + ": production mixes smoothness before writing G6");
+                            if (coverage == 1 && roughness < 0.02f) {
+                                assertTrue(packed[0] > 0.97,
+                                        "Authored polished metal must reach CU's sharp-reflection range, independently of stone finish");
+                            }
 
                             gpu.target(g4, 2, 4);
                             GL20.glUseProgram(transport);
@@ -311,9 +315,10 @@ class MetalMaterialPipelineTest {
                                                     + f0[channel] * (1 - broadShare) * environment;
                                             assertEquals(expectedEnergy, actual[channel], 0.017,
                                                     "Metal absorption must remain absorption; gamma conversion must not darken F0 twice");
-                                            if (environment == 0 && roughness < 0.3f) {
-                                                assertTrue(actual[channel] >= 0.25 * f0[channel],
-                                                        "Front-facing polished metal must retain illumination when reflected surroundings are dark");
+                                            if (environment == 0 && roughness < 0.02f) {
+                                                assertTrue(actual[channel] >= 0.04 * f0[channel]
+                                                        && actual[channel] <= 0.08 * f0[channel],
+                                                        "Polished metal keeps a small light-dependent fallback without a milky base coat");
                                             }
                                         }
                                         if (coverage == 1 && environment == 0) {

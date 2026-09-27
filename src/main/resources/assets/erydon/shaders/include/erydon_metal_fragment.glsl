@@ -6,7 +6,7 @@ flat in vec3 erydonMetalAlbedoMean;
 float erydonMetalCoverage = 0.0;
 vec3 erydonMetalF0 = vec3(0.0);
 vec3 erydonMetalDiffuseComponent = vec3(0.0);
-float erydonMetalRoughness = 0.22;
+float erydonMetalRoughness = 2.0 / 255.0;
 float erydonMetalPacked = 1.0;
 float erydonMetalTag = 0.0;
 
@@ -17,7 +17,7 @@ float erydonMetalTag = 0.0;
 // Match this share in both opaque and translucent reflection composition.
 vec3 erydonMetalBroadLighting(vec3 litColor, vec3 metalComponent, vec3 light, float roughness) {
     vec3 metalLit = min(max(metalComponent * light, vec3(0.0)), max(litColor, vec3(0.0)));
-    float broadWeight = clamp(max(roughness * roughness, 0.30), 0.0, 1.0);
+    float broadWeight = clamp(max(roughness * roughness, 0.06), 0.0, 1.0);
     return litColor - metalLit + metalLit * pow(broadWeight, 1.0 / 2.2);
 }
 
