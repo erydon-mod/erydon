@@ -31,6 +31,31 @@ public abstract class ShallowStairsBlockBase extends StairsBlock implements Wate
     public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
 
     private final Map<BlockState, VoxelShape> SHAPE_CACHE = new HashMap<>();
+    private static final boolean SHARED_SHAPES_ENABLED =
+            Boolean.getBoolean("erydon.perf.shared_stair_shapes");
+    private static final java.util.concurrent.atomic.AtomicReferenceArray<VoxelShape> SHARED_SHAPES =
+            new java.util.concurrent.atomic.AtomicReferenceArray<>(StairShapeSlots.COUNT);
+
+    private VoxelShape sharedShape(BlockState state) {
+        int facing = switch (state.get(FACING)) {
+            case NORTH -> 0;
+            case EAST -> 1;
+            case SOUTH -> 2;
+            case WEST -> 3;
+            default -> throw new IllegalArgumentException("Non-horizontal stair facing");
+        };
+        int key = StairShapeSlots.index(isTopHalf(), facing, state.get(SHAPE).ordinal());
+        VoxelShape result = SHARED_SHAPES.get(key);
+        if (result != null) return result;
+        synchronized (SHARED_SHAPES) {
+            result = SHARED_SHAPES.get(key);
+            if (result == null) {
+                result = calculateShape(state);
+                SHARED_SHAPES.set(key, result);
+            }
+            return result;
+        }
+    }
 
     private BlockState normalizeForCache(BlockState s) {
         if (s.contains(HALF)) {
@@ -53,6 +78,7 @@ public abstract class ShallowStairsBlockBase extends StairsBlock implements Wate
 
     @Override
     public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+        if (SHARED_SHAPES_ENABLED) return sharedShape(state);
         BlockState key = normalizeForCache(state);
         return SHAPE_CACHE.computeIfAbsent(key, this::calculateShape);
     }

@@ -1,0 +1,27 @@
+// Exercise real Minecraft block states under Fabric without opening a graphics window.
+tasks.register('verifyShallowStairShapes', JavaExec) {
+    group = 'verification'
+    description = 'Checks original and shared shallow-stair voxels with the optimisation on.'
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'net.fabricmc.loader.impl.launch.knot.KnotClient'
+    maxHeapSize = '1G'
+    def fixture = layout.buildDirectory.dir('shallow-stair-shape-probe')
+    doFirst {
+        def root = fixture.get().asFile
+        root.mkdirs()
+        workingDir root
+        def mod = new File(root, 'probe-mod')
+        mod.mkdirs()
+        new File(mod, 'fabric.mod.json').text = groovy.json.JsonOutput.toJson([
+                schemaVersion: 1, id: 'erydon_shallow_stair_shape_probe', version: '1.0.0',
+                environment: 'client', entrypoints: [preLaunch: ['com.oliver.erydon.block.ShallowStairShapeLaunchProbe']]
+        ])
+        systemProperty 'fabric.development', 'true'
+        systemProperty 'fabric.addMods', mod.absolutePath
+        systemProperty 'erydon.perf.shared_stair_shapes', 'true'
+        args '--gameDir', root.absolutePath, '--version', '1.20.1', '--accessToken', '0'
+    }
+}
+
+tasks.named('check') { dependsOn tasks.named('verifyShallowStairShapes') }

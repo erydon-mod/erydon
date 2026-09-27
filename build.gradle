@@ -786,6 +786,7 @@ apply from: 'gradle/erydon-modmenu-audit.gradle'
 apply from: 'gradle/erydon-axiom-icon-audit.gradle'
 apply from: 'gradle/erydon-high-polish-validation.gradle'
 apply from: 'gradle/erydon-alcove-transform-validation.gradle'
+apply from: 'gradle/erydon-shallow-stair-validation.gradle'
 
 publishing {
     publications {
