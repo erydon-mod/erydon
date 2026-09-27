@@ -26432,6 +26432,20 @@ private static Block registerBlock(String name, Block block) {
                 new com.oliver.erydon.item.ErydonBlockItem(block, settings));
     }
 
+    private static void registerDoubleCircularColumns() {
+        java.util.List<Identifier> sources = Registries.BLOCK.getIds().stream()
+                .filter(id -> Erydon.MOD_ID.equals(id.getNamespace())
+                        && id.getPath().endsWith("_column_circular")
+                        && Registries.BLOCK.get(id) instanceof ColumnBlock)
+                .sorted(java.util.Comparator.comparing(Identifier::toString))
+                .toList();
+        for (Identifier sourceId : sources) {
+            Block source = Registries.BLOCK.get(sourceId);
+            registerBlock(sourceId.getPath() + "_double",
+                    new DoubleCircularColumnBlock(AbstractBlock.Settings.copy(source).nonOpaque()));
+        }
+    }
+
     public static void registerModBlocks() {
         Erydon.logStartupTextLogo();
         Erydon.LOGGER.info("Registering mod blocks for {}", Erydon.MOD_ID);
@@ -26480,6 +26494,7 @@ private static Block registerBlock(String name, Block block) {
         registerGothicCornices();
         registerGothicColumns();
         registerGeorgianWalls();
+        registerDoubleCircularColumns();
 
         AGANITE_BRAZIER = registerBlock("aganite_brazier", createBrazier());
         BOREALIS_BRAZIER = registerBlock("borealis_brazier", createBrazier());

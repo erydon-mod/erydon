@@ -47,7 +47,8 @@ public final class PolishedStoneMaterials {
     public static boolean isReflectionColumn(String path) {
         if (!path.contains("_column_")) return false;
         if (!includes("erydon", path)) return false;
-        return path.endsWith("_column_circular") || path.endsWith("_column_gothic")
+        return path.endsWith("_column_circular") || path.endsWith("_column_circular_double")
+                || path.endsWith("_column_gothic")
                 || path.endsWith("_column_square");
     }
 }

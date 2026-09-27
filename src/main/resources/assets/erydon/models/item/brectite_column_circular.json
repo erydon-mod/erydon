@@ -1,3 +1,17 @@
 {
-  "parent": "erydon:block/column/circular/brectite_column_circular_base"
+  "parent": "erydon:block/column/circular/brectite_column_circular_base",
+  "display": {
+    "gui": {
+      "rotation": [
+        20,
+        45,
+        0
+      ],
+      "scale": [
+        0.55,
+        0.55,
+        0.55
+      ]
+    }
+  }
 }

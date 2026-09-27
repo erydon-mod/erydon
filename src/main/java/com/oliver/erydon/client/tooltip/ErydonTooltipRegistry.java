@@ -49,6 +49,7 @@ public final class ErydonTooltipRegistry {
             family("arch_gothic", "_arch_gothic"),
             family("alcove_georgian", "_alcove_georgian"),
             family("alcove_gothic", "_alcove_gothic"),
+            family("column_circular", "_column_circular_double"),
             family("column_circular", "_column_circular"),
             family("column_gothic", "_column_gothic"),
             family("column_square", "_column_square"),

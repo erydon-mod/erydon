@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "erydon:imperium_aged_column_circular_double",
+          "conditions": [
+            {
+              "condition": "minecraft:block_state_property",
+              "block": "erydon:imperium_aged_column_circular_double",
+              "properties": {
+                "part_x": "0",
+                "part_z": "0"
+              }
+            }
+          ]
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ]
+    }
+  ]
+}

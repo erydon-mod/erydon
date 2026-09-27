@@ -28,6 +28,9 @@ public final class ErydonFamilyModelLoadingPlugin implements ModelLoadingPlugin 
 
             String path = mid.getPath();
             boolean itemModel = "inventory".equals(mid.getVariant());
+            if (path.endsWith("_column_circular_double") && !itemModel) {
+                return wrap(cache, mid, model, DoubleCircularColumnBakedModel::new, "double_circular_columns", false);
+            }
             if (ErydonModelFamilyIndex.isColumnBlock(path)) {
                 return wrap(cache, mid, model, ColumnBakedModel::new, "columns", itemModel);
             }

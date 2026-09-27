@@ -107,9 +107,9 @@ final class ErydonModelFamilyIndex {
 
     static boolean isColumnBlock(String path) {
         path = ErydonIdMigration.legacyResourcePath(path);
-        return path.contains("column_circular")
+        return !path.endsWith("_column_circular_double") && (path.contains("column_circular")
                 || path.contains("column_gothic")
-                || path.contains("column_square");
+                || path.contains("column_square"));
     }
 
     static boolean isCorniceBlock(String path) {
