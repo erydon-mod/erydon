@@ -120,11 +120,9 @@ public final class DoubleCircularColumnBlock extends Block {
         int z = below.isOf(this) ? below.get(Z) : 0;
         BlockPos anchor = pos.add(-x, 0, -z);
         int height = below.isOf(this) ? 1 : 4;
-        for (int y = 0; y < height; y++) for (int dx = 0; dx < 2; dx++) for (int dz = 0; dz < 2; dz++) {
-            BlockPos cell = anchor.add(dx, y, dz);
-            if (world.isOutOfHeightLimit(cell) || !world.getWorldBorder().contains(cell)
-                    || !world.getBlockState(cell).isReplaceable()) return null;
-        }
+        if (!ColumnPlacementArea.isClear(anchor, height, cell ->
+                !world.isOutOfHeightLimit(cell) && world.getWorldBorder().contains(cell)
+                        && world.getBlockState(cell).isAir())) return null;
         BlockState placed = getDefaultState().with(X, x).with(Z, z);
         return below.isOf(this) ? placed.with(BASE, below.get(BASE)).with(CAPITAL, below.get(CAPITAL)) : placed;
     }
@@ -136,6 +134,13 @@ public final class DoubleCircularColumnBlock extends Block {
         BlockPos anchor = pos.add(-state.get(X), 0, -state.get(Z));
         boolean extension = world.getBlockState(anchor.down()).isOf(this);
         int height = extension ? 1 : 4;
+        // The primary cell is already placed. Recheck the other cells before changing any of them.
+        if (!ColumnPlacementArea.isClear(anchor, height, cell ->
+                cell.equals(pos) || (!world.isOutOfHeightLimit(cell)
+                        && world.getWorldBorder().contains(cell) && world.getBlockState(cell).isAir()))) {
+            world.removeBlock(pos, false);
+            return;
+        }
         for (int y = 0; y < height; y++) for (int dx = 0; dx < 2; dx++) for (int dz = 0; dz < 2; dz++) {
             BlockPos cell = anchor.add(dx, y, dz);
             if (cell.equals(pos)) continue;

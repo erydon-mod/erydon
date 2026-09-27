@@ -32,7 +32,9 @@ class DoubleCircularColumnAssetsTest(unittest.TestCase):
                 loot = json.loads((ROOT / f"data/erydon/loot_tables/blocks/{target}.json").read_text(encoding="utf-8"))
                 condition = loot["pools"][0]["entries"][0]["conditions"][0]
                 self.assertEqual({"part_x": "0", "part_z": "0"}, condition["properties"])
-                self.assertTrue(all(f"block.erydon.{target}" in lang for lang in languages.values()))
+                self.assertIn("Large Circular Column", languages["en_us"][f"block.erydon.{target}"])
+                self.assertIn("Große Rundsäule", languages["de_de"][f"block.erydon.{target}"])
+                self.assertIn("Columna Circular Grande", languages["es_es"][f"block.erydon.{target}"])
                 self.assertIn(f"erydon:{target}", ctm_text)
 
 

@@ -22,27 +22,51 @@ def write_json(path: Path, value: object) -> None:
         path.write_bytes(content.encode("utf-8"))
 
 
-def add_lang_entry(path: Path, source: str, target: str, suffix: str) -> None:
+def add_lang_entry(path: Path, source: str, target: str, locale: str) -> None:
     content = path.read_bytes().decode("utf-8")
     source_key = f"block.erydon.{source}"
     target_key = f"block.erydon.{target}"
-    if f'"{target_key}"' in content:
-        return
     lines = content.splitlines(keepends=True)
+    source_label = None
     for index, line in enumerate(lines):
         if f'"{source_key}"' not in line:
             continue
         match = re.search(r'^(\s*)"[^"]+":\s*("(?:\\.|[^"])*")(,?)(\r?\n)$', line)
         if not match:
             raise ValueError(f"Unexpected language format: {path}:{index + 1}")
-        label = json.loads(match.group(2)) + suffix
+        source_label = json.loads(match.group(2))
+        break
+    if source_label is None:
+        raise ValueError(f"Missing source language entry {source_key} in {path}")
+    if locale == "en_us":
+        label = source_label.replace("Circular Column", "Large Circular Column")
+    elif locale == "de_de":
+        label = source_label.replace("Rund S?ule", "Große Rundsäule")
+    else:
+        label = source_label.replace("Circular Columna", "Columna Circular Grande")
+    if label == source_label:
+        raise ValueError(f"Missing circular column wording in {source_key} in {path}")
+    for index, line in enumerate(lines):
+        if f'"{target_key}"' in line:
+            match = re.search(r'^(\s*)"[^"]+":\s*("(?:\\.|[^"])*")(,?)(\r?\n)$', line)
+            if not match:
+                raise ValueError(f"Unexpected language format: {path}:{index + 1}")
+            updated = (f'{match.group(1)}"{target_key}": '
+                       f'{json.dumps(label, ensure_ascii=False)}{match.group(3)}{match.group(4)}')
+            if line != updated:
+                lines[index] = updated
+                path.write_bytes("".join(lines).encode("utf-8"))
+            return
+    for index, line in enumerate(lines):
+        if f'"{source_key}"' not in line:
+            continue
+        match = re.search(r'^(\s*)"[^"]+":\s*("(?:\\.|[^"])*")(,?)(\r?\n)$', line)
         comma = match.group(3)
         if not comma:
             lines[index] = line.rstrip("\r\n") + "," + match.group(4)
         lines.insert(index + 1, f'{match.group(1)}"{target_key}": {json.dumps(label, ensure_ascii=False)}{comma}{match.group(4)}')
         path.write_bytes("".join(lines).encode("utf-8"))
         return
-    raise ValueError(f"Missing source language entry {source_key} in {path}")
 
 
 def add_to_tags(source: str, target: str) -> None:
@@ -104,7 +128,7 @@ def generate() -> None:
         })
         add_to_tags(source, target)
         for locale in ("en_us", "de_de", "es_es"):
-            add_lang_entry(ASSETS / f"lang/{locale}.json", source, target, " (2×2)")
+            add_lang_entry(ASSETS / f"lang/{locale}.json", source, target, locale)
         add_to_ctm(source, target)
     print(f"Generated {len(sources)} double circular columns")
 
