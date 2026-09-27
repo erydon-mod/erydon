@@ -1,7 +1,7 @@
 # High polish and architectural fixes: test checklist
 
 Use the IDEA development client first, with Complementary Unbound r5.9 dev5
-or Unbound/Reimagined r5.9.3, labPBR and your usual Collection pack. Full
+or Unbound/Reimagined r5.9.3 or Unbound r5.9.4 dev1, labPBR and your usual Collection pack. Full
 Minecraft restarts are required after saving finish or glass settings. No test
 JAR was produced.
 
@@ -36,6 +36,7 @@ JAR was produced.
   Check pattern overrides on Themelios herringbone/weave/inlays and all three
   texture resolutions. Aged/rough stone and bronze sculptures remain unchanged.
 
+The new 27 September metal revision awaits user visual testing.
 Earlier visual approvals include the Gothic arch sliver repair, slices,
 Mod Menu, stronger metal treatment, both Complementary styles, two-way glass
 and the latest high-polish performance trial. The items above are new checks.
@@ -73,12 +74,20 @@ and the latest high-polish performance trial. The items above are new checks.
 ## 2. Metallic details, connected textures and depth
 
 - Compare bronze and silver Trim, Guilloche, Quatrefoil and Rosette on walls,
-  floors, slabs, stairs and slopes. CU's metal trial uses an 85% reflection
-  floor independently of the stone finish. Its corrected final tint and 20%
-  texture preservation should give stronger contrast between dark and bright
-  reflected objects. Silver should stay neutral and bronze warm; confirm that
-  highlights do not wash out the motif. Compare a dark object reflected beside
-  the sky in each metal, and check that the surrounding stone keeps its finish.
+  floors, slabs, stairs and slopes. Include the one-pixel 64x Rosette and
+  Striatus/Nerium bronze weave. The shared conductor response replaces the old
+  85% reflection floor and 20% texture-preservation boost. Expect broader glints,
+  continuous fine detail and less abrupt dark/bright contrast; judge the result
+  in sunlight, an interior lit mainly by blocks, and a mixed-light doorway.
+- Include glossy and matte metal covers, light frames/brackets (lights both on
+  and off) and Daedalon bronze decoration. Matte covers must remain rougher;
+  emitted light, tinted glazing and the approved two-way coating must keep
+  their existing behavior. Compare native 16x, Collection 32x and 64x.
+- Approach and move away slowly, then view at grazing angles. Check thin lines
+  while still and moving: watch for shimmering, crawling coverage, reflection
+  smearing onto adjacent stone, lost joins or excessive flattening of detail.
+  Normal-map strength zero disables the additional bevel; compare the normal
+  settings you use, including 120, without treating global strength as the fix.
 - Check all six faces while moving the camera. Look for flicker, disappearing
   overlays, sorting through stone or detached edges. Include triangular slope
   sides, rotated/inverted slopes and a resource reload.
@@ -87,7 +96,8 @@ and the latest high-polish performance trial. The items above are new checks.
   stone finish, including Honed and master Off.
 - Check herringbone and weave depth at shallow angles with Collection 32x/64x,
   especially grout at CTM seams. Native 16x patterned height maps are flat;
-  the finish adapter does not add height or invent missing metallic masks.
+  the metal adapter recovers only the verified native bronze/grout pair mask;
+  it does not add height.
 - Check alcove recessed backs and the narrow strip above the Gothic apex
   against adjacent blocks, in all facings and before/after F3+T. Marble texture
   phase must remain continuous across seams.
@@ -158,9 +168,9 @@ and the latest high-polish performance trial. The items above are new checks.
   Keep camera, render distance, weather, time and shader settings fixed. Compare
   standing still, turning, walking past it and loading its chunks.
 - Repeat with shaders off. Check sustained FPS, frame-time spikes, chunk-loading
-  delays and visible sorting errors. No new draw pass, specular sample, faces or
-  fluid-neighbour scans are added; shader arithmetic and existing reflection
-  work still need measured comparison before claiming no performance cost.
+  delays and visible sorting errors. The metal lookup adds bounded texture
+  reads and two existing buffers gain alpha storage; it adds no draw pass,
+  reflection ray, face or fluid-neighbour scan. Measure scene performance.
 - Reload/switch shaders and visit all three dimensions. Check CTM, large spiral
   stairs, patterned depth, inlays, glazing and two-way mirrors afterward.
 - Compare both Complementary r5.9.3 styles with labPBR enabled. Their default

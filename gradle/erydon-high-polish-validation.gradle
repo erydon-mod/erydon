@@ -18,6 +18,18 @@ tasks.named('test', Test) {
             inputs.file(shader).withPropertyName(variable + '_source').withPathSensitivity(PathSensitivity.NONE)
         }
     }
+    def shaderDirectory = providers.environmentVariable('ERYDON_CU_TEST_SHADER_DIR')
+    inputs.property('ERYDON_CU_TEST_SHADER_DIR', shaderDirectory.isPresent())
+    if (shaderDirectory.isPresent()) {
+        inputs.files(fileTree(shaderDirectory.get()) { include 'Complementary*.zip' })
+                .withPropertyName('ERYDON_CU_TEST_SHADER_DIR_sources').withPathSensitivity(PathSensitivity.NONE)
+    }
+    inputs.property('ERYDON_CU_GL_VALIDATE', providers.environmentVariable('ERYDON_CU_GL_VALIDATE').getOrElse('false'))
+    // Real shader matrices retain considerably more compiler data than ordinary unit fixtures.
+    if (providers.environmentVariable('ERYDON_CU_TEST_SHADER').isPresent() || shaderDirectory.isPresent()
+            || providers.environmentVariable('ERYDON_CU_GL_VALIDATE').map { it in ['true', '1'] }.getOrElse(false)) {
+        maxHeapSize = '2G'
+    }
 }
 
 // Isolated, pre-launch-only test. No world, graphics window or test JAR is created.
@@ -45,7 +57,7 @@ tasks.register('verifyHighPolishMixinLaunch', JavaExec) {
         systemProperty 'fabric.development', 'true'
         systemProperty 'fabric.addMods', mod.absolutePath
         systemProperty 'mixin.debug.export', 'true'
-        systemProperty 'mixin.debug.export.filter', 'net.irisshaders.iris.shaderpack.ShaderPack'
+        systemProperty 'mixin.debug.export.filter', 'net.irisshaders.iris.shaderpack.**'
         args '--gameDir', root.absolutePath, '--version', '1.20.1', '--accessToken', '0'
     }
 }

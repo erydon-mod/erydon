@@ -5,7 +5,7 @@ import java.util.List;
 import com.oliver.erydon.HighPolishSettings.Level;
 import java.util.function.IntPredicate;
 
-/** Reuses supported shaders' opaque reflection pass; no extra draw or texture sample. */
+/** Stone finish and two-way glass controls; no extra draw or texture sample. */
 public final class HighPolishShaderAdapter {
     public enum Profile { COMPLEMENTARY, BLISS, UNSUPPORTED }
     private static final String BLISS_PROPERTIES_SHA256 =
@@ -38,12 +38,7 @@ public final class HighPolishShaderAdapter {
     private static final String POLISHED = "(mat == 12040 || mat == 12041 || mat == 12043 || mat == 12045 || mat == 12053)";
     private static final String MIRROR = "(mat == 12024 || mat == 12025 || mat == 12027 || mat == 12029 || mat == 12049)";
     private static final String STONE = "(" + HONED + " || " + POLISHED + " || " + MIRROR + ")";
-    // Frame IDs are deliberately absent: two-way coating keeps its own response,
-    // including its ordinary opaque mode when the glass enhancement is disabled.
-    private static final String INLAY_STONE = "(mat == 12024 || mat == 12025 || mat == 12027"
-            + " || mat == 12032 || mat == 12033 || mat == 12035 || mat == 12040 || mat == 12041 || mat == 12043)";
     private static final Pattern SMOOTHNESS = Pattern.compile("float\\s+smoothnessM\\s*=\\s*pow2\\(specularMap\\.r\\)\\s*;");
-    private static final Pattern METAL = Pattern.compile("materialMask\\s*=\\s*specularMap\\.g\\s*-\\s*OSIEBCA\\s*\\*\\s*15\\.0\\s*;");
     private static final String MARKER = "// ERYDON opaque high polish";
     private static final String MIRROR_MARKER = "// ERYDON two-way mirror coating";
     private static final String COLUMN_MARKER = "// ERYDON circular-column reflection approximation";
@@ -55,17 +50,8 @@ public final class HighPolishShaderAdapter {
     private static final Pattern CUSTOM_EMISSION = Pattern.compile(
             "emission\\s*=\\s*GetCustomEmission\\(specularMap,\\s*texCoordM\\);");
     private static final Pattern TRANSLUCENT_REFLECTION = Pattern.compile("reflectMult\\s*=\\s*smoothnessD\\s*;");
-    private static final Pattern REFLECTION_TINT = Pattern.compile("reflection\\.rgb\\s*\\*=\\s*reflectColor\\s*;");
-    private static final Pattern FILTER_SIGNATURE = Pattern.compile(
-            "vec4\\s+sampleBlurFilteredReflection\\(vec4\\s+centerCol,\\s*vec3\\s+nViewPos,\\s*float\\s+dither,\\s*float\\s+z0\\)\\s*\\{");
-    private static final Pattern FILTER_RETURN = Pattern.compile("return\\s+sum\\s*/\\s*weightSum\\s*;");
-    private static final Pattern FILTER_SMOOTHNESS = Pattern.compile("float\\s+smoothnessD\\s*=\\s*texture6\\.r\\s*;");
-    private static final Pattern FILTER_CALL = Pattern.compile(
-            "compositeReflection\\s*=\\s*sampleBlurFilteredReflection\\(compositeReflection,\\s*nViewPos,\\s*dither,\\s*z0\\)\\s*;");
-    private static final Pattern TEXTURE_PRESERVATION = Pattern.compile("const\\s+float\\s+texturePreservation\\s*=\\s*0\\.7\\s*;");
     private static volatile Profile profile = Profile.UNSUPPORTED;
-    private static volatile boolean requested, eligible, terrainReady, deferredReady, waterReady,
-            compositeReady, compositeBlendReady, columnsReady, failed;
+    private static volatile boolean requested, eligible, terrainReady, deferredReady, waterReady, columnsReady, failed;
 
     public record Result(String text, boolean changed, String status) { }
 
@@ -86,7 +72,7 @@ public final class HighPolishShaderAdapter {
         // Keep other packs native while the three-level CU trial is validated.
         requested = selectedProfile == Profile.COMPLEMENTARY && enabled;
         eligible = false;
-        terrainReady = deferredReady = waterReady = compositeReady = compositeBlendReady = columnsReady = failed = false;
+        terrainReady = deferredReady = waterReady = columnsReady = failed = false;
     }
 
     public static boolean requested() { return requested; }
@@ -108,7 +94,7 @@ public final class HighPolishShaderAdapter {
     }
 
     public static boolean ready() {
-        return eligible && terrainReady && deferredReady && waterReady && compositeReady && compositeBlendReady && !failed;
+        return eligible && terrainReady && deferredReady && waterReady && !failed;
     }
 
     public static boolean columnsReady() { return columnsReady && ready(); }
@@ -149,7 +135,7 @@ public final class HighPolishShaderAdapter {
 
     public static String status() {
         return profile + " ids=" + eligible + " terrain=" + terrainReady + " deferred=" + deferredReady
-                + " glass=" + waterReady + " metalTint=" + compositeReady + " metalBlend=" + compositeBlendReady
+                + " glass=" + waterReady
                 + " failed=" + failed;
     }
 
@@ -181,7 +167,7 @@ public final class HighPolishShaderAdapter {
     private static Result adaptTerrain(String source) {
         // Preflight all anchors before changing anything. Metals and grout retain
         // their own masks; no specular image is swapped or sampled a second time.
-        if (!unique(SMOOTHNESS, source) || !unique(DIELECTRIC, source) || !unique(METAL, source))
+        if (!unique(SMOOTHNESS, source) || !unique(DIELECTRIC, source))
             return new Result(source, false, "UNSUPPORTED_SOURCE");
         String finish = """
                     // ERYDON opaque high polish
@@ -194,66 +180,11 @@ public final class HighPolishShaderAdapter {
         result = DIELECTRIC.matcher(result).replaceFirst("$0\n" + """
                     if (%s && specularMap.r >= 0.99) materialMask = OSIEBCA * 242.0;
                 """.formatted(MIRROR));
-        result = METAL.matcher(result).replaceFirst("$0\n" + """
-                    // Keep ERYDON inlays metallic independently of the stone finish.
-                    if (%s) materialMask = OSIEBCA * 243.0;
-                """.formatted(INLAY_STONE));
-        return new Result(result, true, "TRANSFORMED");
-    }
-
-    private static Result adaptComposite(String source) {
-        if (!unique(REFLECTION_TINT, source)) return new Result(source, false, "UNSUPPORTED_SOURCE");
-        // deferred1 only stores reflection strength. The colour must be restored
-        // here, where CU actually multiplies the traced reflection by its tint.
-        String tint = """
-                    // ERYDON opaque high polish
-                    if (materialMaskInt == 243) {
-                        reflectColor = color.rgb / (max(color.r, max(color.g, color.b)) + 0.00001);
-                    }
-                """;
-        return new Result(REFLECTION_TINT.matcher(source).replaceFirst(
-                java.util.regex.Matcher.quoteReplacement(tint) + "$0"), true, "TRANSFORMED");
-    }
-
-    private static Result adaptCompositeBlend(String source) {
-        if (!unique(FILTER_SIGNATURE, source) || !unique(FILTER_RETURN, source)
-                || !unique(FILTER_CALL, source) || !unique(TEXTURE_PRESERVATION, source))
-            return new Result(source, false, "UNSUPPORTED_SOURCE");
-        var signature = FILTER_SIGNATURE.matcher(source);
-        var end = FILTER_RETURN.matcher(source);
-        signature.find();
-        end.find();
-        if (end.start() <= signature.end()) return new Result(source, false, "UNSUPPORTED_SOURCE");
-        String body = source.substring(signature.end(), end.start());
-        var smoothness = FILTER_SMOOTHNESS.matcher(body);
-        if (smoothness.find()) {
-            if (smoothness.find()) return new Result(source, false, "UNSUPPORTED_SOURCE");
-            // Reuse the filter's existing material-buffer fetch; no extra sample.
-            body = FILTER_SMOOTHNESS.matcher(body).replaceFirst("$0\n"
-                    + "        erydonTexturePreservation = int(texture6.g * 255.1) == 243 ? 0.2 : 0.7;\n");
-        }
-        // CU omits this fetch in its macOS/Distant Horizons low-sampler profile.
-        // That profile keeps the native blend instead of introducing a sampler.
-        String helper = """
-                vec4 sampleBlurFilteredReflection(vec4 centerCol, vec3 nViewPos, float dither, float z0,
-                                                  out float erydonTexturePreservation) {
-                    // ERYDON opaque high polish
-                    erydonTexturePreservation = 0.7;
-                """;
-        String result = source.substring(0, signature.start()) + helper + body + source.substring(end.start());
-        result = FILTER_CALL.matcher(result).replaceFirst("""
-                float erydonTexturePreservation;
-                            compositeReflection = sampleBlurFilteredReflection(compositeReflection, nViewPos, dither, z0,
-                                                                               erydonTexturePreservation);
-                """);
-        result = TEXTURE_PRESERVATION.matcher(result).replaceFirst(
-                "float texturePreservation = erydonTexturePreservation;");
         return new Result(result, true, "TRANSFORMED");
     }
 
     private static boolean opaqueProgram(String program) {
-        return "gbuffers_terrain".equals(program) || "deferred1".equals(program)
-                || "composite".equals(program) || "composite1".equals(program);
+        return "gbuffers_terrain".equals(program) || "deferred1".equals(program);
     }
 
     public static Result adaptFragment(String program, String source, boolean enabled) {
@@ -264,8 +195,6 @@ public final class HighPolishShaderAdapter {
         }
         if (source.contains(MARKER)) return new Result(source, false, "ALREADY_TRANSFORMED");
         if ("gbuffers_terrain".equals(program)) return adaptTerrain(source);
-        if ("composite".equals(program)) return adaptComposite(source);
-        if ("composite1".equals(program)) return adaptCompositeBlend(source);
         var matcher = FRESNEL.matcher(source);
         if (!matcher.find()) return new Result(source, false, "UNSUPPORTED_SOURCE");
         int end = matcher.end();
@@ -276,9 +205,6 @@ public final class HighPolishShaderAdapter {
                     // Mirror stone: 50% floor. Honed/Polished use CU's ordinary response.
                     if (materialMaskInt == 242) {
                         fresnelM = (pow3(fresnel) * 0.5 + 0.5) * smoothnessD;
-                    } else if (materialMaskInt == 243) {
-                        // Colour is applied in composite; this stage stores strength only.
-                        fresnelM = (pow3(fresnel) * 0.15 + 0.85) * smoothnessD;
                     }
                 """;
         return new Result(source.substring(0, end) + insertion + source.substring(end), true, "TRANSFORMED");
@@ -291,8 +217,6 @@ public final class HighPolishShaderAdapter {
             if (!ok) failed = true;
             if ("gbuffers_terrain".equals(program)) terrainReady = ok;
             else if ("deferred1".equals(program)) deferredReady = ok;
-            else if ("composite".equals(program)) compositeReady = ok;
-            else if ("composite1".equals(program)) compositeBlendReady = ok;
             else waterReady = ok;
         }
         return result;

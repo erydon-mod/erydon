@@ -1,6 +1,7 @@
 package com.oliver.erydon.mixin.client;
 
 import com.oliver.erydon.client.pom.ErydonCuPomLookupTexture;
+import com.oliver.erydon.client.pom.MetallicLookupTexture;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.texture.SpriteLoader;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,11 +19,13 @@ public abstract class SpriteAtlasTextureMixin {
         SpriteAtlasTexture atlas = (SpriteAtlasTexture) (Object) this;
         if (SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE.equals(atlas.getId())) {
             ErydonCuPomLookupTexture.registerPlaceholder();
+            MetallicLookupTexture.registerPlaceholder();
         }
     }
 
     @Inject(method = "upload", at = @At("RETURN"))
     private void erydon$rebuildCuPomLookupAfterAtlasUpload(SpriteLoader.StitchResult stitchResult, CallbackInfo ci) {
         ErydonCuPomLookupTexture.rebuildAfterBlockAtlasUpload((SpriteAtlasTexture) (Object) this);
+        MetallicLookupTexture.rebuildAfterBlockAtlasUpload((SpriteAtlasTexture) (Object) this, stitchResult);
     }
 }

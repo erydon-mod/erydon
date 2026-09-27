@@ -64,10 +64,15 @@ public abstract class ShaderPropertiesMixin implements ErydonIrisShaderPropertie
             Iterable<StringPair> environmentDefines,
             CallbackInfo ci
     ) {
+        ShaderProperties properties = (ShaderProperties) (Object) this;
+        if (com.oliver.erydon.client.pom.HighPolishShaderAdapter.profile()
+                == com.oliver.erydon.client.pom.HighPolishShaderAdapter.Profile.COMPLEMENTARY) {
+            properties.getIrisCustomTextures().put("erydonMetalLookup",
+                    new TextureDefinition.PNGDefinition("erydon:metal_lookup"));
+        }
         if (!erydon$cuPomEligible) {
             return;
         }
-        ShaderProperties properties = (ShaderProperties) (Object) this;
         properties.getIrisCustomTextures()
                 .put("erydonCtmPomLookup",
                         new TextureDefinition.PNGDefinition("erydon:ctm_pom_lookup"));

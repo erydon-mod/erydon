@@ -1,5 +1,10 @@
 # High-polish rendering investigation
 
+Historical investigation: the metal coefficients and five-stage readiness below
+were superseded on 2026-09-27 by [the shared metal adapter](METAL_RENDERING.md).
+The original stone and two-way glass decisions remain current. This file records
+why the earlier implementation was chosen; it is not the current metal specification.
+
 Status: the earlier opaque CU route and two-way mirror were visually approved.
 The current trial adds Honed, Polished and Mirror stone finishes, plus stronger
 metallic reflections, for CU first. Mirror starts at 50%; Polished has full

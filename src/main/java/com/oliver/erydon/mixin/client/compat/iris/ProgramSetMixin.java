@@ -6,19 +6,56 @@ import com.oliver.erydon.client.pom.ErydonCuPomShaderBridge;
 import com.oliver.erydon.client.pom.ErydonCuPomRuntimeState;
 import com.oliver.erydon.client.pom.ErydonIrisShaderPropertiesExtension;
 import com.oliver.erydon.client.pom.HighPolishShaderAdapter;
+import com.oliver.erydon.client.pom.MetallicShaderAdapter;
+import com.oliver.erydon.client.pom.ErydonMetalProgramSetExtension;
+import net.irisshaders.iris.shaderpack.include.AbsolutePackPath;
+import net.irisshaders.iris.shaderpack.properties.ShaderProperties;
+import net.irisshaders.iris.shaderpack.ShaderPack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArgs;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 
 @Pseudo
 @Mixin(targets = "net.irisshaders.iris.shaderpack.programs.ProgramSet", remap = false)
-public abstract class ProgramSetMixin {
+public abstract class ProgramSetMixin implements ErydonMetalProgramSetExtension {
     private static final AtomicBoolean ERYDON$TRANSFORM_LOGGED = new AtomicBoolean();
     private static final AtomicBoolean ERYDON$FAILURE_LOGGED = new AtomicBoolean();
+    @Unique private boolean erydon$metalEligible;
+
+    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Ljava/lang/Object;<init>()V",
+            shift = At.Shift.AFTER), remap = false, require = 1)
+    private void erydon$preflightMetalPrograms(AbsolutePackPath root,
+                                              Function<AbsolutePackPath, String> sourceProvider,
+                                              ShaderProperties properties, ShaderPack pack, CallbackInfo ci) {
+        if (HighPolishShaderAdapter.profile() != HighPolishShaderAdapter.Profile.COMPLEMENTARY) return;
+        boolean pom = ((ErydonIrisShaderPropertiesExtension) (Object) properties).erydon$isCuPomEligible();
+        for (String program : MetallicShaderAdapter.PROGRAMS) {
+            String vertex = sourceProvider.apply(root.resolve(program + ".vsh"));
+            String fragment = sourceProvider.apply(root.resolve(program + ".fsh"));
+            // A pack may have an empty base ProgramSet before its dimension overrides.
+            if (fragment == null) return;
+            var ctm = ComplementaryUnboundDev5SourceTransformer.transformProgram(program, vertex, fragment,
+                    ErydonCuPomShaderBridge.vertexSource(), ErydonCuPomShaderBridge.fragmentSource(), pom);
+            var polish = HighPolishShaderAdapter.adaptFragment(program, ctm.fragmentText(), true);
+            var metal = MetallicShaderAdapter.adapt(program, ctm.vertexText(), polish.text(), true);
+            if (!metal.changed()) {
+                Erydon.LOGGER.info("[erydon] Metal response retains native rendering for {}: {} {}.", root, program, metal.status());
+                return;
+            }
+        }
+        erydon$metalEligible = true;
+        Erydon.LOGGER.info("[erydon] Metal response preflight passed for {} (all eight programs).", root);
+    }
+
+    @Override public boolean erydon$isMetalEligible() { return erydon$metalEligible; }
 
     @ModifyArgs(
             method = "readProgramSource(Lnet/irisshaders/iris/shaderpack/include/AbsolutePackPath;Ljava/util/function/Function;Ljava/lang/String;Lnet/irisshaders/iris/shaderpack/programs/ProgramSet;Lnet/irisshaders/iris/shaderpack/properties/ShaderProperties;Lnet/irisshaders/iris/gl/blending/BlendModeOverride;Z)Lnet/irisshaders/iris/shaderpack/programs/ProgramSource;",
@@ -72,6 +109,16 @@ public abstract class ProgramSetMixin {
             Erydon.LOGGER.info("[erydon] Adapted {} {} for high polish.", HighPolishShaderAdapter.profile(), programName);
         } else if ("UNSUPPORTED_SOURCE".equals(polish.status())) {
             Erydon.LOGGER.warn("[erydon] Opaque high polish left unsupported {} source unchanged.", programName);
+        }
+        if (((ErydonMetalProgramSetExtension) args.get(6)).erydon$isMetalEligible()) {
+            var metal = MetallicShaderAdapter.adapt(programName, args.get(1), args.get(5), true);
+            if (metal.changed()) {
+                args.set(1, metal.vertex());
+                args.set(5, metal.fragment());
+            } else if ("UNSUPPORTED_SOURCE".equals(metal.status())) {
+                // Preflight used these same sources. Never compile a partially adapted pipeline.
+                throw new IllegalStateException("ERYDON metal source changed after preflight: " + programName);
+            }
         }
         if ("gbuffers_terrain".equals(programName)) {
             args.set(1, HighPolishShaderAdapter.adaptSpiralPredicate(args.get(1)));

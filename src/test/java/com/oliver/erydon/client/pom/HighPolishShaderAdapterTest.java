@@ -78,8 +78,8 @@ class HighPolishShaderAdapterTest {
         assertTrue(deferred.contains("materialMaskInt == 242"));
         assertFalse(terrain.contains("241"));
         assertTrue(deferred.contains("(pow3(fresnel) * 0.5 + 0.5) * smoothnessD"));
-        assertTrue(deferred.contains("materialMaskInt == 243"));
-        assertTrue(deferred.contains("(pow3(fresnel) * 0.15 + 0.85) * smoothnessD"));
+        assertFalse(deferred.contains("materialMaskInt == 243"), "Metal response belongs to the separate material adapter");
+        assertFalse(terrain.contains("OSIEBCA * 243.0"));
         assertFalse(deferred.contains("reflectColor ="), "deferred1 cannot carry the tint into composite");
         String mirrorMask = terrain.substring(terrain.indexOf("if (", terrain.indexOf("materialMask =")), terrain.indexOf("} else"));
         assertTrue(mirrorMask.contains("mat == 12024"));
@@ -97,7 +97,7 @@ class HighPolishShaderAdapterTest {
         assertNull(HighPolishShaderAdapter.adaptFragment("deferred1", null, true).text());
     }
 
-    @Test void everyReflectionStageIsRequiredBeforeClassifyingBlocks() {
+    @Test void stoneAndGlassStagesAreRequiredWithoutCouplingMetalReflectionStages() {
         HighPolishShaderAdapter.beginShaderLoad(true, true);
         assertFalse(HighPolishShaderAdapter.adaptFragment("gbuffers_terrain", TERRAIN).changed());
         HighPolishShaderAdapter.acceptMaterialIds(id -> false);
@@ -106,15 +106,14 @@ class HighPolishShaderAdapterTest {
         HighPolishShaderAdapter.adaptFragment("deferred1", DEFERRED);
         assertFalse(HighPolishShaderAdapter.ready(), "The mirror program must also be recognised");
         HighPolishShaderAdapter.adaptFragment("gbuffers_water", WATER);
-        assertFalse(HighPolishShaderAdapter.ready(), "The actual colour and blend stages must also be recognised");
-        HighPolishShaderAdapter.adaptFragment("composite", COMPOSITE);
-        assertFalse(HighPolishShaderAdapter.ready());
-        HighPolishShaderAdapter.adaptFragment("composite1", BLEND);
+        assertTrue(HighPolishShaderAdapter.ready());
+        assertEquals("OTHER_PROGRAM", HighPolishShaderAdapter.adaptFragment("composite", COMPOSITE).status());
+        assertEquals("OTHER_PROGRAM", HighPolishShaderAdapter.adaptFragment("composite1", BLEND).status());
         assertTrue(HighPolishShaderAdapter.ready());
         // Absent optional programs must not cancel an already loaded base program.
         HighPolishShaderAdapter.adaptFragment("gbuffers_terrain", null);
         assertTrue(HighPolishShaderAdapter.ready());
-        HighPolishShaderAdapter.adaptFragment("composite1", "changed source");
+        HighPolishShaderAdapter.adaptFragment("gbuffers_terrain", "changed source");
         assertFalse(HighPolishShaderAdapter.ready());
         HighPolishShaderAdapter.beginShaderLoad(false, true);
         HighPolishShaderAdapter.acceptMaterialIds(id -> false);
@@ -122,50 +121,17 @@ class HighPolishShaderAdapterTest {
         assertFalse(HighPolishShaderAdapter.ready());
     }
 
-    @Test void metalTintReachesTheStageThatMultipliesTheActualReflection() {
-        String result = HighPolishShaderAdapter.adaptFragment("composite", COMPOSITE, true).text();
-        assertTrue(result.indexOf("if (materialMaskInt == 243)") > result.indexOf("vec3 reflectColor"));
-        assertTrue(result.indexOf("reflectColor = color.rgb /") < result.indexOf("reflection.rgb *= reflectColor;"));
-        assertFalse(result.contains("242"), "The approved stone mirror remains a neutral dielectric");
-        assertFalse(result.contains("texture"), "Tint uses the colour and material already read by CU");
-    }
-
-    @Test void finalBlendReusesTheFilterSampleAndPreservesItsReflectionResult() {
-        String result = HighPolishShaderAdapter.adaptFragment("composite1", BLEND, true).text();
-        assertEquals(1, result.split("texelFetch", -1).length - 1);
-        assertTrue(result.contains("out float erydonTexturePreservation"));
-        assertTrue(result.contains("int(texture6.g * 255.1) == 243 ? 0.2 : 0.7"));
-        assertTrue(result.contains("return sum / weightSum;"), "Reflection filtering, colour and confidence are unchanged");
-        assertTrue(result.contains("float texturePreservation = erydonTexturePreservation;"));
-        assertTrue(result.contains("color = mix(color, compositeReflection.rgb, fresnelM);"));
-        assertFalse(result.contains("const float texturePreservation"));
-        assertFalse(result.contains("242"), "The approved stone blend stays at CU's ordinary 70%");
-    }
-
-    @Test void lowSamplerProfileKeepsNativePreservationWithoutAddingATextureRead() {
-        String limited = BLEND.replace("    vec3 texture6 = texelFetch(colortex6, texelCoord, 0).rgb;\n", "")
-                .replace("    float smoothnessD = texture6.r;\n", "");
-        var result = HighPolishShaderAdapter.adaptFragment("composite1", limited, true);
-        assertTrue(result.changed());
-        assertTrue(result.text().contains("erydonTexturePreservation = 0.7;"));
-        assertFalse(result.text().contains("texelFetch"));
-        assertFalse(result.text().contains("0.2"));
-    }
-
-    @Test void finalStagesAreAtomicDisabledAndIdempotent() {
+    @Test void reflectionTintAndBlendingRemainByteExactForTheSeparateMetalAdapter() {
         for (String program : new String[]{"composite", "composite1"}) {
             String source = program.equals("composite") ? COMPOSITE : BLEND;
-            assertSame(source, HighPolishShaderAdapter.adaptFragment(program, source, false).text());
-            String once = HighPolishShaderAdapter.adaptFragment(program, source, true).text();
-            assertSame(once, HighPolishShaderAdapter.adaptFragment(program, once, true).text());
-            for (String unsupported : new String[]{source + source, "unknown shader source"}) {
-                var result = HighPolishShaderAdapter.adaptFragment(program, unsupported, true);
-                assertEquals("UNSUPPORTED_SOURCE", result.status());
-                assertSame(unsupported, result.text());
+            for (String input : new String[]{source, source + source, "unknown shader source"}) {
+                var result = HighPolishShaderAdapter.adaptFragment(program, input, true);
+                assertEquals("OTHER_PROGRAM", result.status());
+                assertFalse(result.changed());
+                assertSame(input, result.text());
             }
+            assertSame(source, HighPolishShaderAdapter.adaptFragment(program, source, false).text());
         }
-        String incomplete = BLEND.replace("const float texturePreservation = 0.7;", "");
-        assertSame(incomplete, HighPolishShaderAdapter.adaptFragment("composite1", incomplete, true).text());
     }
 
     @Test void collisionRejectsBeforeAnyShaderIsPatched() {

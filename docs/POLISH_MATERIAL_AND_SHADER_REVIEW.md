@@ -1,10 +1,11 @@
 # Stone finish and metal review
 
-Updated 2026-09-25. Honed, Polished and Mirror are now implemented for the
-exact Complementary Unbound r5.9 dev5 and Unbound/Reimagined r5.9.3 labPBR
-profiles. Other shader adapters are paused for this trial. The stone Mirror
-finish, 90% two-way glass coating and stronger metal blend were visually approved,
-as was the latest shader-enabled performance trial. No test JAR was produced.
+Updated 2026-09-27. Honed, Polished and Mirror remain separate from metallic
+materials. The new sprite-based metal treatment replaces the earlier 85%/20%
+metal boost; it does not stack another boost on top. The approved stone finish
+controls and 90% two-way coating retain their existing behavior. The new metal
+appearance and scene performance await user testing; no test JAR was produced.
+See [metal rendering](METAL_RENDERING.md) for the current implementation.
 
 ## Why plain stone can disappear from Noble reflections
 
@@ -66,53 +67,35 @@ For this CU-first trial the PNG files themselves are unchanged. Native material
 behaviour in other shaders is therefore unchanged by these finish controls;
 future cross-shader work can address their different F0 handling separately.
 
-## Implemented metal trial
+## Current metal treatment
 
-All visible pixels in the eight shared in-world overlay families (four motifs,
-bronze/silver, 47 tiles per family) already use specular `(255, 255, 0, 255)`.
-Increasing red alone cannot polish them further. In the inspected CU source,
-changing green 255 to the standard silver code would actually lower its
-reflection weighting, so that earlier proposal was not applied.
+The shared metal adapter identifies actual bronze and silver sprites after atlas
+upload, independently of the block's stone finish or light-emission ID. It covers
+connected overlays, embedded weave/herringbone, covers, light-fitting metal and
+family bronze decoration. Tinted glass and the two-way mirror coating are excluded.
 
-CU tags metallic pixels on the eligible ERYDON stone families separately
-and gives them an 85% reflection floor, weighted by their existing smoothness.
-The initial trial assigned reflection tint in `deferred1`, where the variable
-does not reach the output. The corrected adapter restores the albedo-normalised
-tint in `composite`, immediately before it multiplies the traced reflection.
-Bronze therefore keeps its warm tint and silver stays neutral.
+A compact lookup carries exact sprite bounds, authored roughness and an independent
+linear coverage pyramid. This prevents thin metal from becoming dielectric when
+Iris averages the labPBR green channel. Shared overlay alpha is tested against
+filtered coverage rather than dropping every sample below 50%; the existing
+outline is retained. Small rounded bevels fit inside the original metal texel.
 
-CU's final solid blend also preserves 70% of the base texture wherever the
-reflection is darker than that texture. This reduces an 85% reflection weight
-to 25.5% effective influence for those colour channels. In `composite1`, only
-tagged metal now uses 20% preservation, making that influence 68%. These are
-blend coefficients before subsequent fog/tonemapping, not measured brightness.
-The approved stone and two-way glass blends are unchanged.
+Colored conductor Fresnel, finite roughness and material-aware reflection history
+replace the previous high-contrast metal boost. Ordinary stone is unchanged at
+zero metal coverage. Mixed pixels retain the selected underlying finish. Material
+mask 242 remains Mirror stone, 243 is bronze and 244 silver; the window coating
+keeps its separate path. The metal adapter preflights all eight affected programs
+before enabling a dimension, including the existing buffer-format declarations.
 
-The material tag comes from the blur filter's existing `colortex6` fetch and is
-returned through an output parameter; no texture fetch, filtering loop, ray,
-framebuffer or draw pass is added. CU's macOS/Distant Horizons low-sampler
-profile omits that fetch, so it retains native preservation rather than adding
-a sampler. The tint correction still applies there.
+Native 16x bronze pattern masks can be recovered from their exact grout counterpart
+only when the original all-red specular placeholder and authored bronze colors
+match. Explicit pack masks take priority. No PNG, resource pack, model, CTM rule,
+height map or installed shader archive is rewritten.
 
-This includes overlay and embedded pattern metal when
-the active texture identifies it as metal. There is no extra setting; the
-adjustment is independent of Honed/Polished/Mirror and remains active in CU when
-the stone master is off. Native flat/non-metallic pattern maps are not invented
-or reclassified as metal.
-
-Material mask 242 is reserved for Mirror stone and 243 for this metal trial;
-241 remains water. Their branches reuse the existing deferred reflection pass.
-The window coating has its separate existing handling and is unchanged.
-Readiness now requires the terrain, deferred, water, composite and composite1
-stages before assigning ERYDON material IDs.
-
-The supplied Unbound and Reimagined r5.9.3 ZIPs differ in exactly one line:
-the default `SHADER_STYLE` (4 versus 1). All reflection/PBR code is identical.
-Their shared properties fingerprint is recognised alongside dev5, for both
-the polish and CTM-POM adapters. Unknown releases still require review.
-
-The user approved the stronger metal treatment and both Complementary styles.
-The latest high-polish build's shader-enabled performance was also approved.
+The finish controls continue to require terrain, deferred and water support.
+Metal compatibility has its own atomic preflight; changing a stone preference does
+not change the metal roughness or alloy response. Other shaders retain native PBR.
+The earlier visual approval applies to the superseded treatment, not this revision.
 
 On 2026-09-24 the user confirmed that disabling POM restores missing overlays
 in both Bliss and Noble; Noble's AO switch alone did not restore them. All
@@ -126,7 +109,8 @@ overlay normal map, retaining the exact RGB bevel normals, material AO, albedo,
 specular maps and dimensions. Underlying stone and embedded herringbone/weave
 heightmaps are unchanged. ERYDON and Themelios 1.20.1 ship the same corrected
 maps; Collection 32x/64x deliberately inherit these native overlay images.
-No Java render path, shader source, surface offset, sample or pass was changed.
+That height-map correction did not change the Java render path, shader source,
+surface offset, sample or pass. The later metal adapter is documented separately.
 The existing high-polish offset is retained to avoid reintroducing flicker.
 
 `verifyErydonOverlayPbr` checks all 376 tile companions and the bevel-normal
@@ -189,8 +173,8 @@ adapter are separate capabilities.
 
 | Candidate | Evidence and current ERYDON status |
 | --- | --- |
-| Complementary Reimagined | r5.9.3 is recognised and source-validated with labPBR; user approved the in-game appearance. Recheck the overlay depth correction. |
-| Complementary Unbound | r5.9 dev5 and r5.9.3 are recognised with labPBR; user approved the stronger metallic blend. Recheck the overlay depth correction. |
+| Complementary Reimagined | r5.9.3 is recognised with labPBR. The current metal revision needs user visual testing. |
+| Complementary Unbound | r5.9 dev5, r5.9.3 and the inspected r5.9.4 dev1 are recognised with labPBR. The current metal revision needs user visual testing. |
 | BSL | Official project advertises PBR; no ERYDON polish adapter or local visual validation in this review. |
 | Photon | Installed 1.3b reads labPBR and the user reports good baseline rendering; current polish menu does not add the CU/Bliss reflection boost. |
 | Solas | Official project documents labPBR/oldPBR and requires PBR Resourcepack enabled; additional adapter/testing needed. |
@@ -217,14 +201,16 @@ Primary sources: [Modrinth download catalogue](https://modrinth.com/shaders?s=do
 
 ## Performance boundary
 
-Keep stone opaque and reuse existing material samples/reflection passes. Resolve
+Keep stone opaque and reuse existing reflection passes. The metal lookup adds a
+custom sampler, bounded coverage reads and material-boundary filtering; it does
+not add reflection rays or draw passes. Resolve
 settings at load time; do not restore water-neighbour scans, translucent stone,
 duplicate faces or per-frame Java decisions. The finish trial adds bounded material conditions and changes
 coefficients in the existing shader work. It still needs same-scene GPU comparisons: some shaders spend more work on rough reflections,
 and improved compatibility can enable reflections that were previously skipped.
 Do not equate no extra render pass with a measured guarantee of zero FPS cost.
 
-## Validation of the three-finish trial
+## Historical validation of the three-finish trial
 
 Compilation, all 265 Java tests, the three-language Mod Menu source audit
 and the isolated Fabric/Iris startup probe passed on 2026-09-20. The installed
