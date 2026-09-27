@@ -8,6 +8,7 @@ import com.oliver.erydon.client.pom.ErydonIrisShaderPropertiesExtension;
 import com.oliver.erydon.client.pom.HighPolishShaderAdapter;
 import com.oliver.erydon.client.pom.MetallicShaderAdapter;
 import com.oliver.erydon.client.pom.ErydonMetalProgramSetExtension;
+import com.oliver.erydon.client.pom.InlaySubstrateTransport;
 import net.irisshaders.iris.shaderpack.include.AbsolutePackPath;
 import net.irisshaders.iris.shaderpack.properties.ShaderProperties;
 import net.irisshaders.iris.shaderpack.ShaderPack;
@@ -37,6 +38,7 @@ public abstract class ProgramSetMixin implements ErydonMetalProgramSetExtension 
                                               ShaderProperties properties, ShaderPack pack, CallbackInfo ci) {
         if (HighPolishShaderAdapter.profile() != HighPolishShaderAdapter.Profile.COMPLEMENTARY) return;
         boolean pom = ((ErydonIrisShaderPropertiesExtension) (Object) properties).erydon$isCuPomEligible();
+        boolean recessSupported = false;
         for (String program : MetallicShaderAdapter.PROGRAMS) {
             String vertex = sourceProvider.apply(root.resolve(program + ".vsh"));
             String fragment = sourceProvider.apply(root.resolve(program + ".fsh"));
@@ -47,12 +49,17 @@ public abstract class ProgramSetMixin implements ErydonMetalProgramSetExtension 
             var polish = HighPolishShaderAdapter.adaptFragment(program, ctm.fragmentText(), true);
             var metal = MetallicShaderAdapter.adapt(program, ctm.vertexText(), polish.text(), true);
             if (!metal.changed()) {
+                InlaySubstrateTransport.setSourceSupported(false);
                 Erydon.LOGGER.info("[erydon] Metal response retains native rendering for {}: {} {}.", root, program, metal.status());
                 return;
             }
+            if ("gbuffers_terrain".equals(program)) recessSupported = MetallicShaderAdapter.recessSupported(metal);
         }
         erydon$metalEligible = true;
+        InlaySubstrateTransport.setSourceSupported(recessSupported);
         Erydon.LOGGER.info("[erydon] Metal response preflight passed for {} (all eight programs).", root);
+        Erydon.LOGGER.info("[erydon] Recessed inlay support for {}: source={}, renderer={}; awaiting terrain compilation.",
+                root, recessSupported, InlaySubstrateTransport.rendererSupported());
     }
 
     @Override public boolean erydon$isMetalEligible() { return erydon$metalEligible; }

@@ -5,6 +5,7 @@ import com.oliver.erydon.client.pom.ComplementaryUnboundDev5SourceTransformer;
 import com.oliver.erydon.client.pom.ErydonCuPomAdapterConfig;
 import com.oliver.erydon.client.pom.ErydonCuPomRuntimeState;
 import com.oliver.erydon.client.pom.ErydonIrisShaderPropertiesExtension;
+import com.oliver.erydon.client.pom.InlaySubstrateTransport;
 import net.irisshaders.iris.gl.texture.TextureDefinition;
 import net.irisshaders.iris.helpers.StringPair;
 import net.irisshaders.iris.shaderpack.option.ShaderPackOptions;
@@ -41,6 +42,7 @@ public abstract class ShaderPropertiesMixin implements ErydonIrisShaderPropertie
                         contents,
                         ErydonCuPomAdapterConfig.configuredMode());
         erydon$cuPomEligible = result.eligible();
+        InlaySubstrateTransport.setSourceSupported(false);
         com.oliver.erydon.client.pom.HighPolishShaderAdapter.beginShaderLoad(
                 com.oliver.erydon.client.pom.HighPolishShaderAdapter.profileForProperties(contents),
                 true); // CU also supplies the common Honed baseline when the master is off.

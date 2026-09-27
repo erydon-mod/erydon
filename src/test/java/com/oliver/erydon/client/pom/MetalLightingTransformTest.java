@@ -13,6 +13,7 @@ class MetalLightingTransformTest {
     private static final String GLOBALS = """
             float erydonMetalCoverage = 0.0;
             vec3 erydonMetalF0 = vec3(0.0);
+            vec3 erydonMetalDiffuseComponent = vec3(0.0);
             float erydonMetalRoughness = 0.22;
             """;
     private static final String LIGHTING = """
@@ -54,13 +55,13 @@ class MetalLightingTransformTest {
         assertTrue(helper.contains("vec3 fresnel = f0 + (vec3(1.0) - f0) * fresnelWeight;"));
         assertTrue(helper.contains("clamp(erydonMetalRoughness, 0.18, 1.0)"));
         assertTrue(helper.contains("nativeLightGate <= 0.0 || noV <= 0.0 || noL <= 0.0"));
-        assertTrue(helper.contains("return fresnel * distribution * visibility;"));
+        assertTrue(helper.contains("return pow(max(fresnel * distribution * visibility, vec3(0.0)), vec3(1.0 / 2.2));"));
         assertFalse(helper.contains("highlightMult"));
         assertTrue(result.contains("clamp(erydonMetalCoverage, 0.0, 1.0)"));
         assertTrue(result.indexOf(GLOBALS.strip()) < result.indexOf("vec3 ErydonConductorHighlight"));
     }
 
-    @Test void compiledOutHighlightsLeaveLightingByteExact() {
+    @Test void compiledOutHighlightsStillRemoveOnlyTheMetalDiffuseContribution() {
         String input = """
                 void DoLighting(inout vec4 color) {
                     vec3 lightHighlight = vec3(0.0);
@@ -69,9 +70,12 @@ class MetalLightingTransformTest {
                 }
                 """;
         var result = MetalLightingTransform.adapt("gbuffers_terrain", input);
-        assertEquals("HIGHLIGHT_NOT_COMPILED", result.status());
-        assertFalse(result.changed());
-        assertSame(input, result.text());
+        assertEquals("TRANSFORMED", result.status());
+        assertTrue(result.changed());
+        assertTrue(result.text().contains("if (erydonMetalCoverage > 0.0 && emission <= 0.0)"));
+        assertTrue(result.text().contains("erydonMetalBroadLighting(color.rgb, erydonMetalDiffuseComponent,"));
+        assertFalse(result.text().contains("ErydonConductorHighlight"));
+        assertTrue(result.text().indexOf("erydonMetalBroadLighting") < result.text().indexOf("color.rgb += lightHighlight;"));
     }
 
     @Test void mismatchedOrDuplicateSourcesFailBeforeAnyModification() {

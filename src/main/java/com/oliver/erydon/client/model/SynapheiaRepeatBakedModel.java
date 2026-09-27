@@ -2,6 +2,7 @@ package com.oliver.erydon.client.model;
 
 import com.oliver.erydon.Erydon;
 import com.oliver.erydon.client.pom.ErydonCuPomRuntimeState;
+import com.oliver.erydon.client.pom.InlaySubstrateTransport;
 import net.fabricmc.fabric.api.renderer.v1.Renderer;
 import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
 import net.fabricmc.fabric.api.renderer.v1.material.BlendMode;
@@ -94,24 +95,27 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
         long startedNanos = metricsEnabled ? System.nanoTime() : 0L;
         boolean geometryPomFallback = projectedRepeatGeometry
                 && ErydonCuPomRuntimeState.requiresGeometryFallback();
+        boolean transportSubstrate = plan.hasSourceShapedOverlay() && InlaySubstrateTransport.supportsContext(context);
         RenderCallState renderCall = new RenderCallState(plan.hasOverlay(), metricsEnabled);
         context.pushTransform(quad -> {
             renderCall.recordInputSurface();
-            Identifier sourceSprite = spriteFinder().find(quad).getContents().getId();
+            Sprite capturedSprite = spriteFinder().find(quad);
+            Identifier sourceSprite = capturedSprite.getContents().getId();
             Identifier overlaySourceSprite = resolveOverlaySourceSprite(
                     blockId, sourceSprite, overlaySourceSpriteOverride);
             Direction face = quad.lightFace();
+            SynapheiaManifest.Rule repeatRule = projectedRepeatGeometry
+                    ? plan.repeatRuleForProjectedGeometry(face)
+                    : resolveRepeatRule(plan, face, sourceSprite, overlaySourceSpriteOverride);
             if (renderCall.tracksOverlays()) {
                 if (plan.hasSourceShapedOverlay()) {
-                    observeOverlays(renderCall, quad, plan.overlayRules(face, overlaySourceSprite));
+                    observeOverlays(renderCall, quad, plan.overlayRules(face, overlaySourceSprite),
+                            transportSubstrate, capturedSprite, repeatRule, pos);
                 } else if (isUnitSquare(quad)) {
                     renderCall.observeUnitOverlays(face, plan.overlayRules(face, overlaySourceSprite));
                 }
             }
 
-            SynapheiaManifest.Rule repeatRule = projectedRepeatGeometry
-                    ? plan.repeatRuleForProjectedGeometry(face)
-                    : plan.repeatRule(face, sourceSprite);
             SynapheiaCellGeometry.Cell cell = repeatRule == null || geometryPomFallback
                     ? null : SynapheiaCellGeometry.singleCell(face, quad);
             RepeatDisposition disposition = repeatDisposition(repeatRule, cell);
@@ -191,6 +195,16 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
                 : emittedSprite;
     }
 
+    static SynapheiaManifest.Rule resolveRepeatRule(SynapheiaBlockPlan plan, Direction face,
+                                                    Identifier emittedSprite, Identifier authoredParticleSprite) {
+        SynapheiaManifest.Rule rule = plan.repeatRule(face, emittedSprite);
+        if (rule != null || authoredParticleSprite == null || !plan.hasSourceShapedOverlay()
+                || plan.isRepeatOutput(emittedSprite)) return rule;
+        // Inlay slopes can request a motif CTM set that intentionally only exists as a
+        // shared overlay. Match the existing exact base rule through their authored particle.
+        return plan.repeatRule(face, authoredParticleSprite);
+    }
+
     static void clearCaches() {
         spriteFinder = null;
         SynapheiaSlopeConnections.clear();
@@ -202,7 +216,11 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
 
     private void observeOverlays(RenderCallState renderCall,
                                  MutableQuadView quad,
-                                 List<SynapheiaManifest.Rule> matchingRules) {
+                                 List<SynapheiaManifest.Rule> matchingRules,
+                                 boolean transportSubstrate,
+                                 Sprite sourceSprite,
+                                 SynapheiaManifest.Rule repeatRule,
+                                 BlockPos pos) {
         if (matchingRules.isEmpty()) {
             return;
         }
@@ -234,8 +252,45 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
             if (source == null) {
                 source = capture(quad, null);
             }
-            renderCall.captureSourceOverlay(new SourceOverlay(source, cell, rule));
+            int substrateRecord = transportSubstrate
+                    ? substrateRecord(quad, sourceSprite, repeatRule, cell, pos) : -1;
+            renderCall.captureSourceOverlay(new SourceOverlay(source, cell, rule, substrateRecord));
         }
+    }
+
+    private static int substrateRecord(QuadView quad, Sprite sprite, SynapheiaManifest.Rule repeatRule,
+                                       SynapheiaCellGeometry.Cell cell, BlockPos pos) {
+        Direction face = quad.lightFace();
+        if (repeatRule != null) {
+            // The base's pending repeat operation and overlay both use this exact cell projection.
+            int phase = ErydonCtmService.repeatTileIndex(pos.getX() + cell.offsetX(face),
+                    pos.getY() + cell.offsetY(face), pos.getZ() + cell.offsetZ(face), face);
+            return InlaySubstrateTransport.recordForSprite(repeatRule.tiles().get(phase));
+        }
+        // Generated slopes can already carry their selected repeat sprite. Keep that actual
+        // phase, and only transport it when its UV mapping agrees with the overlay projection.
+        int record = InlaySubstrateTransport.recordForSprite(sprite.getContents().getId());
+        return record >= 0 && substrateProjectionMatches(quad, face, cell,
+                sprite.getMinU(), sprite.getMinV(), sprite.getMaxU() - sprite.getMinU(),
+                sprite.getMaxV() - sprite.getMinV()) ? record : -1;
+    }
+
+    static boolean substrateProjectionMatches(QuadView quad, Direction face, SynapheiaCellGeometry.Cell cell,
+                                               float minU, float minV, float spanU, float spanV) {
+        if (!(spanU > 0) || !(spanV > 0)) return false;
+        for (int vertex = 0; vertex < 4; vertex++) {
+            boolean duplicate = false;
+            for (int earlier = 0; earlier < vertex; earlier++) {
+                duplicate |= quad.x(vertex) == quad.x(earlier) && quad.y(vertex) == quad.y(earlier)
+                        && quad.z(vertex) == quad.z(earlier);
+            }
+            if (duplicate) continue; // Iris's invisible triangle corner can have a synthetic UV.
+            float u = (quad.u(vertex) - minU) / spanU, v = (quad.v(vertex) - minV) / spanV;
+            if (!Float.isFinite(u) || !Float.isFinite(v)
+                    || Math.abs(u - SynapheiaCellGeometry.u(face, quad, vertex, cell)) > 0.0025F
+                    || Math.abs(v - SynapheiaCellGeometry.v(face, quad, vertex, cell)) > 0.0025F) return false;
+        }
+        return true;
     }
 
     private void warnCrossCellSourceOverlay(SynapheiaManifest.Rule rule, Direction face) {
@@ -525,8 +580,10 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
         }
         if (overlaySourceSpriteOverride != null) restoreTriangleOverlayBounds(emitter);
         emitter.spriteBake(overlay.sprite(), MutableQuadView.BAKE_NORMALIZED);
-        offsetPolishedOverlay(emitter, face, highPolish);
-        emitter.emit();
+        // The supported composite replaces the whole face, including its stone. Separate
+        // coincident surfaces even when the player disables the stone finish controls.
+        offsetSourceOverlay(emitter, face, highPolish, sourceOverlay.substrateRecord());
+        InlaySubstrateTransport.emit(emitter, sourceOverlay.substrateRecord());
         recordOverlaySelection(pos, face, sourceOverlay.rule(), overlay);
     }
 
@@ -759,6 +816,31 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
         }
     }
 
+    static void offsetSourceOverlay(MutableQuadView quad, Direction face, boolean highPolish, int substrateRecord) {
+        if (substrateRecord < 0) {
+            offsetPolishedOverlay(quad, face, highPolish);
+            return;
+        }
+        float ax = quad.x(1) - quad.x(0), ay = quad.y(1) - quad.y(0), az = quad.z(1) - quad.z(0);
+        float nx = 0, ny = 0, nz = 0, lengthSquared = 0;
+        for (int third = 2; third < 4 && lengthSquared < 1.0e-12F; third++) {
+            float bx = quad.x(third) - quad.x(0), by = quad.y(third) - quad.y(0), bz = quad.z(third) - quad.z(0);
+            nx = ay * bz - az * by;
+            ny = az * bx - ax * bz;
+            nz = ax * by - ay * bx;
+            lengthSquared = nx * nx + ny * ny + nz * nz;
+        }
+        if (!(lengthSquared > 1.0e-12F) || !Float.isFinite(lengthSquared)) {
+            offsetPolishedOverlay(quad, face, true);
+            return;
+        }
+        float sign = nx * face.getOffsetX() + ny * face.getOffsetY() + nz * face.getOffsetZ() < 0 ? -1 : 1;
+        float scale = sign / (1024.0F * (float) Math.sqrt(lengthSquared));
+        for (int i = 0; i < 4; i++) {
+            quad.pos(i, quad.x(i) + nx * scale, quad.y(i) + ny * scale, quad.z(i) + nz * scale);
+        }
+    }
+
     private static RenderMaterial overlayMaterial(boolean ambientOcclusion,
                                                   SynapheiaManifest.OverlayLayer layer) {
         int materialIndex = layer.ordinal() * 2 + (ambientOcclusion ? 1 : 0);
@@ -938,7 +1020,8 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
 
     private record SourceOverlay(CapturedQuad source,
                                  SynapheiaCellGeometry.Cell cell,
-                                 SynapheiaManifest.Rule rule) {
+                                 SynapheiaManifest.Rule rule,
+                                 int substrateRecord) {
     }
 
     private record OverlayTile(Sprite sprite,

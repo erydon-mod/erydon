@@ -55,7 +55,7 @@ class MetalReflectionFilterTest {
             var result = MetalReflectionFilter.adapt(program, FORMATS);
             assertTrue(result.changed());
             assertTrue(result.text().contains("colortex1Format = RGBA8_SNORM;"));
-            assertTrue(result.text().contains("colortex6Format = RGBA8;"));
+            assertTrue(result.text().contains("colortex6Format = RGBA16;"));
             assertTrue(result.text().contains("colortex4Format = RGBA8_SNORM;"));
             assertTrue(result.text().contains("colortex7Format = RGBA16F;"));
             assertTrue(result.text().contains("colortex1Clear = false;"));

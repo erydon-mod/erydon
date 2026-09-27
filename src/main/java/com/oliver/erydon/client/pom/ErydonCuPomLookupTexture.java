@@ -16,6 +16,7 @@ public final class ErydonCuPomLookupTexture {
     public static final Identifier TEXTURE_ID = new Identifier(Erydon.MOD_ID, "ctm_pom_lookup");
 
     public static void registerPlaceholder() {
+        InlaySubstrateTransport.clearRecords();
         install(createInvalidTexture());
     }
 
@@ -34,6 +35,7 @@ public final class ErydonCuPomLookupTexture {
             ErydonCuPomLookupLayout.Encoded encoded =
                     ErydonCuPomLookupPlan.buildFamilies(stitchedFamilies);
             install(createTexture(encoded.rgba(), encoded.lookupWidth(), encoded.lookupHeight()));
+            InlaySubstrateTransport.installRecords(activeFamilies);
             Erydon.LOGGER.info(
                     "[{}] CTM-POM lookup ready: families={}, phases={}, atlas={}x{}, runtimeBytes={}.",
                     Erydon.MOD_ID,
@@ -43,7 +45,7 @@ public final class ErydonCuPomLookupTexture {
                     encoded.atlasHeight(),
                     ErydonCuPomLookupLayout.RUNTIME_BYTES);
         } catch (RuntimeException exception) {
-            install(createInvalidTexture());
+            registerPlaceholder();
             Erydon.LOGGER.warn(
                     "[{}] CTM-POM lookup validation failed; the invalid placeholder remains active: {}",
                     Erydon.MOD_ID,

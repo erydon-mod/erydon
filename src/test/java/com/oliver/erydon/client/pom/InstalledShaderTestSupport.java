@@ -69,10 +69,16 @@ final class InstalledShaderTestSupport {
 
     static String source(ZipFile zip, String dimension, String file, Options options,
                          List<StringPair> extraDefines) throws Exception {
+        return source(zip, dimension, file, options, extraDefines, java.util.Map.of());
+    }
+
+    static String source(ZipFile zip, String dimension, String file, Options options,
+                         List<StringPair> extraDefines, java.util.Map<String, String> optionOverrides) throws Exception {
         String expanded = HighPolishShaderPackTest.expand(zip, "shaders/" + dimension + "/" + file, 0);
         expanded = option(expanded, "RP_MODE", "3");
         expanded = option(expanded, "ANISOTROPIC_FILTER", Integer.toString(options.filtering()));
         expanded = option(expanded, "NORMAL_MAP_STRENGTH", Integer.toString(options.normalStrength()));
+        for (var override : optionOverrides.entrySet()) expanded = option(expanded, override.getKey(), override.getValue());
         // RP_MODE also selects the LabPBR channel layout. Disable only its POM define.
         if (!options.pom()) expanded = expanded.replaceAll("(?m)^[ \\t]*#define POM[ \\t]*$", "");
         if (!options.temporalAntialiasing()) expanded = expanded.replaceAll("(?m)^[ \\t]*#define TAA[ \\t]*$", "");

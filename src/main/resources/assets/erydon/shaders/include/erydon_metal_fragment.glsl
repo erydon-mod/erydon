@@ -5,9 +5,27 @@ flat in vec3 erydonMetalAlbedoMean;
 
 float erydonMetalCoverage = 0.0;
 vec3 erydonMetalF0 = vec3(0.0);
+vec3 erydonMetalDiffuseComponent = vec3(0.0);
 float erydonMetalRoughness = 0.22;
 float erydonMetalPacked = 1.0;
 float erydonMetalTag = 0.0;
+
+// CU carries gamma-encoded working RGB until composite1. Remove only the
+// metal's diffuse contribution; conductor absorption is not a painted base.
+// A roughness-squared broad-light proxy supplies the unresolved rough lobe.
+vec3 erydonMetalBroadLighting(vec3 litColor, vec3 metalComponent, vec3 light, float roughness) {
+    vec3 metalLit = min(max(metalComponent * light, vec3(0.0)), max(litColor, vec3(0.0)));
+    float broadWeight = clamp(roughness * roughness, 0.0, 1.0);
+    return litColor - metalLit + metalLit * pow(broadWeight, 1.0 / 2.2);
+}
+
+vec3 erydonMetalNormal(vec3 nativeNormal, vec2 bevel, int kind) {
+    // Authored and POM-generated normals belong to the actual surface. In
+    // particular, never flatten an embedded groove's vertical wall or sculpted metal.
+    if (kind != 1) return nativeNormal;
+    vec2 slope = clamp(nativeNormal.xy * 0.15, vec2(-0.18), vec2(0.18)) + bevel;
+    return normalize(vec3(slope, sqrt(max(0.0, 1.0 - dot(slope, slope)))));
+}
 
 float erydonMetalAt(ivec2 pixel, ivec2 size, int offset, int kind) {
     if (kind == 1 && (any(lessThan(pixel, ivec2(0))) || any(greaterThanEqual(pixel, size)))) return 0.0;

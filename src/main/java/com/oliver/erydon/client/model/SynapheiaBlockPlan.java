@@ -51,6 +51,10 @@ final class SynapheiaBlockPlan {
         return !rules.repeatRules.isEmpty();
     }
 
+    boolean isRepeatOutput(Identifier sprite) {
+        return sprite != null && rules.repeatOutputTiles.contains(sprite);
+    }
+
     boolean hasOverlay() {
         return !rules.overlayRules.isEmpty();
     }

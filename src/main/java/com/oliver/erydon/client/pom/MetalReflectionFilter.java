@@ -40,7 +40,7 @@ public final class MetalReflectionFilter {
         if (!unique(HISTORY_FORMAT, source) || !unique(MATERIAL_FORMAT, source))
             return unchanged(source, "UNSUPPORTED_SOURCE");
         String result = replace(HISTORY_FORMAT, source, FORMAT_MARKER + "\nconst int colortex1Format = RGBA8_SNORM;");
-        result = replace(MATERIAL_FORMAT, result, "const int colortex6Format = RGBA8;");
+        result = replace(MATERIAL_FORMAT, result, "const int colortex6Format = RGBA16;");
         return transformed(result);
     }
 

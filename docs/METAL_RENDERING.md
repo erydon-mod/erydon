@@ -26,17 +26,44 @@ interprets it as a dielectric. Metal coverage is now stored separately from that
 categorical channel, with an area-averaged mip pyramid and bounded anisotropic
 filtering. Exact sprite bounds and final CTM-POM coordinates prevent reading the
 wrong connected tile. Coverage and the selected underlying finish travel through
-the alpha channel of the existing material buffer.
+the alpha channel of the existing material buffer. Its 16-bit payload also stores
+metal roughness independently: six coverage bits, two finish bits and eight
+roughness bits. A mixed pixel must not derive alloy roughness from the selected
+stone finish. Coverage and roughness are quantized before mixing so the later
+passes use the same values.
 The lookup also carries each sprite's mean metal albedo, so the new alloy color
 replaces the metal contribution without blending the already mixed stone twice.
 
-At close range the original pixel outline is retained. A shallow rounded bevel
-fits inside its edges, including opposite edges of a one-pixel line. The added
-bevel fades with the pixel footprint and is disabled with normal-map strength
-zero. It never changes model geometry or POM height. Existing overlay corner
-normals are tempered to avoid steep isolated glints.
+At close range the original pixel outline is retained. Supported shared overlays
+use a composite POM surface: the surrounding stone forms the groove walls and
+the metal sits below it. The underlying stone's connected tile is carried through
+Iris's existing block render-type short; the material/finish ID stays untouched.
+The shader resolves that tile through the existing CTM lookup, including phase
+changes where a ray crosses a connected tile. There is no replacement height PNG.
 
-At distance, shared overlay visibility uses CU's existing Bayer/TAA sequence and
+The payload is limited to the verified Iris/Sodium/Indium encoder and synchronous
+terrain emitter. Invalid records, unavailable POM/normal mapping, unsupported UV layouts or an
+unsupported renderer retain the flush overlay. The source adapter and successful
+terrain compilation must both enable the recessed path before chunk building
+can emit its payload. The original base surface remains the fallback.
+
+The groove depth is 0.25 of a 64x texel at CU POM depth 1, scaled by that setting
+and faded with distance and pixel footprint. Its cavity ray walks at most 24
+mask cells; authored substrate relief uses at most 32 steps and five refinements.
+When a cavity ray leaves the known overlay tile, it retains the opening's floor
+without further displacement rather than inventing a wall or a neighboring
+47-tile overlay. This is an explicit seam approximation, not neighboring overlay
+lookup. Unsupported nonorthogonal CTM phase directions retain the current phase.
+The original four-sample substrate POM shadow is retained, and visible metal
+floors test whether the groove opening admits the directional light. These
+local shadows affect the existing shadow multiplier, not emission or ambient light.
+
+Embedded weave/herringbone and standalone metal keep their authored normal maps
+and POM sidewall normals. They no longer receive the overlay-only normal reduction.
+The existing small overlay bevel remains available on the flush fallback and is
+disabled with normal-map strength zero.
+
+At distance, flush overlay visibility uses CU's existing Bayer/TAA sequence and
 filtered coverage instead of a fixed 50% alpha threshold. This avoids systematically
 discarding thin strokes, but possible motion shimmer needs in-game assessment.
 Embedded patterns mix the metallic and underlying stone responses continuously.
@@ -57,14 +84,28 @@ authored rougher metal and the 0.65 matte-cover fallback remain rougher.
 
 Direct sun/moon highlights use a colored conductor lobe within CU's existing
 lighting gates. The reflected color tends toward neutral at grazing angles.
+Linear reflectance coefficients are encoded before multiplication into CU's
+encoded scene RGB; the final metal reflection is added in linear light. This
+avoids applying gamma twice to alloy colour or replacing absorbed light with
+brightly lit albedo. Direct highlights are retained separately from the broad
+rough-metal light approximation, whose weight is perceptual roughness squared.
+Fractional stone/metal pixels recover the base smoothness and evaluate CU's
+active SSR/WSR Fresnel curve, instead of merely undoing its final multiplier.
+Only an actually applied Mirror mask selects the Mirror reflection floor.
+The unknown substrate reflectivity and shared base-colour attenuation remain
+bounded approximations; pure material endpoints are exact for this model.
+Later CU rain/snow changes remain native; this is not a separate layered wet-metal
+model. Zero-coverage formulas are unchanged, although G6 now stores native RGB
+values with higher precision rather than reproducing their previous byte rounding.
+
 Reflection filtering and history reject a different metal or adjacent ordinary
-material, with a finite center-sample fallback for isolated thin detail. The final
-texture-preservation term varies with roughness rather than imposing the earlier
-high-contrast constant. The native low-sampler blend keeps its fallback.
+material, with a finite center-sample fallback for isolated thin detail. The
+stored reflection coefficient is capped below CU's invalid-value sentinel after
+RGBA8_SNORM quantization. The native low-sampler blend keeps its fallback.
 
 Complementary still supplies the rays, visibility, lighting and color pipeline.
 Block lights do not become physically traced point lights: their existing diffuse
-lighting supplies the broad indirect proxy, and available reflected geometry
+lighting supplies a roughness-weighted broad proxy, and available reflected geometry
 supplies detail. This is not a full spectral or energy-conserving renderer. A dark
 room can legitimately have dark reflections; there is no emission or brightness
 floor added to make metal glow.
@@ -80,8 +121,13 @@ pack format declarations. Existing CTM, shape and light-material IDs remain.
 The nearest RGBA8 lookup is rebuilt once after atlas upload, deduplicates coverage
 masks, omits uniform masks, and has a 32 MiB maximum. Unsupported/animated sprite
 layouts retain native rendering. It adds vertex metadata reads and bounded
-fragment coverage reads, but no new reflection rays, draw passes or geometry.
-Two existing render buffers gain alpha storage; reflection-boundary checks reuse
+fragment coverage reads. Recessed overlays add bounded local height and light
+visibility traces, but
+no new reflection rays, draw passes, geometry, vertex stride or GPU texture.
+The existing G6 material buffer is now RGBA16 UNORM, adding four bytes per pixel
+per attachment compared with the previous RGBA8 revision (about 31.6 MiB per
+4K attachment; a pair of full-size attachments doubles that). The existing G1
+reflection-history buffer keeps RGBA8_SNORM. Reflection-boundary checks reuse
 their samplers. These costs need same-scene performance measurement.
 
 `MetallicShaderPackTest` preprocesses installed packs through Iris, applies the
@@ -91,20 +137,36 @@ or `ERYDON_CU_TEST_SHADER_DIR` for installed Complementary archives, plus
 `ERYDON_CU_GL_VALIDATE=true` for driver checks. These are automated shader checks,
 not visual acceptance. No Minecraft world or test JAR is required.
 
-## Automated verification (27 September 2026)
+## Verification (27 September 2026)
 
-The full Java run reported 350 tests: 349 passed, zero failures/errors and one
+The full Java run reported 363 tests: 362 passed, zero failures/errors and one
 optional Bliss archive check skipped because that archive was not configured.
-The numerical GPU test exercised the real packed lookup, one-pixel coverage,
-opposed bevel slopes, authored albedo decoding and mixed stone/metal color.
+The numerical GPU tests exercised the real packed lookup, one-pixel coverage,
+authored albedo decoding, mixed stone/metal color, recessed floors and stone
+walls, directional cavity shadows, and displacement over nonflat substrate.
+Groove visibility and shadows were checked at 16x, 32x and 64x. The actual
+RGBA16 material and SNORM reflection targets carried coverage, finish and
+independent metal roughness through production shader slices. SSR and WSR
+curves, all stone finishes, ineligible Mirror, fractional coverage, bright/dark
+reflected surroundings and preservation of direct lighting were exercised.
 
-All 348 metallic vertex/fragment program pairs compiled and linked through Iris
-and the installed NVIDIA driver across Unbound r5.9 dev5, Unbound r5.9.3,
-Reimagined r5.9.3 and Unbound r5.9.4 dev1. This includes all three dimensions,
-POM on/off, anisotropic filtering 0/8, normal strength 0/120, TAA off, disabled
-finish controls and the low-sampler profile. Compilation, overlay PBR validation
-and the Mod Menu source audit also passed. The isolated Fabric/Iris launch probe
-verified the real constructor order and Complementary-only sampler registration.
+All 444 metallic and 204 stone-finish vertex/fragment program pairs compiled and
+linked through Iris and the installed NVIDIA driver across Unbound r5.9 dev5,
+Unbound r5.9.3, Reimagined r5.9.3 and Unbound r5.9.4 dev1. This includes all three
+dimensions, POM on/off, anisotropic filtering 0/8, normal strength 0/120/200,
+TAA off, disabled finish controls and the low-sampler profile. Compilation,
+overlay PBR validation and the Mod Menu source audit also passed. The isolated
+Fabric/Iris launch probe verified the real constructor order, Complementary-only
+sampler registration, and the actual woven Iris encoder: only the intended
+substrate shorts changed, allocation guards and other vertex data survived, and
+the next ordinary quad retained its native values.
+
+A separate targeted test compiled and linked all eight complete adapted programs
+for Unbound r5.9.4 dev1's Overworld with world-space reflections, player
+reflections and coloured lighting enabled. That profile used AF8, normal strength
+200, POM depth 2, quality 512 and distance 1024. It exercises the WSR resource
+declarations and translucent reflection replacement in addition to the numerical
+shader slices. Iris supplies the test's actual render-stage definitions.
 These checks do not establish visual quality or frame rate in a Minecraft scene.
 
 Validation tasks: `compileJava test verifyErydonOverlayPbr

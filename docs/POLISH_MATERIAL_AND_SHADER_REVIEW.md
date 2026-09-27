@@ -3,8 +3,11 @@
 Updated 2026-09-27. Honed, Polished and Mirror remain separate from metallic
 materials. The new sprite-based metal treatment replaces the earlier 85%/20%
 metal boost; it does not stack another boost on top. The approved stone finish
-controls and 90% two-way coating retain their existing behavior. The new metal
-appearance and scene performance await user testing; no test JAR was produced.
+controls and 90% two-way coating retain their existing behavior. The follow-up
+removes excessive lit-albedo preservation, corrects the reflection colour space
+and restores authored metal normals. Shared overlays use recessed POM grooves
+on the verified Complementary terrain path. This revised appearance and scene
+performance await user testing; no test JAR was produced.
 See [metal rendering](METAL_RENDERING.md) for the current implementation.
 
 ## Why plain stone can disappear from Noble reflections
@@ -78,7 +81,9 @@ A compact lookup carries exact sprite bounds, authored roughness and an independ
 linear coverage pyramid. This prevents thin metal from becoming dielectric when
 Iris averages the labPBR green channel. Shared overlay alpha is tested against
 filtered coverage rather than dropping every sample below 50%; the existing
-outline is retained. Small rounded bevels fit inside the original metal texel.
+outline is retained. Supported shared overlays now combine the actual stone
+substrate and metal in a single recessed POM surface; unsupported render paths
+retain the flush overlay. Embedded patterns keep their authored POM normals.
 
 Colored conductor Fresnel, finite roughness and material-aware reflection history
 replace the previous high-contrast metal boost. Ordinary stone is unchanged at

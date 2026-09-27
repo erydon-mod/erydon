@@ -19,8 +19,22 @@ public final class MetallicShaderAdapter {
     private static final Pattern WATER_REFLECT = Pattern.compile("reflectMult\\s*=\\s*smoothnessD\\s*;");
     private static final String LOOKUP = resource("erydon_metal_lookup.glsl");
     private static final String FRAGMENT = resource("erydon_metal_fragment.glsl");
+    private static final String RECESS = resource("erydon_inlay_recess.glsl");
+    private static final String RECESS_MARKER = "// ERYDON recessed inlay substrate";
+    private static final Pattern POM_DEPTH = Pattern.compile("parallaxdir\\.xy\\s*\\*=\\s*1\\.0\\s*\\*\\s*([0-9]+(?:\\.[0-9]+)?)\\s*;");
+    private static final Pattern POM_DISTANCE = Pattern.compile("parallaxFade\\s*=\\s*pow2\\(lViewPos\\s*/\\s*([0-9]+(?:\\.[0-9]+)?)\\)\\s*;");
+    private static final Pattern CUSTOM_MATERIALS = Pattern.compile("void\\s+GetCustomMaterials\\s*\\(");
+    private static final Pattern MATERIAL_UV = Pattern.compile("vec2\\s+texCoordM\\s*=\\s*texCoord\\s*;");
+    private static final Pattern SKIP_POM = Pattern.compile("bool\\s+skipPom\\s*=\\s*[^;]+;");
+    private static final Pattern SKIPPED_NORMAL = Pattern.compile("else\\s+normalMap\\s*=\\s*texture2D\\(normals,\\s*texCoordM\\)\\s*;");
+    private static final Pattern MATERIAL_NORMAL = Pattern.compile("normalM\\s*=\\s*clamp\\(normalize\\(normalM\\s*\\*\\s*tbnMatrix\\),\\s*vec3\\(-1\\.0\\),\\s*vec3\\(1\\.0\\)\\)\\s*;");
 
     public record Program(String vertex, String fragment, boolean changed, String status) { }
+
+    public static boolean recessSupported(Program program) {
+        return program != null && program.changed() && program.vertex() != null && program.fragment() != null
+                && program.vertex().contains(RECESS_MARKER) && program.fragment().contains(RECESS_MARKER);
+    }
 
     public static Program adapt(String program, String vertex, String fragment, boolean enabled) {
         if (!enabled || fragment == null) return new Program(vertex, fragment, false, "DISABLED");
@@ -33,7 +47,14 @@ public final class MetallicShaderAdapter {
                 // The metadata encodes labPBR categories. Other PBR formats remain native.
                 require(Pattern.compile("highlightMult\\s*\\*=\\s*0\\.5\\s*\\+\\s*0\\.5\\s*\\*\\s*specularMap\\.g").matcher(fragment).find());
                 require(unique(SPECULAR, f) && unique(MAIN, v));
+                boolean recess = program.equals("gbuffers_terrain")
+                        && v.contains(ComplementaryUnboundDev5SourceTransformer.HELPER_SENTINEL)
+                        && f.contains("vec2 erydonCtmPomAtlasUv(")
+                        && unique(POM_DEPTH, f) && unique(POM_DISTANCE, f)
+                        && unique(CUSTOM_MATERIALS, f) && unique(MATERIAL_UV, f)
+                        && unique(SKIP_POM, f) && unique(SKIPPED_NORMAL, f) && unique(MATERIAL_NORMAL, f);
                 String declarations = "flat out ivec4 erydonMetalBounds;\nflat out ivec4 erydonMetalInfo;\nflat out ivec2 erydonMetalAtlas;\nflat out vec3 erydonMetalAlbedoMean;\n";
+                if (recess) declarations += RECESS_MARKER + "\nflat out int erydonInlaySubstrateRecord;\nflat out vec4 erydonInlayBaseBounds;\n";
                 v = injectHelpers(v, MARKER + "\n" + LOOKUP + declarations);
                 v = after(MAIN, v, """
 
@@ -52,9 +73,36 @@ public final class MetallicShaderAdapter {
                             }
                         }
                         """);
-                f = injectHelpers(f, MARKER + "\n" + LOOKUP + FRAGMENT);
+                if (recess) {
+                    v = after(MAIN, v, """
+                            erydonInlaySubstrateRecord = -1;
+                            erydonInlayBaseBounds = vec4(0.0);
+                            if (mc_Entity.y <= -2.0 && erydonCtmPomHeaderValid(vec2(atlasSize))) {
+                                int erydonRecord = int(floor(-mc_Entity.y - 2.0 + 0.5));
+                                if (float(erydonRecord) < erydonCtmPomRecordCount()) {
+                                    vec4 erydonBounds = erydonCtmPomReadBoundsPx(float(erydonRecord));
+                                    if (all(greaterThan(erydonBounds.zw, vec2(0.0)))) {
+                                        erydonInlaySubstrateRecord = erydonRecord;
+                                        erydonInlayBaseBounds = erydonBounds;
+                                    }
+                                }
+                            }
+                            """);
+                }
+                String recessDeclarations = recess ? RECESS_MARKER + """
+
+                        flat in int erydonInlaySubstrateRecord;
+                        flat in vec4 erydonInlayBaseBounds;
+                        bool erydonInlayActive = false;
+                        float erydonInlayMetalCoverage = 0.0;
+                        vec3 erydonInlayWallNormal = vec3(0.0);
+                        vec4 erydonInlayNormalSample = vec4(0.5, 0.5, 1.0, 1.0);
+                        vec4 erydonInlaySpecularSample = vec4(0.0);
+                        """ : "";
+                f = injectHelpers(f, MARKER + "\n" + LOOKUP + recessDeclarations + FRAGMENT);
                 boolean temporalCoverage = Pattern.compile("TAAJitter\\(gl_Position\\.xy,\\s*gl_Position\\.w\\)").matcher(vertex).find();
-                f = surface(f, program.equals("gbuffers_water"), temporalCoverage);
+                f = surface(f, program.equals("gbuffers_water"), temporalCoverage, recess);
+                if (recess) f = recess(f, temporalCoverage);
                 var light = MetalLightingTransform.adapt(program, f);
                 require(accepted(light.status()));
                 f = light.text();
@@ -72,7 +120,7 @@ public final class MetallicShaderAdapter {
         }
     }
 
-    private static String surface(String source, boolean water, boolean temporalCoverage) {
+    private static String surface(String source, boolean water, boolean temporalCoverage, boolean recess) {
         // Resolve coverage before the finish adapter sees the mixed specular sample.
         // At a partly covered pixel it still computes the user's underlying stone finish.
         String s = after(SPECULAR, source, """
@@ -97,6 +145,9 @@ public final class MetallicShaderAdapter {
                             // Do not filter the same mask a second time for those admitted samples.
                             erydonMetalCoverage = erydonInfo.x == 1 ? 1.0
                                     : erydonMetalMask(texCoordM, erydonBounds, erydonInfo, erydonDx, erydonDy);
+                            // Lighting, smoothness mixing and deferred reconstruction
+                            // must use the same coverage represented in the material buffer.
+                            erydonMetalCoverage = floor(clamp(erydonMetalCoverage, 0.0, 1.0) * 63.0 + 0.5) / 63.0;
                             if (erydonMetalCoverage >= 1.0 / 126.0) {
                                 specularMap.g = erydonMetalCoverage > 0.999 ? 1.0 : min(specularMap.g, 10.0 / 255.0);
                             }
@@ -111,7 +162,8 @@ public final class MetallicShaderAdapter {
                     if (erydonMetalCoverage >= 1.0 / 126.0 && erydonInfo.x > 0) {
                         erydonMetalF0 = erydonConductorF0(erydonInfo.y, color.rgb);
                         float erydonRoughness = erydonMetalCoverage > 0.95 && erydonHasAuthoredMetal ? erydonAuthoredRoughness : float(erydonInfo.z) / 255.0;
-                        erydonMetalRoughness = clamp(max(0.22, erydonRoughness), 0.22, 0.9);
+                        // Quantize once, before either lighting lobe uses roughness.
+                        erydonMetalRoughness = clamp(floor(erydonRoughness * 255.0 + 0.5), 57.0, 229.0) / 255.0;
                         float erydonMetalSmoothness = (1.0 - erydonMetalRoughness) * (1.0 - erydonMetalRoughness);
                         smoothnessG = mix(smoothnessG, erydonMetalSmoothness, erydonMetalCoverage);
                         smoothnessD = mix(smoothnessD, erydonMetalSmoothness, erydonMetalCoverage);
@@ -123,21 +175,28 @@ public final class MetallicShaderAdapter {
                         if (erydonInfo.x == 1 && erydonFootprint >= 0.75) {
                             color.rgb = pow(erydonMetalF0, vec3(1.0 / 2.2)) * glColor.rgb;
                         }
+                        // Keep an estimated metal-only contribution for the lighting stage.
+                        // Fully covered pixels retain all authored wear; mixed pixels leave
+                        // the stone contribution in the original sampled colour.
+                        erydonMetalDiffuseComponent = erydonMetalCoverage > 0.999 ? color.rgb
+                                : min(max(color.rgb, vec3(0.0)), erydonMetalCoverage
+                                        * pow(erydonMetalF0, vec3(1.0 / 2.2)) * glColor.rgb);
                         if (%s) {
-                        vec2 erydonBevel = erydonMetalBevel(texCoordM, erydonBounds, erydonInfo, erydonFootprint);
-                        vec3 erydonTangentNormal = tbnMatrix * normalM;
-                        // Keep broad authored normals; temper the exaggerated overlay corner normals.
-                        float erydonNormalRetention = erydonInfo.x == 1 ? 0.15 : 0.5;
-                        erydonTangentNormal.xy = clamp(erydonTangentNormal.xy * erydonNormalRetention, vec2(-0.18), vec2(0.18)) + erydonBevel;
-                        erydonTangentNormal.z = sqrt(max(0.0, 1.0 - dot(erydonTangentNormal.xy, erydonTangentNormal.xy)));
-                        normalM = normalize(mix(normalM, normalize(erydonTangentNormal * tbnMatrix), erydonMetalCoverage));
-                        NdotU = dot(normalM, upVec);
-                        NdotUmax0 = max0(NdotU);
+                            if (erydonInfo.x == 1) {
+                                vec2 erydonBevel = erydonMetalBevel(texCoordM, erydonBounds, erydonInfo, erydonFootprint);
+                                vec3 erydonTangentNormal = erydonMetalNormal(tbnMatrix * normalM, erydonBevel, erydonInfo.x);
+                                normalM = normalize(mix(normalM, normalize(erydonTangentNormal * tbnMatrix), erydonMetalCoverage));
+                                NdotU = dot(normalM, upVec);
+                                NdotUmax0 = max0(NdotU);
+                            }
                         }
-                        int erydonFinish = (mat == 12024 || mat == 12025 || mat == 12027 || mat == 12029 || mat == 12049) ? 3
+                        // A selected mirror finish can be ineligible for an authored
+                        // rough substrate. Preserve only the mirror actually applied.
+                        int erydonFinish = int(materialMask * 255.1) == 242 ? 3
                                 : (mat == 12040 || mat == 12041 || mat == 12043 || mat == 12045 || mat == 12053) ? 2
                                 : (mat == 12032 || mat == 12033 || mat == 12035 || mat == 12037 || mat == 12051) ? 1 : 0;
-                        erydonMetalPacked = (floor(erydonMetalCoverage * 63.0 + 0.5) * 4.0 + float(erydonFinish)) / 255.0;
+                        erydonMetalPacked = ((floor(erydonMetalCoverage * 63.0 + 0.5) * 4.0 + float(erydonFinish)) * 256.0
+                                + floor(erydonMetalRoughness * 255.0 + 0.5)) / 65535.0;
                         erydonMetalTag = (erydonInfo.y == 1 ? 243.0 : 244.0) / 255.0;
                         %s
                     } else erydonMetalCoverage = 0.0;
@@ -169,7 +228,55 @@ public final class MetallicShaderAdapter {
             require(unique(call, s));
             s = after(call, s, "\nif (erydonMetalInfo.x == 1) color.a = 1.0;\n");
         }
+        if (recess) {
+            // Replace only these authored insertions, not native CTM/POM code.
+            s = s.replace("if (any(lessThan(erydonPixel, erydonBounds.xy))", "if (!erydonInlayActive && (any(lessThan(erydonPixel, erydonBounds.xy))")
+                    .replace("greaterThanEqual(erydonPixel, erydonBounds.xy + erydonBounds.zw))) {", "greaterThanEqual(erydonPixel, erydonBounds.xy + erydonBounds.zw)))) {");
+            s = s.replace("erydonMetalCoverage = erydonInfo.x == 1 ? 1.0", "erydonMetalCoverage = erydonInlayActive ? erydonInlayMetalCoverage : erydonInfo.x == 1 ? 1.0");
+            s = s.replace("if (erydonInfo.x == 1 && erydonFootprint >= 0.75)", "if (!erydonInlayActive && erydonInfo.x == 1 && erydonFootprint >= 0.75)");
+            s = s.replace("if (erydonInfo.x == 1)", "if (erydonInfo.x == 1 && !erydonInlayActive)");
+        }
         return s;
+    }
+
+    private static String recess(String source, boolean temporalCoverage) {
+        Matcher depth = POM_DEPTH.matcher(source), distance = POM_DISTANCE.matcher(source);
+        require(depth.find() && distance.find());
+        String constants = "const float ERYDON_INLAY_POM_DEPTH = " + depth.group(1) + ";\n"
+                + "const float ERYDON_INLAY_POM_DISTANCE = " + distance.group(1) + ";\n";
+        String result = CUSTOM_MATERIALS.matcher(source).replaceFirst(Matcher.quoteReplacement(constants + RECESS + "\n") + "$0");
+        String dither = temporalCoverage
+                ? "fract(Bayer64(gl_FragCoord.xy) + 0.61803398875 * mod(float(frameCounter), 3600.0))"
+                : "Bayer64(gl_FragCoord.xy)";
+        result = after(MATERIAL_UV, result, "\nif (erydonInlayActive) {\n"
+                + "    erydonInlayTrace(texCoordM, color, lViewPos);\n"
+                + "    shadowMult *= erydonInlayShadow(tbnMatrix * lightVec, " + dither + ");\n}\n");
+        result = after(SKIP_POM, result, "\nif (erydonInlayActive) skipPom = true;\n");
+        result = replace(SKIPPED_NORMAL, result,
+                "else normalMap = erydonInlayActive ? erydonInlayNormalSample : texture2D(normals, texCoordM);");
+        // The native NdotU update and directional block lighting must both
+        // see the cavity wall normal rather than the substrate's floor normal.
+        result = after(MATERIAL_NORMAL, result, """
+
+                    if (erydonInlayActive && dot(erydonInlayWallNormal, erydonInlayWallNormal) > 0.5) {
+                        normalM = normalize(erydonInlayWallNormal * tbnMatrix);
+                    }
+                    """);
+        result = after(SPECULAR, result, """
+
+                    if (erydonInlayActive) {
+                        specularMap = erydonInlaySpecularSample;
+                    }
+                    """);
+        Pattern cutout = Pattern.compile("float\\s+erydonOverlayAlpha\\s*=");
+        require(unique(cutout, result));
+        result = cutout.matcher(result).replaceFirst(Matcher.quoteReplacement("""
+                erydonInlayActive = erydonInlaySubstrateRecord >= 0 && erydonMetalInfo.x == 1
+                        && all(greaterThan(erydonInlayBaseBounds.zw, vec2(0.0)));
+                """) + "$0");
+        result = result.replace("float erydonOverlayAlpha = erydonMetalCutout(",
+                "float erydonOverlayAlpha = erydonInlayActive ? 1.0 : erydonMetalCutout(");
+        return result;
     }
 
     private static int matchingBrace(String text, int start) {

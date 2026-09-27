@@ -17,6 +17,12 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import net.irisshaders.iris.compat.sodium.impl.block_context.BlockContextHolder;
+import net.irisshaders.iris.compat.sodium.impl.vertex_format.terrain_xhfp.XHFPTerrainVertex;
+import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEncoder;
+import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.Material;
+import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.parameters.AlphaCutoffParameter;
+import org.lwjgl.system.MemoryUtil;
 
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
@@ -71,7 +77,8 @@ public final class HighPolishMixinLaunchProbe implements PreLaunchEntrypoint {
             require(rawMapAllocations == 0, "Iris must not parse the ID map a second time");
             verifyMetalPreflightOrdering();
             verifyMetalSamplerProfiles(emptyShader);
-            System.out.println("ERYDON_HIGH_POLISH_MIXIN_PROBE_OK: resources installed; ID preflight precedes base programs; parsed map reused; metal preflight precedes every source read; metal sampler profile gate executed; multiface placement hook applied.");
+            verifyInlayVertexTransport();
+            System.out.println("ERYDON_HIGH_POLISH_MIXIN_PROBE_OK: resources installed; ID preflight precedes base programs; parsed map reused; metal preflight precedes every source read; metal sampler profile gate executed; multiface placement hook applied; inlay substrate short written by real Iris encoder with all other bytes preserved.");
             System.exit(0);
         } catch (Throwable failure) {
             failure.printStackTrace();
@@ -144,5 +151,76 @@ public final class HighPolishMixinLaunchProbe implements PreLaunchEntrypoint {
 
     private static void require(boolean condition, String message) {
         if (!condition) throw new AssertionError(message);
+    }
+
+    private static void verifyInlayVertexTransport() {
+        InlaySubstrateTransport.setSourceSupported(false);
+        InlaySubstrateTransport.restoreRecord(-1);
+        require(InlaySubstrateTransport.rendererSupported(), "Pinned renderer format and synchronous emitter must pass substrate guard");
+        require(Arrays.stream(XHFPTerrainVertex.class.getDeclaredMethods())
+                        .anyMatch(method -> method.getName().contains("writeInlaySubstrate")),
+                "Substrate transport mixin must be applied to the real Iris encoder");
+        var writer = new XHFPTerrainVertex();
+        var context = new BlockContextHolder();
+        context.blockId = 12040;
+        context.renderType = 0;
+        context.lightValue = 9;
+        writer.iris$setContextHolder(context);
+        var vertices = ChunkVertexEncoder.Vertex.uninitializedQuad();
+        for (int i = 0; i < 4; i++) {
+            vertices[i].x = i >= 2 ? 1 : 0;
+            vertices[i].y = 0.5F;
+            vertices[i].z = i == 1 || i == 2 ? 1 : 0;
+            vertices[i].u = .25F + .125F * vertices[i].x;
+            vertices[i].v = .5F + .0625F * vertices[i].z;
+            vertices[i].color = 0xffd0c0b0;
+            vertices[i].light = 0x00f000b0;
+        }
+        var material = new Material(null, AlphaCutoffParameter.HALF, true);
+        long memory = MemoryUtil.nmemAlloc(4L * 40 + 32);
+        require(memory != 0, "Vertex probe allocation failed");
+        long start = memory + 16;
+        try {
+            MemoryUtil.memSet(memory, 0x5a, 4L * 40 + 32);
+            require(writer.write(start, material, vertices, 3) == start + 160, "Iris vertex stride changed");
+            byte[] baseline = new byte[160];
+            for (int i = 0; i < baseline.length; i++) baseline[i] = MemoryUtil.memGetByte(start + i);
+            ErydonCuPomRuntimeState.beginShaderLoad(true);
+            ErydonCuPomRuntimeState.acceptProgramStatus("TRANSFORMED");
+            ErydonCuPomRuntimeState.confirmTerrainProgramsCompiled();
+            InlaySubstrateTransport.setSourceSupported(true);
+            require(InlaySubstrateTransport.enabled(), "Substrate path must be active after successful preflight/link");
+            int previous = InlaySubstrateTransport.pushRecord(17);
+            try {
+                writer.write(start, material, vertices, 3);
+            } finally {
+                InlaySubstrateTransport.restoreRecord(previous);
+            }
+            for (int vertex = 0; vertex < 4; vertex++) {
+                require(MemoryUtil.memGetShort(start + vertex * 40L + 34) == -19,
+                        "Actual Iris write did not carry substrate record 17");
+            }
+            for (int i = 0; i < 160; i++) {
+                if (i % 40 != 34 && i % 40 != 35) require(MemoryUtil.memGetByte(start + i) == baseline[i],
+                        "Substrate transport changed unrelated vertex byte " + i);
+            }
+            for (int i = 0; i < 16; i++) {
+                require(MemoryUtil.memGetByte(memory + i) == 0x5a && MemoryUtil.memGetByte(start + 160 + i) == 0x5a,
+                        "Substrate transport wrote outside the vertex allocation");
+            }
+            writer.write(start, material, vertices, 3);
+            for (int vertex = 0; vertex < 4; vertex++) require(MemoryUtil.memGetShort(start + vertex * 40L + 34) == 0,
+                    "Scoped substrate payload leaked into the next ordinary quad");
+            InlaySubstrateTransport.setSourceSupported(false);
+            previous = InlaySubstrateTransport.pushRecord(17);
+            try { writer.write(start, material, vertices, 3); }
+            finally { InlaySubstrateTransport.restoreRecord(previous); }
+            require(MemoryUtil.memGetShort(start + 34) == 0, "Unsupported shader must retain the native vertex format values");
+        } finally {
+            InlaySubstrateTransport.setSourceSupported(false);
+            InlaySubstrateTransport.restoreRecord(-1);
+            ErydonCuPomRuntimeState.beginShaderLoad(false);
+            MemoryUtil.nmemFree(memory);
+        }
     }
 }

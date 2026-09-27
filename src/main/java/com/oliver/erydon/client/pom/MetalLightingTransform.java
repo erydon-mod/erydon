@@ -32,10 +32,20 @@ public final class MetalLightingTransform {
             return new Result(source, false, "UNSUPPORTED_SOURCE");
         boolean nativeHighlight = NATIVE_HIGHLIGHT.matcher(source).find();
         boolean highlightMix = HIGHLIGHT_MIX.matcher(source).find();
-        if (!nativeHighlight && !highlightMix)
-            return new Result(source, false, "HIGHLIGHT_NOT_COMPILED");
-        if (!unique(NATIVE_HIGHLIGHT, source) || !unique(HIGHLIGHT_MIX, source))
+        if (nativeHighlight != highlightMix || nativeHighlight
+                && (!unique(NATIVE_HIGHLIGHT, source) || !unique(HIGHLIGHT_MIX, source)))
             return new Result(source, false, "UNSUPPORTED_SOURCE");
+
+        String diffuse = """
+                // ERYDON conductor direct lighting
+                color.rgb *= finalDiffuse;
+                if (erydonMetalCoverage > 0.0 && emission <= 0.0) {
+                    color.rgb = erydonMetalBroadLighting(color.rgb, erydonMetalDiffuseComponent,
+                                                        finalDiffuse, erydonMetalRoughness);
+                }
+                """;
+        String result = DIFFUSE_APPLICATION.matcher(source).replaceFirst(Matcher.quoteReplacement(diffuse));
+        if (!nativeHighlight) return new Result(result, true, "TRANSFORMED");
 
         String helper = """
                 // ERYDON conductor direct lighting
@@ -71,11 +81,12 @@ public final class MetalLightingTransform {
                     vec3 fresnel = f0 + (vec3(1.0) - f0) * fresnelWeight;
                     // CU's shadowMult already carries its light-facing cosine.
                     // Reuse that gate once, without a second NdotL or shine boost.
-                    return fresnel * distribution * visibility;
+                    // CU's working colour is gamma encoded here, just like highlightColor.
+                    return pow(max(fresnel * distribution * visibility, vec3(0.0)), vec3(1.0 / 2.2));
                 }
 
                 """;
-        String result = LIGHTING_FUNCTION.matcher(source).replaceFirst(Matcher.quoteReplacement(helper) + "$0");
+        result = LIGHTING_FUNCTION.matcher(result).replaceFirst(Matcher.quoteReplacement(helper) + "$0");
         String blend = """
                 if (erydonMetalCoverage > 0.0) {
                     vec3 erydonConductor = ErydonConductorHighlight(normalM, nViewPos, lightVec, NdotLmax0);

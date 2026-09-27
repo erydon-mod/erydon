@@ -26,6 +26,7 @@
     "client.compat.axiom.SliceFlipMixin",
     "client.compat.continuity.SynapheiaOwnershipMixin",
     "client.compat.iris.IrisChunkProgramOverridesMixin",
+    "client.compat.iris.InlaySubstrateVertexMixin",
     "client.compat.iris.HighPolishBlockMaterialMixin",
     "client.compat.iris.HighPolishIdMapAccessor",
     "client.compat.iris.HighPolishShaderPackMixin",

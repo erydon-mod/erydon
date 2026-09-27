@@ -132,7 +132,7 @@ class HighPolishShaderPackTest {
                 for (String dimension : List.of("world0", "world-1", "world1")) {
                     for (boolean pomEnabled : new boolean[]{false, true}) {
                         for (int filtering : new int[]{0, 8}) {
-                            for (int strength : new int[]{0, 120}) {
+                            for (int strength : new int[]{0, 120, 200}) {
                                 var options = new InstalledShaderTestSupport.Options(pomEnabled, filtering, strength);
                                 String label = path.getFileName() + "/" + dimension + "/" + options;
                                 String vertex = InstalledShaderTestSupport.source(zip, dimension,

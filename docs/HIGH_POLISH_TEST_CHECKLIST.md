@@ -87,7 +87,15 @@ and the latest high-polish performance trial. The items above are new checks.
   while still and moving: watch for shimmering, crawling coverage, reflection
   smearing onto adjacent stone, lost joins or excessive flattening of detail.
   Normal-map strength zero disables the additional bevel; compare the normal
-  settings you use, including 120, without treating global strength as the fix.
+  settings you use, including 120 and 200, without treating global strength as
+  the fix. Embedded patterns and solid metal should retain their authored relief.
+- With POM enabled, view the shared inlay at a shallow angle from both sides.
+  The metal should sit in a clearly recessed groove, with stone sidewalls and
+  the original narrow aperture. Look for black holes, clipped metal floors,
+  raised lettering, floating edges, or the wrong stone tile inside a groove.
+  Repeat across CTM joins, on slopes, and with POM or normal mapping disabled to
+  check the flush fallback. Restart IDEA's client for the vertex-transport change
+  before testing.
 - Check all six faces while moving the camera. Look for flicker, disappearing
   overlays, sorting through stone or detached edges. Include triangular slope
   sides, rotated/inverted slopes and a resource reload.
@@ -169,8 +177,10 @@ and the latest high-polish performance trial. The items above are new checks.
   standing still, turning, walking past it and loading its chunks.
 - Repeat with shaders off. Check sustained FPS, frame-time spikes, chunk-loading
   delays and visible sorting errors. The metal lookup adds bounded texture
-  reads and two existing buffers gain alpha storage; it adds no draw pass,
-  reflection ray, face or fluid-neighbour scan. Measure scene performance.
+  reads, recessed overlays add bounded local height/shadow traces, and the
+  material buffer now uses RGBA16 for independent roughness. It adds no draw
+  pass, environment reflection ray, face or fluid-neighbour scan. Measure scene
+  performance and memory; see the costs in `METAL_RENDERING.md`.
 - Reload/switch shaders and visit all three dimensions. Check CTM, large spiral
   stairs, patterned depth, inlays, glazing and two-way mirrors afterward.
 - Compare both Complementary r5.9.3 styles with labPBR enabled. Their default
