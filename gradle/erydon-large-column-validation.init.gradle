@@ -1,0 +1,47 @@
+// Standalone validation keeps its outputs separate from other active development tasks.
+gradle.beforeProject { project ->
+    project.layout.buildDirectory.set(new File(project.projectDir, '.gradle/large-column-validation/build'))
+    project.afterEvaluate {
+        project.tasks.register('verifyLargeColumnRepair', JavaExec) {
+            group = 'verification'
+            description = 'Checks large-column breaking, deferred repair, recalc and section transforms under Fabric.'
+            dependsOn project.tasks.named('testClasses')
+            classpath = project.sourceSets.test.runtimeClasspath
+            mainClass = 'net.fabricmc.loader.impl.launch.knot.KnotClient'
+            maxHeapSize = '2G'
+            def fixture = project.layout.buildDirectory.dir('large-column-probe')
+            // Optional named/remapped Axiom + client API classes. No external mod is initialised.
+            def axiomClasses = project.providers.gradleProperty('erydon.largeColumnTestMods')
+            if (axiomClasses.isPresent()) classpath += project.files(fixture.map { it.dir('axiom-classes') })
+            doFirst {
+                def root = fixture.get().asFile
+                root.mkdirs()
+                workingDir root
+                def mod = new File(root, 'probe-mod')
+                mod.mkdirs()
+                def metadata = [schemaVersion: 1, id: 'erydon_large_column_probe', version: '1.0.0',
+                    environment: 'client', entrypoints: [preLaunch: ['com.oliver.erydon.block.DoubleColumnRepairLaunchProbe']]]
+                def extraMods = [mod.absolutePath]
+                if (axiomClasses.isPresent()) {
+                    def classes = new File(root, 'axiom-classes')
+                    project.copy {
+                        from axiomClasses.get().split(java.util.regex.Pattern.quote(File.pathSeparator)).collect { project.zipTree(it) }
+                        include '**/*.class'
+                        into classes
+                    }
+                    // Enable the normal compatibility plugin without running Axiom entrypoints.
+                    def axiomMarker = new File(root, 'axiom-marker')
+                    axiomMarker.mkdirs()
+                    new File(axiomMarker, 'fabric.mod.json').text = groovy.json.JsonOutput.toJson([
+                        schemaVersion: 1, id: 'axiom', version: '5.4.2', environment: 'client'])
+                    extraMods.add(axiomMarker.absolutePath)
+                }
+                new File(mod, 'fabric.mod.json').text = groovy.json.JsonOutput.toJson(metadata)
+                systemProperty 'fabric.development', 'true'
+                systemProperty 'fabric.addMods', extraMods.join(File.pathSeparator)
+                systemProperty 'erydon.large_column_test.axiom', axiomClasses.isPresent()
+                args '--gameDir', root.absolutePath, '--version', '1.20.1', '--accessToken', '0'
+            }
+        }
+    }
+}

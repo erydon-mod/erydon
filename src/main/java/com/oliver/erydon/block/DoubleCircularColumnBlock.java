@@ -2,6 +2,7 @@ package com.oliver.erydon.block;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -22,13 +23,21 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.math.random.Random;
+import com.oliver.erydon.util.ClusterRecalcSafety;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 /** One material ID per 2x2 circular column; all four cells share the same ID. */
-public final class DoubleCircularColumnBlock extends Block {
+public final class DoubleCircularColumnBlock extends Block implements ClusterRebuildableBlock {
     public static final IntProperty X = IntProperty.of("part_x", 0, 1);
     public static final IntProperty Z = IntProperty.of("part_z", 0, 1);
     public static final EnumProperty<Section> SECTION = EnumProperty.of("section", Section.class);
@@ -92,21 +101,31 @@ public final class DoubleCircularColumnBlock extends Block {
         if (world.isClient) return ActionResult.SUCCESS;
         BlockPos anchor = pos.add(-state.get(X), 0, -state.get(Z));
         BlockPos bottom = anchor;
-        while (world.getBlockState(bottom.down()).isOf(this)) bottom = bottom.down();
+        while (true) {
+            BlockState row = layerState(world, bottom.down());
+            if (row == null) return ActionResult.PASS;
+            if (!row.isOf(this)) break;
+            bottom = bottom.down();
+        }
         BlockPos top = anchor;
-        while (world.getBlockState(top.up()).isOf(this)) top = top.up();
+        while (true) {
+            BlockState row = layerState(world, top.up());
+            if (row == null) return ActionResult.PASS;
+            if (!row.isOf(this)) break;
+            top = top.up();
+        }
         boolean base = state.get(SECTION) == Section.BASE_LOWER || state.get(SECTION) == Section.BASE_UPPER;
         boolean capital = state.get(SECTION) == Section.CAPITAL_LOWER || state.get(SECTION) == Section.CAPITAL_UPPER;
         if (!base && !capital) base = hit.getPos().y - pos.getY() <= 0.45;
-        ColumnBlock.BaseStyle nextBase = base ? world.getBlockState(bottom).get(BASE).next() : null;
+        ColumnBlock.BaseStyle nextBase = base ? layerState(world, bottom).get(BASE).next() : null;
         ColumnBlock.CapitalStyle nextCapital = base ? null
-                : world.getBlockState(top).get(CAPITAL).next(true);
+                : layerState(world, top).get(CAPITAL).next(true);
         for (int y = bottom.getY(); y <= top.getY(); y++) {
             for (int x = 0; x < 2; x++) for (int z = 0; z < 2; z++) {
                 BlockPos cell = new BlockPos(anchor.getX() + x, y, anchor.getZ() + z);
                 BlockState current = world.getBlockState(cell);
-                if (current.isOf(this)) world.setBlockState(cell,
-                        base ? current.with(BASE, nextBase) : current.with(CAPITAL, nextCapital), Block.NOTIFY_ALL);
+                if (belongsToLayer(current, x, z)) world.setBlockState(cell,
+                        base ? current.with(BASE, nextBase) : current.with(CAPITAL, nextCapital), Block.NOTIFY_LISTENERS);
             }
         }
         return ActionResult.SUCCESS;
@@ -147,41 +166,178 @@ public final class DoubleCircularColumnBlock extends Block {
             world.setBlockState(cell, getDefaultState().with(X, dx).with(Z, dz)
                     .with(BASE, state.get(BASE)).with(CAPITAL, state.get(CAPITAL)), Block.NOTIFY_ALL);
         }
-        updateSections(world, anchor);
+        // Settle only the changed end of the column, after all placement cells exist.
+        Map<BlockPos, BlockState> updates = new LinkedHashMap<>();
+        for (int dy = -3; dy <= 3; dy++) {
+            planLayer(world, anchor.up(dy), updates);
+        }
+        applyUpdates(world, updates);
     }
 
-    private void updateSections(World world, BlockPos anchor) {
-        BlockPos bottom = anchor;
-        while (world.getBlockState(bottom.down()).isOf(this)) bottom = bottom.down();
-        BlockPos top = anchor;
-        while (world.getBlockState(top.up()).isOf(this)) top = top.up();
-        int length = top.getY() - bottom.getY() + 1;
-        for (int y = 0; y < length; y++) {
-            Section section = y == 0 ? Section.BASE_LOWER
-                    : y == 1 ? Section.BASE_UPPER
-                    : y == length - 2 ? Section.CAPITAL_LOWER
-                    : y == length - 1 ? Section.CAPITAL_UPPER : Section.SHAFT;
-            for (int dx = 0; dx < 2; dx++) for (int dz = 0; dz < 2; dz++) {
-                BlockPos cell = bottom.add(dx, y, dz);
-                BlockState existing = world.getBlockState(cell);
-                if (existing.isOf(this) && existing.get(SECTION) != section)
-                    world.setBlockState(cell, existing.with(SECTION, section), Block.NOTIFY_ALL);
+    private static BlockPos anchor(BlockState state, BlockPos pos) {
+        return pos.add(-state.get(X), 0, -state.get(Z));
+    }
+
+    private boolean belongsToLayer(BlockState state, int x, int z) {
+        return state != null && state.isOf(this) && state.get(X) == x && state.get(Z) == z;
+    }
+
+    private static BlockState loadedState(BlockView view, BlockPos pos) {
+        if (view instanceof World world) {
+            if (world.isOutOfHeightLimit(pos)) return Blocks.AIR.getDefaultState();
+            if (!world.isChunkLoaded(pos)) return null;
+        }
+        return ClusterRecalcSafety.getBlockState(view, pos);
+    }
+
+    /** A missing corner must not cause an adjacent column to become this column's anchor. */
+    BlockState layerState(BlockView view, BlockPos origin) {
+        BlockState member = Blocks.AIR.getDefaultState();
+        for (int x = 0; x < 2; x++) for (int z = 0; z < 2; z++) {
+            BlockState state = loadedState(view, origin.add(x, 0, z));
+            if (state == null) return null;
+            if (!member.isOf(this) && belongsToLayer(state, x, z)) member = state;
+        }
+        return member;
+    }
+
+    /** Three layers each way suffice to identify both two-high ends; no full-height scan. */
+    Section resolvedSection(BlockView view, BlockPos origin) {
+        BlockState current = layerState(view, origin);
+        if (current == null || !current.isOf(this)) return null;
+        int below = 0, above = 0;
+        BlockState belowState = null, aboveState = null;
+        for (int distance = 1; distance <= 3; distance++) {
+            BlockState next = layerState(view, origin.down(distance));
+            if (next == null) return null;
+            if (!next.isOf(this)) break;
+            if (distance == 1) belowState = next;
+            below++;
+        }
+        for (int distance = 1; distance <= 3; distance++) {
+            BlockState next = layerState(view, origin.up(distance));
+            if (next == null) return null;
+            if (!next.isOf(this)) break;
+            if (distance == 1) aboveState = next;
+            above++;
+        }
+        if (below + above + 1 >= 4) {
+            if (below == 0) return Section.BASE_LOWER;
+            if (below == 1) return Section.BASE_UPPER;
+            if (above == 0) return Section.CAPITAL_UPPER;
+            if (above == 1) return Section.CAPITAL_LOWER;
+            return Section.SHAFT;
+        }
+        // Moving a whole base/capital or an individual shaft must preserve that section.
+        // Short remnants cannot fit both ends: keep complete pairs, demote orphan halves.
+        return switch (current.get(SECTION)) {
+            case BASE_LOWER -> aboveState != null && aboveState.get(SECTION) == Section.BASE_UPPER
+                    ? Section.BASE_LOWER : Section.SHAFT;
+            case BASE_UPPER -> belowState != null && belowState.get(SECTION) == Section.BASE_LOWER
+                    ? Section.BASE_UPPER : Section.SHAFT;
+            case CAPITAL_LOWER -> aboveState != null && aboveState.get(SECTION) == Section.CAPITAL_UPPER
+                    ? Section.CAPITAL_LOWER : Section.SHAFT;
+            case CAPITAL_UPPER -> belowState != null && belowState.get(SECTION) == Section.CAPITAL_LOWER
+                    ? Section.CAPITAL_UPPER : Section.SHAFT;
+            case SHAFT -> Section.SHAFT;
+        };
+    }
+
+    void planLayer(BlockView view, BlockPos origin, Map<BlockPos, BlockState> updates) {
+        Section section = resolvedSection(view, origin);
+        if (section == null) return;
+        for (int x = 0; x < 2; x++) for (int z = 0; z < 2; z++) {
+            BlockPos cell = origin.add(x, 0, z);
+            BlockState state = loadedState(view, cell);
+            if (belongsToLayer(state, x, z) && state.get(SECTION) != section)
+                updates.put(cell, state.with(SECTION, section));
+        }
+    }
+
+    private void applyUpdates(World world, Map<BlockPos, BlockState> updates) {
+        updates.forEach((pos, state) -> world.setBlockState(pos, state, Block.NOTIFY_LISTENERS));
+    }
+
+    private void queueNearbyLayers(World world, BlockPos origin) {
+        if (world.isClient) return;
+        for (int dy = -3; dy <= 3; dy++) {
+            BlockPos layer = origin.up(dy);
+            BlockState state = layerState(world, layer);
+            if (state == null || !state.isOf(this)) continue;
+            // Schedule on a cell that exists, including columns with a missing north-west corner.
+            world.scheduleBlockTick(layer.add(state.get(X), 0, state.get(Z)), this, 1);
+        }
+    }
+
+    @Override public void onBlockAdded(BlockState state, World world, BlockPos pos,
+                                        BlockState oldState, boolean notify) {
+        super.onBlockAdded(state, world, pos, oldState, notify);
+        if (!oldState.isOf(this) || oldState.get(X) != state.get(X) || oldState.get(Z) != state.get(Z))
+            queueNearbyLayers(world, anchor(state, pos));
+    }
+
+    @Override public void onStateReplaced(BlockState state, World world, BlockPos pos,
+                                           BlockState replacement, boolean moved) {
+        super.onStateReplaced(state, world, pos, replacement, moved);
+        if (!replacement.isOf(this) || replacement.get(X) != state.get(X) || replacement.get(Z) != state.get(Z))
+            queueNearbyLayers(world, anchor(state, pos));
+    }
+
+    @Override public BlockState getStateForNeighborUpdate(BlockState state, Direction direction,
+            BlockState neighbour, WorldAccess access, BlockPos pos, BlockPos neighbourPos) {
+        if (direction.getAxis() == Direction.Axis.Y && access instanceof World world)
+            queueNearbyLayers(world, anchor(state, pos));
+        return state;
+    }
+
+    @Override public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
+        Map<BlockPos, BlockState> updates = new LinkedHashMap<>();
+        planLayer(world, anchor(state, pos), updates);
+        applyUpdates(world, updates);
+    }
+
+    @Override public ClusterRecalcResult recalcCluster(World world, BlockPos seed) {
+        BlockState seedState = loadedState(world, seed);
+        if (seedState == null || !seedState.isOf(this)) return ClusterRecalcResult.none();
+        BlockPos origin = anchor(seedState, seed);
+        Set<BlockPos> members = new LinkedHashSet<>();
+        Set<BlockPos> layers = new LinkedHashSet<>();
+        for (Direction direction : new Direction[]{Direction.DOWN, Direction.UP}) {
+            BlockPos layer = direction == Direction.DOWN ? origin : origin.up();
+            while (true) {
+                BlockState row = layerState(world, layer);
+                if (row == null) return new ClusterRecalcResult(members, RecalcStatus.UNLOADED_EDGE);
+                if (!row.isOf(this)) break;
+                layers.add(layer);
+                for (int x = 0; x < 2; x++) for (int z = 0; z < 2; z++) {
+                    BlockPos cell = layer.add(x, 0, z);
+                    if (belongsToLayer(loadedState(world, cell), x, z)) {
+                        if (members.size() >= ClusterRecalcSafety.MAX_CLUSTER_BLOCKS || !ClusterRecalcSafety.claim(cell))
+                            return new ClusterRecalcResult(members, RecalcStatus.TOO_LARGE);
+                        members.add(cell);
+                    }
+                }
+                layer = layer.offset(direction);
             }
         }
+        ClusterRecalcResult unsafe = ClusterRecalcSafety.unsafeResult(members);
+        if (unsafe != null) return unsafe;
+        Map<BlockPos, BlockState> updates = new LinkedHashMap<>();
+        for (BlockPos layer : layers) {
+            if (resolvedSection(world, layer) == null)
+                return new ClusterRecalcResult(members, RecalcStatus.UNLOADED_EDGE);
+            planLayer(world, layer, updates);
+        }
+        applyUpdates(world, updates);
+        return new ClusterRecalcResult(members, true);
     }
 
     @Override public void onBreak(World world, BlockPos pos, BlockState state, PlayerEntity player) {
         if (!world.isClient) {
-            BlockPos anchor = pos.add(-state.get(X), 0, -state.get(Z));
-            // A player's break removes this horizontal layer, not the full column.
-            // Programmatic edits remain independent so Axiom can move the selected cells.
-            for (int dx = 0; dx < 2; dx++) for (int dz = 0; dz < 2; dz++) {
-                BlockPos cell = anchor.add(dx, 0, dz);
-                BlockState part = world.getBlockState(cell);
-                if (!cell.equals(pos) && part.isOf(this)
-                        && part.get(X) == dx && part.get(Z) == dz)
-                    world.removeBlock(cell, false);
-            }
+            // Snapshot before removing anything. Breaking and Axiom use the same section.
+            // Tool edits never cascade through onBreak; they settle after the edit batch.
+            for (BlockPos cell : selectionCells(world, pos))
+                if (!cell.equals(pos)) world.removeBlock(cell, false);
         }
         super.onBreak(world, pos, state, player);
     }
