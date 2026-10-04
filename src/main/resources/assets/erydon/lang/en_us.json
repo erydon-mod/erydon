@@ -9656,7 +9656,7 @@
     "tooltip.erydon.family.column_square.4": "Use /erydon recalc to rebuild; your style and orientation choices are kept.",
     "tooltip.erydon.family.column_circular.4": "Use /erydon recalc to rebuild; your style and orientation choices are kept.",
     "tooltip.erydon.family.column_gothic.4": "Use /erydon recalc to rebuild; your style and orientation choices are kept.",
-    "command.erydon.swap.help": "/erydon swap chunk <from> <to> | radius <from> <to> <1-32> | box <from> <to> <x y z> <x y z> | undolast. Put names containing spaces in quotes. Honed, Polished and Mirror all select plain stone; the displayed name follows your stone-finish setting. Aged and each overlay select their own finish. A Family source selects every finish of that material; a Family target keeps the existing finish, while a finish target applies that finish. All Family Blocks includes installed ERYDON, Daedalon and Themelios material blocks; All ERYDON Blocks, All Daedalon Blocks and All Themelios Blocks limit the source to one mod. Only matching shapes change; missing counterparts stay unchanged. Undo restores the last swap in this world and skips blocks edited since it.",
+    "command.erydon.swap.help": "/erydon swap chunk <from> <to> | radius <from> <to> <1-32> | box <from> <to> <x y z> <x y z> | undolast. Put names containing spaces in quotes. Honed, Polished and Mirror all select plain stone; the displayed name follows your stone-finish setting. Aged and each overlay select their own finish. A Family source selects every finish of that material; a Family target keeps the existing finish, while a finish target applies that finish. All Family Blocks includes installed ERYDON, Daedalon and Themelios material blocks; All ERYDON Blocks, All Daedalon Blocks and All Themelios Blocks limit the source to one mod. Only matching shapes change; missing counterparts stay unchanged. Undo restores the last swap in this world and skips blocks edited since it. Use /erydon swap overlay to change Bronze and Silver inlays while keeping the stone, pattern and shape.",
   "button.erydon.high_polish": "High polish",
   "screen.erydon.high_polish.title": "High polish",
   "button.erydon.high_polish_on": "High polish: On",
@@ -9695,5 +9695,10 @@
   "option.erydon.polish.mirror": "Mirror",
   "option.erydon.polish.all": "All: %s",
   "option.erydon.polish.all_hint": "Apply this finish to every stone and reset pattern choices to Inherit. Glass settings are kept.",
-  "option.erydon.polish.level_hint": "Honed: softer reflections. Polished: full smoothness with no extra reflection boost. Mirror: full smoothness with a 50% reflection floor. Uses the same specular maps."
+  "option.erydon.polish.level_hint": "Honed: softer reflections. Polished: full smoothness with no extra reflection boost. Mirror: full smoothness with a 50% reflection floor. Uses the same specular maps.",
+    "command.erydon.swap.overlay.help": "/erydon swap overlay chunk <bronze|silver> <silver|bronze> | radius <from> <to> <1-32> | box <from> <to> <x y z> <x y z>. Changes only the metal of Trim, Guilloche, Quatrefoil and Rosette inlays, keeping the stone, pattern, shape and supported block settings. Missing counterparts stay unchanged. Use /erydon swap undolast to undo.",
+    "command.erydon.swap.overlay.same": "Source and target overlay metals must be different.",
+    "command.erydon.swap.overlay.invalid": "Invalid overlay metal '%s'. Use bronze or silver.",
+    "command.erydon.swap.overlay.bronze": "Bronze overlays",
+    "command.erydon.swap.overlay.silver": "Silver overlays"
 }

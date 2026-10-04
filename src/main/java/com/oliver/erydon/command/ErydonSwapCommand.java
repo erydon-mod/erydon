@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.WeakHashMap;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
@@ -50,6 +51,10 @@ public final class ErydonSwapCommand {
 
     private static final SimpleCommandExceptionType SAME_FAMILY =
             new SimpleCommandExceptionType(Text.literal("Source and target families must be different."));
+    private static final SimpleCommandExceptionType SAME_OVERLAY =
+            new SimpleCommandExceptionType(Text.translatable("command.erydon.swap.overlay.same"));
+    private static final DynamicCommandExceptionType INVALID_OVERLAY =
+            new DynamicCommandExceptionType(metal -> Text.translatable("command.erydon.swap.overlay.invalid", metal));
     private static final SimpleCommandExceptionType ALL_ERYDON_BLOCKS_TARGET =
             new SimpleCommandExceptionType(Text.literal("All-block selectors can only be used as the source."));
     private static final SimpleCommandExceptionType NO_SWAP_TO_UNDO =
@@ -73,44 +78,103 @@ public final class ErydonSwapCommand {
     }
 
     public static LiteralArgumentBuilder<ServerCommandSource> createCommand() {
-        return literal("swap")
+        return addScopes(literal("swap")
                 .executes(ctx -> sendHelp(ctx.getSource()))
                 .then(literal("help").executes(ctx -> sendHelp(ctx.getSource())))
                 .then(literal("undolast")
                         .executes(ctx -> executeUndoLast(ctx.getSource())))
+                .then(addScopes(literal("overlay")
+                        .executes(ctx -> sendOverlayHelp(ctx.getSource()))
+                        .then(literal("help").executes(ctx -> sendOverlayHelp(ctx.getSource()))), true)), false);
+    }
+
+    private static LiteralArgumentBuilder<ServerCommandSource> addScopes(
+            LiteralArgumentBuilder<ServerCommandSource> root, boolean overlay) {
+        return root
                 .then(literal("chunk")
                         .then(argument(SOURCE_ARGUMENT, StringArgumentType.string())
-                                .suggests((context, builder) -> suggestFamilies(ErydonSwapFamilyDatabase.sourceKeys(), builder))
+                                .suggests((context, builder) -> suggestSources(builder, overlay))
                                 .then(argument(TARGET_ARGUMENT, StringArgumentType.string())
-                                        .suggests(ErydonSwapCommand::suggestTargetFamilies)
+                                        .suggests((context, builder) -> suggestTargets(context, builder, overlay))
                                         .executes(ctx -> executeChunk(
                                                 ctx.getSource(),
-                                                StringArgumentType.getString(ctx, SOURCE_ARGUMENT),
-                                                StringArgumentType.getString(ctx, TARGET_ARGUMENT))))))
+                                                resolvePlan(ctx, overlay))))))
                 .then(literal("radius")
                         .then(argument(SOURCE_ARGUMENT, StringArgumentType.string())
-                                .suggests((context, builder) -> suggestFamilies(ErydonSwapFamilyDatabase.sourceKeys(), builder))
+                                .suggests((context, builder) -> suggestSources(builder, overlay))
                                 .then(argument(TARGET_ARGUMENT, StringArgumentType.string())
-                                        .suggests(ErydonSwapCommand::suggestTargetFamilies)
+                                        .suggests((context, builder) -> suggestTargets(context, builder, overlay))
                                         .then(argument("radius", IntegerArgumentType.integer(1, MAX_RADIUS))
                                                 .executes(ctx -> executeRadius(
                                                         ctx.getSource(),
-                                                        StringArgumentType.getString(ctx, SOURCE_ARGUMENT),
-                                                        StringArgumentType.getString(ctx, TARGET_ARGUMENT),
+                                                        resolvePlan(ctx, overlay),
                                                         IntegerArgumentType.getInteger(ctx, "radius")))))))
                 .then(literal("box")
                         .then(argument(SOURCE_ARGUMENT, StringArgumentType.string())
-                                .suggests((context, builder) -> suggestFamilies(ErydonSwapFamilyDatabase.sourceKeys(), builder))
+                                .suggests((context, builder) -> suggestSources(builder, overlay))
                                 .then(argument(TARGET_ARGUMENT, StringArgumentType.string())
-                                        .suggests(ErydonSwapCommand::suggestTargetFamilies)
+                                        .suggests((context, builder) -> suggestTargets(context, builder, overlay))
                                         .then(argument("from", BlockPosArgumentType.blockPos())
                                                 .then(argument("to", BlockPosArgumentType.blockPos())
                                                         .executes(ctx -> executeBox(
                                                                 ctx.getSource(),
-                                                                StringArgumentType.getString(ctx, SOURCE_ARGUMENT),
-                                                                StringArgumentType.getString(ctx, TARGET_ARGUMENT),
+                                                                resolvePlan(ctx, overlay),
                                                                 BlockPosArgumentType.getBlockPos(ctx, "from"),
                                                                 BlockPosArgumentType.getBlockPos(ctx, "to"))))))));
+    }
+
+    private static int sendOverlayHelp(ServerCommandSource source) {
+        source.sendFeedback(() -> Text.translatable("command.erydon.swap.overlay.help"), false);
+        return 1;
+    }
+
+    private static SwapPlan resolvePlan(CommandContext<ServerCommandSource> context, boolean overlay)
+            throws CommandSyntaxException {
+        String from = StringArgumentType.getString(context, SOURCE_ARGUMENT);
+        String to = StringArgumentType.getString(context, TARGET_ARGUMENT);
+        if (overlay) {
+            return resolveOverlayPlan(from, to);
+        }
+        FamilyPair families = resolveFamilies(from, to);
+        return new SwapPlan(
+                ErydonSwapFamilyDatabase.displayText(families.fromFamily().canonicalKey()),
+                ErydonSwapFamilyDatabase.displayText(families.toFamily().canonicalKey()),
+                id -> ErydonSwapFamilyDatabase.match(id, families.fromFamily(), families.toFamily())
+                        .map(match -> match.targetId(families.toFamily())));
+    }
+
+    static SwapPlan resolveOverlayPlan(String from, String to) throws CommandSyntaxException {
+        ErydonSwapOverlay source = ErydonSwapOverlay.parse(from).orElseThrow(() -> INVALID_OVERLAY.create(from));
+        ErydonSwapOverlay target = ErydonSwapOverlay.parse(to).orElseThrow(() -> INVALID_OVERLAY.create(to));
+        if (source == target) {
+            throw SAME_OVERLAY.create();
+        }
+        return new SwapPlan(Text.translatable("command.erydon.swap.overlay." + source.key()),
+                Text.translatable("command.erydon.swap.overlay." + target.key()),
+                id -> source.targetId(id, target));
+    }
+
+    private static CompletableFuture<Suggestions> suggestSources(SuggestionsBuilder builder, boolean overlay) {
+        return overlay ? suggestMetals(builder, Optional.empty())
+                : suggestFamilies(ErydonSwapFamilyDatabase.sourceKeys(), builder);
+    }
+
+    private static CompletableFuture<Suggestions> suggestTargets(
+            CommandContext<ServerCommandSource> context, SuggestionsBuilder builder, boolean overlay)
+            throws CommandSyntaxException {
+        return overlay ? suggestMetals(builder, ErydonSwapOverlay.parse(StringArgumentType.getString(context, SOURCE_ARGUMENT)))
+                : suggestTargetFamilies(context, builder);
+    }
+
+    private static CompletableFuture<Suggestions> suggestMetals(
+            SuggestionsBuilder builder, Optional<ErydonSwapOverlay> source) {
+        String remaining = builder.getRemaining().toLowerCase(Locale.ROOT);
+        for (ErydonSwapOverlay metal : ErydonSwapOverlay.values()) {
+            if (source.orElse(null) != metal && metal.key().startsWith(remaining)) {
+                builder.suggest(metal.key());
+            }
+        }
+        return builder.buildFuture();
     }
 
     private static int sendHelp(ServerCommandSource source) {
@@ -118,8 +182,7 @@ public final class ErydonSwapCommand {
         return 1;
     }
 
-    private static int executeChunk(ServerCommandSource source, String rawFromFamily, String rawToFamily) throws CommandSyntaxException {
-        FamilyPair families = resolveFamilies(rawFromFamily, rawToFamily);
+    private static int executeChunk(ServerCommandSource source, SwapPlan plan) throws CommandSyntaxException {
         ServerWorld world = source.getWorld();
         ChunkPos chunkPos = new ChunkPos(BlockPos.ofFloored(source.getPosition()));
         Box box = new Box(
@@ -130,14 +193,13 @@ public final class ErydonSwapCommand {
                 world.getTopY() - 1,
                 chunkPos.getEndZ()
         );
-        SwapOutcome outcome = swapInBox(world, box, families.fromFamily(), families.toFamily());
-        sendSummary(source, "chunk " + chunkPos.x + "," + chunkPos.z, families, outcome);
+        SwapOutcome outcome = swapInBox(world, box, plan);
+        sendSummary(source, "chunk " + chunkPos.x + "," + chunkPos.z, plan, outcome);
         return outcome.replacedBlocks();
     }
 
-    private static int executeRadius(ServerCommandSource source, String rawFromFamily, String rawToFamily, int radius)
+    private static int executeRadius(ServerCommandSource source, SwapPlan plan, int radius)
             throws CommandSyntaxException {
-        FamilyPair families = resolveFamilies(rawFromFamily, rawToFamily);
         BlockPos origin = BlockPos.ofFloored(source.getPosition());
         Box box = new Box(
                 origin.getX() - radius,
@@ -147,17 +209,16 @@ public final class ErydonSwapCommand {
                 origin.getY() + radius,
                 origin.getZ() + radius
         );
-        SwapOutcome outcome = swapInBox(source.getWorld(), box, families.fromFamily(), families.toFamily());
-        sendSummary(source, "radius " + radius + " around " + formatPos(origin), families, outcome);
+        SwapOutcome outcome = swapInBox(source.getWorld(), box, plan);
+        sendSummary(source, "radius " + radius + " around " + formatPos(origin), plan, outcome);
         return outcome.replacedBlocks();
     }
 
-    private static int executeBox(ServerCommandSource source, String rawFromFamily, String rawToFamily, BlockPos first, BlockPos second)
+    private static int executeBox(ServerCommandSource source, SwapPlan plan, BlockPos first, BlockPos second)
             throws CommandSyntaxException {
-        FamilyPair families = resolveFamilies(rawFromFamily, rawToFamily);
         Box box = Box.fromCorners(first, second);
-        SwapOutcome outcome = swapInBox(source.getWorld(), box, families.fromFamily(), families.toFamily());
-        sendSummary(source, "box " + formatPos(box.minPos()) + " to " + formatPos(box.maxPos()), families, outcome);
+        SwapOutcome outcome = swapInBox(source.getWorld(), box, plan);
+        sendSummary(source, "box " + formatPos(box.minPos()) + " to " + formatPos(box.maxPos()), plan, outcome);
         return outcome.replacedBlocks();
     }
 
@@ -270,19 +331,17 @@ public final class ErydonSwapCommand {
         return normalized.replace('-', '_').replaceAll("\\s+", "_");
     }
 
-    private static SwapOutcome swapInBox(ServerWorld world, Box requestedBox,
-                                         ErydonSwapFamilyDatabase.FamilySpec fromFamily,
-                                         ErydonSwapFamilyDatabase.FamilySpec toFamily)
+    private static SwapOutcome swapInBox(ServerWorld world, Box requestedBox, SwapPlan plan)
             throws CommandSyntaxException {
         Box box = requestedBox.clampY(world);
         if (box.isEmpty()) {
-            throw NO_MATCHING_BLOCKS.create(ErydonSwapFamilyDatabase.displayText(fromFamily.canonicalKey()));
+            throw NO_MATCHING_BLOCKS.create(plan.fromLabel());
         }
         ensureVolumeWithinLimit(box.volume());
 
         List<Replacement> replacements = new ArrayList<>();
         Map<Identifier, Optional<Block>> counterpartCache = new HashMap<>();
-        Map<Identifier, Optional<ErydonSwapFamilyDatabase.FamilyMatch>> matchCache = new HashMap<>();
+        Map<Identifier, Optional<Identifier>> matchCache = new HashMap<>();
         BlockPos.Mutable mutable = new BlockPos.Mutable();
 
         int matchingBlocks = 0;
@@ -294,14 +353,13 @@ public final class ErydonSwapCommand {
                     mutable.set(x, y, z);
                     BlockState sourceState = world.getBlockState(mutable);
                     Identifier sourceId = Registries.BLOCK.getId(sourceState.getBlock());
-                    Optional<ErydonSwapFamilyDatabase.FamilyMatch> match = matchCache.computeIfAbsent(sourceId,
-                            id -> ErydonSwapFamilyDatabase.match(id, fromFamily, toFamily));
+                    Optional<Identifier> match = matchCache.computeIfAbsent(sourceId, plan.targetId());
                     if (match.isEmpty()) {
                         continue;
                     }
 
                     matchingBlocks++;
-                    Identifier targetId = match.get().targetId(toFamily);
+                    Identifier targetId = match.get();
                     Block targetBlock = resolveTargetBlock(targetId, counterpartCache);
                     if (targetBlock == null) {
                         missingCounterparts++;
@@ -316,8 +374,7 @@ public final class ErydonSwapCommand {
                     BlockPos pos = mutable.toImmutable();
                     NbtCompound previousNbt = createBlockEntityNbt(world, pos);
                     NbtCompound targetNbt = ErydonSwapBlockEntitySupport.swapComponents(previousNbt, componentId ->
-                            ErydonSwapFamilyDatabase.match(componentId, fromFamily, toFamily)
-                                    .map(component -> component.targetId(toFamily))
+                            plan.targetId().apply(componentId)
                                     .filter(id -> resolveTargetBlock(id, counterpartCache) != null)
                                     .orElse(componentId));
                     replacements.add(new Replacement(
@@ -332,7 +389,7 @@ public final class ErydonSwapCommand {
         }
 
         if (matchingBlocks == 0) {
-            throw NO_MATCHING_BLOCKS.create(ErydonSwapFamilyDatabase.displayText(fromFamily.canonicalKey()));
+            throw NO_MATCHING_BLOCKS.create(plan.fromLabel());
         }
 
         int replacedBlocks = 0;
@@ -365,7 +422,7 @@ public final class ErydonSwapCommand {
         return new SwapOutcome(replacedBlocks, missingCounterparts);
     }
 
-    private static void sendSummary(ServerCommandSource source, String scope, FamilyPair families, SwapOutcome outcome) {
+    private static void sendSummary(ServerCommandSource source, String scope, SwapPlan plan, SwapOutcome outcome) {
         StringBuilder message = new StringBuilder();
         message.append("Swapped ")
                 .append(outcome.replacedBlocks())
@@ -373,10 +430,9 @@ public final class ErydonSwapCommand {
                 .append(outcome.replacedBlocks() == 1 ? "" : "s")
                 .append(" in ")
                 .append(scope)
-                .append(" (")
-                .append(ErydonSwapFamilyDatabase.displayText(families.fromFamily().canonicalKey()))
-                .append(" -> ")
-                .append(ErydonSwapFamilyDatabase.displayText(families.toFamily().canonicalKey()));
+                .append(" (");
+        Text prefix = Text.literal(message.toString()).append(plan.fromLabel()).append(" -> ").append(plan.toLabel());
+        message.setLength(0);
 
         if (outcome.missingCounterparts() > 0) {
             message.append(", ")
@@ -387,7 +443,7 @@ public final class ErydonSwapCommand {
         }
 
         message.append(").");
-        source.sendFeedback(() -> Text.literal(message.toString()), false);
+        source.sendFeedback(() -> prefix.copy().append(message.toString()), false);
     }
 
     private static void sendUndoSummary(ServerCommandSource source, UndoOutcome outcome) {
@@ -515,6 +571,9 @@ public final class ErydonSwapCommand {
 
     record FamilyPair(ErydonSwapFamilyDatabase.FamilySpec fromFamily,
                               ErydonSwapFamilyDatabase.FamilySpec toFamily) {
+    }
+
+    record SwapPlan(Text fromLabel, Text toLabel, Function<Identifier, Optional<Identifier>> targetId) {
     }
 
     private record Replacement(BlockPos pos, BlockState state,

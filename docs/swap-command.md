@@ -63,6 +63,26 @@ exact combination does not exist in the destination, the block stays unchanged.
 An explicit finish destination replaces the original finish, including the
 secondary stone or metal. It does not create nonexistent aged overlays.
 
+### Changing only the overlay metal
+
+Use `/erydon swap overlay` to change Bronze to Silver, or Silver to Bronze,
+across mixed stone materials in one area:
+
+```text
+/erydon swap overlay chunk bronze silver
+/erydon swap overlay radius silver bronze 8
+/erydon swap overlay box bronze silver ~ ~ ~ ~15 ~15 ~15
+```
+
+This changes Trim, Guilloche, Quatrefoil and Rosette inlays while keeping each
+block's stone material, motif, shape and supported state properties. It covers
+matching inlays in the supported installed mods, using counterparts in the same
+namespace. Metal names are case-insensitive; suggestions offer the opposite metal.
+Solid-bronze decoration, plain stone, Herringbone and Weave finishes are outside
+this selection. Missing counterparts stay unchanged and are counted in the summary.
+The usual area limits and `/erydon swap undolast` apply to overlay swaps too.
+Use `/erydon swap overlay help` for the in-game instructions.
+
 ## Examples
 
 ```text

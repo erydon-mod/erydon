@@ -9656,7 +9656,7 @@
     "tooltip.erydon.family.column_square.4": "/erydon recalc reconstruye la columna y conserva el estilo y la orientación.",
     "tooltip.erydon.family.column_circular.4": "/erydon recalc reconstruye la columna y conserva el estilo y la orientación.",
     "tooltip.erydon.family.column_gothic.4": "/erydon recalc reconstruye la columna y conserva el estilo y la orientación.",
-    "command.erydon.swap.help": "/erydon swap chunk <origen> <destino> | radius <origen> <destino> <1-32> | box <origen> <destino> <x y z> <x y z> | undolast. Escribe entre comillas los nombres con espacios. Honed, Polished y Mirror seleccionan piedra lisa; el nombre mostrado sigue tu ajuste de acabado. Aged y cada incrustación seleccionan su propio acabado. Un origen Family incluye todos los acabados del material; un destino Family conserva el acabado actual, mientras que un destino de acabado lo sustituye. All Family Blocks incluye los bloques de material instalados de ERYDON, Daedalon y Themelios; All ERYDON Blocks, All Daedalon Blocks y All Themelios Blocks limitan el origen a un mod. Solo cambian las formas compatibles; los bloques sin equivalente permanecen intactos. Undo revierte el último cambio de este mundo y omite los bloques modificados después.",
+    "command.erydon.swap.help": "/erydon swap chunk <origen> <destino> | radius <origen> <destino> <1-32> | box <origen> <destino> <x y z> <x y z> | undolast. Escribe entre comillas los nombres con espacios. Honed, Polished y Mirror seleccionan piedra lisa; el nombre mostrado sigue tu ajuste de acabado. Aged y cada incrustación seleccionan su propio acabado. Un origen Family incluye todos los acabados del material; un destino Family conserva el acabado actual, mientras que un destino de acabado lo sustituye. All Family Blocks incluye los bloques de material instalados de ERYDON, Daedalon y Themelios; All ERYDON Blocks, All Daedalon Blocks y All Themelios Blocks limitan el origen a un mod. Solo cambian las formas compatibles; los bloques sin equivalente permanecen intactos. Undo revierte el último cambio de este mundo y omite los bloques modificados después. Usa /erydon swap overlay para cambiar las incrustaciones de bronce y plata conservando la piedra, el patrón y la forma.",
   "button.erydon.high_polish": "Alto brillo",
   "screen.erydon.high_polish.title": "Alto brillo",
   "button.erydon.high_polish_on": "Alto brillo: Sí",
@@ -9695,5 +9695,10 @@
   "option.erydon.polish.mirror": "Espejo",
   "option.erydon.polish.all": "Todo: %s",
   "option.erydon.polish.all_hint": "Aplicar este acabado a todas las piedras y restablecer los patrones a Heredar. Se conservan los ajustes del vidrio.",
-  "option.erydon.polish.level_hint": "Apomazado: reflejos más suaves. Pulido: máxima suavidad sin intensificar los reflejos. Espejo: máxima suavidad con un mínimo de reflexión del 50%. Usa los mismos mapas especulares."
+  "option.erydon.polish.level_hint": "Apomazado: reflejos más suaves. Pulido: máxima suavidad sin intensificar los reflejos. Espejo: máxima suavidad con un mínimo de reflexión del 50%. Usa los mismos mapas especulares.",
+    "command.erydon.swap.overlay.help": "/erydon swap overlay chunk <bronze|silver> <silver|bronze> | radius <origen> <destino> <1-32> | box <origen> <destino> <x y z> <x y z>. Cambia solo el metal de las incrustaciones Trim, Guilloche, Quatrefoil y Rosette, conservando la piedra, el patrón, la forma y los ajustes compatibles del bloque. Los bloques sin equivalente permanecen intactos. Usa /erydon swap undolast para deshacer.",
+    "command.erydon.swap.overlay.same": "Los metales de origen y destino de las incrustaciones deben ser diferentes.",
+    "command.erydon.swap.overlay.invalid": "Metal de incrustación no válido: '%s'. Usa bronze o silver.",
+    "command.erydon.swap.overlay.bronze": "Incrustaciones de bronce",
+    "command.erydon.swap.overlay.silver": "Incrustaciones de plata"
 }

@@ -9656,7 +9656,7 @@
     "tooltip.erydon.family.column_square.4": "/erydon recalc baut die Säule neu auf; Stil und Ausrichtung bleiben erhalten.",
     "tooltip.erydon.family.column_circular.4": "/erydon recalc baut die Säule neu auf; Stil und Ausrichtung bleiben erhalten.",
     "tooltip.erydon.family.column_gothic.4": "/erydon recalc baut die Säule neu auf; Stil und Ausrichtung bleiben erhalten.",
-    "command.erydon.swap.help": "/erydon swap chunk <von> <nach> | radius <von> <nach> <1-32> | box <von> <nach> <x y z> <x y z> | undolast. Namen mit Leerzeichen in Anführungszeichen setzen. Honed, Polished und Mirror wählen einfachen Stein; der angezeigte Name folgt deiner Steinoberfläche. Aged und jede Einlage wählen ihre eigene Oberfläche. Eine Family-Quelle umfasst alle Oberflächen des Materials; ein Family-Ziel behält die Oberfläche bei, ein Oberflächenziel ersetzt sie. All Family Blocks umfasst installierte Materialblöcke aus ERYDON, Daedalon und Themelios; All ERYDON Blocks, All Daedalon Blocks und All Themelios Blocks begrenzen die Quelle auf eine Mod. Nur passende Formen werden ersetzt; fehlende Gegenstücke bleiben unverändert. Undo macht den letzten Austausch in dieser Welt rückgängig und überspringt seither bearbeitete Blöcke.",
+    "command.erydon.swap.help": "/erydon swap chunk <von> <nach> | radius <von> <nach> <1-32> | box <von> <nach> <x y z> <x y z> | undolast. Namen mit Leerzeichen in Anführungszeichen setzen. Honed, Polished und Mirror wählen einfachen Stein; der angezeigte Name folgt deiner Steinoberfläche. Aged und jede Einlage wählen ihre eigene Oberfläche. Eine Family-Quelle umfasst alle Oberflächen des Materials; ein Family-Ziel behält die Oberfläche bei, ein Oberflächenziel ersetzt sie. All Family Blocks umfasst installierte Materialblöcke aus ERYDON, Daedalon und Themelios; All ERYDON Blocks, All Daedalon Blocks und All Themelios Blocks begrenzen die Quelle auf eine Mod. Nur passende Formen werden ersetzt; fehlende Gegenstücke bleiben unverändert. Undo macht den letzten Austausch in dieser Welt rückgängig und überspringt seither bearbeitete Blöcke. Mit /erydon swap overlay kannst du Bronze- und Silber-Einlagen austauschen und dabei Stein, Muster und Form beibehalten.",
   "button.erydon.high_polish": "Hochglanz",
   "screen.erydon.high_polish.title": "Hochglanz",
   "button.erydon.high_polish_on": "Hochglanz: An",
@@ -9695,5 +9695,10 @@
   "option.erydon.polish.mirror": "Spiegelglanz",
   "option.erydon.polish.all": "Alle: %s",
   "option.erydon.polish.all_hint": "Diese Oberfläche auf alle Steine anwenden und Muster auf Übernehmen zurücksetzen. Glaseinstellungen bleiben erhalten.",
-  "option.erydon.polish.level_hint": "Geschliffen: weichere Reflexionen. Poliert: volle Glätte ohne zusätzliche Reflexionsverstärkung. Spiegelglanz: volle Glätte mit mindestens 50% Reflexion. Verwendet dieselben Specular-Texturen."
+  "option.erydon.polish.level_hint": "Geschliffen: weichere Reflexionen. Poliert: volle Glätte ohne zusätzliche Reflexionsverstärkung. Spiegelglanz: volle Glätte mit mindestens 50% Reflexion. Verwendet dieselben Specular-Texturen.",
+    "command.erydon.swap.overlay.help": "/erydon swap overlay chunk <bronze|silver> <silver|bronze> | radius <von> <nach> <1-32> | box <von> <nach> <x y z> <x y z>. Ändert nur das Metall von Trim-, Guilloche-, Quatrefoil- und Rosette-Einlagen und behält Stein, Muster, Form und unterstützte Blockeinstellungen bei. Fehlende Gegenstücke bleiben unverändert. Mit /erydon swap undolast rückgängig machen.",
+    "command.erydon.swap.overlay.same": "Quell- und Zielmetall der Einlagen müssen unterschiedlich sein.",
+    "command.erydon.swap.overlay.invalid": "Ungültiges Einlagenmetall '%s'. Verwende bronze oder silver.",
+    "command.erydon.swap.overlay.bronze": "Bronze-Einlagen",
+    "command.erydon.swap.overlay.silver": "Silber-Einlagen"
 }
