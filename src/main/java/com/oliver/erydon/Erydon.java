@@ -1,6 +1,7 @@
 package com.oliver.erydon;
 
 import com.oliver.erydon.compat.FamilyReleaseCompatibility;
+import com.oliver.erydon.compat.daedalon.CapitalDebugControls;
 import com.oliver.erydon.compat.worldedit.WorldEditCompat;
 import com.oliver.erydon.command.ErydonRecalcCommand;
 import com.oliver.erydon.block.entity.ModBlockEntities;
@@ -35,6 +36,7 @@ public final class Erydon implements ModInitializer {
         ModItemGroups.register();
         ErydonLoot.init();
         ErydonConfigNetworking.registerServer();
+        CapitalDebugControls.register();
         ErydonLightUpdateQueue.register();
         ErydonRecalcCommand.register();
         WorldEditCompat.init();

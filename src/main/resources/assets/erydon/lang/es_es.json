@@ -9700,5 +9700,10 @@
     "command.erydon.swap.overlay.same": "Los metales de origen y destino de las incrustaciones deben ser diferentes.",
     "command.erydon.swap.overlay.invalid": "Metal de incrustación no válido: '%s'. Usa bronze o silver.",
     "command.erydon.swap.overlay.bronze": "Incrustaciones de bronce",
-    "command.erydon.swap.overlay.silver": "Incrustaciones de plata"
+    "command.erydon.swap.overlay.silver": "Incrustaciones de plata",
+    "property.erydon.companion_capital_size": "Tamaño",
+    "property.erydon.companion_capital_orientation": "Orientación",
+    "option.erydon.companion_capital_size.small": "Pequeño",
+    "option.erydon.companion_capital_size.large": "Grande",
+    "message.erydon.companion_capital_size_blocked": "No hay espacio libre suficiente para un capitel grande (2×2×2 bloques)."
 }

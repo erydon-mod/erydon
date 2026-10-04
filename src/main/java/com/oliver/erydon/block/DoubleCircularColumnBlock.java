@@ -67,9 +67,12 @@ public final class DoubleCircularColumnBlock extends Block implements ClusterReb
     /** The block cells that form the selected physical section in building tools. */
     public static List<BlockPos> selectionCells(BlockView world, BlockPos hit) {
         BlockState state = world.getBlockState(hit);
-        if (!(state.getBlock() instanceof DoubleCircularColumnBlock)) return List.of();
+        if (!(state.getBlock() instanceof DoubleCircularColumnBlock block)) return List.of();
         BlockPos anchor = hit.add(-state.get(X), 0, -state.get(Z));
-        Section section = state.get(SECTION);
+        // Axiom can select immediately after paste, before deferred repair updates
+        // the stored labels. Use the same bounded physical resolver as repair.
+        Section section = block.resolvedSection(world, anchor);
+        if (section == null) return List.of();
         int lowerY = switch (section) {
             case BASE_UPPER, CAPITAL_UPPER -> -1;
             default -> 0;
@@ -85,11 +88,11 @@ public final class DoubleCircularColumnBlock extends Block implements ClusterReb
                 case CAPITAL_LOWER, CAPITAL_UPPER -> dy == lowerY ? Section.CAPITAL_LOWER : Section.CAPITAL_UPPER;
                 case SHAFT -> Section.SHAFT;
             };
+            if (block.resolvedSection(world, anchor.up(dy)) != expected) continue;
             for (int dx = 0; dx < 2; dx++) for (int dz = 0; dz < 2; dz++) {
                 BlockPos cell = anchor.add(dx, dy, dz);
                 BlockState part = world.getBlockState(cell);
-                if (part.isOf(state.getBlock()) && part.get(X) == dx && part.get(Z) == dz
-                        && part.get(SECTION) == expected) cells.add(cell);
+                if (part.isOf(state.getBlock()) && part.get(X) == dx && part.get(Z) == dz) cells.add(cell);
             }
         }
         return cells;

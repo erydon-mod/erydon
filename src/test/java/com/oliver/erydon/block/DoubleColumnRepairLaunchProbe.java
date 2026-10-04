@@ -40,6 +40,8 @@ public final class DoubleColumnRepairLaunchProbe implements PreLaunchEntrypoint 
             for (int height : new int[]{4, 5, 8, 128}) {
                 TestWorld world = world();
                 column(world, BlockPos.ORIGIN, height, true);
+                require(selectionCells(world,new BlockPos(1,height-1,1)).size()==8,
+                        "Selection split a newly pasted capital before repair");
                 settle(world);
                 assertLayout(world, height);
                 require(world.states.values().stream().allMatch(state ->

@@ -9700,5 +9700,10 @@
     "command.erydon.swap.overlay.same": "Source and target overlay metals must be different.",
     "command.erydon.swap.overlay.invalid": "Invalid overlay metal '%s'. Use bronze or silver.",
     "command.erydon.swap.overlay.bronze": "Bronze overlays",
-    "command.erydon.swap.overlay.silver": "Silver overlays"
+    "command.erydon.swap.overlay.silver": "Silver overlays",
+    "property.erydon.companion_capital_size": "Size",
+    "property.erydon.companion_capital_orientation": "Orientation",
+    "option.erydon.companion_capital_size.small": "Small",
+    "option.erydon.companion_capital_size.large": "Large",
+    "message.erydon.companion_capital_size_blocked": "Not enough clear space for a Large capital (2×2×2 blocks)."
 }

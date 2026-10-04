@@ -12,6 +12,7 @@ import com.oliver.erydon.block.StairsSpiralLargeBlock;
 import com.oliver.erydon.block.SurroundBlock;
 import com.oliver.erydon.block.WindowArchBlock;
 import com.oliver.erydon.block.WindowFrenchGeorgianBlock;
+import com.oliver.erydon.compat.daedalon.CapitalDebugControls;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
@@ -24,12 +25,22 @@ import net.minecraft.world.WorldAccess;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Collection;
 import java.util.List;
 
-@Mixin(DebugStickItem.class)
+// The later-applied lower-priority HEAD injection runs before the older companion's handler.
+@Mixin(value=DebugStickItem.class,priority=900)
 public abstract class DebugStickItemMixin {
+    @Inject(method="use",at=@At("HEAD"),cancellable=true)
+    private void erydon$companionCapitalControls(PlayerEntity player,BlockState state,WorldAccess world,
+            BlockPos pos,boolean update,ItemStack stack,CallbackInfoReturnable<Boolean> callback) {
+        if(CapitalDebugControls.handles(state)) callback.setReturnValue(
+                CapitalDebugControls.use(player,state,world,pos,update,stack));
+    }
+
     @Redirect(method = "use", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/state/StateManager;getProperties()Ljava/util/Collection;"))
     private Collection<Property<?>> erydon$visibleProperties(StateManager<?, ?> manager,

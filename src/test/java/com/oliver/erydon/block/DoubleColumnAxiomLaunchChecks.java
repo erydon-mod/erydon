@@ -56,8 +56,31 @@ final class DoubleColumnAxiomLaunchChecks {
         type.getMethod("createSelectionBuffer").invoke(selection);
         require(!(boolean)contains.invoke(selection,removed),"Tool operation retained a stale completed cell");
         for(BlockPos cell:selectionCells(world,shaft)) require((boolean)contains.invoke(selection,cell),"Operation lost a remaining shaft cell");
-        System.out.println("ERYDON_LARGE_COLUMN_AXIOM_OK: actual selection/corner/shrink/restore/reset/operation entry points");
-        return 7;
+        // Capital selection must work for either layer and every style, even before
+        // deferred paste repair has replaced stale shaft labels on the top layers.
+        world.states.put(removed,block.getDefaultState().with(SECTION,Section.SHAFT));
+        int capitals=0;
+        for(ColumnBlock.CapitalStyle style:ColumnBlock.CapitalStyle.values()) {
+            for(int y=3;y<=4;y++) for(int x=0;x<2;x++) for(int z=0;z<2;z++)
+                world.states.put(new BlockPos(x,y,z),block.getDefaultState().with(X,x).with(Z,z)
+                        .with(SECTION,Section.SHAFT).with(CAPITAL,style));
+            for(int y=3;y<=4;y++) for(int x=0;x<2;x++) for(int z=0;z<2;z++) {
+                BlockPos capital=new BlockPos(x,y,z);
+                type.getMethod("setPos1",BlockPos.class).invoke(selection,capital);
+                type.getMethod("setPos2",BlockPos.class).invoke(selection,capital);
+                java.util.List<BlockPos> cells=selectionCells(world,capital);
+                require(cells.size()==8,"Stale capital was not resolved as a complete section");
+                for(BlockPos cell:cells) require((boolean)contains.invoke(selection,cell),"Actual Axiom split the capital: "+style);
+                require(!(boolean)contains.invoke(selection,shaft),"Capital selection included its shaft");
+                Object capitalRestore=restore.invoke(selection);
+                require(capitalRestore.getClass().getMethod("pos1").invoke(capitalRestore).equals(capital),"Capital completion moved the corner");
+                type.getMethod("createSelectionBuffer").invoke(selection);
+                for(BlockPos cell:cells) require((boolean)contains.invoke(selection,cell),"Operation split a capital");
+                capitals++;
+            }
+        }
+        System.out.println("ERYDON_LARGE_COLUMN_AXIOM_OK: actual selection/corner/shrink/restore/reset/operation entry points, "+capitals+" capital/style cases");
+        return 7+capitals;
     }
     private static BlockHitResult hit(BlockPos pos) { return new BlockHitResult(Vec3d.ofCenter(pos),Direction.UP,pos,false); }
     private static final class TestClientWorld extends ClientWorld {

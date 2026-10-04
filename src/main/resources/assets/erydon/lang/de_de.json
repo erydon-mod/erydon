@@ -9700,5 +9700,10 @@
     "command.erydon.swap.overlay.same": "Quell- und Zielmetall der Einlagen müssen unterschiedlich sein.",
     "command.erydon.swap.overlay.invalid": "Ungültiges Einlagenmetall '%s'. Verwende bronze oder silver.",
     "command.erydon.swap.overlay.bronze": "Bronze-Einlagen",
-    "command.erydon.swap.overlay.silver": "Silber-Einlagen"
+    "command.erydon.swap.overlay.silver": "Silber-Einlagen",
+    "property.erydon.companion_capital_size": "Größe",
+    "property.erydon.companion_capital_orientation": "Ausrichtung",
+    "option.erydon.companion_capital_size.small": "Klein",
+    "option.erydon.companion_capital_size.large": "Groß",
+    "message.erydon.companion_capital_size_blocked": "Nicht genug freier Platz für ein großes Kapitell (2×2×2 Blöcke)."
 }
