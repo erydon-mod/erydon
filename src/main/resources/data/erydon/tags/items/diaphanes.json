@@ -1,0 +1,33 @@
+{
+  "replace": false,
+  "values": [
+    "erydon:borealis_diaphanes",
+    "erydon:borealis_diaphanes_block",
+    "erydon:borealis_diaphanes_layer",
+    "erydon:borealis_diaphanes_layer_vertical",
+    "erydon:borealis_diaphanes_light_modern",
+    "erydon:borealis_diaphanes_light_wall",
+    "erydon:borealis_diaphanes_slab",
+    "erydon:gelastrum_diaphanes",
+    "erydon:gelastrum_diaphanes_block",
+    "erydon:gelastrum_diaphanes_layer",
+    "erydon:gelastrum_diaphanes_layer_vertical",
+    "erydon:gelastrum_diaphanes_light_modern",
+    "erydon:gelastrum_diaphanes_light_wall",
+    "erydon:gelastrum_diaphanes_slab",
+    "erydon:mielonyx_diaphanes",
+    "erydon:mielonyx_diaphanes_block",
+    "erydon:mielonyx_diaphanes_layer",
+    "erydon:mielonyx_diaphanes_layer_vertical",
+    "erydon:mielonyx_diaphanes_light_modern",
+    "erydon:mielonyx_diaphanes_light_wall",
+    "erydon:mielonyx_diaphanes_slab",
+    "erydon:selenephos_diaphanes",
+    "erydon:selenephos_diaphanes_block",
+    "erydon:selenephos_diaphanes_layer",
+    "erydon:selenephos_diaphanes_layer_vertical",
+    "erydon:selenephos_diaphanes_light_modern",
+    "erydon:selenephos_diaphanes_light_wall",
+    "erydon:selenephos_diaphanes_slab"
+  ]
+}

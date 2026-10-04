@@ -12,6 +12,11 @@ import java.util.Map;
 /** Carries an existing CTM substrate record through Iris's unused block render-type short. */
 public final class InlaySubstrateTransport {
     public static final int MAX_RECORD = ErydonCuPomLookupLayout.MAX_RECORDS - 1;
+    /** Upper half of the signed payload marks UV-rotated perimeter ribbons. */
+    public static final int RIBBON_FLAG = 1 << 14;
+    // Pre-box once: synchronous per-quad transport must not allocate a payload.
+    private static final Integer[] PAYLOADS = payloads();
+    private static final Integer NO_PAYLOAD = -1;
     private static final ThreadLocal<Integer> CURRENT = new ThreadLocal<>();
     private static volatile Map<Identifier, Integer> records = Map.of();
     private static volatile boolean sourceSupported;
@@ -60,28 +65,61 @@ public final class InlaySubstrateTransport {
         }
     }
 
+    /** Ribbon albedo UVs differ from the substrate's world-cell projection. */
+    public static void emitRibbon(QuadEmitter emitter, int record) {
+        int payload = enabled() && record >= 0 && record < MAX_RECORD ? record | RIBBON_FLAG : -1;
+        int previous = pushPayload(payload);
+        try {
+            emitter.emit();
+        } finally {
+            restoreRecord(previous);
+        }
+    }
+
     static int pushRecord(int record) {
+        return pushPayload(record >= 0 && record <= MAX_RECORD ? record : -1);
+    }
+
+    private static int pushPayload(int record) {
         Integer previous = CURRENT.get();
-        if (record < 0 || record > MAX_RECORD) CURRENT.remove();
-        else CURRENT.set(record);
+        if (record < 0) CURRENT.set(NO_PAYLOAD);
+        else CURRENT.set(PAYLOADS[record]);
         return previous == null ? -1 : previous;
     }
 
     static void restoreRecord(int record) {
-        if (record < 0) CURRENT.remove();
-        else CURRENT.set(record);
+        if (record < 0) CURRENT.set(NO_PAYLOAD);
+        else CURRENT.set(PAYLOADS[record]);
     }
 
     /** Called only by the supported Iris encoder after its ordinary 40-byte vertex writes. */
     public static int currentRecord() {
         if (!enabled()) return -1;
         Integer record = CURRENT.get();
-        return record == null ? -1 : record;
+        return record == null || record < 0 ? -1 : record & (RIBBON_FLAG - 1);
+    }
+
+    public static boolean currentRibbon() {
+        Integer record = enabled() ? CURRENT.get() : null;
+        return record != null && record >= 0 && (record & RIBBON_FLAG) != 0;
     }
 
     public static short encodedRenderType(int record) {
         if (record < 0 || record > MAX_RECORD) throw new IllegalArgumentException("Invalid substrate record");
         return (short) (-2 - record);
+    }
+
+    public static short encodedRenderType(int record, boolean ribbon) {
+        if (!ribbon) return encodedRenderType(record);
+        // -32768 is valid; the final possible base record has no ribbon encoding.
+        if (record < 0 || record >= MAX_RECORD) throw new IllegalArgumentException("Invalid ribbon substrate record");
+        return (short) (-2 - (record | RIBBON_FLAG));
+    }
+
+    private static Integer[] payloads() {
+        Integer[] values = new Integer[2 * RIBBON_FLAG - 1];
+        for (int index = 0; index < values.length; index++) values[index] = index;
+        return values;
     }
 
     static boolean supportedVersions(String iris, String sodium, String indium) {

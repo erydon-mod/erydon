@@ -337,6 +337,13 @@
     "erydon:aganite_rosette_silver_slope_steep_upper",
     "erydon:aganite_rosette_silver_slope_vertical",
     "erydon:aganite_rosette_silver_slope_vertical_shallow_broad",
-    "erydon:aganite_rosette_silver_slope_vertical_shallow_narrow"
+    "erydon:aganite_rosette_silver_slope_vertical_shallow_narrow",
+    "erydon:aganite_aged_coping_georgian",
+    "erydon:aganite_ashlar_coping_georgian",
+    "erydon:aganite_brazier",
+    "erydon:aganite_coping_georgian",
+    "erydon:aganite_hewn_coping_georgian",
+    "erydon:aganite_oil_burner",
+    "erydon:aganite_rusticated_coping_georgian"
   ]
 }

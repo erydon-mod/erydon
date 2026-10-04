@@ -379,6 +379,13 @@
     "erydon:laurentium_rosette_silver_slope_steep_upper",
     "erydon:laurentium_rosette_silver_slope_vertical",
     "erydon:laurentium_rosette_silver_slope_vertical_shallow_broad",
-    "erydon:laurentium_rosette_silver_slope_vertical_shallow_narrow"
+    "erydon:laurentium_rosette_silver_slope_vertical_shallow_narrow",
+    "erydon:laurentium_aged_coping_georgian",
+    "erydon:laurentium_ashlar_coping_georgian",
+    "erydon:laurentium_brazier",
+    "erydon:laurentium_coping_georgian",
+    "erydon:laurentium_hewn_coping_georgian",
+    "erydon:laurentium_oil_burner",
+    "erydon:laurentium_rusticated_coping_georgian"
   ]
 }

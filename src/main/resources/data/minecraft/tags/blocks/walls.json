@@ -384,6 +384,7 @@
     "erydon:solistra_rusticated_wall",
     "erydon:striatus_hewn_wall",
     "erydon:striatus_rock_wall",
-    "erydon:striatus_rusticated_wall"
+    "erydon:striatus_rusticated_wall",
+    "#erydon:walls"
   ]
 }

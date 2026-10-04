@@ -262,6 +262,7 @@ public BlockState getPlacementState(ItemPlacementContext ctx) {
 
     @Override
     public BlockState mirror(BlockState state, BlockMirror mirror) {
+        if (mirror == BlockMirror.NONE) return state;
         Direction facing = state.get(FACING);
         Handedness mirroredHand = swapHandedness(state.get(HAND));
         Direction mirroredFacing = switch (mirror) {

@@ -84,6 +84,12 @@ DEFAULT_RAW_BLOCK_SOURCE_ROOT = Path(
 )
 RAW_CANONICAL_BLOCK_PREFIX = "src/main/resources/assets/erydon/authoring_models/block/"
 REGISTERED_RAW_MODEL_PATHS = (
+    "coping/georgian/coping_georgian_flat.json",
+    "coping/georgian/coping_georgian_slope.json",
+    "coping/georgian/coping_georgian_shallow_lower.json",
+    "coping/georgian/coping_georgian_shallow_upper.json",
+    "coping/georgian/coping_georgian_steep_lower.json",
+    "coping/georgian/coping_georgian_steep_upper.json",
     "alcove/alcove_georgian_double_side_left.json",
     "alcove/alcove_georgian_double_side_right.json",
     "alcove/alcove_georgian_double_top_left.json",

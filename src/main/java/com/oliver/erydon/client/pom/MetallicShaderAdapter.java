@@ -20,6 +20,7 @@ public final class MetallicShaderAdapter {
     private static final String LOOKUP = resource("erydon_metal_lookup.glsl");
     private static final String FRAGMENT = resource("erydon_metal_fragment.glsl");
     private static final String RECESS = resource("erydon_inlay_recess.glsl");
+    private static final String INLAY_PROJECTION = resource("erydon_inlay_projection.glsl");
     private static final String RECESS_MARKER = "// ERYDON recessed inlay substrate";
     private static final Pattern POM_DEPTH = Pattern.compile("parallaxdir\\.xy\\s*\\*=\\s*1\\.0\\s*\\*\\s*([0-9]+(?:\\.[0-9]+)?)\\s*;");
     private static final Pattern POM_DISTANCE = Pattern.compile("parallaxFade\\s*=\\s*pow2\\(lViewPos\\s*/\\s*([0-9]+(?:\\.[0-9]+)?)\\)\\s*;");
@@ -54,7 +55,13 @@ public final class MetallicShaderAdapter {
                         && unique(CUSTOM_MATERIALS, f) && unique(MATERIAL_UV, f)
                         && unique(SKIP_POM, f) && unique(SKIPPED_NORMAL, f) && unique(MATERIAL_NORMAL, f);
                 String declarations = "flat out ivec4 erydonMetalBounds;\nflat out ivec4 erydonMetalInfo;\nflat out ivec2 erydonMetalAtlas;\nflat out vec3 erydonMetalAlbedoMean;\n";
-                if (recess) declarations += RECESS_MARKER + "\nflat out int erydonInlaySubstrateRecord;\nflat out vec4 erydonInlayBaseBounds;\n";
+                if (recess) {
+                    declarations += INLAY_PROJECTION + RECESS_MARKER + "\nflat out int erydonInlaySubstrateRecord;\nflat out vec4 erydonInlayBaseBounds;\n"
+                            + "flat out int erydonInlayRibbon;\nout vec2 erydonInlayBaseLocal;\n";
+                    if (!Pattern.compile("attribute\\s+vec[34]\\s+at_midBlock\\s*;").matcher(v).find()) {
+                        declarations += "attribute vec3 at_midBlock;\n";
+                    }
+                }
                 v = injectHelpers(v, MARKER + "\n" + LOOKUP + declarations);
                 v = after(MAIN, v, """
 
@@ -77,13 +84,23 @@ public final class MetallicShaderAdapter {
                     v = after(MAIN, v, """
                             erydonInlaySubstrateRecord = -1;
                             erydonInlayBaseBounds = vec4(0.0);
+                            erydonInlayRibbon = 0;
+                            erydonInlayBaseLocal = vec2(0.0);
                             if (mc_Entity.y <= -2.0 && erydonCtmPomHeaderValid(vec2(atlasSize))) {
-                                int erydonRecord = int(floor(-mc_Entity.y - 2.0 + 0.5));
+                                int erydonRecord = erydonInlayDecodeRecord(mc_Entity.y, erydonInlayRibbon);
                                 if (float(erydonRecord) < erydonCtmPomRecordCount()) {
                                     vec4 erydonBounds = erydonCtmPomReadBoundsPx(float(erydonRecord));
                                     if (all(greaterThan(erydonBounds.zw, vec2(0.0)))) {
                                         erydonInlaySubstrateRecord = erydonRecord;
                                         erydonInlayBaseBounds = erydonBounds;
+                                        if (erydonInlayRibbon == 1) {
+                                            // Mid-block identifies the integer cell only. Keep the
+                                            // full position precision for UVs rather than its 1/64 packing.
+                                            // The integer camera translation cancels in the cell
+                                            // projection; omit it to preserve precision far from spawn.
+                                            vec3 erydonWorld = (gbufferModelViewInverse * gl_ModelViewMatrix * gl_Vertex).xyz + fract(cameraPosition);
+                                            erydonInlayBaseLocal = erydonInlayProjectBase(erydonWorld, at_midBlock.xyz, gl_Normal);
+                                        }
                                     }
                                 }
                             }
@@ -93,6 +110,8 @@ public final class MetallicShaderAdapter {
 
                         flat in int erydonInlaySubstrateRecord;
                         flat in vec4 erydonInlayBaseBounds;
+                        flat in int erydonInlayRibbon;
+                        in vec2 erydonInlayBaseLocal;
                         bool erydonInlayActive = false;
                         float erydonInlayMetalCoverage = 0.0;
                         vec3 erydonInlayWallNormal = vec3(0.0);

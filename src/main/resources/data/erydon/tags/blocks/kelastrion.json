@@ -227,6 +227,13 @@
     "erydon:kelastrion_hewn_alcove_georgian",
     "erydon:kelastrion_rock_alcove_georgian",
     "erydon:kelastrion_hewn_alcove_gothic",
-    "erydon:kelastrion_rock_alcove_gothic"
+    "erydon:kelastrion_rock_alcove_gothic",
+    "erydon:kelastrion_aged_coping_georgian",
+    "erydon:kelastrion_ashlar_coping_georgian",
+    "erydon:kelastrion_brazier",
+    "erydon:kelastrion_coping_georgian",
+    "erydon:kelastrion_hewn_coping_georgian",
+    "erydon:kelastrion_oil_burner",
+    "erydon:kelastrion_rusticated_coping_georgian"
   ]
 }

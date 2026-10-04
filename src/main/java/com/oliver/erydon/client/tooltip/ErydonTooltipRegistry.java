@@ -27,6 +27,7 @@ public final class ErydonTooltipRegistry {
     private static final String FAMILY_KEY_PREFIX = "tooltip." + Erydon.MOD_ID + ".family.";
 
     private static final List<TooltipFamily> FAMILIES = List.of(
+            family("coping_georgian", "_coping_georgian"),
             family("layer_multiface", "_layer_multiface"),
             family("layer_vertical", "_layer_vertical"),
             family("vertical_slice", "_vertical_slice"),

@@ -20,6 +20,12 @@ LOADER_PATH = (
 )
 
 EXPECTED_AUTHORING_MODELS = {
+    "coping_georgian/flat": "authoring_models/block/coping/georgian/coping_georgian_flat.json",
+    "coping_georgian/slope": "authoring_models/block/coping/georgian/coping_georgian_slope.json",
+    "coping_georgian/shallow_lower": "authoring_models/block/coping/georgian/coping_georgian_shallow_lower.json",
+    "coping_georgian/shallow_upper": "authoring_models/block/coping/georgian/coping_georgian_shallow_upper.json",
+    "coping_georgian/steep_lower": "authoring_models/block/coping/georgian/coping_georgian_steep_lower.json",
+    "coping_georgian/steep_upper": "authoring_models/block/coping/georgian/coping_georgian_steep_upper.json",
     "column_gothic/plinth": "authoring_models/block/column/gothic/column_gothic_plinth.json",
     "column_gothic/base": "authoring_models/block/column/gothic/column_gothic_base.json",
     "column_gothic/pillar": "authoring_models/block/column/gothic/column_gothic_pillar.json",
@@ -159,7 +165,7 @@ class RawLoaderSourceContractTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.source = LOADER_PATH.read_text(encoding="utf-8")
 
-    def test_authoring_model_map_contains_exactly_the_50_registered_paths(self) -> None:
+    def test_authoring_model_map_contains_exactly_the_registered_paths(self) -> None:
         declaration = re.search(
             r"\bAUTHORING_MODELS\s*=\s*Map\.ofEntries\s*\(", self.source
         )
@@ -173,8 +179,8 @@ class RawLoaderSourceContractTests(unittest.TestCase):
             flags=re.DOTALL,
         )
 
-        self.assertEqual(50, initializer.count("Map.entry("))
-        self.assertEqual(50, len(entries), "Every authoring entry must match the locked path form")
+        self.assertEqual(len(EXPECTED_AUTHORING_MODELS), initializer.count("Map.entry("))
+        self.assertEqual(len(EXPECTED_AUTHORING_MODELS), len(entries), "Every authoring entry must match the locked path form")
         self.assertEqual(EXPECTED_AUTHORING_MODELS, dict(entries))
 
     def test_supplemental_georgian_slope_assets_are_audited_but_not_shared_parsed(self) -> None:

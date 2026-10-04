@@ -1,0 +1,22 @@
+{
+  "parent": "erydon:block/internal/wrapped/porphyros_aged_coping_georgian",
+  "display": {
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "translation": [
+        0,
+        5,
+        0
+      ],
+      "scale": [
+        0.65,
+        0.65,
+        0.65
+      ]
+    }
+  }
+}

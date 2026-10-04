@@ -337,6 +337,13 @@
     "erydon:noxoplis_rosette_silver_slope_steep_upper",
     "erydon:noxoplis_rosette_silver_slope_vertical",
     "erydon:noxoplis_rosette_silver_slope_vertical_shallow_broad",
-    "erydon:noxoplis_rosette_silver_slope_vertical_shallow_narrow"
+    "erydon:noxoplis_rosette_silver_slope_vertical_shallow_narrow",
+    "erydon:noxoplis_aged_coping_georgian",
+    "erydon:noxoplis_ashlar_coping_georgian",
+    "erydon:noxoplis_brazier",
+    "erydon:noxoplis_coping_georgian",
+    "erydon:noxoplis_hewn_coping_georgian",
+    "erydon:noxoplis_oil_burner",
+    "erydon:noxoplis_rusticated_coping_georgian"
   ]
 }

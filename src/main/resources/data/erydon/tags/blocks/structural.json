@@ -17,6 +17,7 @@
     "#erydon:stairs_shallow",
     "#erydon:stairs_spiral_large",
     "#erydon:vertical_slice",
-    "#erydon:wall"
+    "#erydon:wall",
+    "#erydon:coping"
   ]
 }

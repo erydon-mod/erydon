@@ -104,11 +104,38 @@ public final class ShallowSlopeBakedModel implements BakedModel, FabricBakedMode
     }
 
     private static void emitNativeStraightSlope(RenderContext context, FaceSprites sprites, FixedSlopeRotation transform, boolean upperVariant) {
-        QuadEmitter emitter = context.getEmitter();
+        emitStraightGeometry(nativeSink(context.getEmitter(), sprites, transform), upperVariant);
+    }
+
+    private static void emitNativeOuterCorner(RenderContext context, FaceSprites sprites, FixedSlopeRotation transform, boolean upperVariant) {
+        emitOuterGeometry(nativeSink(context.getEmitter(), sprites, transform), upperVariant);
+    }
+
+    private static void emitNativeInnerCorner(RenderContext context, FaceSprites sprites, FixedSlopeRotation transform, boolean upperVariant) {
+        emitInnerGeometry(nativeSink(context.getEmitter(), sprites, transform), upperVariant);
+    }
+
+    private static GeometrySink nativeSink(QuadEmitter emitter, FaceSprites sprites, FixedSlopeRotation transform) {
+        return (face,
+                x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3, z3,
+                u0, v0, u1, v1, u2, v2, u3, v3) -> emitQuad(emitter, sprites, transform, face,
+                x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3, z3,
+                u0, v0, u1, v1, u2, v2, u3, v3);
+    }
+
+    @FunctionalInterface
+    private interface GeometrySink {
+        void quad(Direction face,
+                  float x0, float y0, float z0, float x1, float y1, float z1,
+                  float x2, float y2, float z2, float x3, float y3, float z3,
+                  float u0, float v0, float u1, float v1, float u2, float v2, float u3, float v3);
+    }
+
+    private static void emitStraightGeometry(GeometrySink sink, boolean upperVariant) {
         float westHeight = heightAt(upperVariant, 0.0F);
         float eastHeight = heightAt(upperVariant, 1.0F);
 
-        emitQuad(emitter, sprites, transform, Direction.UP,
+        sink.quad(Direction.UP,
                 0.0F, westHeight, 0.0F,
                 0.0F, westHeight, 1.0F,
                 1.0F, eastHeight, 1.0F,
@@ -117,7 +144,7 @@ public final class ShallowSlopeBakedModel implements BakedModel, FabricBakedMode
                 0.0F, 16.0F,
                 16.0F, 16.0F,
                 16.0F, 0.0F);
-        emitQuad(emitter, sprites, transform, Direction.WEST,
+        sink.quad(Direction.WEST,
                 0.0F, 0.0F, 0.0F,
                 0.0F, 0.0F, 1.0F,
                 0.0F, westHeight, 1.0F,
@@ -127,7 +154,7 @@ public final class ShallowSlopeBakedModel implements BakedModel, FabricBakedMode
                 16.0F, 0.0F,
                 0.0F, 0.0F);
         if (eastHeight > 0.0F) {
-            emitQuad(emitter, sprites, transform, Direction.EAST,
+            sink.quad(Direction.EAST,
                     1.0F, 0.0F, 0.0F,
                     1.0F, eastHeight, 0.0F,
                     1.0F, eastHeight, 1.0F,
@@ -137,7 +164,7 @@ public final class ShallowSlopeBakedModel implements BakedModel, FabricBakedMode
                     16.0F, (1.0F - eastHeight) * 16.0F,
                     16.0F, 16.0F);
         }
-        emitQuad(emitter, sprites, transform, Direction.DOWN,
+        sink.quad(Direction.DOWN,
                 0.0F, 0.0F, 0.0F,
                 1.0F, 0.0F, 0.0F,
                 1.0F, 0.0F, 1.0F,
@@ -147,14 +174,13 @@ public final class ShallowSlopeBakedModel implements BakedModel, FabricBakedMode
                 16.0F, 16.0F,
                 0.0F, 16.0F);
 
-        emitSideStrips(emitter, sprites, transform, Direction.NORTH, 0.0F, upperVariant);
-        emitSideStrips(emitter, sprites, transform, Direction.SOUTH, 1.0F, upperVariant);
+        emitSideStrips(sink, Direction.NORTH, 0.0F, upperVariant);
+        emitSideStrips(sink, Direction.SOUTH, 1.0F, upperVariant);
     }
 
-    private static void emitNativeOuterCorner(RenderContext context, FaceSprites sprites, FixedSlopeRotation transform, boolean upperVariant) {
-        QuadEmitter emitter = context.getEmitter();
+    private static void emitOuterGeometry(GeometrySink sink, boolean upperVariant) {
 
-        emitQuad(emitter, sprites, transform, Direction.DOWN,
+        sink.quad(Direction.DOWN,
                 0.0F, 0.0F, 0.0F,
                 1.0F, 0.0F, 0.0F,
                 1.0F, 0.0F, 1.0F,
@@ -164,19 +190,18 @@ public final class ShallowSlopeBakedModel implements BakedModel, FabricBakedMode
                 16.0F, 16.0F,
                 0.0F, 16.0F);
 
-        emitNorthOuterCorner(emitter, sprites, transform, upperVariant);
-        emitWestOuterCorner(emitter, sprites, transform, upperVariant);
-        emitOuterUpperBaseEnds(emitter, sprites, transform, upperVariant);
-        emitOuterSlopeFaces(emitter, sprites, transform, upperVariant);
-        emitOuterApexCover(emitter, sprites, transform, upperVariant);
+        emitNorthOuterCorner(sink, upperVariant);
+        emitWestOuterCorner(sink, upperVariant);
+        emitOuterUpperBaseEnds(sink, upperVariant);
+        emitOuterSlopeFaces(sink, upperVariant);
+        emitOuterApexCover(sink, upperVariant);
     }
 
-    private static void emitNativeInnerCorner(RenderContext context, FaceSprites sprites, FixedSlopeRotation transform, boolean upperVariant) {
-        QuadEmitter emitter = context.getEmitter();
+    private static void emitInnerGeometry(GeometrySink sink, boolean upperVariant) {
         float westHeight = heightAt(upperVariant, 0.0F);
         float southHeight = heightFromZ(upperVariant, 1.0F);
 
-        emitQuad(emitter, sprites, transform, Direction.DOWN,
+        sink.quad(Direction.DOWN,
                 0.0F, 0.0F, 0.0F,
                 1.0F, 0.0F, 0.0F,
                 1.0F, 0.0F, 1.0F,
@@ -185,7 +210,7 @@ public final class ShallowSlopeBakedModel implements BakedModel, FabricBakedMode
                 16.0F, 0.0F,
                 16.0F, 16.0F,
                 0.0F, 16.0F);
-        emitQuad(emitter, sprites, transform, Direction.WEST,
+        sink.quad(Direction.WEST,
                 0.0F, 0.0F, 0.0F,
                 0.0F, 0.0F, 1.0F,
                 0.0F, westHeight, 1.0F,
@@ -194,7 +219,7 @@ public final class ShallowSlopeBakedModel implements BakedModel, FabricBakedMode
                 16.0F, 16.0F,
                 16.0F, 0.0F,
                 0.0F, 0.0F);
-        emitQuad(emitter, sprites, transform, Direction.SOUTH,
+        sink.quad(Direction.SOUTH,
                 0.0F, 0.0F, 1.0F,
                 1.0F, 0.0F, 1.0F,
                 1.0F, southHeight, 1.0F,
@@ -204,16 +229,16 @@ public final class ShallowSlopeBakedModel implements BakedModel, FabricBakedMode
                 16.0F, 0.0F,
                 0.0F, 0.0F);
 
-        emitNorthInnerCorner(emitter, sprites, transform, upperVariant);
-        emitEastInnerCorner(emitter, sprites, transform, upperVariant);
-        emitInnerSlopeFaces(emitter, sprites, transform, upperVariant);
+        emitNorthInnerCorner(sink, upperVariant);
+        emitEastInnerCorner(sink, upperVariant);
+        emitInnerSlopeFaces(sink, upperVariant);
     }
 
-    private static void emitSideStrips(QuadEmitter emitter, FaceSprites sprites, FixedSlopeRotation transform, Direction face, float z, boolean upperVariant) {
+    private static void emitSideStrips(GeometrySink sink, Direction face, float z, boolean upperVariant) {
         float h0 = heightAt(upperVariant, 0.0F);
         float h1 = Math.max(heightAt(upperVariant, 1.0F), MIN_SIDE_HEIGHT);
         if (face == Direction.NORTH) {
-            emitQuad(emitter, sprites, transform, face,
+            sink.quad(face,
                     0.0F, 0.0F, z,
                     0.0F, h0, z,
                     1.0F, h1, z,
@@ -223,7 +248,7 @@ public final class ShallowSlopeBakedModel implements BakedModel, FabricBakedMode
                     16.0F, (1.0F - h1) * 16.0F,
                     16.0F, 16.0F);
         } else {
-            emitQuad(emitter, sprites, transform, face,
+            sink.quad(face,
                     0.0F, 0.0F, z,
                     1.0F, 0.0F, z,
                     1.0F, h1, z,
@@ -235,13 +260,13 @@ public final class ShallowSlopeBakedModel implements BakedModel, FabricBakedMode
         }
     }
 
-    private static void emitNorthOuterCorner(QuadEmitter emitter, FaceSprites sprites, FixedSlopeRotation transform, boolean upperVariant) {
+    private static void emitNorthOuterCorner(GeometrySink sink, boolean upperVariant) {
         for (int i = 0; i < SIDE_STEPS; i++) {
             float x0 = (float) i / SIDE_STEPS;
             float x1 = (float) (i + 1) / SIDE_STEPS;
             float h0 = heightAt(upperVariant, x0);
             float h1 = heightAt(upperVariant, x1);
-            emitQuad(emitter, sprites, transform, Direction.NORTH,
+            sink.quad(Direction.NORTH,
                     x0, 0.0F, 0.0F,
                     x0, h0, 0.0F,
                     x1, h1, 0.0F,
@@ -253,13 +278,13 @@ public final class ShallowSlopeBakedModel implements BakedModel, FabricBakedMode
         }
     }
 
-    private static void emitWestOuterCorner(QuadEmitter emitter, FaceSprites sprites, FixedSlopeRotation transform, boolean upperVariant) {
+    private static void emitWestOuterCorner(GeometrySink sink, boolean upperVariant) {
         for (int i = 0; i < SIDE_STEPS; i++) {
             float z0 = (float) i / SIDE_STEPS;
             float z1 = (float) (i + 1) / SIDE_STEPS;
             float h0 = heightAt(upperVariant, z0);
             float h1 = heightAt(upperVariant, z1);
-            emitQuad(emitter, sprites, transform, Direction.WEST,
+            sink.quad(Direction.WEST,
                     0.0F, 0.0F, z0,
                     0.0F, 0.0F, z1,
                     0.0F, h1, z1,
@@ -271,13 +296,13 @@ public final class ShallowSlopeBakedModel implements BakedModel, FabricBakedMode
         }
     }
 
-    private static void emitOuterUpperBaseEnds(QuadEmitter emitter, FaceSprites sprites, FixedSlopeRotation transform, boolean upperVariant) {
+    private static void emitOuterUpperBaseEnds(GeometrySink sink, boolean upperVariant) {
         if (!upperVariant) {
             return;
         }
 
         float base = 0.5F;
-        emitQuad(emitter, sprites, transform, Direction.EAST,
+        sink.quad(Direction.EAST,
                 1.0F, 0.0F, 0.0F,
                 1.0F, base, 0.0F,
                 1.0F, base, 1.0F,
@@ -286,7 +311,7 @@ public final class ShallowSlopeBakedModel implements BakedModel, FabricBakedMode
                 0.0F, 8.0F,
                 16.0F, 8.0F,
                 16.0F, 16.0F);
-        emitQuad(emitter, sprites, transform, Direction.SOUTH,
+        sink.quad(Direction.SOUTH,
                 0.0F, 0.0F, 1.0F,
                 1.0F, 0.0F, 1.0F,
                 1.0F, base, 1.0F,
@@ -297,14 +322,14 @@ public final class ShallowSlopeBakedModel implements BakedModel, FabricBakedMode
                 0.0F, 8.0F);
     }
 
-    private static void emitOuterSlopeFaces(QuadEmitter emitter, FaceSprites sprites, FixedSlopeRotation transform, boolean upperVariant) {
+    private static void emitOuterSlopeFaces(GeometrySink sink, boolean upperVariant) {
         for (int i = 0; i < SIDE_STEPS; i++) {
             float t0 = (float) i / SIDE_STEPS;
             float t1 = (float) (i + 1) / SIDE_STEPS;
             float h0 = heightAt(upperVariant, t0);
             float h1 = heightAt(upperVariant, t1);
 
-            emitQuad(emitter, sprites, transform, Direction.UP,
+            sink.quad(Direction.UP,
                     t0, h0, 0.0F,
                     t0, h0, t0,
                     t1, h1, t1,
@@ -313,7 +338,7 @@ public final class ShallowSlopeBakedModel implements BakedModel, FabricBakedMode
                     t0 * 16.0F, t0 * 16.0F,
                     t1 * 16.0F, t1 * 16.0F,
                     t1 * 16.0F, 0.0F);
-            emitQuad(emitter, sprites, transform, Direction.UP,
+            sink.quad(Direction.UP,
                     0.0F, h0, t0,
                     0.0F, h1, t1,
                     t1, h1, t1,
@@ -325,12 +350,12 @@ public final class ShallowSlopeBakedModel implements BakedModel, FabricBakedMode
         }
     }
 
-    private static void emitOuterApexCover(QuadEmitter emitter, FaceSprites sprites, FixedSlopeRotation transform, boolean upperVariant) {
+    private static void emitOuterApexCover(GeometrySink sink, boolean upperVariant) {
         float cap = 1.0F / SIDE_STEPS;
         float lift = 0.0005F;
         float top = heightAt(upperVariant, 0.0F);
         float inner = heightAt(upperVariant, cap);
-        emitQuad(emitter, sprites, transform, Direction.UP,
+        sink.quad(Direction.UP,
                 0.0F, top + lift, 0.0F,
                 0.0F, inner + lift, cap,
                 cap, inner + lift, cap,
@@ -341,17 +366,17 @@ public final class ShallowSlopeBakedModel implements BakedModel, FabricBakedMode
                 cap * 16.0F, 0.0F);
     }
 
-    private static void emitNorthInnerCorner(QuadEmitter emitter, FaceSprites sprites, FixedSlopeRotation transform, boolean upperVariant) {
-        emitNorthOuterCorner(emitter, sprites, transform, upperVariant);
+    private static void emitNorthInnerCorner(GeometrySink sink, boolean upperVariant) {
+        emitNorthOuterCorner(sink, upperVariant);
     }
 
-    private static void emitEastInnerCorner(QuadEmitter emitter, FaceSprites sprites, FixedSlopeRotation transform, boolean upperVariant) {
+    private static void emitEastInnerCorner(GeometrySink sink, boolean upperVariant) {
         for (int i = 0; i < SIDE_STEPS; i++) {
             float z0 = (float) i / SIDE_STEPS;
             float z1 = (float) (i + 1) / SIDE_STEPS;
             float h0 = heightFromZ(upperVariant, z0);
             float h1 = heightFromZ(upperVariant, z1);
-            emitQuad(emitter, sprites, transform, Direction.EAST,
+            sink.quad(Direction.EAST,
                     1.0F, 0.0F, z0,
                     1.0F, h0, z0,
                     1.0F, h1, z1,
@@ -363,7 +388,7 @@ public final class ShallowSlopeBakedModel implements BakedModel, FabricBakedMode
         }
     }
 
-    private static void emitInnerSlopeFaces(QuadEmitter emitter, FaceSprites sprites, FixedSlopeRotation transform, boolean upperVariant) {
+    private static void emitInnerSlopeFaces(GeometrySink sink, boolean upperVariant) {
         for (int i = 0; i < SIDE_STEPS; i++) {
             float t0 = (float) i / SIDE_STEPS;
             float t1 = (float) (i + 1) / SIDE_STEPS;
@@ -372,7 +397,7 @@ public final class ShallowSlopeBakedModel implements BakedModel, FabricBakedMode
             float e0 = 1.0F - t0;
             float e1 = 1.0F - t1;
 
-            emitQuad(emitter, sprites, transform, Direction.UP,
+            sink.quad(Direction.UP,
                     t0, h0, 0.0F,
                     t0, h0, e0,
                     t1, h1, e1,
@@ -381,7 +406,7 @@ public final class ShallowSlopeBakedModel implements BakedModel, FabricBakedMode
                     t0 * 16.0F, e0 * 16.0F,
                     t1 * 16.0F, e1 * 16.0F,
                     t1 * 16.0F, 0.0F);
-            emitQuad(emitter, sprites, transform, Direction.UP,
+            sink.quad(Direction.UP,
                     t0, h0, e0,
                     1.0F, h0, e0,
                     1.0F, h1, e1,
@@ -551,16 +576,8 @@ public final class ShallowSlopeBakedModel implements BakedModel, FabricBakedMode
     }
 
     private static int normalRotationForState(BlockState state) {
-        int rotation = rotationForFacing(state.get(ShallowSlopeBlock.FACING));
-        ShallowSlopeBlock.SlopeShape shape = state.get(ShallowSlopeBlock.SHAPE);
-        boolean top = state.get(ShallowSlopeBlock.HALF) == BlockHalf.TOP;
-
-        return switch (shape) {
-            case STRAIGHT, INNER_RIGHT -> rotation;
-            case INNER_LEFT -> top ? rotation - 90 : rotation;
-            case OUTER_LEFT -> top ? rotation : rotation - 90;
-            case OUTER_RIGHT -> top ? rotation + 90 : rotation;
-        };
+        return com.oliver.erydon.block.SlopeOrientation.shallow(state.get(ShallowSlopeBlock.FACING),
+                state.get(ShallowSlopeBlock.HALF),state.get(ShallowSlopeBlock.SHAPE));
     }
 
     private static int cornerRotationForState(BlockState state) {
@@ -628,85 +645,32 @@ public final class ShallowSlopeBakedModel implements BakedModel, FabricBakedMode
     }
 
     private List<BakedQuad> smoothQuads(BlockState state) {
-        if (state.get(ShallowSlopeBlock.SHAPE) == ShallowSlopeBlock.SlopeShape.STRAIGHT) {
-            return List.copyOf(smoothStraightQuads(state));
-        }
-
-        return List.copyOf(smoothCornerQuads(state));
-    }
-
-    private List<BakedQuad> smoothStraightQuads(BlockState state) {
+        ShallowSlopeBlock.SlopeShape shape = state.get(ShallowSlopeBlock.SHAPE);
         int xDegrees = state.get(ShallowSlopeBlock.HALF) == BlockHalf.TOP ? 180 : 0;
-        int yDegrees = rotationForFacing(state.get(ShallowSlopeBlock.FACING));
-        List<BakedQuad> quads = new ArrayList<>();
-
-        addBakedQuad(quads, particle, Direction.UP, xDegrees, yDegrees,
-                0.0F, 1.0F, 0.0F,
-                0.0F, 1.0F, 1.0F,
-                1.0F, 0.0F, 1.0F,
-                1.0F, 0.0F, 0.0F,
-                0.0F, 0.0F,
-                0.0F, 16.0F,
-                16.0F, 16.0F,
-                16.0F, 0.0F);
-        addBakedQuad(quads, particle, Direction.WEST, xDegrees, yDegrees,
-                0.0F, 0.0F, 0.0F,
-                0.0F, 0.0F, 1.0F,
-                0.0F, 1.0F, 1.0F,
-                0.0F, 1.0F, 0.0F,
-                0.0F, 16.0F,
-                16.0F, 16.0F,
-                16.0F, 0.0F,
-                0.0F, 0.0F);
-        addBakedQuad(quads, particle, Direction.DOWN, xDegrees, yDegrees,
-                0.0F, 0.0F, 0.0F,
-                1.0F, 0.0F, 0.0F,
-                1.0F, 0.0F, 1.0F,
-                0.0F, 0.0F, 1.0F,
-                0.0F, 0.0F,
-                16.0F, 0.0F,
-                16.0F, 16.0F,
-                0.0F, 16.0F);
-
-        addBakedSideStrips(quads, particle, Direction.NORTH, 0.0F, xDegrees, yDegrees);
-        addBakedSideStrips(quads, particle, Direction.SOUTH, 1.0F, xDegrees, yDegrees);
-        return quads;
+        int yDegrees = shape == ShallowSlopeBlock.SlopeShape.STRAIGHT
+                ? rotationForFacing(state.get(ShallowSlopeBlock.FACING))
+                : normalRotationForState(state);
+        return previewQuads(particle, isUpperVariant(state), shape, xDegrees, yDegrees);
     }
 
-    private static void addBakedSideStrips(List<BakedQuad> quads,
-                                           Sprite sprite,
-                                           Direction face,
-                                           float z,
-                                           int xDegrees,
-                                           int yDegrees) {
-        for (int i = 0; i < SIDE_STEPS; i++) {
-            float x0 = (float) i / SIDE_STEPS;
-            float x1 = (float) (i + 1) / SIDE_STEPS;
-            float h0 = 1.0F - x0;
-            float h1 = Math.max(1.0F - x1, 0.001F);
-
-            if (face == Direction.NORTH) {
-                addBakedQuad(quads, sprite, face, xDegrees, yDegrees,
-                        x0, 0.0F, z,
-                        x0, h0, z,
-                        x1, h1, z,
-                        x1, 0.0F, z,
-                        x0 * 16.0F, 16.0F,
-                        x0 * 16.0F, (1.0F - h0) * 16.0F,
-                        x1 * 16.0F, (1.0F - h1) * 16.0F,
-                        x1 * 16.0F, 16.0F);
-            } else {
-                addBakedQuad(quads, sprite, face, xDegrees, yDegrees,
-                        x0, 0.0F, z,
-                        x1, 0.0F, z,
-                        x1, h1, z,
-                        x0, h0, z,
-                        x0 * 16.0F, 16.0F,
-                        x1 * 16.0F, 16.0F,
-                        x1 * 16.0F, (1.0F - h1) * 16.0F,
-                        x0 * 16.0F, (1.0F - h0) * 16.0F);
-            }
+    // Axiom uses vanilla quads; share the placed geometry so variant heights,
+    // corner profiles and closing faces cannot diverge from the hologram.
+    static List<BakedQuad> previewQuads(Sprite sprite, boolean upperVariant,
+                                      ShallowSlopeBlock.SlopeShape shape, int xDegrees, int yDegrees) {
+        List<BakedQuad> quads = new ArrayList<>();
+        GeometrySink sink = (face,
+                x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3, z3,
+                u0, v0, u1, v1, u2, v2, u3, v3) -> addBakedQuad(quads, sprite, face, xDegrees, yDegrees,
+                x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3, z3,
+                u0, v0, u1, v1, u2, v2, u3, v3);
+        if (shape == ShallowSlopeBlock.SlopeShape.STRAIGHT) {
+            emitStraightGeometry(sink, upperVariant);
+        } else if (isOuterCorner(shape)) {
+            emitOuterGeometry(sink, upperVariant);
+        } else {
+            emitInnerGeometry(sink, upperVariant);
         }
+        return List.copyOf(quads);
     }
 
     private static void addBakedQuad(List<BakedQuad> quads,
@@ -765,175 +729,6 @@ public final class ShallowSlopeBakedModel implements BakedModel, FabricBakedMode
         data[offset + 3] = -1;
         data[offset + 4] = Float.floatToRawIntBits(sprite.getFrameU(u));
         data[offset + 5] = Float.floatToRawIntBits(sprite.getFrameV(v));
-    }
-
-    private List<BakedQuad> smoothCornerQuads(BlockState state) {
-        int xDegrees = state.get(ShallowSlopeBlock.HALF) == BlockHalf.TOP ? 180 : 0;
-        int yDegrees = normalRotationForState(state);
-        List<BakedQuad> quads = new ArrayList<>();
-
-        if (isOuterCorner(state.get(ShallowSlopeBlock.SHAPE))) {
-            addBakedOuterCorner(quads, particle, xDegrees, yDegrees);
-        } else {
-            addBakedInnerCorner(quads, particle, xDegrees, yDegrees);
-        }
-        return quads;
-    }
-
-    private static void addBakedOuterCorner(List<BakedQuad> quads, Sprite sprite, int xDegrees, int yDegrees) {
-        addBakedQuad(quads, sprite, Direction.DOWN, xDegrees, yDegrees,
-                0.0F, 0.0F, 0.0F,
-                1.0F, 0.0F, 0.0F,
-                1.0F, 0.0F, 1.0F,
-                0.0F, 0.0F, 1.0F,
-                0.0F, 0.0F,
-                16.0F, 0.0F,
-                16.0F, 16.0F,
-                0.0F, 16.0F);
-        addBakedNorthOuterCorner(quads, sprite, xDegrees, yDegrees);
-        addBakedWestOuterCorner(quads, sprite, xDegrees, yDegrees);
-        addBakedOuterSlopeFaces(quads, sprite, xDegrees, yDegrees);
-    }
-
-    private static void addBakedInnerCorner(List<BakedQuad> quads, Sprite sprite, int xDegrees, int yDegrees) {
-        addBakedQuad(quads, sprite, Direction.DOWN, xDegrees, yDegrees,
-                0.0F, 0.0F, 0.0F,
-                1.0F, 0.0F, 0.0F,
-                1.0F, 0.0F, 1.0F,
-                0.0F, 0.0F, 1.0F,
-                0.0F, 0.0F,
-                16.0F, 0.0F,
-                16.0F, 16.0F,
-                0.0F, 16.0F);
-        addBakedQuad(quads, sprite, Direction.WEST, xDegrees, yDegrees,
-                0.0F, 0.0F, 0.0F,
-                0.0F, 0.0F, 1.0F,
-                0.0F, 1.0F, 1.0F,
-                0.0F, 1.0F, 0.0F,
-                0.0F, 16.0F,
-                16.0F, 16.0F,
-                16.0F, 0.0F,
-                0.0F, 0.0F);
-        addBakedQuad(quads, sprite, Direction.SOUTH, xDegrees, yDegrees,
-                0.0F, 0.0F, 1.0F,
-                1.0F, 0.0F, 1.0F,
-                1.0F, 1.0F, 1.0F,
-                0.0F, 1.0F, 1.0F,
-                0.0F, 16.0F,
-                16.0F, 16.0F,
-                16.0F, 0.0F,
-                0.0F, 0.0F);
-        addBakedNorthOuterCorner(quads, sprite, xDegrees, yDegrees);
-        addBakedEastInnerCorner(quads, sprite, xDegrees, yDegrees);
-        addBakedInnerSlopeFaces(quads, sprite, xDegrees, yDegrees);
-    }
-
-    private static void addBakedNorthOuterCorner(List<BakedQuad> quads, Sprite sprite, int xDegrees, int yDegrees) {
-        for (int i = 0; i < SIDE_STEPS; i++) {
-            float x0 = (float) i / SIDE_STEPS;
-            float x1 = (float) (i + 1) / SIDE_STEPS;
-            float h0 = 1.0F - x0;
-            float h1 = Math.max(1.0F - x1, 0.001F);
-            addBakedQuad(quads, sprite, Direction.NORTH, xDegrees, yDegrees,
-                    x0, 0.0F, 0.0F,
-                    x0, h0, 0.0F,
-                    x1, h1, 0.0F,
-                    x1, 0.0F, 0.0F,
-                    x0 * 16.0F, 16.0F,
-                    x0 * 16.0F, (1.0F - h0) * 16.0F,
-                    x1 * 16.0F, (1.0F - h1) * 16.0F,
-                    x1 * 16.0F, 16.0F);
-        }
-    }
-
-    private static void addBakedWestOuterCorner(List<BakedQuad> quads, Sprite sprite, int xDegrees, int yDegrees) {
-        for (int i = 0; i < SIDE_STEPS; i++) {
-            float z0 = (float) i / SIDE_STEPS;
-            float z1 = (float) (i + 1) / SIDE_STEPS;
-            float h0 = 1.0F - z0;
-            float h1 = Math.max(1.0F - z1, 0.001F);
-            addBakedQuad(quads, sprite, Direction.WEST, xDegrees, yDegrees,
-                    0.0F, 0.0F, z0,
-                    0.0F, 0.0F, z1,
-                    0.0F, h1, z1,
-                    0.0F, h0, z0,
-                    z0 * 16.0F, 16.0F,
-                    z1 * 16.0F, 16.0F,
-                    z1 * 16.0F, (1.0F - h1) * 16.0F,
-                    z0 * 16.0F, (1.0F - h0) * 16.0F);
-        }
-    }
-
-    private static void addBakedOuterSlopeFaces(List<BakedQuad> quads, Sprite sprite, int xDegrees, int yDegrees) {
-        for (int i = 0; i < SIDE_STEPS; i++) {
-            float t0 = (float) i / SIDE_STEPS;
-            float t1 = (float) (i + 1) / SIDE_STEPS;
-            float h0 = 1.0F - t0;
-            float h1 = Math.max(1.0F - t1, 0.001F);
-            addBakedQuad(quads, sprite, Direction.UP, xDegrees, yDegrees,
-                    t0, h0, 0.0F,
-                    t0, h0, t0,
-                    t1, h1, t1,
-                    t1, h1, 0.0F,
-                    t0 * 16.0F, 0.0F,
-                    t0 * 16.0F, t0 * 16.0F,
-                    t1 * 16.0F, t1 * 16.0F,
-                    t1 * 16.0F, 0.0F);
-            addBakedQuad(quads, sprite, Direction.UP, xDegrees, yDegrees,
-                    0.0F, h0, t0,
-                    0.0F, h1, t1,
-                    t1, h1, t1,
-                    t0, h0, t0,
-                    0.0F, t0 * 16.0F,
-                    0.0F, t1 * 16.0F,
-                    t1 * 16.0F, t1 * 16.0F,
-                    t0 * 16.0F, t0 * 16.0F);
-        }
-    }
-
-    private static void addBakedEastInnerCorner(List<BakedQuad> quads, Sprite sprite, int xDegrees, int yDegrees) {
-        for (int i = 0; i < SIDE_STEPS; i++) {
-            float z0 = (float) i / SIDE_STEPS;
-            float z1 = (float) (i + 1) / SIDE_STEPS;
-            float h0 = z0;
-            float h1 = Math.max(z1, 0.001F);
-            addBakedQuad(quads, sprite, Direction.EAST, xDegrees, yDegrees,
-                    1.0F, 0.0F, z0,
-                    1.0F, h0, z0,
-                    1.0F, h1, z1,
-                    1.0F, 0.0F, z1,
-                    z0 * 16.0F, 16.0F,
-                    z0 * 16.0F, (1.0F - h0) * 16.0F,
-                    z1 * 16.0F, (1.0F - h1) * 16.0F,
-                    z1 * 16.0F, 16.0F);
-        }
-    }
-
-    private static void addBakedInnerSlopeFaces(List<BakedQuad> quads, Sprite sprite, int xDegrees, int yDegrees) {
-        for (int i = 0; i < SIDE_STEPS; i++) {
-            float t0 = (float) i / SIDE_STEPS;
-            float t1 = (float) (i + 1) / SIDE_STEPS;
-            float h0 = 1.0F - t0;
-            float h1 = Math.max(1.0F - t1, 0.001F);
-            addBakedQuad(quads, sprite, Direction.UP, xDegrees, yDegrees,
-                    t0, h0, 0.0F,
-                    t0, h0, h0,
-                    t1, h1, h1,
-                    t1, h1, 0.0F,
-                    t0 * 16.0F, 0.0F,
-                    t0 * 16.0F, h0 * 16.0F,
-                    t1 * 16.0F, h1 * 16.0F,
-                    t1 * 16.0F, 0.0F);
-            addBakedQuad(quads, sprite, Direction.UP, xDegrees, yDegrees,
-                    1.0F - h0, h0, h0,
-                    1.0F, h0, h0,
-                    1.0F, h1, h1,
-                    1.0F - h1, h1, h1,
-                    (1.0F - h0) * 16.0F, h0 * 16.0F,
-                    16.0F, h0 * 16.0F,
-                    16.0F, h1 * 16.0F,
-                    (1.0F - h1) * 16.0F, h1 * 16.0F);
-        }
     }
 
     @Override

@@ -344,6 +344,14 @@
     "erydon:selenephos_rosette_silver_slope_steep_upper",
     "erydon:selenephos_rosette_silver_slope_vertical",
     "erydon:selenephos_rosette_silver_slope_vertical_shallow_broad",
-    "erydon:selenephos_rosette_silver_slope_vertical_shallow_narrow"
+    "erydon:selenephos_rosette_silver_slope_vertical_shallow_narrow",
+    "erydon:selenephos_aged_coping_georgian",
+    "erydon:selenephos_ashlar_coping_georgian",
+    "erydon:selenephos_brazier",
+    "erydon:selenephos_coping_georgian",
+    "erydon:selenephos_diaphanes_light_pendant",
+    "erydon:selenephos_hewn_coping_georgian",
+    "erydon:selenephos_oil_burner",
+    "erydon:selenephos_rusticated_coping_georgian"
   ]
 }

@@ -78,7 +78,7 @@ public final class HighPolishMixinLaunchProbe implements PreLaunchEntrypoint {
             verifyMetalPreflightOrdering();
             verifyMetalSamplerProfiles(emptyShader);
             verifyInlayVertexTransport();
-            System.out.println("ERYDON_HIGH_POLISH_MIXIN_PROBE_OK: resources installed; ID preflight precedes base programs; parsed map reused; metal preflight precedes every source read; metal sampler profile gate executed; multiface placement hook applied; inlay substrate short written by real Iris encoder with all other bytes preserved.");
+            System.out.println("ERYDON_HIGH_POLISH_MIXIN_PROBE_OK: resources installed; ID preflight precedes base programs; parsed map reused; metal preflight precedes every source read; metal sampler profile gate executed; multiface placement hook applied; ordinary and diagonal-ribbon substrate shorts written by real Iris encoder with all other bytes preserved.");
             System.exit(0);
         } catch (Throwable failure) {
             failure.printStackTrace();
@@ -203,6 +203,45 @@ public final class HighPolishMixinLaunchProbe implements PreLaunchEntrypoint {
             for (int i = 0; i < 160; i++) {
                 if (i % 40 != 34 && i % 40 != 35) require(MemoryUtil.memGetByte(start + i) == baseline[i],
                         "Substrate transport changed unrelated vertex byte " + i);
+            }
+            var ribbonEmitter = (net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter) java.lang.reflect.Proxy.newProxyInstance(
+                    HighPolishMixinLaunchProbe.class.getClassLoader(),
+                    new Class[]{net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter.class}, (proxy, method, arguments) -> {
+                        require(method.getName().equals("emit"), "Ribbon transport unexpectedly touched emitter state");
+                        require(InlaySubstrateTransport.currentRecord() == 17 && InlaySubstrateTransport.currentRibbon(),
+                                "Ribbon emission lost its phase or projection flag");
+                        writer.write(start, material, vertices, 3);
+                        return proxy;
+                    });
+            InlaySubstrateTransport.emitRibbon(ribbonEmitter, 17);
+            for (int vertex = 0; vertex < 4; vertex++) require(MemoryUtil.memGetShort(start + vertex * 40L + 34)
+                            == InlaySubstrateTransport.encodedRenderType(17, true),
+                    "Actual Iris encoder did not retain the ribbon flag and phase");
+            for (int i = 0; i < 160; i++) {
+                if (i % 40 != 34 && i % 40 != 35) require(MemoryUtil.memGetByte(start + i) == baseline[i],
+                        "Ribbon transport changed unrelated vertex byte " + i);
+            }
+            require(InlaySubstrateTransport.currentRecord() == -1 && !InlaySubstrateTransport.currentRibbon(),
+                    "Ribbon metadata leaked out of its synchronous emission");
+            previous = InlaySubstrateTransport.pushRecord(43);
+            try {
+                InlaySubstrateTransport.emitRibbon(ribbonEmitter, 17);
+                require(InlaySubstrateTransport.currentRecord() == 43 && !InlaySubstrateTransport.currentRibbon(),
+                        "Nested ribbon did not restore its ordinary substrate payload");
+                var failingEmitter = (net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter) java.lang.reflect.Proxy.newProxyInstance(
+                        HighPolishMixinLaunchProbe.class.getClassLoader(),
+                        new Class[]{net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter.class}, (proxy, method, arguments) -> {
+                            throw new IllegalStateException("Expected ribbon emission failure");
+                        });
+                try {
+                    InlaySubstrateTransport.emitRibbon(failingEmitter, 17);
+                    throw new AssertionError("The emitter exception was swallowed");
+                } catch (IllegalStateException expected) {
+                    require(InlaySubstrateTransport.currentRecord() == 43 && !InlaySubstrateTransport.currentRibbon(),
+                            "Failed ribbon emission did not restore its caller's payload");
+                }
+            } finally {
+                InlaySubstrateTransport.restoreRecord(previous);
             }
             for (int i = 0; i < 16; i++) {
                 require(MemoryUtil.memGetByte(memory + i) == 0x5a && MemoryUtil.memGetByte(start + 160 + i) == 0x5a,

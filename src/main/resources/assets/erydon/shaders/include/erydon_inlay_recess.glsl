@@ -5,6 +5,32 @@ vec2 erydonInlayShadowLocal = vec2(0.0);
 float erydonInlayShadowBaseFade = 0.0;
 float erydonInlayShadowBaseHeight = 1.0;
 float erydonInlayCavityDepth = 0.0;
+mat2 erydonInlayRibbonToBase = mat2(1.0);
+mat2 erydonInlayRibbonNormal = mat2(1.0);
+vec2 erydonInlayRibbonOffset = vec2(0.0);
+vec2 erydonInlayRibbonScale = vec2(1.0);
+
+// Perimeter ribbons rotate their albedo, while the stone below remains world-phased.
+// Derivatives recover the affine UV transform without another vertex-format field.
+void erydonInlayRibbonFrame(vec2 local) {
+    if (erydonInlayRibbon != 1) return;
+    erydonInlayRibbonOffset = erydonInlayBaseLocal - local;
+    mat2 ribbon = mat2(dFdx(local), dFdy(local));
+    float determinantValue = ribbon[0].x * ribbon[1].y - ribbon[1].x * ribbon[0].y;
+    if (abs(determinantValue) < 0.000000000001) return;
+    mat2 inverseRibbon = mat2(ribbon[1].y, -ribbon[0].y, -ribbon[1].x, ribbon[0].x) / determinantValue;
+    erydonInlayRibbonToBase = mat2(dFdx(erydonInlayBaseLocal), dFdy(erydonInlayBaseLocal)) * inverseRibbon;
+    erydonInlayRibbonOffset = erydonInlayBaseLocal - erydonInlayRibbonToBase * local;
+    erydonInlayRibbonScale = max(vec2(length(erydonInlayRibbonToBase[0]), length(erydonInlayRibbonToBase[1])), vec2(0.000001));
+    erydonInlayRibbonNormal = mat2(erydonInlayRibbonToBase[0] / erydonInlayRibbonScale.x,
+                                  erydonInlayRibbonToBase[1] / erydonInlayRibbonScale.y);
+}
+
+vec2 erydonInlayGradient(vec2 gradient, vec2 scale) {
+    if (erydonInlayRibbon != 1) return gradient * scale;
+    vec2 size = vec2(erydonMetalBounds.zw), atlas = vec2(erydonMetalAtlas);
+    return (erydonInlayRibbonToBase * (gradient * atlas / size)) * size * scale / atlas;
+}
 
 // A mask cell is a groove opening; empty cells inside the tile are stone walls.
 // DDA finds the first wall exactly instead of stepping across one-pixel grooves.
@@ -59,7 +85,10 @@ vec4 erydonInlaySubstrateBounds(vec2 local) {
     vec2 tiles = floor(local);
     if (all(equal(tiles, vec2(0.0)))) return bounds;
     vec2 repeatDelta;
-    if (!erydonCtmPomRepeatDelta(tiles, repeatDelta)) return bounds;
+    // Ribbons already use the canonical world U/V basis above. Their rotated
+    // tangent cannot pass the ordinary axis-aligned repeat-delta guard.
+    if (erydonInlayRibbon == 1) repeatDelta = tiles;
+    else if (!erydonCtmPomRepeatDelta(tiles, repeatDelta)) return bounds;
     float record = float(erydonInlaySubstrateRecord);
     float family = floor(record / 36.0) * 36.0;
     float phase = record - family;
@@ -70,6 +99,7 @@ vec4 erydonInlaySubstrateBounds(vec2 local) {
 }
 
 vec2 erydonInlaySubstrateUv(vec2 local, out vec2 gradientScale) {
+    if (erydonInlayRibbon == 1) local = erydonInlayRibbonToBase * local + erydonInlayRibbonOffset;
     vec4 bounds = erydonInlaySubstrateBounds(local);
     // Explicit gradients retain the right mip, while clamped centres prevent
     // the displaced ray from reading an unrelated neighbouring atlas sprite.
@@ -81,17 +111,19 @@ vec2 erydonInlaySubstrateUv(vec2 local, out vec2 gradientScale) {
 float erydonInlaySubstrateHeight(vec2 local) {
     vec2 scale;
     vec2 uv = erydonInlaySubstrateUv(local, scale);
-    return textureGrad(normals, uv, dcdx * scale, dcdy * scale).a;
+    return textureGrad(normals, uv, erydonInlayGradient(dcdx, scale), erydonInlayGradient(dcdy, scale)).a;
 }
 
 void erydonInlayTrace(inout vec2 sampledUv, inout vec4 color, float distanceToSurface) {
     erydonInlayCavityDepth = 0.0;
     vec2 local = (texCoord * vec2(erydonMetalAtlas) - vec2(erydonMetalBounds.xy))
                   / vec2(erydonMetalBounds.zw);
+    erydonInlayRibbonFrame(local);
     float fade = clamp(1.0 - distanceToSurface * distanceToSurface
             / (ERYDON_INLAY_POM_DISTANCE * ERYDON_INLAY_POM_DISTANCE), 0.0, 1.0);
     vec2 viewRay = viewVector.xy / max(-viewVector.z, 0.05);
     if (viewVector.z >= 0.0) viewRay = vec2(0.0);
+    viewRay /= erydonInlayRibbonScale;
     // Reproduce the substrate's own relief before descending into its groove.
     // Thirty-two coarse steps plus five refinements bound work independently
     // of CU's global POM quality. Flat substrate exits on its first sample.
@@ -133,11 +165,18 @@ void erydonInlayTrace(inout vec2 sampledUv, inout vec4 color, float distanceToSu
     }
     vec2 scale;
     vec2 baseUv = erydonInlaySubstrateUv(hit, scale);
-    vec4 baseColor = textureGrad(tex, baseUv, dcdx * scale, dcdy * scale);
-    erydonInlayNormalSample = textureGrad(normals, baseUv, dcdx * scale, dcdy * scale);
+    vec2 baseDx = erydonInlayGradient(dcdx, scale), baseDy = erydonInlayGradient(dcdy, scale);
+    vec4 baseColor = textureGrad(tex, baseUv, baseDx, baseDy);
+    erydonInlayNormalSample = textureGrad(normals, baseUv, baseDx, baseDy);
+    if (erydonInlayRibbon == 1) {
+        // Normal RGB belongs to the stone's UV frame, not the rotated ribbon.
+        vec2 baseNormal = erydonInlayNormalSample.rg * 2.0 - 1.0;
+        erydonInlayNormalSample.rg = vec2(dot(erydonInlayRibbonNormal[0], baseNormal),
+                dot(erydonInlayRibbonNormal[1], baseNormal)) * 0.5 + 0.5;
+    }
     erydonInlayShadowLocal = hit;
     erydonInlayShadowBaseHeight = erydonInlayNormalSample.a;
-    erydonInlaySpecularSample = textureGrad(specular, baseUv, dcdx * scale, dcdy * scale);
+    erydonInlaySpecularSample = textureGrad(specular, baseUv, baseDx, baseDy);
     sampledUv = baseUv;
     if (coverage > 0.0) {
         vec2 overlayPixel = clamp(hit * vec2(erydonMetalBounds.zw), vec2(0.5), vec2(erydonMetalBounds.zw) - vec2(0.5));
@@ -166,7 +205,7 @@ float erydonInlayShadow(vec3 lightTangent, float dither) {
         for (int i = 0; i < 4 && shadow >= 0.01; i++) {
             float stepLC = 0.025 * (float(i) + dither);
             float currentHeight = erydonInlayShadowBaseHeight + direction.z * stepLC;
-            float offsetHeight = erydonInlaySubstrateHeight(erydonInlayShadowLocal + direction.xy * stepLC);
+            float offsetHeight = erydonInlaySubstrateHeight(erydonInlayShadowLocal + direction.xy / erydonInlayRibbonScale * stepLC);
             shadow *= clamp(1.0 - (offsetHeight - currentHeight) * 4.0, 0.0, 1.0);
         }
         shadow = mix(1.0, shadow, erydonInlayShadowBaseFade);
@@ -177,7 +216,7 @@ float erydonInlayShadow(vec3 lightTangent, float dither) {
         if (lightTangent.z <= 0.0) return 0.0;
         vec2 opening;
         vec3 wall;
-        vec2 ray = lightTangent.xy / max(lightTangent.z, 0.05)
+        vec2 ray = lightTangent.xy / erydonInlayRibbonScale / max(lightTangent.z, 0.05)
                 * erydonInlayCavityDepth * vec2(erydonMetalBounds.zw);
         shadow *= erydonInlayTraceGroove(erydonInlayShadowLocal, ray, opening, wall);
     }

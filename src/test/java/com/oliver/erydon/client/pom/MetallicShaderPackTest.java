@@ -206,6 +206,10 @@ class MetallicShaderPackTest {
         assertEquals(recessed, result.fragment().contains("// ERYDON recessed inlay substrate"),
                 label + ": unsupported POM/normal paths must keep the original overlay fallback");
         if (recessed) {
+            assertTrue(result.vertex().contains("erydonInlayDecodeRecord(mc_Entity.y, erydonInlayRibbon)"));
+            assertTrue(result.vertex().contains("erydonInlayProjectBase(erydonWorld, at_midBlock.xyz, gl_Normal)"));
+            assertTrue(result.vertex().contains("+ fract(cameraPosition)"), "World-cell UVs must avoid far-origin precision loss");
+            assertTrue(result.fragment().contains("erydonInlayRibbonFrame(local)"));
             int wall = result.fragment().indexOf("normalM = normalize(erydonInlayWallNormal * tbnMatrix)");
             int lighting = result.fragment().indexOf("mat3 lightmapTBN", result.fragment().indexOf("void GetCustomMaterials("));
             assertTrue(wall >= 0, label + ": cavity wall shading normal");

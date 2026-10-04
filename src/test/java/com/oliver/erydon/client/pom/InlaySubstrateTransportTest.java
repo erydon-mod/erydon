@@ -52,6 +52,20 @@ class InlaySubstrateTransportTest {
         assertEquals(-1, InlaySubstrateTransport.currentRecord(), "Shader path has not passed preflight");
     }
 
+    @Test void ribbonFlagRetainsEveryEncodablePhaseWithoutOverlappingOrdinaryQuads() {
+        for (int record = 0; record < InlaySubstrateTransport.MAX_RECORD; record++) {
+            short encoded = InlaySubstrateTransport.encodedRenderType(record, true);
+            int payload = -encoded - 2;
+            assertTrue(encoded < InlaySubstrateTransport.encodedRenderType(InlaySubstrateTransport.MAX_RECORD));
+            assertEquals(InlaySubstrateTransport.RIBBON_FLAG, payload & InlaySubstrateTransport.RIBBON_FLAG);
+            assertEquals(record, payload & (InlaySubstrateTransport.RIBBON_FLAG - 1));
+            assertEquals(InlaySubstrateTransport.encodedRenderType(record),
+                    InlaySubstrateTransport.encodedRenderType(record, false));
+        }
+        assertThrows(IllegalArgumentException.class, () -> InlaySubstrateTransport.encodedRenderType(-1, true));
+        assertThrows(IllegalArgumentException.class, () -> InlaySubstrateTransport.encodedRenderType(InlaySubstrateTransport.MAX_RECORD, true));
+    }
+
     @Test void onlyVerifiedRendererVersionsAreEligible() {
         assertTrue(InlaySubstrateTransport.supportedVersions("1.7.6+mc1.20.1", "0.5.13+mc1.20.1", "1.0.36+mc1.20.1"));
         assertFalse(InlaySubstrateTransport.supportedVersions("1.8.0+mc1.20.1", "0.5.13+mc1.20.1", "1.0.36+mc1.20.1"));

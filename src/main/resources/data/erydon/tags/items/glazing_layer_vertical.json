@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "erydon:glazing_bronze_layer_vertical",
+    "erydon:glazing_crystal_layer_vertical",
+    "erydon:glazing_silver_layer_vertical",
+    "erydon:glazing_tinted_layer_vertical"
+  ]
+}

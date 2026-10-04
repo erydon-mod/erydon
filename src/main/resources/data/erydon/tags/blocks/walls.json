@@ -396,6 +396,9 @@
     "erydon:solistra_rusticated_wall",
     "erydon:striatus_hewn_wall",
     "erydon:striatus_rock_wall",
-    "erydon:striatus_rusticated_wall"
+    "erydon:striatus_rusticated_wall",
+    "erydon:aterzon_wall",
+    "erydon:porphyros_wall",
+    "erydon:selenephos_wall"
   ]
 }

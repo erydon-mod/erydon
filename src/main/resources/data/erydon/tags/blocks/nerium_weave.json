@@ -80,6 +80,10 @@
     "erydon:striatus_nerium_weave_grout_stairs_shallow_bottom",
     "erydon:striatus_nerium_weave_grout_stairs_shallow_top",
     "erydon:striatus_nerium_weave_grout_slice_vertical",
-    "erydon:striatus_nerium_weave_grout_wall"
+    "erydon:striatus_nerium_weave_grout_wall",
+    "erydon:glacium_nerium_weave_bronze_wall_georgian",
+    "erydon:glacium_nerium_weave_grout_wall_georgian",
+    "erydon:striatus_nerium_weave_bronze_wall_georgian",
+    "erydon:striatus_nerium_weave_grout_wall_georgian"
   ]
 }

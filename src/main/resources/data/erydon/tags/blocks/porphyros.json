@@ -337,6 +337,13 @@
     "erydon:porphyros_rosette_silver_slope_steep_upper",
     "erydon:porphyros_rosette_silver_slope_vertical",
     "erydon:porphyros_rosette_silver_slope_vertical_shallow_broad",
-    "erydon:porphyros_rosette_silver_slope_vertical_shallow_narrow"
+    "erydon:porphyros_rosette_silver_slope_vertical_shallow_narrow",
+    "erydon:porphyros_aged_coping_georgian",
+    "erydon:porphyros_ashlar_coping_georgian",
+    "erydon:porphyros_brazier",
+    "erydon:porphyros_coping_georgian",
+    "erydon:porphyros_hewn_coping_georgian",
+    "erydon:porphyros_oil_burner",
+    "erydon:porphyros_rusticated_coping_georgian"
   ]
 }

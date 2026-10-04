@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "erydon:glazing_bronze_block",
+    "erydon:glazing_crystal_block",
+    "erydon:glazing_silver_block",
+    "erydon:glazing_tinted_block"
+  ]
+}

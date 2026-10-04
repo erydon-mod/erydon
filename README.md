@@ -33,6 +33,9 @@ Official Collection resource packs are distributed separately so this source
 repository remains a practical size. Use only releases published by ERYDON's
 official project pages.
 
+IntelliJ's development client includes REI for testing Creative/recipe searches.
+Reload the Gradle project after dependency changes, then restart the client.
+
 ## Build prerequisites
 
 - A 64-bit JDK 17

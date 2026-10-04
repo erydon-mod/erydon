@@ -49,17 +49,17 @@ LANGUAGE_PROFILE_NAMES = {
 
 TOOLTIPS = {
     "de_de.json": (
-        "Baut automatisch gotische Bögen mit 1-3 Blöcken Breite in beliebiger Höhe.",
+        "Baut automatisch gotische Bögen mit 1-3 Metern Breite in beliebiger Höhe.",
         "Verwendet einen einfachen Rahmen ohne den romanischen Säulenstil.",
         "Nutze /recalc, um Gruppen neu aufzubauen.",
     ),
     "en_us.json": (
-        "Auto-assembles Gothic arches 1-3 blocks wide at any height.",
+        "Auto-assembles Gothic arches 1-3 metres wide at any height.",
         "Uses a simple frame without the Romanesque column style.",
         "Use /recalc to rebuild clusters.",
     ),
     "es_es.json": (
-        "Ensambla automáticamente arcos góticos de 1 a 3 bloques de ancho a cualquier altura.",
+        "Ensambla automáticamente arcos góticos de 1 a 3 metros de ancho a cualquier altura.",
         "Utiliza un marco sencillo sin el estilo de columnas románico.",
         "Usa /recalc para reconstruir los grupos.",
     ),

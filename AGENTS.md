@@ -43,6 +43,8 @@ Stop before committing or pushing if:
 
 ## Repository hygiene
 
+- When adding or editing blocks, verify Synapheia CTM coverage for every material and finish, native resources and the active Collection pack, and the final placed model chain. Check texture phase across joins and all facings. Older packs may override material rules without new block IDs; dedicated native family rules can reuse their tiles. Report separately any in-game visual check still required.
+
 Codex is responsible for routine Git and GitHub maintenance for this repository:
 
 - Keep commits focused.

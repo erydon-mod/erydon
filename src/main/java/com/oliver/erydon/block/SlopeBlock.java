@@ -32,10 +32,8 @@ import java.util.Locale;
  * - facing: horizontal
  * - half: bottom/top (top is upside-down placement)
  *
- * Blockstate rotation convention assumed:
- * - straight + inner_left + outer_left use y based on facing
- * - inner_right + outer_right use y based on facing.rotateYClockwise()
- * - half=top uses x=180 and keeps the same y mapping
+ * Rendering and cached interaction shapes share SlopeOrientation.
+ * The top half rotates 180 degrees around X before its Y orientation.
  */
 public class SlopeBlock extends Block implements Waterloggable {
 
@@ -346,10 +344,10 @@ public class SlopeBlock extends Block implements Waterloggable {
         // Y rotation (0/90/180/270): rotate clockwise around vertical axis
         int ySteps = (((yRot % 360) + 360) % 360) / 90;
         for (int s = 0; s < ySteps; s++) {
-            double nMinX = minZ;
-            double nMaxX = maxZ;
-            double nMinZ = 1.0D - maxX;
-            double nMaxZ = 1.0D - minX;
+            double nMinX = 1.0D - maxZ;
+            double nMaxX = 1.0D - minZ;
+            double nMinZ = minX;
+            double nMaxZ = maxX;
             minX = nMinX; maxX = nMaxX;
             minZ = nMinZ; maxZ = nMaxZ;
         }
@@ -357,36 +355,9 @@ public class SlopeBlock extends Block implements Waterloggable {
         return VoxelShapes.union(out, VoxelShapes.cuboid(minX, minY, minZ, maxX, maxY, maxZ));
     }
 
-    /**
-     * Rotation mapping to match your blockstate convention:
-     * - straight + LEFT shapes: y based on facing
-     * - RIGHT shapes: y based on facing.rotateYClockwise()
-     */
-    // replace lines 334–355 with:
-    private static int modelYRotationDegrees(Direction facing, BlockHalf half, SlopeShape shape) {
-        Direction f = facing;
-
-        // right-hand shapes use facing.rotateYClockwise() (matches your blockstates)
-        if (shape == SlopeShape.INNER_RIGHT || shape == SlopeShape.OUTER_RIGHT) {
-            f = f.rotateYClockwise();
-        }
-
-        int y = yForFacing(f);
-
-        // global OUTER CCW (matches your blockstates baseline)
-        if (shape == SlopeShape.OUTER_LEFT || shape == SlopeShape.OUTER_RIGHT) {
-            y = (y + 270) % 360; // -90 (CCW)
-        }
-
-        // keep your current north/south baseline correction
-        if (facing == Direction.NORTH || facing == Direction.SOUTH) {
-            y = (y + 180) % 360;
-        }
-
-        // apply the very specific strike-only overrides
-        y = (y + strikeExtraYDegrees(facing, half, shape)) % 360;
-
-        return y;
+    /** The placed renderer, preview, outline and collision use the same mapping. */
+    public static int modelYRotationDegrees(Direction facing, BlockHalf half, SlopeShape shape) {
+        return SlopeOrientation.standard(facing,half,shape);
     }
 
     private static int strikeExtraYDegrees(Direction facing, BlockHalf half, SlopeShape shape) {

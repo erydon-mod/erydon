@@ -379,6 +379,13 @@
     "erydon:rosinium_rosette_silver_slope_steep_upper",
     "erydon:rosinium_rosette_silver_slope_vertical",
     "erydon:rosinium_rosette_silver_slope_vertical_shallow_broad",
-    "erydon:rosinium_rosette_silver_slope_vertical_shallow_narrow"
+    "erydon:rosinium_rosette_silver_slope_vertical_shallow_narrow",
+    "erydon:rosinium_aged_coping_georgian",
+    "erydon:rosinium_ashlar_coping_georgian",
+    "erydon:rosinium_brazier",
+    "erydon:rosinium_coping_georgian",
+    "erydon:rosinium_hewn_coping_georgian",
+    "erydon:rosinium_oil_burner",
+    "erydon:rosinium_rusticated_coping_georgian"
   ]
 }

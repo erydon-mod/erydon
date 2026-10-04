@@ -1,0 +1,50 @@
+// Real block-state, registration and raycast checks, without opening a game window.
+tasks.register('verifyCopingPlacement', JavaExec) {
+    group = 'verification'
+    description = 'Checks coping support profiles, stacked steep placement, transforms and targeting under Fabric.'
+    dependsOn tasks.named('testClasses')
+    dependsOn tasks.named('configureLaunch')
+    def fixture = layout.buildDirectory.dir('coping-placement-probe')
+    classpath = sourceSets.test.runtimeClasspath
+    // The named probe is a directory, so discover it on the classpath without
+    // attempting the intermediary-to-named JAR remap used for companion mods.
+    classpath += files(fixture.map { new File(it.asFile, 'probe-mod') })
+    // Optional compatibility proof against an existing companion JAR; never packages or installs one.
+    def legacyCapitalJar = providers.gradleProperty('erydon.capitalCompat.legacyJar')
+    mainClass = 'net.fabricmc.loader.impl.launch.knot.KnotClient'
+    maxHeapSize = '2G'
+    doFirst {
+        def root = fixture.get().asFile
+        root.mkdirs()
+        workingDir root
+        def mod = new File(root, 'probe-mod')
+        mod.mkdirs()
+        new File(mod, 'fabric.mod.json').text = groovy.json.JsonOutput.toJson([
+                schemaVersion: 1, id: 'erydon_coping_placement_probe', version: '1.0.0',
+                environment: 'client', entrypoints: [preLaunch: ['com.oliver.erydon.block.CopingPlacementLaunchProbe']]
+        ])
+        systemProperty 'fabric.development', 'true'
+        def extraMods = []
+        // Only this probe sees the existing intermediary EMI dependency.
+        // Loader remaps it into its cache; other Fabric probes retain their classpaths.
+        def viewerEmi = configurations.viewerProbeEmi.singleFile
+        if (!viewerEmi.isFile()) {
+            throw new GradleException('The existing full EMI test dependency is missing')
+        }
+        extraMods.add(viewerEmi.absolutePath)
+        systemProperty 'fabric.remapClasspathFile', file('.gradle/loom-cache/remapClasspath.txt').absolutePath
+        if (legacyCapitalJar.isPresent()) {
+            def companion = file(legacyCapitalJar.get())
+            if (!companion.isFile() || !companion.name.endsWith('.jar')) {
+                throw new GradleException('erydon.capitalCompat.legacyJar must name an existing companion JAR')
+            }
+            extraMods.add(companion.absolutePath)
+            systemProperty 'erydon.capitalCompat.legacyProof', 'true'
+            systemProperty 'mixin.debug.export', 'true'
+            systemProperty 'mixin.debug.export.filter', 'net.minecraft.item.DebugStickItem'
+        }
+        systemProperty 'fabric.addMods', extraMods.join(File.pathSeparator)
+        args '--gameDir', root.absolutePath, '--version', '1.20.1', '--accessToken', '0'
+    }
+}
+tasks.named('check') { dependsOn tasks.named('verifyCopingPlacement') }

@@ -5,6 +5,7 @@
   "plugin": "com.oliver.erydon.mixin.ErydonMixinPlugin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "CopingRaycastMixin",
     "BlockItemMixin",
     "DebugStickItemMixin",
     "WorldMixin",

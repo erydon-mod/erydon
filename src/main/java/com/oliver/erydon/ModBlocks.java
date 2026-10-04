@@ -26399,6 +26399,10 @@ public final class ModBlocks {
         return block;
     }
 
+    private static void registerCopings() {
+        CopingBlocks.register(ModBlocks::sourceBlock, ModBlocks::registerBlock);
+    }
+
     private static Block createPendantLight() {
         return new LightPendantBlock(AbstractBlock.Settings.copy(AGANITE_BLOCK).nonOpaque().luminance(LightPendantBlock::luminance));
     }
@@ -26424,6 +26428,10 @@ private static Block registerBlock(String name, Block block) {
 
     private static Item registerBlockItem(String name, Block block) {
         Item.Settings settings = new Item.Settings();
+        if (block instanceof CopingBlock) {
+            return Registry.register(Registries.ITEM, new Identifier(Erydon.MOD_ID, name),
+                    new com.oliver.erydon.item.CopingItem(block, settings));
+        }
         if (block instanceof LayerBlock) {
             return Registry.register(Registries.ITEM, new Identifier(Erydon.MOD_ID, name),
                     new com.oliver.erydon.item.ErydonLayerItem(block, settings));
@@ -26568,5 +26576,6 @@ private static Block registerBlock(String name, Block block) {
         initStriatusNeriumWeave();
         initOverlayShapeFamilies();
         initSlitherBlocks();
+        registerCopings();
     }
 }

@@ -63,6 +63,12 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
     private static final Pattern GOTHIC_ALCOVE_COMPONENT = Pattern.compile("^block/alcove/gothic/(.+)_alcove_gothic_(back|sides|base|top|icon|double_side_left|double_side_right|double_top_left|double_top_right|triple_side_left|triple_side_center|triple_side_right|triple_top_left|triple_top_center|triple_top_right)(_aged)?$");
     private static final Pattern GOTHIC_ARCH_COMPONENT = Pattern.compile("^block/arch/gothic/(.+)_arch_gothic_(corner_small|corner_medium|corner_large_upper|corner_large_lower|side_small|side_medium|side_large|top_large|icon)(_aged)?$");
     private static final Map<String, Identifier> AUTHORING_MODELS = Map.ofEntries(
+            Map.entry("coping_georgian/flat", new Identifier(Erydon.MOD_ID, "authoring_models/block/coping/georgian/coping_georgian_flat.json")),
+            Map.entry("coping_georgian/slope", new Identifier(Erydon.MOD_ID, "authoring_models/block/coping/georgian/coping_georgian_slope.json")),
+            Map.entry("coping_georgian/shallow_lower", new Identifier(Erydon.MOD_ID, "authoring_models/block/coping/georgian/coping_georgian_shallow_lower.json")),
+            Map.entry("coping_georgian/shallow_upper", new Identifier(Erydon.MOD_ID, "authoring_models/block/coping/georgian/coping_georgian_shallow_upper.json")),
+            Map.entry("coping_georgian/steep_lower", new Identifier(Erydon.MOD_ID, "authoring_models/block/coping/georgian/coping_georgian_steep_lower.json")),
+            Map.entry("coping_georgian/steep_upper", new Identifier(Erydon.MOD_ID, "authoring_models/block/coping/georgian/coping_georgian_steep_upper.json")),
             Map.entry("column_gothic/plinth", new Identifier(Erydon.MOD_ID, "authoring_models/block/column/gothic/column_gothic_plinth.json")),
             Map.entry("column_gothic/base", new Identifier(Erydon.MOD_ID, "authoring_models/block/column/gothic/column_gothic_base.json")),
             Map.entry("column_gothic/pillar", new Identifier(Erydon.MOD_ID, "authoring_models/block/column/gothic/column_gothic_pillar.json")),

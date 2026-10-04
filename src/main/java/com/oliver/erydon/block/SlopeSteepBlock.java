@@ -76,6 +76,8 @@ public class SlopeSteepBlock extends HorizontalFacingBlock implements Waterlogga
 
     private final Variant variant;
 
+    public Variant variant() { return variant; }
+
     public SlopeSteepBlock(Settings settings, Variant variant) {
         super(settings);
         this.variant = variant;
@@ -291,10 +293,7 @@ public class SlopeSteepBlock extends HorizontalFacingBlock implements Waterlogga
             };
 
             for (Direction facing : HORIZONTALS) {
-                int steps = yStepsForFacing(facing);
-                if (shape == SlopeShape.INNER_RIGHT || shape == SlopeShape.OUTER_RIGHT) {
-                    steps = (steps + 1) & 3;
-                }
+                int steps = Math.floorMod(modelYRotation(facing,shape,half),360)/90;
 
                 cache[shape.ordinal()][horizontalIndex(facing)] = rotateShapeSteps(base, steps);
             }
@@ -312,7 +311,7 @@ public class SlopeSteepBlock extends HorizontalFacingBlock implements Waterlogga
 
             out[0] = VoxelShapes.union(
                     out[0],
-                    VoxelShapes.cuboid(minX, newMinY, minZ, maxX, newMaxY, maxZ)
+                    VoxelShapes.cuboid(minX, newMinY, 1-maxZ, maxX, newMaxY, 1-minZ)
             );
         });
 
@@ -490,6 +489,10 @@ public class SlopeSteepBlock extends HorizontalFacingBlock implements Waterlogga
             case NORTH -> 3;
             default -> 0;
         };
+    }
+
+    public static int modelYRotation(Direction facing,SlopeShape shape,BlockHalf half) {
+        return SlopeOrientation.steep(facing,half,shape);
     }
 
     private static VoxelShape rotateShapeSteps(VoxelShape shape, int steps) {

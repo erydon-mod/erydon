@@ -2,6 +2,7 @@ package com.oliver.erydon;
 
 import com.oliver.erydon.client.ErydonConfigNetworkingClient;
 import com.oliver.erydon.client.CollectionResourcePackNotice;
+import com.oliver.erydon.client.model.CopingModelLoadingPlugin;
 import com.oliver.erydon.client.model.CoverModelLoadingPlugin;
 import com.oliver.erydon.client.model.ErydonCtmService;
 import com.oliver.erydon.client.model.ErydonFamilyModelLoadingPlugin;
@@ -42,6 +43,8 @@ public final class ErydonClient implements ClientModInitializer {
         }
         ModelLoadingPlugin.register(new ErydonSharedBakedGeometryPlugin());
         ModelLoadingPlugin.register(new ErydonFamilyModelLoadingPlugin());
+        PreparableModelLoadingPlugin.register(CopingModelLoadingPlugin::load,
+                new CopingModelLoadingPlugin());
         ModelLoadingPlugin.register(new ErydonSlopeModelLoadingPlugin());
         PreparableModelLoadingPlugin.register(
                 GeorgianWallSlopeModelLoadingPlugin::load,

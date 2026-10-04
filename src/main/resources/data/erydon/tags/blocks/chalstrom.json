@@ -379,6 +379,13 @@
     "erydon:chalstrom_rosette_silver_slope_steep_upper",
     "erydon:chalstrom_rosette_silver_slope_vertical",
     "erydon:chalstrom_rosette_silver_slope_vertical_shallow_broad",
-    "erydon:chalstrom_rosette_silver_slope_vertical_shallow_narrow"
+    "erydon:chalstrom_rosette_silver_slope_vertical_shallow_narrow",
+    "erydon:chalstrom_aged_coping_georgian",
+    "erydon:chalstrom_ashlar_coping_georgian",
+    "erydon:chalstrom_brazier",
+    "erydon:chalstrom_coping_georgian",
+    "erydon:chalstrom_hewn_coping_georgian",
+    "erydon:chalstrom_oil_burner",
+    "erydon:chalstrom_rusticated_coping_georgian"
   ]
 }

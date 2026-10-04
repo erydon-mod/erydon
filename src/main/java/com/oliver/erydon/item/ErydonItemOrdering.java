@@ -31,6 +31,7 @@ public final class ErydonItemOrdering {
             Map.entry("stairs_spiral_large", 23),
             Map.entry("wall", 30),
             Map.entry("wall_georgian", 31),
+            Map.entry("coping_georgian", 32),
             Map.entry("layer", 40),
             Map.entry("layer_multiface", 41),
             Map.entry("layer_vertical", 42),

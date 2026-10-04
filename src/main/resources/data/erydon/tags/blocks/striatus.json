@@ -379,6 +379,13 @@
     "erydon:striatus_rosette_silver_slope_steep_upper",
     "erydon:striatus_rosette_silver_slope_vertical",
     "erydon:striatus_rosette_silver_slope_vertical_shallow_broad",
-    "erydon:striatus_rosette_silver_slope_vertical_shallow_narrow"
+    "erydon:striatus_rosette_silver_slope_vertical_shallow_narrow",
+    "erydon:striatus_aged_coping_georgian",
+    "erydon:striatus_ashlar_coping_georgian",
+    "erydon:striatus_brazier",
+    "erydon:striatus_coping_georgian",
+    "erydon:striatus_hewn_coping_georgian",
+    "erydon:striatus_oil_burner",
+    "erydon:striatus_rusticated_coping_georgian"
   ]
 }

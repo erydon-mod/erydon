@@ -337,6 +337,13 @@
     "erydon:brectite_rosette_silver_slope_steep_upper",
     "erydon:brectite_rosette_silver_slope_vertical",
     "erydon:brectite_rosette_silver_slope_vertical_shallow_broad",
-    "erydon:brectite_rosette_silver_slope_vertical_shallow_narrow"
+    "erydon:brectite_rosette_silver_slope_vertical_shallow_narrow",
+    "erydon:brectite_aged_coping_georgian",
+    "erydon:brectite_ashlar_coping_georgian",
+    "erydon:brectite_brazier",
+    "erydon:brectite_coping_georgian",
+    "erydon:brectite_hewn_coping_georgian",
+    "erydon:brectite_oil_burner",
+    "erydon:brectite_rusticated_coping_georgian"
   ]
 }

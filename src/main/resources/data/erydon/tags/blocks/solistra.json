@@ -379,6 +379,13 @@
     "erydon:solistra_rosette_silver_slope_steep_upper",
     "erydon:solistra_rosette_silver_slope_vertical",
     "erydon:solistra_rosette_silver_slope_vertical_shallow_broad",
-    "erydon:solistra_rosette_silver_slope_vertical_shallow_narrow"
+    "erydon:solistra_rosette_silver_slope_vertical_shallow_narrow",
+    "erydon:solistra_aged_coping_georgian",
+    "erydon:solistra_ashlar_coping_georgian",
+    "erydon:solistra_brazier",
+    "erydon:solistra_coping_georgian",
+    "erydon:solistra_hewn_coping_georgian",
+    "erydon:solistra_oil_burner",
+    "erydon:solistra_rusticated_coping_georgian"
   ]
 }

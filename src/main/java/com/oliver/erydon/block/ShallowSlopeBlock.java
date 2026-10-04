@@ -92,7 +92,7 @@ public class ShallowSlopeBlock extends HorizontalFacingBlock implements Waterlog
         VoxelShape inner = upper ? UPPER_INNER : LOWER_INNER;
         VoxelShape outer = upper ? UPPER_OUTER : LOWER_OUTER;
 
-        // TOP-half shapes: flip vertically around y=0.5
+        // Rendering rotates top halves 180 degrees around X (both Y and Z flip).
         if (half == BlockHalf.TOP) {
             straight = flipY(straight);
             inner = flipY(inner);
@@ -109,15 +109,8 @@ public class ShallowSlopeBlock extends HorizontalFacingBlock implements Waterlog
             };
 
             for (Direction facing : HORIZONTALS) {
-                // Match your JSON rotation pattern:
-                // facing=EAST => y=0
-                // SOUTH => 90, WEST => 180, NORTH => 270
-                int steps = yStepsForFacing(facing);
-
-                // *_RIGHT is rendered 90° clockwise relative to *_LEFT in your model set
-                if (shape == SlopeShape.INNER_RIGHT || shape == SlopeShape.OUTER_RIGHT) {
-                    steps = (steps + 1) & 3;
-                }
+                // Match the placed renderer's facing, corner and half orientation.
+                int steps = Math.floorMod(modelYRotation(facing, shape, half), 360) / 90;
 
                 cache[shape.ordinal()][horizontalIndex(facing)] = rotateShapeSteps(base, steps);
             }
@@ -130,13 +123,13 @@ public class ShallowSlopeBlock extends HorizontalFacingBlock implements Waterlog
         final VoxelShape[] out = {VoxelShapes.empty()};
 
         in.forEachBox((minX, minY, minZ, maxX, maxY, maxZ) -> {
-            // Mirror around the block mid-plane (y=0.5): y -> 1 - y
+            // Match the rendered X=180 rotation: flip both Y and Z.
             double newMinY = 1.0 - maxY;
             double newMaxY = 1.0 - minY;
 
             out[0] = VoxelShapes.union(
                     out[0],
-                    VoxelShapes.cuboid(minX, newMinY, minZ, maxX, newMaxY, maxZ)
+                    VoxelShapes.cuboid(minX, newMinY, 1-maxZ, maxX, newMaxY, 1-minZ)
             );
         });
 
@@ -144,6 +137,8 @@ public class ShallowSlopeBlock extends HorizontalFacingBlock implements Waterlog
     }
 
     private final Variant variant;
+
+    public Variant variant() { return variant; }
 
     public ShallowSlopeBlock(Settings settings, Variant variant) {
         super(settings);
@@ -385,8 +380,8 @@ public class ShallowSlopeBlock extends HorizontalFacingBlock implements Waterlog
     }
 
     private static VoxelShape createOuterFromStraight(VoxelShape straight) {
-        // CCW = 3 CW steps (rotateShapeSteps is clockwise)
-        VoxelShape rotated = rotateShapeSteps(straight, 3);
+        // The rendered outer profile is min(1-x, 1-z); the inner is max(1-x, z).
+        VoxelShape rotated = rotateShapeSteps(straight, 1);
         return VoxelShapes.combineAndSimplify(straight, rotated, BooleanBiFunction.AND);
     }
 
@@ -402,6 +397,11 @@ public class ShallowSlopeBlock extends HorizontalFacingBlock implements Waterlog
             case NORTH -> 3;
             default -> 0;
         };
+    }
+
+    /** One orientation contract for placed rendering, previews, outline and collision. */
+    public static int modelYRotation(Direction facing, SlopeShape shape, BlockHalf half) {
+        return SlopeOrientation.shallow(facing,half,shape);
     }
 
     /** Rotates the given shape by N * 90° clockwise around Y. */

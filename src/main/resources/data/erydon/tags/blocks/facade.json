@@ -5,6 +5,7 @@
     "#erydon:cover",
     "#erydon:surround",
     "#erydon:wall",
-    "#erydon:window"
+    "#erydon:window",
+    "#erydon:coping"
   ]
 }

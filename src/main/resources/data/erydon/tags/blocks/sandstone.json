@@ -220,6 +220,20 @@
     "erydon:psamatheon_hewn_alcove_georgian",
     "erydon:psamatheon_rock_alcove_georgian",
     "erydon:psamatheon_hewn_alcove_gothic",
-    "erydon:psamatheon_rock_alcove_gothic"
+    "erydon:psamatheon_rock_alcove_gothic",
+    "erydon:psamatheon_aged_column_gothic",
+    "erydon:psamatheon_aged_coping_georgian",
+    "erydon:psamatheon_aged_cornice_gothic",
+    "erydon:psamatheon_aged_wall_georgian",
+    "erydon:psamatheon_ashlar_coping_georgian",
+    "erydon:psamatheon_ashlar_wall_georgian",
+    "erydon:psamatheon_brazier",
+    "erydon:psamatheon_column_gothic",
+    "erydon:psamatheon_coping_georgian",
+    "erydon:psamatheon_cornice_gothic",
+    "erydon:psamatheon_hewn_coping_georgian",
+    "erydon:psamatheon_oil_burner",
+    "erydon:psamatheon_rusticated_coping_georgian",
+    "erydon:psamatheon_wall_georgian"
   ]
 }

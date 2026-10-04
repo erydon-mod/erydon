@@ -560,6 +560,7 @@
     "erydon:striatus_ashlar_alcove_georgian",
     "erydon:striatus_rusticated_alcove_georgian",
     "erydon:striatus_hewn_alcove_georgian",
-    "erydon:striatus_rock_alcove_georgian"
+    "erydon:striatus_rock_alcove_georgian",
+    "#erydon:coping"
   ]
 }

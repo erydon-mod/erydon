@@ -490,16 +490,7 @@ public final class SlopeBakedModel implements BakedModel, FabricBakedModel {
     }
 
     static int normalRotationForState(Direction facing, BlockHalf half, SlopeBlock.SlopeShape shape) {
-        int rotation = rotationForFacing(facing);
-        boolean top = half == BlockHalf.TOP;
-
-        return switch (shape) {
-            case STRAIGHT -> rotation;
-            case INNER_RIGHT -> rotation + 180;
-            case INNER_LEFT -> top ? rotation - 90 : rotation;
-            case OUTER_LEFT -> top ? rotation : rotation - 90;
-            case OUTER_RIGHT -> top ? rotation + 90 : rotation;
-        };
+        return com.oliver.erydon.block.SlopeOrientation.standard(facing,half,shape);
     }
 
     private static int cornerRotationForState(BlockState state) {

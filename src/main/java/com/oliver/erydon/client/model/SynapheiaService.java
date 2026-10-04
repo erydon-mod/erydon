@@ -18,6 +18,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 final class SynapheiaService {
     private static final AtomicLong NEXT_GENERATION = new AtomicLong();
+    private static final boolean SPRITE_HANDLES_ENABLED =
+            Boolean.parseBoolean(System.getProperty("erydon.perf.sprite_handles", "true"));
     private static final Map<SpriteKey, List<Sprite>> SPRITES = new ConcurrentHashMap<>();
     private static volatile Snapshot current = Snapshot.empty();
 
@@ -49,8 +51,17 @@ final class SynapheiaService {
             plansByBlock.put(block, SynapheiaBlockPlan.create(block, compiled));
         });
 
+        ReloadSpriteHandles<SynapheiaManifest.Rule, List<Sprite>> spriteHandles = null;
+        if (SPRITE_HANDLES_ENABLED) {
+            var builder = new ReloadSpriteHandles.Builder<SynapheiaManifest.Rule, List<Sprite>>();
+            for (SynapheiaManifest.Rule rule : prepared.rules()) {
+                List<Identifier> tiles = rule.tiles();
+                builder.bind(rule, tiles, () -> resolveSprites(tiles, rule.resourceId()));
+            }
+            spriteHandles = builder.build();
+        }
         Snapshot published = new Snapshot(generation, Map.copyOf(byBlock), Map.copyOf(plansByBlock),
-                prepared.repeatRuleCount(), prepared.overlayRuleCount(), prepared.sourcePacks());
+                prepared.repeatRuleCount(), prepared.overlayRuleCount(), prepared.sourcePacks(), spriteHandles);
         SPRITES.clear();
         SynapheiaRepeatBakedModel.clearCaches();
         current = published;
@@ -80,19 +91,24 @@ final class SynapheiaService {
         if (snapshot.generation() != current.generation() || !snapshot.active()) {
             return null;
         }
+        if (SPRITE_HANDLES_ENABLED) {
+            return snapshot.spriteHandles().get(rule);
+        }
         SpriteKey key = new SpriteKey(snapshot.generation(), rule.tiles());
-        return SPRITES.computeIfAbsent(key, ignored -> {
-            var atlas = MinecraftClient.getInstance().getSpriteAtlas(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE);
-            List<Sprite> result = key.tiles().stream().map(atlas).toList();
-            for (int index = 0; index < result.size(); index++) {
-                Identifier actual = result.get(index).getContents().getId();
-                if (!key.tiles().get(index).equals(actual)) {
-                    throw new IllegalStateException("Synapheia sprite " + key.tiles().get(index)
-                            + " is missing from the block atlas for rule " + rule.resourceId() + ".");
-                }
+        return SPRITES.computeIfAbsent(key, ignored -> resolveSprites(key.tiles(), rule.resourceId()));
+    }
+
+    private static List<Sprite> resolveSprites(List<Identifier> tiles, Identifier ruleId) {
+        var atlas = MinecraftClient.getInstance().getSpriteAtlas(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE);
+        List<Sprite> result = tiles.stream().map(atlas).toList();
+        for (int index = 0; index < result.size(); index++) {
+            Identifier actual = result.get(index).getContents().getId();
+            if (!tiles.get(index).equals(actual)) {
+                throw new IllegalStateException("Synapheia sprite " + tiles.get(index)
+                        + " is missing from the block atlas for rule " + ruleId + ".");
             }
-            return result;
-        });
+        }
+        return result;
     }
 
     private static Map<String, Object> fields(Object... entries) {
@@ -144,9 +160,10 @@ final class SynapheiaService {
                     Map<Identifier, SynapheiaBlockPlan> plansByBlock,
                     int repeatRuleCount,
                     int overlayRuleCount,
-                    String sourcePacks) {
+                    String sourcePacks,
+                    ReloadSpriteHandles<SynapheiaManifest.Rule, List<Sprite>> spriteHandles) {
         static Snapshot empty() {
-            return new Snapshot(0L, Map.of(), Map.of(), 0, 0, "<initial>");
+            return new Snapshot(0L, Map.of(), Map.of(), 0, 0, "<initial>", null);
         }
 
         boolean active() {

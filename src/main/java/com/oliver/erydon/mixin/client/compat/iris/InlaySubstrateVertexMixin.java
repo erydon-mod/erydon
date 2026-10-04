@@ -23,7 +23,7 @@ public abstract class InlaySubstrateVertexMixin {
         if (record < 0 || vertices.length != 4) return;
         // The guard verifies this exact bytecode layout before any payload can be active.
         long start = result.getReturnValueJ() - 4L * 40;
-        short encoded = InlaySubstrateTransport.encodedRenderType(record);
+        short encoded = InlaySubstrateTransport.encodedRenderType(record, InlaySubstrateTransport.currentRibbon());
         for (int vertex = 0; vertex < 4; vertex++) MemoryUtil.memPutShort(start + vertex * 40L + 34, encoded);
     }
 }

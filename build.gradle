@@ -3,6 +3,13 @@ plugins {
     id 'maven-publish'
 }
 
+tasks.register('verifyCatalogueTags', Exec) {
+    group = 'verification'
+    description = 'Checks complete block/item tag coverage for the player catalogue.'
+    commandLine 'python', 'tools/sync_catalogue_tags.py', '--check'
+}
+tasks.named('check') { dependsOn tasks.named('verifyCatalogueTags') }
+
 group = maven_group
 version = mod_version
 // The measurement module is absent from ordinary development and release builds.
@@ -58,6 +65,16 @@ configurations.configureEach {
     }
 }
 
+// Viewer alias probes use remapped implementations only on the test classpath.
+loom.createRemapConfigurations(sourceSets.test)
+configurations {
+    viewerProbeEmi {
+        canBeConsumed = false
+        canBeResolved = true
+        transitive = false
+    }
+}
+
 dependencies {
     // Core
     minecraft "com.mojang:minecraft:${minecraft_version}"
@@ -75,12 +92,22 @@ dependencies {
     modRuntimeOnly "maven.modrinth:iris:1.7.6+1.20.1"
     modCompileOnly "com.terraformersmc:modmenu:7.2.2"
     modRuntimeOnly "com.terraformersmc:modmenu:7.2.2" // optional
-    modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:12.1.785"
+    // 12.1.740 supports the project's Loom 1.6; later REI builds require Loom 1.7.
+    modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:12.1.740"
+    modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:12.1.740"
     modCompileOnly("mezz.jei:jei-1.20.1-fabric:15.16.2.73") {
         transitive = false
     }
     modCompileOnly "dev.emi:emi-fabric:${emi_version}:api"
     testImplementation "org.junit.jupiter:junit-jupiter:5.10.2"
+    modTestRuntimeOnly("mezz.jei:jei-1.20.1-fabric:15.16.2.73") {
+        transitive = false
+    }
+    // The full EMI artifact carries Loom 1.7 metadata. Loader remaps this existing
+    // test dependency at probe launch; it never enters the development runtime.
+    viewerProbeEmi("dev.emi:emi-fabric:${emi_version}") {
+        transitive = false
+    }
 
     // Required for Iris to parse shaderpacks
     runtimeOnly "org.anarres:jcpp:1.4.14"
@@ -103,6 +130,9 @@ loom {
             vmArgs "-Xms6G", "-Xmx${clientMaxHeap}", "-XshowSettings:vm"
             vmArgs "-Derydon.model_performance.runtime_report=${runtimeReport}"
             vmArgs "-Derydon.shared_geometry.mode=${sharedGeometryMode}"
+            // Keep both experimental switches explicit in generated development launchers.
+            vmArgs "-Derydon.perf.shared_stair_shapes=${providers.gradleProperty('erydon.perf.shared_stair_shapes').getOrElse('true')}"
+            vmArgs "-Derydon.perf.sprite_handles=${providers.gradleProperty('erydon.perf.sprite_handles').getOrElse('true')}"
             if (providers.gradleProperty('erydon.debug.loadProfile').map { it.toBoolean() }.getOrElse(false)) {
                 vmArgs "-Derydon.debug.load_profile=true", "-Derydon.debug.model_reload=true"
             }
@@ -787,6 +817,8 @@ apply from: 'gradle/erydon-axiom-icon-audit.gradle'
 apply from: 'gradle/erydon-high-polish-validation.gradle'
 apply from: 'gradle/erydon-alcove-transform-validation.gradle'
 apply from: 'gradle/erydon-shallow-stair-validation.gradle'
+apply from: 'gradle/erydon-coping-validation.gradle'
+apply from: 'gradle/erydon-finial-compat-validation.gradle'
 
 publishing {
     publications {

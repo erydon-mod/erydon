@@ -61,7 +61,8 @@ class MetalShaderNumericalTest {
                         gl_Position = vec4(positions[gl_VertexID], 0.0, 1.0);
                     }
                     """;
-            String fragmentSource = "#version 330 core\n" + helper + resource("erydon_metal_fragment.glsl") + """
+            String fragmentSource = "#version 330 core\n" + helper + resource("erydon_metal_fragment.glsl")
+                    + resource("erydon_inlay_projection.glsl") + """
                     uniform sampler2D tex;
                     uniform sampler2D normals;
                     uniform sampler2D specular;
@@ -69,10 +70,18 @@ class MetalShaderNumericalTest {
                     uniform vec2 testGrooveRay;
                     uniform vec3 testView;
                     uniform float testDistance;
+                    uniform int testRibbon;
+                    uniform mat2 testRibbonToBase;
+                    uniform vec2 testBaseLocal;
+                    uniform vec3 testProjectionWorld, testProjectionMidBlock, testProjectionNormal;
+                    uniform float testRenderType;
+                    uniform int testNeighbourPhases;
                     const float ERYDON_INLAY_POM_DISTANCE = 32.0;
                     const float ERYDON_INLAY_POM_DEPTH = 1.0;
                     vec4 erydonInlayBaseBounds = vec4(64, 0, 16, 16);
                     int erydonInlaySubstrateRecord = 0;
+                    int erydonInlayRibbon = 0;
+                    vec2 erydonInlayBaseLocal = vec2(0.0);
                     vec2 texCoord, dcdx = vec2(0.0), dcdy = vec2(0.0);
                     vec3 viewVector;
                     vec4 glColor = vec4(1.0);
@@ -81,8 +90,16 @@ class MetalShaderNumericalTest {
                     vec3 erydonInlayWallNormal;
                     // This fixture supplies one substrate tile; the real transport/phase mapping is tested separately.
                     bool erydonCtmPomRepeatDelta(vec2 tiles, out vec2 delta) { delta = vec2(0.0); return false; }
-                    float erydonCtmPomRecordCount() { return 1.0; }
-                    vec4 erydonCtmPomReadBoundsPx(float record) { return erydonInlayBaseBounds; }
+                    float erydonCtmPomRecordCount() { return testNeighbourPhases == 1 ? 36.0 : 1.0; }
+                    vec4 erydonCtmPomReadBoundsPx(float record) {
+                        if (testNeighbourPhases == 1) {
+                            if (record == 1.0) return vec4(80, 0, 16, 16);
+                            if (record == 5.0) return vec4(96, 0, 16, 16);
+                            if (record == 6.0) return vec4(80, 16, 16, 16);
+                            if (record == 30.0) return vec4(96, 16, 16, 16);
+                        }
+                        return erydonInlayBaseBounds;
+                    }
                     """ + resource("erydon_inlay_recess.glsl") + """
                     uniform vec2 testUv;
                     uniform vec2 testDx;
@@ -124,12 +141,26 @@ class MetalShaderNumericalTest {
                             viewVector = testView;
                             dcdx = testDx / vec2(erydonMetalAtlas);
                             dcdy = testDy / vec2(erydonMetalAtlas);
+                            erydonInlayRibbon = testRibbon;
+                            if (testRibbon == 1) {
+                                vec2 delta = dcdx * (gl_FragCoord.x - 0.5) + dcdy * (gl_FragCoord.y - 0.5);
+                                texCoord += delta;
+                                erydonInlayBaseLocal = testBaseLocal + testRibbonToBase
+                                        * (delta * vec2(erydonMetalAtlas) / vec2(erydonMetalBounds.zw));
+                            }
                             vec2 sampledUv = testUv;
                             vec4 color = vec4(0.0);
                             erydonInlayTrace(sampledUv, color, testDistance);
                             if (testMode == 8) result = color;
                             else if (testMode == 9) result = vec4(erydonInlayWallNormal, erydonInlayMetalCoverage);
                             else if (testMode == 11) result = vec4(vec3(erydonInlayShadow(testLight, 0.0)), erydonInlayMetalCoverage);
+                            else if (testMode == 12) result = vec4(erydonInlayNormalSample.rg, erydonInlaySpecularSample.g, erydonInlayNormalSample.a);
+                            else if (testMode == 13) result = vec4(erydonInlayProjectBase(testProjectionWorld, testProjectionMidBlock, testProjectionNormal), 0.0, 1.0);
+                            else if (testMode == 14) {
+                                int ribbon;
+                                int record = erydonInlayDecodeRecord(testRenderType, ribbon);
+                                result = vec4(float(record), float(ribbon), 0.0, 1.0);
+                            }
                             else result = vec4(sampledUv, erydonInlaySpecularSample.g, erydonInlayNormalSample.a);
                         } else {
                             result = vec4(coverage, float(erydonMetalInfo.x), float(erydonMetalInfo.y), 1.0);
@@ -358,6 +389,104 @@ class MetalShaderNumericalTest {
                 assertEquals((64 + local * 16) / 128, displaced[0], 0.00003,
                         "Substrate displacement must preserve native depth direction and ceiling fade");
                 assertEquals(128.0f / 255, displaced[3], 0.00001f);
+            }
+
+            // Actual rotated ribbon mapping must not stretch the stone, its PBR
+            // companions, or the existing relief into tile14's cropped strip.
+            GL20.glUniform1i(GL20.glGetUniformLocation(program, "testRibbon"), 1);
+            GL20.glUniform2f(GL20.glGetUniformLocation(program, "testBaseLocal"), .7F, .3F);
+            var directionalNormal = BufferUtils.createByteBuffer(16 * 16 * 4);
+            for (int i = 0; i < 16 * 16; i++) directionalNormal.put(new byte[]{(byte) 179, (byte) 102, (byte) 255, (byte) 128});
+            directionalNormal.flip();
+            GL13.glActiveTexture(GL13.GL_TEXTURE2);
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, normalAtlas);
+            GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 64, 0, 16, 16, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, directionalNormal);
+            GL13.glActiveTexture(GL13.GL_TEXTURE0);
+            for (double angle : new double[]{Math.atan(.5), Math.PI / 4, -Math.atan(.5), -Math.PI / 4}) {
+                for (float mirror : new float[]{-1, 1}) {
+                    float c = (float) Math.cos(angle), s = (float) Math.sin(angle), length = 2.5F;
+                    float m00 = c * length, m10 = s * length, m01 = -s * mirror, m11 = c * mirror;
+                    FloatBuffer matrix = BufferUtils.createFloatBuffer(4).put(new float[]{m00, m10, m01, m11});
+                    matrix.flip();
+                    GL20.glUniformMatrix2fv(GL20.glGetUniformLocation(program, "testRibbonToBase"), false, matrix);
+                    GL20.glUniform3f(GL20.glGetUniformLocation(program, "testView"), 0, 0, -1);
+                    float[] mapped = sample(program, 30.5f, 32.5f, .01F, 0, 0, .01F, 10);
+                    assertArrayEquals(new float[]{(64 + .7F * 16) / 128, .3F * 16 / 64, 10F / 255, 128F / 255}, mapped, .00003F,
+                            "Diagonal stone UV, dielectric specular and height must retain the original world cell");
+                    float nx = 179F / 255 * 2 - 1, ny = 102F / 255 * 2 - 1;
+                    float[] normals = sample(program, 30.5f, 32.5f, .01F, 0, 0, .01F, 12);
+                    assertArrayEquals(new float[]{(c * nx + s * ny) * .5F + .5F,
+                            (-s * mirror * nx + c * mirror * ny) * .5F + .5F, 10F / 255, 128F / 255}, normals, .00003F,
+                            "Stone normals must convert into the diagonal tangent frame, retaining material and alpha");
+                    for (float direction : new float[]{-.5F, .5F}) {
+                        GL20.glUniform3f(GL20.glGetUniformLocation(program, "testView"), direction, 0, -1);
+                        float[] displaced = sample(program, 30.5f, 32.5f, .01F, 0, 0, .01F, 10);
+                        double height = 128.0 / 255;
+                        double relief = direction * .25 * (1 - Math.pow(height, 64)) * (1 - height);
+                        assertEquals((64 + (.7 + c * relief) * 16) / 128, displaced[0], .00003,
+                                "Ribbon length must not scale alpha-driven world-space POM depth");
+                        assertEquals((.3 + s * relief) * 16 / 64, displaced[1], .00003);
+                    }
+                }
+            }
+            GL20.glUniform1i(GL20.glGetUniformLocation(program, "testNeighbourPhases"), 1);
+            for (int[] phase : List.of(new int[]{80, 0, 17}, new int[]{96, 0, 23}, new int[]{80, 16, 31}, new int[]{96, 16, 47})) {
+                GL13.glActiveTexture(GL13.GL_TEXTURE2);
+                GL11.glBindTexture(GL11.GL_TEXTURE_2D, normalAtlas);
+                directionalNormal.rewind();
+                GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, phase[0], phase[1], 16, 16, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, directionalNormal);
+                var phaseSpecular = BufferUtils.createByteBuffer(16 * 16 * 4);
+                for (int i = 0; i < 16 * 16; i++) phaseSpecular.put(new byte[]{(byte) 128, (byte) phase[2], 0, (byte) 255});
+                phaseSpecular.flip();
+                GL13.glActiveTexture(GL13.GL_TEXTURE3);
+                GL11.glBindTexture(GL11.GL_TEXTURE_2D, specularAtlas);
+                GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, phase[0], phase[1], 16, 16, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, phaseSpecular);
+            }
+            GL13.glActiveTexture(GL13.GL_TEXTURE0);
+            for (double angle : new double[]{Math.atan(.5), Math.PI / 4, -Math.atan(.5), -Math.PI / 4}) {
+                float c = (float) Math.cos(angle), s = (float) Math.sin(angle);
+                FloatBuffer matrix = BufferUtils.createFloatBuffer(4).put(new float[]{c * 2.5F, s * 2.5F, -s, c});
+                matrix.flip();
+                GL20.glUniformMatrix2fv(GL20.glGetUniformLocation(program, "testRibbonToBase"), false, matrix);
+                for (int axis = 0; axis < 2; axis++) for (int direction : new int[]{-1, 1}) {
+                    float u = axis == 0 ? direction > 0 ? .95F : .05F : .3F;
+                    float v = axis == 1 ? direction > 0 ? .95F : .05F : .3F;
+                    GL20.glUniform2f(GL20.glGetUniformLocation(program, "testBaseLocal"), u, v);
+                    GL20.glUniform3f(GL20.glGetUniformLocation(program, "testView"),
+                            direction * (axis == 0 ? c : s), direction * (axis == 0 ? -s : c), -1);
+                    float[] crossed = sample(program, 10.5F, 32.5F, .01F, 0, 0, .01F, 10);
+                    double height = 128.0 / 255;
+                    double relief = direction * .25 * (1 - Math.pow(height, 64)) * (1 - height);
+                    double hitU = u + (axis == 0 ? relief : 0), hitV = v + (axis == 1 ? relief : 0);
+                    int[] phase = axis == 0 ? direction > 0 ? new int[]{80, 0, 17} : new int[]{96, 0, 23}
+                            : direction > 0 ? new int[]{80, 16, 31} : new int[]{96, 16, 47};
+                    assertArrayEquals(new float[]{(float) ((phase[0] + (hitU - Math.floor(hitU)) * 16) / 128),
+                                    (float) ((phase[1] + (hitV - Math.floor(hitV)) * 16) / 64), phase[2] / 255F, 128F / 255},
+                            crossed, .00004F, "Both U/V directions must sample the actual neighbouring CTM phase through a diagonal tangent");
+                }
+            }
+            GL20.glUniform1i(GL20.glGetUniformLocation(program, "testNeighbourPhases"), 0);
+            // Iris's real signed mid-block packing must identify the same cell
+            // for all four side faces, including exact 0/1 and 0.001 safety edges.
+            for (float[] normal : List.of(new float[]{1, 0, 0}, new float[]{-1, 0, 0}, new float[]{0, 0, 1}, new float[]{0, 0, -1})) {
+                for (float[] local : List.of(new float[]{.37F, .001F, .62F}, new float[]{0, 1, 0}, new float[]{1, 0, 1})) {
+                    int packed = net.irisshaders.iris.vertices.ExtendedDataHelper.computeMidBlock(local[0], local[1], local[2], 0, 0, 0);
+                    GL20.glUniform3f(GL20.glGetUniformLocation(program, "testProjectionWorld"), -17 + local[0], 63 + local[1], 28 + local[2]);
+                    GL20.glUniform3f(GL20.glGetUniformLocation(program, "testProjectionMidBlock"), (byte) packed, (byte) (packed >> 8), (byte) (packed >> 16));
+                    GL20.glUniform3f(GL20.glGetUniformLocation(program, "testProjectionNormal"), normal[0], normal[1], normal[2]);
+                    float u = normal[0] != 0 ? local[2] : local[0];
+                    if (normal[0] > 0 || normal[2] < 0) u = 1 - u;
+                    assertArrayEquals(new float[]{u, 1 - local[1], 0, 1}, sample(program, 30.5f, 32.5f, .01F, 0, 0, .01F, 13), .00003F,
+                            "Full-position projection must retain Synapheia's face basis at integer boundaries");
+                }
+            }
+            for (int record : new int[]{0, 17, 8783, InlaySubstrateTransport.MAX_RECORD - 1}) {
+                for (boolean ribbon : new boolean[]{false, true}) {
+                    GL20.glUniform1f(GL20.glGetUniformLocation(program, "testRenderType"), InlaySubstrateTransport.encodedRenderType(record, ribbon));
+                    assertArrayEquals(new float[]{record, ribbon ? 1 : 0, 0, 1},
+                            sample(program, 30.5f, 32.5f, .01F, 0, 0, .01F, 14), 0,
+                            "The real shader must decode the signed Iris short without changing its CTM phase");
+                }
             }
         } finally {
             GL20.glUseProgram(0);

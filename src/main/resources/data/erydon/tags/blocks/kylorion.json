@@ -379,6 +379,13 @@
     "erydon:kylorion_rosette_silver_slope_steep_upper",
     "erydon:kylorion_rosette_silver_slope_vertical",
     "erydon:kylorion_rosette_silver_slope_vertical_shallow_broad",
-    "erydon:kylorion_rosette_silver_slope_vertical_shallow_narrow"
+    "erydon:kylorion_rosette_silver_slope_vertical_shallow_narrow",
+    "erydon:kylorion_aged_coping_georgian",
+    "erydon:kylorion_ashlar_coping_georgian",
+    "erydon:kylorion_brazier",
+    "erydon:kylorion_coping_georgian",
+    "erydon:kylorion_hewn_coping_georgian",
+    "erydon:kylorion_oil_burner",
+    "erydon:kylorion_rusticated_coping_georgian"
   ]
 }

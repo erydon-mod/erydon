@@ -2,11 +2,18 @@ package com.oliver.erydon.item;
 
 import com.oliver.erydon.util.ErydonIdNaming;
 import com.oliver.erydon.migration.ErydonIdMigration;
+import net.minecraft.text.Text;
 
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 public final class ErydonBlockCategories {
+    private static final Set<String> MATERIAL_PREFIXES = Set.copyOf(ErydonMaterialSources.materialPrefixes());
+    private static final Set<String> NON_STANDARD_FINISH_TOKENS = Set.of(
+            "aged", "ashlar", "hewn", "rusticated", "rock", "weave", "herringbone",
+            "trim", "guilloche", "quatrefoil", "rosette", "rose", "diaphanes");
+
     private ErydonBlockCategories() {
     }
 
@@ -17,6 +24,24 @@ public final class ErydonBlockCategories {
 
     public static boolean isSlab(String path) {
         return matchesSuffix(path, "_slab");
+    }
+
+    public static boolean isFullBlock(String path) {
+        return ErydonIdNaming.withoutAged(ErydonIdMigration.canonicalPath(path)).endsWith("_block");
+    }
+
+    /** Plain stone forms share the requested polished, honed and mirror search vocabulary. */
+    public static boolean isStandardFinish(String path) {
+        String[] tokens = ErydonIdMigration.canonicalPath(path).split("_");
+        if (tokens.length < 2 || !MATERIAL_PREFIXES.contains(tokens[0])) {
+            return false;
+        }
+        for (int index = 1; index < tokens.length; index++) {
+            if (NON_STANDARD_FINISH_TOKENS.contains(tokens[index])) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public static boolean isStairs(String path) {
@@ -133,7 +158,18 @@ public final class ErydonBlockCategories {
 
     public static List<String> searchTerms(String path) {
         LinkedHashSet<String> terms = new LinkedHashSet<>(ErydonMaterialSources.findSearchTerms(path));
+        terms.add("erydon");
         terms.addAll(ErydonIdMigration.searchTermsForCanonicalPath(path));
+
+        if (isStandardFinish(path)) {
+            addAll(terms, "polished", "honed", "mirror");
+            terms.add(Text.translatable("search.erydon.standard_finish").getString());
+        }
+
+        if (isFullBlock(path)) {
+            addAll(terms, "block", "blocks", "full block", "full cube");
+            terms.add(Text.translatable("search.erydon.full_block").getString());
+        }
 
         if (isStairs(path)) {
             addAll(terms, "steps", "staircase");
@@ -143,6 +179,9 @@ public final class ErydonBlockCategories {
             if (path.contains("spiral")) {
                 terms.add("spiral staircase");
             }
+        }
+        if (path.endsWith("_coping_georgian")) {
+            addAll(terms, "coping", "wall cap", "capping", "wall top", "capstone", "georgian");
         }
         if (isLayer(path)) {
             addAll(terms, "thin", "cladding", "panel");

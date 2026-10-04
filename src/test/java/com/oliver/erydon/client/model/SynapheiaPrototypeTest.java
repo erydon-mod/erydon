@@ -20,6 +20,7 @@ import java.util.stream.IntStream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -413,6 +414,12 @@ final class SynapheiaPrototypeTest {
         assertTrue(first.active());
         assertTrue(second.active());
         assertNotEquals(first.generation(), second.generation());
+        assertNull(SynapheiaService.sprites(first, rule), "Old snapshot must not resolve sprites after reload");
+        assertEquals(Boolean.parseBoolean(System.getProperty("erydon.perf.sprite_handles", "true")),
+                second.spriteHandles() != null);
+        if (second.spriteHandles() != null) {
+            assertNotSame(first.spriteHandles(), second.spriteHandles(), "Reload must use a fresh handle table");
+        }
         assertEquals(Set.of(block), second.rulesByBlock().keySet());
         assertEquals(rule, second.repeatRuleFor(block, Direction.UP,
                 new Identifier("erydon", "block/aganite_block")));
@@ -604,7 +611,7 @@ final class SynapheiaPrototypeTest {
                 }
             }
         }
-        assertEquals(1025, repeatRules);
+        assertEquals(1160, repeatRules); // Includes 135 pack-independent coping rules.
         assertEquals(192, overlayRules);
         assertEquals(192, sourceOverlayRules);
         assertEquals(192, ruleConnectedOverlays);

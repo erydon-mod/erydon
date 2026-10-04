@@ -1,0 +1,77 @@
+// Compile a narrow set of actual companion sources against the same named Minecraft
+// classes. This proof neither packages a mod JAR nor loads an older Daedalon artifact.
+def finialCompanionRoot = providers.gradleProperty('erydon.finialCompat.daedalonSource')
+        .map { file(it) }
+        .getOrElse(file('../daedalon-fabric-mc1.20.1'))
+def finialCompanionSources = [
+        'com/oliver/daedalon/block/DecorShapeTransforms.java',
+        'com/oliver/daedalon/block/TwoSizeDecorBlock.java',
+        'com/oliver/daedalon/block/FixedDecorBlock.java',
+        'com/oliver/daedalon/block/FinialBlock.java',
+        'com/oliver/daedalon/block/FinialSupport.java',
+        'com/oliver/daedalon/block/FinialSupportPlacement.java',
+        'com/oliver/daedalon/block/FinialRaycast.java',
+        'com/oliver/daedalon/client/model/obj/FinialMeshTransform.java',
+        'com/oliver/daedalon/client/model/obj/FinialBaseMesh.java',
+        'com/oliver/daedalon/client/model/obj/ShaderTerrainNormalBridge.java',
+        'com/oliver/daedalon/mixin/FinialRaycastMixin.java'
+]
+
+sourceSets {
+    finialCompat {
+        java.setSrcDirs(['src/finialCompat/java', new File(finialCompanionRoot, 'src/main/java')])
+        java.setIncludes(finialCompanionSources + [
+                'com/oliver/daedalon/client/model/obj/FinialCopingCompatLaunchProbe.java',
+                'com/oliver/erydon/client/model/CopingFinialMeshContact.java'
+        ])
+        resources.setSrcDirs([new File(finialCompanionRoot, 'src/main/resources')])
+        resources.setIncludes([
+                'assets/daedalon/authoring_models/block/finial/support_base.json',
+                'data/daedalon/tags/blocks/*finial.json'
+        ])
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+    }
+}
+
+tasks.register('verifyFinialCopingCompat', JavaExec) {
+    group = 'verification'
+    description = 'Checks fitted finials against real current coping and companion sources without packaging a JAR.'
+    dependsOn tasks.named('finialCompatClasses')
+    dependsOn tasks.named('configureLaunch')
+    def fixture = layout.buildDirectory.dir('finial-coping-compat-probe')
+    classpath = sourceSets.finialCompat.runtimeClasspath
+    classpath += files(fixture.map { new File(it.asFile, 'probe-mod') })
+    mainClass = 'net.fabricmc.loader.impl.launch.knot.KnotClient'
+    maxHeapSize = '2G'
+    doFirst {
+        for (String source : finialCompanionSources) {
+            if (!new File(finialCompanionRoot, "src/main/java/${source}").isFile()) {
+                throw new GradleException("Missing current finial companion source: ${source}")
+            }
+        }
+        def root = fixture.get().asFile
+        root.mkdirs()
+        workingDir root
+        def mod = new File(root, 'probe-mod')
+        mod.mkdirs()
+        new File(mod, 'fabric.mod.json').text = groovy.json.JsonOutput.toJson([
+                schemaVersion: 1, id: 'erydon_finial_coping_compat_probe', version: project.version.toString(),
+                environment: 'client', mixins: ['erydon-finial-coping-probe.mixins.json'], entrypoints: [preLaunch: [
+                        'com.oliver.daedalon.client.model.obj.FinialCopingCompatLaunchProbe'
+                ]]
+        ])
+        new File(mod, 'erydon-finial-coping-probe.mixins.json').text = groovy.json.JsonOutput.toJson([
+                required: true, minVersion: '0.8', package: 'com.oliver.daedalon.mixin',
+                compatibilityLevel: 'JAVA_17', mixins: ['FinialRaycastMixin'],
+                injectors: [defaultRequire: 1]
+        ])
+        systemProperty 'fabric.development', 'true'
+        systemProperty 'mixin.debug.export', 'true'
+        systemProperty 'mixin.debug.export.filter', 'net.minecraft.world.BlockView'
+        args '--gameDir', root.absolutePath, '--version', '1.20.1', '--accessToken', '0'
+    }
+}
+
+// This source checkout is optional for ordinary standalone repository/CI checks.
+// The coordinated family development run invokes the dedicated task explicitly.

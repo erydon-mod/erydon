@@ -1,0 +1,118 @@
+{
+	"format_version": "1.21.11",
+	"credit": "Made with Blockbench",
+	"elements": [
+		{
+			"name": "upper_band",
+			"from": [7.44098, 0.6, -0.5],
+			"to": [26.44756, 3, 16.5],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 0.6, 0]},
+			"faces": {
+				"north": {"uv": [0, 0, 16, 2], "texture": "#stone"},
+				"east": {"uv": [0, 0, 16, 2], "texture": "#stone"},
+				"south": {"uv": [0, 0, 16, 2], "texture": "#stone"},
+				"west": {"uv": [0, 0, 16, 2], "texture": "#stone"},
+				"up": {"uv": [0, 0, 16, 16], "texture": "#stone"},
+				"down": {"uv": [0, 0, 16, 16], "texture": "#stone"}
+			}
+		},
+		{
+			"name": "top",
+			"from": [8, 3, 0],
+			"to": [25.88854, 3.6, 16],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 1.2, 0]},
+			"faces": {
+				"north": {"uv": [0, 0, 16, 0.5], "texture": "#stone"},
+				"east": {"uv": [0, 0, 16, 0.5], "texture": "#stone"},
+				"south": {"uv": [0, 0, 16, 0.5], "texture": "#stone"},
+				"west": {"uv": [0, 0, 16, 0.5], "texture": "#stone"},
+				"up": {"uv": [0, 0, 16, 16], "texture": "#stone"},
+				"down": {"uv": [0, 0, 16, 16], "texture": "#stone"}
+			}
+		},
+		{
+			"name": "base",
+			"from": [5.76393, 0, -2],
+			"to": [28.12461, 1.944, 18],
+			"rotation": {"angle": 0, "axis": "y", "origin": [16.94427, 1.15544, 8]},
+			"faces": {
+				"north": {"uv": [0, 0.38, 16, 2], "texture": "#stone"},
+				"east": {"uv": [0, 0.38, 16, 2], "texture": "#stone"},
+				"south": {"uv": [0, 0.38, 16, 2], "texture": "#stone"},
+				"west": {"uv": [0, 0.38, 16, 2], "texture": "#stone"},
+				"up": {"uv": [0, 0, 16, 16], "texture": "#stone"},
+				"down": {"uv": [0, 0, 16, 16], "texture": "#stone"}
+			}
+		},
+		{
+			"name": "edge_west",
+			"from": [0.66829, -7.09479, -0.5],
+			"to": [2.16829, -5.89479, 16.5],
+			"rotation": {"x": 0, "y": 0, "z": 67.5, "origin": [-1.85136, 2.49818, 8]},
+			"color": 6,
+			"faces": {
+				"north": {"uv": [16, 0, 14.5, 1], "texture": "#stone"},
+				"east": {"uv": [16, 0, 0, 1], "texture": "#stone"},
+				"south": {"uv": [1.5, 0, 0, 1], "texture": "#stone"},
+				"west": {"uv": [16, 0, 0, 1], "texture": "#stone"},
+				"up": {"uv": [1.5, 0, 0, 16], "texture": "#stone"},
+				"down": {"uv": [1.5, 0, 0, 16], "texture": "#stone"}
+			}
+		},
+		{
+			"name": "edge_north",
+			"from": [7.44098, -7.09479, -7.27269],
+			"to": [26.44098, -5.89479, -5.77269],
+			"rotation": {"x": -67.5, "y": 0, "z": 0, "origin": [15.94098, 2.49818, -9.79234]},
+			"color": 5,
+			"faces": {
+				"north": {"uv": [16, 0, 0, 1], "texture": "#stone"},
+				"east": {"uv": [16, 0, 14.5, 1], "texture": "#stone"},
+				"south": {"uv": [16, 0, 0, 1], "texture": "#stone"},
+				"west": {"uv": [1.5, 0, 0, 1], "texture": "#stone"},
+				"up": {"uv": [1.5, 0, 0, 16], "rotation": 90, "texture": "#stone"},
+				"down": {"uv": [1.5, 0, 0, 16], "rotation": 270, "texture": "#stone"}
+			}
+		},
+		{
+			"name": "edge_east",
+			"from": [25.43024, 1.47748, -0.5],
+			"to": [26.93024, 2.67748, 16.5],
+			"rotation": {"x": 0, "y": 0, "z": -67.5, "origin": [26.18024, 2.07748, 8]},
+			"color": 6,
+			"faces": {
+				"north": {"uv": [14.5, 0, 16, 1], "texture": "#stone"},
+				"east": {"uv": [0, 0, 16, 1], "texture": "#stone"},
+				"south": {"uv": [0, 0, 1.5, 1], "texture": "#stone"},
+				"west": {"uv": [0, 0, 16, 1], "texture": "#stone"},
+				"up": {"uv": [0, 0, 1.5, 16], "texture": "#stone"},
+				"down": {"uv": [0, 0, 1.5, 16], "texture": "#stone"}
+			}
+		},
+		{
+			"name": "edge_south",
+			"from": [7.44098, -7.09479, 21.77269],
+			"to": [26.44098, -5.89479, 23.27269],
+			"rotation": {"x": 67.5, "y": 0, "z": 0, "origin": [15.94098, 2.49818, 25.79234]},
+			"color": 5,
+			"faces": {
+				"north": {"uv": [0, 0, 16, 1], "texture": "#stone"},
+				"east": {"uv": [14.5, 0, 16, 1], "texture": "#stone"},
+				"south": {"uv": [0, 0, 16, 1], "texture": "#stone"},
+				"west": {"uv": [0, 0, 1.5, 1], "texture": "#stone"},
+				"up": {"uv": [0, 0, 1.5, 16], "rotation": 90, "texture": "#stone"},
+				"down": {"uv": [0, 0, 1.5, 16], "rotation": 270, "texture": "#stone"}
+			}
+		}
+	],
+	"groups": [
+		{
+			"name": "coping_profile",
+			"origin": [8, 0, 0],
+			"rotation": [0, 0, -63.43495],
+			"scope": 0,
+			"color": 0,
+			"children": [0, 1, 2, 3, 4, 5, 6]
+		}
+	]
+}

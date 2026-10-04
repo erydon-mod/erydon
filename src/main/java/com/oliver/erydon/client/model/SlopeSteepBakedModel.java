@@ -1110,22 +1110,8 @@ public final class SlopeSteepBakedModel implements BakedModel, FabricBakedModel 
     }
 
     private static int normalRotationForState(BlockState state) {
-        int rotation = rotationForFacing(state.get(SlopeSteepBlock.FACING));
-        SlopeSteepBlock.SlopeShape shape = state.get(SlopeSteepBlock.SHAPE);
-        boolean top = state.get(SlopeSteepBlock.HALF) == BlockHalf.TOP;
-
-        if (shape == SlopeSteepBlock.SlopeShape.STRAIGHT) {
-            return rotation;
-        }
-
-        boolean right = isRightCorner(shape);
-        if (top && !right) {
-            return rotation - 90;
-        }
-        if (!top && right) {
-            return rotation + 90;
-        }
-        return rotation;
+        return com.oliver.erydon.block.SlopeOrientation.steep(state.get(SlopeSteepBlock.FACING),
+                state.get(SlopeSteepBlock.HALF),state.get(SlopeSteepBlock.SHAPE));
     }
 
     @Override

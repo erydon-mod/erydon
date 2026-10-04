@@ -32,7 +32,7 @@ public abstract class ShallowStairsBlockBase extends StairsBlock implements Wate
 
     private final Map<BlockState, VoxelShape> SHAPE_CACHE = new HashMap<>();
     private static final boolean SHARED_SHAPES_ENABLED =
-            Boolean.getBoolean("erydon.perf.shared_stair_shapes");
+            Boolean.parseBoolean(System.getProperty("erydon.perf.shared_stair_shapes", "true"));
     private static final java.util.concurrent.atomic.AtomicReferenceArray<VoxelShape> SHARED_SHAPES =
             new java.util.concurrent.atomic.AtomicReferenceArray<>(StairShapeSlots.COUNT);
 

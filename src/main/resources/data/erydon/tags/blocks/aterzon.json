@@ -337,6 +337,13 @@
     "erydon:aterzon_rosette_silver_slope_steep_upper",
     "erydon:aterzon_rosette_silver_slope_vertical",
     "erydon:aterzon_rosette_silver_slope_vertical_shallow_broad",
-    "erydon:aterzon_rosette_silver_slope_vertical_shallow_narrow"
+    "erydon:aterzon_rosette_silver_slope_vertical_shallow_narrow",
+    "erydon:aterzon_aged_coping_georgian",
+    "erydon:aterzon_ashlar_coping_georgian",
+    "erydon:aterzon_brazier",
+    "erydon:aterzon_coping_georgian",
+    "erydon:aterzon_hewn_coping_georgian",
+    "erydon:aterzon_oil_burner",
+    "erydon:aterzon_rusticated_coping_georgian"
   ]
 }
