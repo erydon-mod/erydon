@@ -53,6 +53,7 @@ public class GlazingShallowSlopeBlock extends HorizontalFacingBlock implements W
     }
 
     public static final DirectionProperty FACING = Properties.HORIZONTAL_FACING;
+    // Retained for saved worlds and tools; the registered variant owns the section geometry.
     public static final EnumProperty<BlockHalf> HALF = Properties.BLOCK_HALF;
     public static final EnumProperty<SlopeShape> SHAPE = EnumProperty.of("shape", SlopeShape.class);
     public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
@@ -66,10 +67,8 @@ public class GlazingShallowSlopeBlock extends HorizontalFacingBlock implements W
     private static final VoxelShape UPPER_STRAIGHT = createUpperShape();
     private static final VoxelShape UPPER_INNER = createUpperInnerShape();
     private static final VoxelShape UPPER_OUTER = createUpperOuterShape();
-    private static final VoxelShape[][] LOWER_BOTTOM_CACHE = buildShapeCache(LOWER_STRAIGHT, LOWER_INNER, LOWER_OUTER);
-    private static final VoxelShape[][] LOWER_TOP_CACHE = buildShapeCache(flipY(LOWER_STRAIGHT), flipY(LOWER_INNER), flipY(LOWER_OUTER));
-    private static final VoxelShape[][] UPPER_BOTTOM_CACHE = buildShapeCache(UPPER_STRAIGHT, UPPER_INNER, UPPER_OUTER);
-    private static final VoxelShape[][] UPPER_TOP_CACHE = buildShapeCache(flipY(UPPER_STRAIGHT), flipY(UPPER_INNER), flipY(UPPER_OUTER));
+    private static final VoxelShape[][] LOWER_CACHE = buildShapeCache(LOWER_STRAIGHT, LOWER_INNER, LOWER_OUTER);
+    private static final VoxelShape[][] UPPER_CACHE = buildShapeCache(UPPER_STRAIGHT, UPPER_INNER, UPPER_OUTER);
 
     private final Variant variant;
 
@@ -78,7 +77,7 @@ public class GlazingShallowSlopeBlock extends HorizontalFacingBlock implements W
         this.variant = variant;
         this.setDefaultState(this.stateManager.getDefaultState()
                 .with(FACING, Direction.NORTH)
-                .with(HALF, BlockHalf.BOTTOM)
+                .with(HALF, variant == Variant.UPPER ? BlockHalf.TOP : BlockHalf.BOTTOM)
                 .with(SHAPE, SlopeShape.STRAIGHT)
                 .with(WATERLOGGED, false));
     }
@@ -90,19 +89,10 @@ public class GlazingShallowSlopeBlock extends HorizontalFacingBlock implements W
 
     @Override
     public BlockState getPlacementState(ItemPlacementContext ctx) {
-        BlockHalf half;
-        if (ctx.getSide() == Direction.DOWN) {
-            half = BlockHalf.TOP;
-        } else if (ctx.getSide() == Direction.UP) {
-            half = BlockHalf.BOTTOM;
-        } else {
-            double hitY = ctx.getHitPos().y - ctx.getBlockPos().getY();
-            half = hitY > 0.5d ? BlockHalf.TOP : BlockHalf.BOTTOM;
-        }
-
+        // Like shallow stairs, the held lower/upper block chooses the section.
+        // Facing follows the player; clicking a ceiling or a high side must not invert it.
         BlockState placed = this.getDefaultState()
                 .with(FACING, ctx.getHorizontalPlayerFacing())
-                .with(HALF, half)
                 .with(WATERLOGGED, ctx.getWorld().getFluidState(ctx.getBlockPos()).getFluid() == Fluids.WATER)
                 .with(SHAPE, SlopeShape.STRAIGHT);
 
@@ -181,12 +171,7 @@ public class GlazingShallowSlopeBlock extends HorizontalFacingBlock implements W
     }
 
     private VoxelShape getVoxelForState(BlockState state) {
-        VoxelShape[][] cache;
-        if (variant == Variant.UPPER) {
-            cache = state.get(HALF) == BlockHalf.TOP ? UPPER_TOP_CACHE : UPPER_BOTTOM_CACHE;
-        } else {
-            cache = state.get(HALF) == BlockHalf.TOP ? LOWER_TOP_CACHE : LOWER_BOTTOM_CACHE;
-        }
+        VoxelShape[][] cache = variant == Variant.UPPER ? UPPER_CACHE : LOWER_CACHE;
         return cache[state.get(SHAPE).ordinal()][horizontalIndex(state.get(FACING))];
     }
 
@@ -397,15 +382,6 @@ public class GlazingShallowSlopeBlock extends HorizontalFacingBlock implements W
         return shape;
     }
 
-    private static VoxelShape flipY(VoxelShape shape) {
-        final VoxelShape[] flipped = {VoxelShapes.empty()};
-        shape.forEachBox((minX, minY, minZ, maxX, maxY, maxZ) -> flipped[0] = VoxelShapes.union(
-                flipped[0],
-                VoxelShapes.cuboid(minX, 1.0 - maxY, minZ, maxX, 1.0 - minY, maxZ)
-        ));
-        return flipped[0];
-    }
-
     private static VoxelShape createInnerFromStraight(VoxelShape straight) {
         return VoxelShapes.union(straight, rotateShapeSteps(straight, 3));
     }
@@ -422,7 +398,7 @@ public class GlazingShallowSlopeBlock extends HorizontalFacingBlock implements W
         Direction facing = state.get(FACING);
 
         BlockState front = world.getBlockState(pos.offset(facing));
-        if (isSameVariantSlope(front, state)) {
+        if (isSameVariantSlope(front)) {
             Direction frontFacing = front.get(FACING);
             if (frontFacing.getAxis() != facing.getAxis()
                     && isDifferentOrientation(state, world, pos, frontFacing.getOpposite())) {
@@ -433,7 +409,7 @@ public class GlazingShallowSlopeBlock extends HorizontalFacingBlock implements W
         }
 
         BlockState back = world.getBlockState(pos.offset(facing.getOpposite()));
-        if (isSameVariantSlope(back, state)) {
+        if (isSameVariantSlope(back)) {
             Direction backFacing = back.get(FACING);
             if (backFacing.getAxis() != facing.getAxis()
                     && isDifferentOrientation(state, world, pos, backFacing)) {
@@ -448,17 +424,11 @@ public class GlazingShallowSlopeBlock extends HorizontalFacingBlock implements W
 
     private boolean isDifferentOrientation(BlockState state, BlockView world, BlockPos pos, Direction direction) {
         BlockState other = world.getBlockState(pos.offset(direction));
-        return !(isSameVariantSlope(other, state) && other.get(FACING) == state.get(FACING));
+        return !(isSameVariantSlope(other) && other.get(FACING) == state.get(FACING));
     }
 
-    private boolean isSameVariantSlope(BlockState otherState, BlockState selfState) {
-        if (!(otherState.getBlock() instanceof GlazingShallowSlopeBlock other)) {
-            return false;
-        }
-        if (other.variant != this.variant) {
-            return false;
-        }
-        return otherState.get(HALF) == selfState.get(HALF);
+    private boolean isSameVariantSlope(BlockState otherState) {
+        return otherState.getBlock() instanceof GlazingShallowSlopeBlock other && other.variant == this.variant;
     }
 
     private static SlopeShape swapLeftRight(SlopeShape shape) {

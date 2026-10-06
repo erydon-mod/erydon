@@ -1,7 +1,7 @@
 // Exercise real Minecraft block states under Fabric without opening a graphics window.
 tasks.register('verifyShallowStairShapes', JavaExec) {
     group = 'verification'
-    description = 'Checks original and shared shallow-stair voxels with the optimisation on.'
+    description = 'Checks shallow-stair voxels and fixed-section glazing placement, corners and targeting.'
     dependsOn tasks.named('testClasses')
     classpath = sourceSets.test.runtimeClasspath
     mainClass = 'net.fabricmc.loader.impl.launch.knot.KnotClient'
