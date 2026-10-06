@@ -5,6 +5,7 @@ import net.minecraft.block.enums.BlockHalf;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemPlacementContext;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.*;
 import net.minecraft.util.BlockMirror;
@@ -180,6 +181,13 @@ public final class CopingBlock extends HorizontalFacingBlock implements Waterlog
     }
     @Override public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         Surface surface=state.get(SURFACE);
+        // Lighting workers must not query neighbours: a chunk may be waiting
+        // for this very lighting task. Use the saved profile's cached shape;
+        // client and server-thread interaction still resolves joined outlines.
+        if (world instanceof ServerWorld serverWorld && !serverWorld.getServer().isOnThread()) {
+            return (state.get(OFFSET) ? OFFSET_SHAPES : SHAPES)
+                    [surface.ordinal()][state.get(FACING).getHorizontal()];
+        }
         if(world!=null && (surface.aligned() || (surface==Surface.FLAT && CopingConnections.hasAlignedNeighbour(world,pos)))) {
             Direction facing=CopingConnections.facing(world,state,pos);
             var joins=CopingConnections.resolve(world,state,pos,facing);

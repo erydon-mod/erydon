@@ -61,6 +61,7 @@ public final class CopingPlacementLaunchProbe implements PreLaunchEntrypoint {
                 require(Registries.BLOCK.getId(block).equals(Registries.ITEM.getId(block.asItem())),"Block/item ID mismatch");
             }
             CopingBlock coping=(CopingBlock)block("glacium_coping_georgian");
+            CopingLightingLaunchChecks.run(coping);
             CopingHorizontalPlacementLaunchChecks.run(coping);
             mixedJoins(coping);
             steepSupportRemoval(coping);
