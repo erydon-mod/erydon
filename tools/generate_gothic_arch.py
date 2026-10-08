@@ -488,7 +488,13 @@ def _tag_updates(repo_root: Path, modern_ids: list[str]) -> dict[Path, bytes]:
         {**modern_document, "values": [mapping[value] for value in modern_document["values"]]}
     )
 
-    excluded = {modern_tag.resolve(), (erydon_tags / "modern.json").resolve()}
+    # Source-specific searches stay Modern, including the legacy word order.
+    # The catalogue synchroniser fills item peers with canonical source IDs.
+    excluded = {
+        (data_root / "erydon" / "tags" / kind / name).resolve()
+        for kind in ("blocks", "items")
+        for name in ("arch_modern.json", "modern.json", "modern_arch.json")
+    }
     for path in sorted(data_root.rglob("*.json")):
         if path.resolve() in excluded:
             continue

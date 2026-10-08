@@ -227,13 +227,28 @@ class ModelZFightingSafetyTests(unittest.TestCase):
         }
         # CopingGeometry trims these covered bevel end caps against the upper band
         # when rendering, preserving the supplied editable authoring geometry.
+        # The approved pitched parents have six coplanar end-cap pairs. Their
+        # north/south bevels stop short of the band's east plane; only the flat
+        # parent has those two additional east-plane overlaps.
         intentional_coping_overlaps = {
             "coping/georgian/coping_georgian_flat.json": 8,
             "coping/georgian/coping_georgian_slope.json": 6,
-            "coping/georgian/coping_georgian_shallow_lower.json": 8,
-            "coping/georgian/coping_georgian_shallow_upper.json": 8,
-            "coping/georgian/coping_georgian_steep_lower.json": 8,
-            "coping/georgian/coping_georgian_steep_upper.json": 8,
+            "coping/georgian/coping_georgian_shallow_lower.json": 6,
+            "coping/georgian/coping_georgian_shallow_upper.json": 6,
+            "coping/georgian/coping_georgian_steep_lower.json": 6,
+            "coping/georgian/coping_georgian_steep_upper.json": 6,
+        }
+        coping_end_pairs = {
+            tuple(sorted((("upper_band", face), (bevel, face))))
+            for face, bevel in (
+                ("west", "edge_north"), ("west", "edge_south"),
+                ("north", "edge_east"), ("north", "edge_west"),
+                ("south", "edge_east"), ("south", "edge_west"),
+            )
+        }
+        flat_east_pairs = {
+            tuple(sorted((("upper_band", "east"), (bevel, "east"))))
+            for bevel in ("edge_north", "edge_south")
         }
         intentional_exact_same_overlaps = {
             **intentional_coping_overlaps,
@@ -287,6 +302,19 @@ class ModelZFightingSafetyTests(unittest.TestCase):
                         relative,
                     )
                 observed_intentional_overlaps[relative] = len(same_findings)
+                if relative in intentional_coping_overlaps:
+                    expected_pairs = coping_end_pairs | (
+                        flat_east_pairs if relative.endswith("_flat.json") else set()
+                    )
+                    actual_pairs = {
+                        tuple(sorted(
+                            (document["elements"][finding[side]["element"]]["name"],
+                             finding[side]["face"])
+                            for side in ("a", "b")
+                        ))
+                        for finding in same_findings
+                    }
+                    self.assertEqual(actual_pairs, expected_pairs, relative)
             exact_same += sum(
                 finding["orientation"] == "same"
                 and finding["plane_quality"] == "exact"
@@ -298,7 +326,7 @@ class ModelZFightingSafetyTests(unittest.TestCase):
             )
             authored_cullfaces += len(scanner._raw_cull_boundary_state(document))
         self.assertEqual(observed_intentional_overlaps, intentional_exact_same_overlaps)
-        self.assertEqual(exact_same, 1395)
+        self.assertEqual(exact_same, 1387)
         self.assertEqual(near, 36)
         self.assertEqual(authored_cullfaces, 933)
 

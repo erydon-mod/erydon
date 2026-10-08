@@ -4,6 +4,7 @@ import importlib.util
 import hashlib
 import json
 import re
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -266,6 +267,44 @@ class AlcoveSafetyTests(unittest.TestCase):
 
     def test_generator_is_idempotent(self) -> None:
         self.assertEqual(GENERATOR.generate(REPO_ROOT, check=True), [])
+
+    def test_tag_updates_preserve_georgian_searches_and_extend_shared_searches(self) -> None:
+        source = "erydon:aganite_alcove_georgian"
+        gothic = "erydon:aganite_alcove_gothic"
+        legacy = "erydon:aganite_alcove_georgian_aged"
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            tags = root / "src/main/resources/data/erydon/tags"
+
+            def tag(kind: str, name: str, values: list[str]) -> Path:
+                path = tags / kind / f"{name}.json"
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(json.dumps({"replace": False, "values": values}, indent=3) + "\n")
+                return path
+
+            source_tags = [
+                tag(kind, name, [source])
+                for kind in ("blocks", "items")
+                for name in ("alcove_georgian", "georgian")
+            ]
+            shared_tags = [tag(kind, "alcove", [source, legacy]) for kind in ("blocks", "items")]
+            tag("blocks", "gothic", [])
+            complete_item_tag = tag("items", "gothic", [gothic, "#erydon:arch_gothic"])
+            preserved = {path: path.read_bytes() for path in (*source_tags, complete_item_tag)}
+
+            updates = GENERATOR._tag_updates(root, [source.removeprefix("erydon:")])
+            self.assertTrue(set(preserved).isdisjoint(updates))
+            for path in shared_tags:
+                self.assertEqual([source, gothic, legacy], json.loads(updates[path])["values"])
+            for path, content in updates.items():
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(content)
+            self.assertEqual(preserved, {path: path.read_bytes() for path in preserved})
+            self.assertEqual(
+                [],
+                [path for path, content in GENERATOR._tag_updates(root, [source.removeprefix("erydon:")]).items()
+                 if not path.exists() or path.read_bytes() != content],
+            )
 
 
 if __name__ == "__main__":

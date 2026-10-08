@@ -282,7 +282,13 @@ def _tag_updates(
         }
     )
 
-    excluded = {georgian_tag.resolve(), (erydon_tags / "georgian.json").resolve()}
+    # Source-specific searches stay Georgian on both Axiom and item browsers.
+    # The catalogue synchroniser fills item peers with canonical source IDs.
+    excluded = {
+        (data_root / "erydon" / "tags" / kind / name).resolve()
+        for kind in ("blocks", "items")
+        for name in ("alcove_georgian.json", "georgian.json")
+    }
     for path in sorted(data_root.rglob("*.json")):
         if path.resolve() in excluded:
             continue
