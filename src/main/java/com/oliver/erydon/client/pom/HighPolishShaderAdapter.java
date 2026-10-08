@@ -5,7 +5,7 @@ import java.util.List;
 import com.oliver.erydon.HighPolishSettings.Level;
 import java.util.function.IntPredicate;
 
-/** Stone finish and two-way glass controls; no extra draw or texture sample. */
+/** Stone finish and glass controls; no extra draw or texture sample. */
 public final class HighPolishShaderAdapter {
     public enum Profile { COMPLEMENTARY, BLISS, UNSUPPORTED }
     private static final String BLISS_PROPERTIES_SHA256 =
@@ -30,10 +30,12 @@ public final class HighPolishShaderAdapter {
     public static final int HONED_COLUMN_ID = 12051;
     public static final int POLISHED_COLUMN_ID = 12053;
     public static final int NORMAL_COLUMN_ID = 12055;
+    public static final int GLAZING_ID = 12057;
+    public static final float GLAZING_REFLECTION_FLOOR = 0.5F;
     public static final List<Integer> RESERVED_IDS = List.of(SOLID_ID, SHAPE_ID, SPIRAL_ID,
             MIRROR_POLISHED_FRAME_ID, MIRROR_NORMAL_FRAME_ID, HONED_SOLID_ID, HONED_SHAPE_ID,
             HONED_SPIRAL_ID, HONED_FRAME_ID, POLISHED_SOLID_ID, POLISHED_SHAPE_ID, POLISHED_SPIRAL_ID, POLISHED_FRAME_ID,
-            MIRROR_COLUMN_ID, HONED_COLUMN_ID, POLISHED_COLUMN_ID, NORMAL_COLUMN_ID);
+            MIRROR_COLUMN_ID, HONED_COLUMN_ID, POLISHED_COLUMN_ID, NORMAL_COLUMN_ID, GLAZING_ID);
     private static final String HONED = "(mat == 12032 || mat == 12033 || mat == 12035 || mat == 12037 || mat == 12051)";
     private static final String POLISHED = "(mat == 12040 || mat == 12041 || mat == 12043 || mat == 12045 || mat == 12053)";
     private static final String MIRROR = "(mat == 12024 || mat == 12025 || mat == 12027 || mat == 12029 || mat == 12049)";
@@ -50,8 +52,13 @@ public final class HighPolishShaderAdapter {
     private static final Pattern CUSTOM_EMISSION = Pattern.compile(
             "emission\\s*=\\s*GetCustomEmission\\(specularMap,\\s*texCoordM\\);");
     private static final Pattern TRANSLUCENT_REFLECTION = Pattern.compile("reflectMult\\s*=\\s*smoothnessD\\s*;");
+    private static final Pattern TRANSLUCENT_FRESNEL = Pattern.compile(
+            "fresnelM\\s*=\\s*\\(fresnelM\\s*\\*\\s*0\\.85\\s*\\+\\s*0\\.15\\)\\s*\\*\\s*reflectMult\\s*;");
+    private static final Pattern TRANSLUCENT_TINT = Pattern.compile(Pattern.quote(
+            "translucentMult.rgb = mix(translucentMult.rgb, vec3(1.0), min1(pow2(pow2(lViewPos / far))));"));
     private static volatile Profile profile = Profile.UNSUPPORTED;
     private static volatile boolean requested, eligible, terrainReady, deferredReady, waterReady, columnsReady, failed;
+    private static volatile boolean glazingRequested;
 
     public record Result(String text, boolean changed, String status) { }
 
@@ -68,9 +75,14 @@ public final class HighPolishShaderAdapter {
     }
 
     public static void beginShaderLoad(Profile selectedProfile, boolean enabled) {
+        beginShaderLoad(selectedProfile, enabled, false);
+    }
+
+    public static void beginShaderLoad(Profile selectedProfile, boolean enabled, boolean glazing) {
         profile = selectedProfile;
-        // Keep other packs native while the three-level CU trial is validated.
+        // Keep other shader packs native.
         requested = selectedProfile == Profile.COMPLEMENTARY && enabled;
+        glazingRequested = requested && glazing;
         eligible = false;
         terrainReady = deferredReady = waterReady = columnsReady = failed = false;
     }
@@ -88,7 +100,7 @@ public final class HighPolishShaderAdapter {
             case SOLID_ID, SHAPE_ID, SPIRAL_ID, MIRROR_POLISHED_FRAME_ID, MIRROR_NORMAL_FRAME_ID,
                     HONED_SOLID_ID, HONED_SHAPE_ID, HONED_SPIRAL_ID, HONED_FRAME_ID,
                     POLISHED_SOLID_ID, POLISHED_SHAPE_ID, POLISHED_SPIRAL_ID, POLISHED_FRAME_ID,
-                    MIRROR_COLUMN_ID, HONED_COLUMN_ID, POLISHED_COLUMN_ID, NORMAL_COLUMN_ID -> true;
+                    MIRROR_COLUMN_ID, HONED_COLUMN_ID, POLISHED_COLUMN_ID, NORMAL_COLUMN_ID, GLAZING_ID -> true;
             default -> false;
         };
     }
@@ -145,17 +157,53 @@ public final class HighPolishShaderAdapter {
         var reflection = TRANSLUCENT_REFLECTION.matcher(source);
         if (!sample.find() || !reflection.find()) return new Result(source, false, "UNSUPPORTED_SOURCE");
         if (sample.find() || reflection.find()) return new Result(source, false, "UNSUPPORTED_SOURCE");
-        String tagged = CUSTOM_EMISSION.matcher(source).replaceFirst("$0\n" + """
+        if (glazingRequested && (!unique(TRANSLUCENT_TINT, source) || !unique(TRANSLUCENT_FRESNEL, source)))
+            return new Result(source, false, "UNSUPPORTED_SOURCE");
+        String flags = """
                     // ERYDON two-way mirror coating
                     // Carry the coating flag through the existing unused inout value.
                     materialMask = ((mat == 12029 || mat == 12031 || mat == 12037 || mat == 12045)
                             && specularMap.r >= 0.99 && specularMap.g >= 229.5 / 255.0) ? 1.0 : 0.0;
-                """);
+                """;
+        if (glazingRequested) {
+            flags += """
+                        // Negative flag: ordinary dielectric panes only. Opaque frames,
+                        // metal coatings and exactly transparent edge pixels stay native.
+                        if ((mat == 12057 || mat == 12029 || mat == 12031 || mat == 12037 || mat == 12045)
+                                && specularMap.r >= 0.99 && specularMap.g < 229.1 / 255.0
+                                && color.a > 0.0 && color.a < 1.0) materialMask = -1.0;
+                    """;
+        }
+        String tagged = CUSTOM_EMISSION.matcher(source).replaceFirst("$0\n" + flags);
         String result = TRANSLUCENT_REFLECTION.matcher(tagged).replaceFirst("$0\n" + """
                     // The later CU blend is (fresnelM * 0.85 + 0.15) * reflectMult.
                     // Give only the outward metallic coating a 90% reflection floor.
                     if (materialMaskPh > 0.5) fresnelM = max(fresnelM, (0.9 - 0.15) / 0.85);
                 """);
+        if (glazingRequested) {
+            String response = """
+                        // ERYDON glazing: Fresnel reflection is independent of pane alpha.
+                        float erydonGlazingReflection = 0.0;
+                        if (materialMaskPh < -0.5) {
+                            // CU stores sqrt(R) in RGBA8_SNORM; stay below its exact-one sentinel after quantization.
+                            erydonGlazingReflection = min(0.99, (%s + (1.0 - %s) * pow(fresnel, 5.0)) * reflectMult);
+                        }
+                    """.formatted(Float.toString(GLAZING_REFLECTION_FLOOR),
+                            Float.toString(GLAZING_REFLECTION_FLOOR));
+            result = TRANSLUCENT_REFLECTION.matcher(result).replaceFirst("$0\n" + response);
+            // These anchors prove custom PBR survived Iris preprocessing. Do not
+            // insert preprocessor directives: its AST transformation runs next.
+            // Keep CU's authored pane tint for volumetric light; only the final
+            // surface compositing alpha includes reflection coverage.
+            result = TRANSLUCENT_TINT.matcher(result).replaceFirst("$0\n" + """
+                        if (materialMaskPh < -0.5) {
+                            color.a = color.a * (1.0 - erydonGlazingReflection) + erydonGlazingReflection;
+                        }
+                    """);
+            result = TRANSLUCENT_FRESNEL.matcher(result).replaceFirst("$0\n" + """
+                        if (materialMaskPh < -0.5) fresnelM = erydonGlazingReflection / color.a;
+                    """);
+        }
         return new Result(result, true, "TRANSFORMED");
     }
 

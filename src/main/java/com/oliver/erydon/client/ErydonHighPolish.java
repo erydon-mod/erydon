@@ -29,7 +29,7 @@ public final class ErydonHighPolish {
 
     public static void registerGlazingResources() {
         if (!ACTIVE.glazingEnabled()) return;
-        // Only registered for this launch. No shader hooks or per-frame texture substitutions.
+        // Only registered for this launch; the shader adapter adjusts reflections separately.
         boolean registered = ResourceManagerHelper.registerBuiltinResourcePack(
                 new Identifier(Erydon.MOD_ID, "high_polish_glazing"),
                 FabricLoader.getInstance().getModContainer(Erydon.MOD_ID).orElseThrow(),
@@ -52,6 +52,7 @@ public final class ErydonHighPolish {
         }
         Erydon.LOGGER.info("[{}] High polish {} using opaque stone ({} eligible blocks; glazing {}; two-way {}; changes require restart)",
                 Erydon.MOD_ID, ACTIVE.enabled() ? "on" : "off", matched,
-                ACTIVE.glazingEnabled() ? "on" : "off", ACTIVE.twoWayEnabled() ? "on" : "off");
+                ACTIVE.glazingEnabled() ? "on" : "off",
+                ACTIVE.twoWayEnabled() ? "on" : "off");
     }
 }

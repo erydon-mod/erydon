@@ -17,37 +17,50 @@ import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
+import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.WorldAccess;
 
 public class GlazingSlopeBlock extends HorizontalFacingBlock implements Waterloggable {
+    public enum SlopeShape implements StringIdentifiable {
+        STRAIGHT("straight"),
+        INNER_LEFT("inner_left"),
+        INNER_RIGHT("inner_right"),
+        OUTER_LEFT("outer_left"),
+        OUTER_RIGHT("outer_right");
+
+        private final String name;
+
+        SlopeShape(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String asString() {
+            return name;
+        }
+    }
+
     public static final DirectionProperty FACING = Properties.HORIZONTAL_FACING;
     public static final EnumProperty<BlockHalf> HALF = Properties.BLOCK_HALF;
+    public static final EnumProperty<SlopeShape> SHAPE = EnumProperty.of("shape", SlopeShape.class);
     public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
-
-    private static final Direction[] HORIZONTALS = new Direction[] {
-            Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST
-    };
-    private static final VoxelShape BOTTOM_SOUTH_SHAPE = createBottomSouthShape();
-    private static final VoxelShape TOP_SOUTH_SHAPE = rotateX180(BOTTOM_SOUTH_SHAPE);
-    private static final VoxelShape[] BOTTOM_CACHE = buildShapeCache(BOTTOM_SOUTH_SHAPE);
-    private static final VoxelShape[] TOP_CACHE = buildShapeCache(TOP_SOUTH_SHAPE);
 
     public GlazingSlopeBlock(Settings settings) {
         super(settings.nonOpaque());
         this.setDefaultState(this.stateManager.getDefaultState()
                 .with(FACING, Direction.NORTH)
                 .with(HALF, BlockHalf.BOTTOM)
+                .with(SHAPE, SlopeShape.STRAIGHT)
                 .with(WATERLOGGED, false));
     }
 
     @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        builder.add(FACING, HALF, WATERLOGGED);
+        builder.add(FACING, HALF, SHAPE, WATERLOGGED);
     }
 
     @Override
@@ -62,10 +75,11 @@ public class GlazingSlopeBlock extends HorizontalFacingBlock implements Waterlog
             half = hitY > 0.5d ? BlockHalf.TOP : BlockHalf.BOTTOM;
         }
 
-        return this.getDefaultState()
+        BlockState placed = this.getDefaultState()
                 .with(FACING, ctx.getHorizontalPlayerFacing())
                 .with(HALF, half)
                 .with(WATERLOGGED, ctx.getWorld().getFluidState(ctx.getBlockPos()).getFluid() == Fluids.WATER);
+        return getStateWithShape(placed, ctx.getWorld(), ctx.getBlockPos());
     }
 
     @Override
@@ -94,7 +108,9 @@ public class GlazingSlopeBlock extends HorizontalFacingBlock implements Waterlog
         if (state.get(WATERLOGGED)) {
             world.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
         }
-        return super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
+        return direction.getAxis().isHorizontal()
+                ? getStateWithShape(state, world, pos)
+                : super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
     }
 
     @Override
@@ -104,7 +120,12 @@ public class GlazingSlopeBlock extends HorizontalFacingBlock implements Waterlog
 
     @Override
     public BlockState mirror(BlockState state, BlockMirror mirror) {
-        return state.rotate(mirror.getRotation(state.get(FACING)));
+        if (mirror == BlockMirror.NONE) {
+            return state;
+        }
+        Direction facing = state.get(FACING);
+        return state.with(FACING, mirror.getRotation(facing).rotate(facing))
+                .with(SHAPE, swapLeftRight(state.get(SHAPE)));
     }
 
     @Override
@@ -112,79 +133,59 @@ public class GlazingSlopeBlock extends HorizontalFacingBlock implements Waterlog
         return BlockRenderType.MODEL;
     }
 
+    private BlockState getStateWithShape(BlockState state, BlockView world, BlockPos pos) {
+        return state.with(SHAPE, computeCornerShape(state, world, pos));
+    }
+
+    private SlopeShape computeCornerShape(BlockState state, BlockView world, BlockPos pos) {
+        Direction facing = state.get(FACING);
+
+        BlockState front = world.getBlockState(pos.offset(facing));
+        if (isCompatibleSlope(state, front)) {
+            Direction frontFacing = front.get(FACING);
+            if (frontFacing.getAxis() != facing.getAxis()
+                    && isDifferentOrientation(state, world, pos, frontFacing.getOpposite())) {
+                return frontFacing == facing.rotateYCounterclockwise()
+                        ? SlopeShape.INNER_LEFT
+                        : SlopeShape.INNER_RIGHT;
+            }
+        }
+
+        BlockState back = world.getBlockState(pos.offset(facing.getOpposite()));
+        if (isCompatibleSlope(state, back)) {
+            Direction backFacing = back.get(FACING);
+            if (backFacing.getAxis() != facing.getAxis()
+                    && isDifferentOrientation(state, world, pos, backFacing)) {
+                return backFacing == facing.rotateYCounterclockwise()
+                        ? SlopeShape.OUTER_LEFT
+                        : SlopeShape.OUTER_RIGHT;
+            }
+        }
+
+        return SlopeShape.STRAIGHT;
+    }
+
+    private boolean isDifferentOrientation(BlockState state, BlockView world, BlockPos pos, Direction direction) {
+        BlockState other = world.getBlockState(pos.offset(direction));
+        return !(isCompatibleSlope(state, other) && other.get(FACING) == state.get(FACING));
+    }
+
+    private static boolean isCompatibleSlope(BlockState state, BlockState other) {
+        return other.getBlock() instanceof GlazingSlopeBlock && other.get(HALF) == state.get(HALF);
+    }
+
+    private static SlopeShape swapLeftRight(SlopeShape shape) {
+        return switch (shape) {
+            case INNER_LEFT -> SlopeShape.INNER_RIGHT;
+            case INNER_RIGHT -> SlopeShape.INNER_LEFT;
+            case OUTER_LEFT -> SlopeShape.OUTER_RIGHT;
+            case OUTER_RIGHT -> SlopeShape.OUTER_LEFT;
+            default -> shape;
+        };
+    }
+
     private static VoxelShape getVoxelForState(BlockState state) {
-        VoxelShape[] cache = state.get(HALF) == BlockHalf.TOP ? TOP_CACHE : BOTTOM_CACHE;
-        return cache[horizontalIndex(state.get(FACING))];
-    }
-
-    private static VoxelShape[] buildShapeCache(VoxelShape southShape) {
-        VoxelShape[] cache = new VoxelShape[4];
-        for (Direction facing : HORIZONTALS) {
-            cache[horizontalIndex(facing)] = rotateShapeSteps(southShape, stepsForFacing(facing));
-        }
-        return cache;
-    }
-
-    private static VoxelShape createBottomSouthShape() {
-        VoxelShape shape = VoxelShapes.empty();
-        double thickness = 1.25d / 16.0d;
-
-        for (int z = 0; z < 16; z++) {
-            double minZ = z / 16.0d;
-            double maxZ = (z + 1) / 16.0d;
-            double midZ = (minZ + maxZ) * 0.5d;
-            double minY = Math.max(0.0d, midZ - thickness * 0.5d);
-            double maxY = Math.min(1.0d, midZ + thickness * 0.5d);
-
-            shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.0d, minY, minZ, 1.0d, maxY, maxZ));
-        }
-
-        return shape.simplify();
-    }
-
-    private static VoxelShape rotateX180(VoxelShape shape) {
-        final VoxelShape[] flipped = {VoxelShapes.empty()};
-        shape.forEachBox((minX, minY, minZ, maxX, maxY, maxZ) -> flipped[0] = VoxelShapes.union(
-                flipped[0],
-                // Match the authored blockstate's X=180 rotation, including its Z reversal.
-                VoxelShapes.cuboid(minX, 1.0d - maxY, 1.0d - maxZ, maxX, 1.0d - minY, 1.0d - minZ)
-        ));
-        return flipped[0];
-    }
-
-    private static int stepsForFacing(Direction facing) {
-        return switch (facing) {
-            case SOUTH -> 0;
-            case WEST -> 1;
-            case NORTH -> 2;
-            case EAST -> 3;
-            default -> 0;
-        };
-    }
-
-    private static VoxelShape rotateShapeSteps(VoxelShape shape, int steps) {
-        int turns = ((steps % 4) + 4) % 4;
-        VoxelShape current = shape;
-
-        for (int i = 0; i < turns; i++) {
-            final VoxelShape[] rotated = {VoxelShapes.empty()};
-            current.forEachBox((minX, minY, minZ, maxX, maxY, maxZ) -> rotated[0] = VoxelShapes.union(
-                    rotated[0],
-                    VoxelShapes.cuboid(1.0d - maxZ, minY, minX, 1.0d - minZ, maxY, maxX)
-            ));
-            current = rotated[0];
-        }
-
-        return current;
-    }
-
-    private static int horizontalIndex(Direction direction) {
-        return switch (direction) {
-            case NORTH -> 0;
-            case EAST -> 1;
-            case SOUTH -> 2;
-            case WEST -> 3;
-            default -> 0;
-        };
+        return GlazingSlopeGeometry.shape(GlazingSlopeGeometry.Profile.STANDARD,
+                state.get(FACING), state.get(SHAPE).asString(), state.get(HALF));
     }
 }

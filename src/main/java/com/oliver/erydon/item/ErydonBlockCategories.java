@@ -70,7 +70,7 @@ public final class ErydonBlockCategories {
     }
 
     public static boolean isSlope(String path) {
-        return path.contains("_slope");
+        return ErydonIdMigration.legacyResourcePath(ErydonIdMigration.canonicalPath(path)).contains("_slope");
     }
 
     public static boolean isWindow(String path) {
@@ -200,6 +200,10 @@ public final class ErydonBlockCategories {
         }
         if (isGlass(path)) {
             addAll(terms, "glass", "pane", "transparent");
+        }
+        if (path.startsWith("glazing_framed_") && path.endsWith("_vertical_diagonal")) {
+            addAll(terms, "vertical diagonal", "diagonal glazing", "upright diagonal", "vertical slope", "slope vertical");
+            terms.add(Text.translatable("search.erydon." + path).getString());
         }
         if (isWindow(path)) {
             addAll(terms, "window", "frame");

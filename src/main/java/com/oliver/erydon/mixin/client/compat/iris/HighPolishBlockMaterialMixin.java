@@ -48,9 +48,11 @@ abstract class HighPolishBlockMaterialMixin {
             boolean window = erydon && (block instanceof WindowArchBlock || block instanceof WindowFrenchGeorgianBlock);
             boolean mirror = HighPolishShaderAdapter.profile() == HighPolishShaderAdapter.Profile.COMPLEMENTARY
                     && ErydonHighPolish.twoWayEnabled() && window;
+            boolean glazing = ErydonHighPolish.activeSettings().glazingEnabled()
+                    && erydon && (window || id.getPath().startsWith("glazing_"));
             boolean column = erydon && HighPolishShaderAdapter.columnsReady()
                     && PolishedStoneMaterials.isReflectionColumn(id.getPath());
-            if (!stone && !mirror && !column) continue;
+            if (!stone && !mirror && !column && !glazing) continue;
             boolean spiral = erydon && id.getPath().endsWith("_stairs_spiral_large");
             for (BlockState state : block.getStateManager().getStates()) {
                 // Preserve specialised light-source shader classifications.
@@ -61,9 +63,15 @@ abstract class HighPolishBlockMaterialMixin {
                     continue;
                 }
                 // Keep frames separate from inlay-bearing shapes even with glass polish off.
-                if (stone && window || mirror && state.get(WindowArchBlock.GLASS) == WindowArchBlock.Glass.TWO_WAY) {
+                if ((stone || glazing) && window
+                        || mirror && state.get(WindowArchBlock.GLASS) == WindowArchBlock.Glass.TWO_WAY) {
                     ids.put(state, stone ? HighPolishShaderAdapter.mirrorFrameId(level)
                             : HighPolishShaderAdapter.MIRROR_NORMAL_FRAME_ID);
+                    count++;
+                    continue;
+                }
+                if (glazing) {
+                    ids.put(state, HighPolishShaderAdapter.GLAZING_ID);
                     count++;
                     continue;
                 }

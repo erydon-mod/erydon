@@ -1,0 +1,54 @@
+// Independent outputs keep glazing geometry validation separate from other active tasks.
+gradle.beforeProject { project ->
+    project.layout.buildDirectory.set(new File(project.projectDir, '.gradle/glazing-validation/build'))
+    project.afterEvaluate {
+        project.tasks.register('verifyGlazingSlopes', JavaExec) {
+            group = 'verification'
+            description = 'Checks real triangular glazing meshes, corner placement and interaction shapes under Fabric.'
+            dependsOn project.tasks.named('testClasses')
+            dependsOn project.tasks.named('configureLaunch')
+            def fixture = project.layout.buildDirectory.dir('glazing-slope-probe')
+            classpath = project.sourceSets.test.runtimeClasspath + project.files(fixture.map { it.dir('probe-mod') })
+            mainClass = 'net.fabricmc.loader.impl.launch.knot.KnotClient'
+            javaLauncher = project.javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(17) }
+            maxHeapSize = '3G'
+            doFirst {
+                def root = fixture.get().asFile
+                root.mkdirs()
+                workingDir root
+                def mod = new File(root, 'probe-mod')
+                mod.mkdirs()
+                new File(mod, 'fabric.mod.json').text = groovy.json.JsonOutput.toJson([
+                    schemaVersion: 1, id: 'erydon_glazing_slope_probe', version: '1.0.0',
+                    environment: 'client', entrypoints: [preLaunch: ['com.oliver.erydon.client.model.GlazingSlopeReviewLaunchProbe']]
+                ])
+                systemProperty 'fabric.development', 'true'
+                systemProperty 'fabric.remapClasspathFile', project.file('.gradle/loom-cache/remapClasspath.txt').absolutePath
+                args '--gameDir', root.absolutePath, '--version', '1.20.1', '--accessToken', '0'
+            }
+        }
+        project.tasks.register('verifyGlazingSlopesServer', JavaExec) {
+            group = 'verification'
+            description = 'Checks glazing geometry and cached interaction shapes in the dedicated-server environment.'
+            dependsOn project.tasks.named('testClasses'), project.tasks.named('configureLaunch')
+            def fixture = project.layout.buildDirectory.dir('glazing-slope-server-probe')
+            classpath = project.sourceSets.test.runtimeClasspath + project.files(fixture.map { it.dir('probe-mod') })
+            mainClass = 'net.fabricmc.loader.impl.launch.knot.KnotServer'
+            javaLauncher = project.javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(17) }
+            maxHeapSize = '1G'
+            doFirst {
+                def root = fixture.get().asFile
+                root.mkdirs()
+                workingDir root
+                def mod = new File(root, 'probe-mod')
+                mod.mkdirs()
+                new File(mod, 'fabric.mod.json').text = groovy.json.JsonOutput.toJson([
+                    schemaVersion: 1, id: 'erydon_glazing_slope_server_probe', version: '1.0.0',
+                    environment: 'server', entrypoints: [preLaunch: ['com.oliver.erydon.block.GlazingSlopeServerLaunchProbe']]
+                ])
+                systemProperty 'fabric.development', 'true'
+                systemProperty 'fabric.remapClasspathFile', project.file('.gradle/loom-cache/remapClasspath.txt').absolutePath
+            }
+        }
+    }
+}

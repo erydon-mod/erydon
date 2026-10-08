@@ -1,6 +1,6 @@
 # Stone finish and metal review
 
-Updated 2026-09-27. Honed, Polished and Mirror remain separate from metallic
+Updated 2026-10-08. Honed, Polished and Mirror remain separate from metallic
 materials. The new sprite-based metal treatment replaces the earlier 85%/20%
 metal boost; it does not stack another boost on top. The approved stone finish
 controls and 90% two-way coating retain their existing behavior. The follow-up
@@ -69,6 +69,53 @@ The tiny generated resource pack now supplies command labels only.
 For this CU-first trial the PNG files themselves are unchanged. Native material
 behaviour in other shaders is therefore unchanged by these finish controls;
 future cross-shader work can address their different F0 handling separately.
+
+## Glazing reflections
+
+The glazing toggle already supplies maximum-smoothness specular maps. Increasing
+red beyond 255 cannot increase shine. In the inspected Complementary Unbound
+r5.9.4 dev1, the translucent surface blend also multiplies reflection by pane
+opacity. Crystal's authored alpha of 20/255 reduces its frontal reflection to
+about 1.18%, despite maximum smoothness; the other three glazing finishes use
+150/255. The Collection packs inherit these native glazing textures.
+
+Following visual approval, glazing uses the fixed strong response: a 50% frontal
+reflection coefficient, rising toward grazing angles. This is an artistic
+coated-glass treatment; the experimental strength selector and its saved property
+have been removed. Settings are captured at launch and require a full restart.
+The existing glazing toggle still disables the adjustment independently of the
+two-way mirror coating.
+
+The supported Complementary adapter reuses the existing translucent reflection
+pass and its one specular sample. With authored opacity `a` and angle-dependent
+reflection `R`, surface compositing uses `a' = a * (1 - R) + R` and a reflection
+blend of `R / a'`. The resulting reflection contribution is `R`, tint is
+`a * (1 - R)`, and transmitted background is `(1 - a) * (1 - R)`. Crystal therefore
+still transmits about 46% of the background frontally.
+CU's volumetric tint is calculated before this compositing-alpha adjustment,
+and its existing fog and world-space reflection attenuation remain in place.
+Reflection is capped below one to avoid CU's exact-one history rejection.
+
+Only partially transparent, smooth dielectric panes in ERYDON glazing and window
+families receive the adjustment. Zero-alpha edges, opaque lead/stone frames,
+metal coatings and other mods' glass retain their existing response. No albedo,
+normal map, height map, shader ZIP or Collection pack is rewritten. Other shader
+packs retain their native material behavior. This adds no reflection ray, texture
+sample, draw pass or per-frame Java decision; same-scene appearance and performance
+still need in-game review.
+
+Validation on 2026-10-08 includes the three-language Mod Menu audit and the real
+Fabric/Iris mixin launch probe. The installed Unbound r5.9.4 dev1 is checked through
+Iris transformation and GPU compile/link across dimensions and POM modes, with
+the metal adapter also active. GPU blend readback covers crystal/colored glass at
+different angles, unaffected edges, frames, coatings and the reflection-history
+storage limit. The user approved the strong treatment in-game. These checks do
+not establish a measured same-scene FPS result.
+
+The angle response follows the dielectric Fresnel principle described in
+[Physically Based Rendering](https://www.pbr-book.org/4ed/Reflection_Models/Dielectric_BSDF).
+The native maps remain non-metallic under the
+[LabPBR material standard](https://shaderlabs.org/wiki/LabPBR_Material_Standard).
 
 ## Current metal treatment
 

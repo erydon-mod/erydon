@@ -96,7 +96,7 @@ def synchronise(check=False):
         extend(blocks, name, set().union(*(material_members[material] for material in stone_set)))
     for form in ("slab", "stairs", "layer", "layer_multiface", "layer_vertical", "pane",
                  "slope", "slope_shallow_lower", "slope_shallow_upper", "slope_steep_lower", "slope_steep_upper",
-                 "slope_vertical", "slope_vertical_shallow_broad", "slope_vertical_shallow_narrow",
+                 "slope_vertical", "slope_vertical_shallow_broad", "slope_vertical_shallow_narrow", "vertical_diagonal",
                  "stairs_shallow_bottom", "stairs_shallow_top", "stairs_spiral_large", "column_square", "column_gothic",
                  "arch_modern", "arch_gothic", "arch_romanesque", "alcove_georgian", "alcove_gothic",
                  "chimney_circular", "window_arch", "window_french_georgian", "post"):
@@ -104,7 +104,7 @@ def synchronise(check=False):
     for colour in ("black", "white", "bronze", "silver", "crystal", "tinted"):
         extend(blocks, colour, {path for path in ids if colour in path.split("_")})
     for name in ("herringbone", "herringbone_bronze", "herringbone_grout", "weave", "weave_bronze", "weave_grout",
-                 "trim", "quatrefoil", "guilloche", "horizontal", "vertical", "broad", "narrow", "shallow", "steep",
+                 "trim", "quatrefoil", "guilloche", "horizontal", "vertical", "diagonal", "broad", "narrow", "shallow", "steep",
                  "circular", "square", "modern", "georgian", "romanesque"):
         extend(blocks, name, {path for path in ids if "_" + name + "_" in "_" + path + "_"})
     weave_ids = {path for path in ids if "_weave_" in path}

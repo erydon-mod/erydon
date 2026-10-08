@@ -45,7 +45,8 @@ public abstract class ShaderPropertiesMixin implements ErydonIrisShaderPropertie
         InlaySubstrateTransport.setSourceSupported(false);
         com.oliver.erydon.client.pom.HighPolishShaderAdapter.beginShaderLoad(
                 com.oliver.erydon.client.pom.HighPolishShaderAdapter.profileForProperties(contents),
-                true); // CU also supplies the common Honed baseline when the master is off.
+                true, // CU also supplies the common Honed baseline when the master is off.
+                com.oliver.erydon.client.ErydonHighPolish.activeSettings().glazingEnabled());
         ErydonCuPomRuntimeState.beginShaderLoad(result.eligible());
         if (result.changed()) {
             Erydon.LOGGER.info("[{}] Enabled the supported Complementary CTM-POM adapter in memory.",

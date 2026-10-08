@@ -212,4 +212,38 @@ class HighPolishShaderAdapterTest {
         }
         assertSame(WATER, HighPolishShaderAdapter.adaptFragment("gbuffers_water", WATER, false).text());
     }
+
+    @Test void glazingPreflightsEveryCompositingAnchorAndResetsWithShaderSelection() {
+        String tint = "translucentMult.rgb = mix(translucentMult.rgb, vec3(1.0), min1(pow2(pow2(lViewPos / far))));";
+        String blend = "fresnelM = (fresnelM * 0.85 + 0.15) * reflectMult;";
+        String source = WATER + "\n" + tint + "\n" + blend;
+        String coatingOnly = HighPolishShaderAdapter.adaptFragment("gbuffers_water", source, true).text();
+        assertEquals(0.5F, HighPolishShaderAdapter.GLAZING_REFLECTION_FLOOR);
+        HighPolishShaderAdapter.beginShaderLoad(HighPolishShaderAdapter.Profile.COMPLEMENTARY,
+                true, true);
+        var glazing = HighPolishShaderAdapter.adaptFragment("gbuffers_water", source, true);
+        assertTrue(glazing.changed());
+        assertTrue(glazing.text().contains("(0.5 + (1.0 - 0.5) * pow(fresnel, 5.0))"));
+        assertTrue(glazing.text().indexOf("materialMask = -1.0;") > glazing.text().indexOf("? 1.0 : 0.0;"),
+                "The coating's ordinary-pane zero must not overwrite the glass flag");
+        assertTrue(glazing.text().indexOf("color.a = color.a *") > glazing.text().indexOf(tint),
+                "CU's volumetric tint must still use the authored pane opacity");
+        assertTrue(glazing.text().indexOf("fresnelM = erydonGlazingReflection / color.a;") > glazing.text().indexOf(blend));
+        assertTrue(glazing.text().contains("color.a > 0.0 && color.a < 1.0"), "Holes and opaque frames stay native");
+        assertTrue(glazing.text().contains("min(0.99,"), "Avoid CU's exact-one WSR rejection after SNORM quantization");
+        assertSame(glazing.text(), HighPolishShaderAdapter.adaptFragment("gbuffers_water", glazing.text(), true).text());
+        for (String bad : new String[]{source.replace(tint, ""), source.replace(blend, ""), source + tint, source + blend}) {
+            assertSame(bad, HighPolishShaderAdapter.adaptFragment("gbuffers_water", bad, true).text());
+        }
+        HighPolishShaderAdapter.beginShaderLoad(HighPolishShaderAdapter.Profile.COMPLEMENTARY,
+                true, false);
+        assertEquals(coatingOnly, HighPolishShaderAdapter.adaptFragment("gbuffers_water", source, true).text());
+        HighPolishShaderAdapter.beginShaderLoad(HighPolishShaderAdapter.Profile.COMPLEMENTARY, true);
+        assertEquals(coatingOnly, HighPolishShaderAdapter.adaptFragment("gbuffers_water", source, true).text(),
+                "The two-argument entry point must reset glazing to off");
+        HighPolishShaderAdapter.beginShaderLoad(HighPolishShaderAdapter.Profile.UNSUPPORTED,
+                true, true);
+        HighPolishShaderAdapter.acceptMaterialIds(id -> false);
+        assertSame(source, HighPolishShaderAdapter.adaptFragment("gbuffers_water", source).text());
+    }
 }

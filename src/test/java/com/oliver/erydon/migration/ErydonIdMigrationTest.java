@@ -12,8 +12,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ErydonIdMigrationTest {
     @Test
     void loadsTheCompleteApprovedMapIncludingQuatrefoil() {
-        assertEquals(1775, ErydonIdMigration.entries().size());
-        assertEquals(1586, ErydonIdMigration.aliases().size());
+        assertEquals(1779, ErydonIdMigration.entries().size());
+        assertEquals(1590, ErydonIdMigration.aliases().size());
         assertEquals(189, ErydonIdMigration.directRenames().size());
         assertEquals(48, ErydonIdMigration.aliases().stream()
                 .filter(entry -> entry.oldId().getPath().contains("quatrefoil"))

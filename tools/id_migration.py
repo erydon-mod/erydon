@@ -20,8 +20,8 @@ from pathlib import Path
 from typing import Iterable
 
 
-EXPECTED_TOTAL = 1775
-EXPECTED_ALIASES = 1586
+EXPECTED_TOTAL = 1779
+EXPECTED_ALIASES = 1590
 EXPECTED_DIRECT_RENAMES = 189
 EXPECTED_QUATREFOIL_ALIASES = 48
 MANIFEST_COLUMNS = (
@@ -68,6 +68,9 @@ def parser() -> argparse.ArgumentParser:
     export.add_argument("--workbook", type=Path, required=True)
     export.add_argument("--output", type=Path, required=True)
     export.add_argument("--sheet", default="05 ID Migration Map")
+    export.add_argument("--supplemental-manifest", type=Path,
+                        default=Path(__file__).resolve().parents[1] / "src/main/resources/data/erydon/id_migration.tsv",
+                        help="retain directly approved source_row=0 migrations from this committed manifest")
 
     apply = subcommands.add_parser("apply", help="apply registry-keyed source moves")
     apply.add_argument("--manifest", type=Path, required=True)
@@ -112,7 +115,7 @@ def validate_entries(entries: list[Entry]) -> None:
             f"expected {EXPECTED_QUATREFOIL_ALIASES} Quatrefoil aliases, found {len(quatrefoil)}")
 
 
-def workbook_entries(workbook: Path, sheet_name: str) -> list[Entry]:
+def workbook_entries(workbook: Path, sheet_name: str, supplements: Iterable[Entry] = ()) -> list[Entry]:
     try:
         from openpyxl import load_workbook
     except ImportError as exception:
@@ -171,8 +174,26 @@ def workbook_entries(workbook: Path, sheet_name: str) -> list[Entry]:
             review_status=str(values[index["Review status"]] or "").strip(),
         ))
 
+    entries = retain_supplemental_entries(entries, supplements)
     validate_entries(entries)
     return entries
+
+
+def retain_supplemental_entries(entries: list[Entry], supplements: Iterable[Entry]) -> list[Entry]:
+    """A workbook export must not discard later direct user approvals."""
+    old_paths = {entry.old_path: entry for entry in entries}
+    result = list(entries)
+    for entry in supplements:
+        if entry.source_row != 0:
+            continue
+        if entry.old_path in old_paths:
+            current = old_paths[entry.old_path]
+            require(current.canonical_path == entry.canonical_path and current.mode == entry.mode,
+                    f"workbook contradicts permanent supplemental migration: {entry.old_path}")
+        else:
+            result.append(entry)
+            old_paths[entry.old_path] = entry
+    return result
 
 
 def write_manifest(entries: Iterable[Entry], output: Path) -> None:
@@ -245,6 +266,16 @@ def update_registry_references(repo: Path, entries: list[Entry]) -> int:
 def localized_value(language: str, entry: Entry, current: str) -> str:
     if language == "en_us":
         return entry.canonical_display_name
+
+    if entry.reason == "Vertical diagonal wording":
+        finish = entry.old_path.removeprefix("glazing_framed_").removesuffix("_slope_vertical")
+        if language == "de_de":
+            names = {"tinted": "getönte Verglasung", "silver": "silberne Verglasung",
+                     "crystal": "Kristallverglasung", "bronze": "bronzene Verglasung"}
+            return f"Gerahmte {names[finish]} – vertikale Diagonale"
+        if language == "es_es":
+            names = {"tinted": "tintada", "silver": "plateada", "crystal": "de cristal", "bronze": "de bronce"}
+            return f"Cristalera enmarcada {names[finish]} – diagonal vertical"
 
     value = current
     if "Byzantine style" in entry.reason:
@@ -409,7 +440,8 @@ def main() -> int:
     arguments = parser().parse_args()
     try:
         if arguments.command == "export":
-            entries = workbook_entries(arguments.workbook.resolve(), arguments.sheet)
+            supplements = read_manifest(arguments.supplemental_manifest.resolve())
+            entries = workbook_entries(arguments.workbook.resolve(), arguments.sheet, supplements)
             write_manifest(entries, arguments.output.resolve())
             print(json.dumps({
                 "output": str(arguments.output.resolve()),

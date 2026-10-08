@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Approved ERYDON 2.0 registry-ID migration and permanent compatibility aliases.
+ * Approved registry-ID migrations and permanent compatibility aliases.
  */
 public final class ErydonIdMigration {
     private static final String MANIFEST_RESOURCE = "/data/erydon/id_migration.tsv";
@@ -29,8 +29,8 @@ public final class ErydonIdMigration {
             "source_row", "mode", "old_path", "canonical_path",
             "old_display_name", "canonical_display_name", "design_style",
             "publication_status", "reason", "review_status");
-    private static final int EXPECTED_ENTRIES = 1775;
-    private static final int EXPECTED_ALIASES = 1586;
+    private static final int EXPECTED_ENTRIES = 1779;
+    private static final int EXPECTED_ALIASES = 1590;
     private static final int EXPECTED_DIRECT_RENAMES = 189;
     private static final int EXPECTED_QUATREFOIL_ALIASES = 48;
 
@@ -165,12 +165,7 @@ public final class ErydonIdMigration {
         }
 
         for (Entry entry : MANIFEST.aliases()) {
-            requireCanonicalRegistration(entry);
-            if (Registries.BLOCK.containsId(entry.oldId()) || Registries.ITEM.containsId(entry.oldId())) {
-                throw new IllegalStateException("Old ID is registered instead of aliased: " + entry.oldId());
-            }
-            Registries.BLOCK.addAlias(entry.oldId(), entry.canonicalId());
-            Registries.ITEM.addAlias(entry.oldId(), entry.canonicalId());
+            registerAlias(entry);
         }
         aliasesRegistered = true;
         verifyLiveRegistry();
@@ -178,6 +173,16 @@ public final class ErydonIdMigration {
                         + "verified {} unpublished direct renames, including {} Quatrefoil aliases.",
                 MANIFEST.aliases().size(), MANIFEST.directRenames().size(),
                 MANIFEST.aliases().stream().filter(entry -> entry.oldId().getPath().contains("quatrefoil")).count());
+    }
+
+    /** Shared by the startup loop and focused real-registry migration checks. */
+    static void registerAlias(Entry entry) {
+        requireCanonicalRegistration(entry);
+        if (Registries.BLOCK.containsId(entry.oldId()) || Registries.ITEM.containsId(entry.oldId())) {
+            throw new IllegalStateException("Old ID is registered instead of aliased: " + entry.oldId());
+        }
+        Registries.BLOCK.addAlias(entry.oldId(), entry.canonicalId());
+        Registries.ITEM.addAlias(entry.oldId(), entry.canonicalId());
     }
 
     public static void verifyLiveRegistry() {

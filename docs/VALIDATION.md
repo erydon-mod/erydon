@@ -92,3 +92,10 @@ The optional `erydon.largeColumnTestMods` property accepts named/remapped Axiom
 and client API JAR paths. With Axiom 5.4.2, it checks the actual selection, corner,
 shrink, restore, reset and operation entry points, including every cell of each
 capital style before deferred section repair. No game window or mod JAR is created.
+
+The framed-glazing probes run with
+`-I gradle/erydon-glazing-validation.init.gradle verifyGlazingSlopes verifyGlazingSlopesServer`.
+They check smooth triangular meshes, automatic inner/outer corners, placement,
+collision and selection shapes, and the permanent Vertical Diagonal aliases under
+Fabric on both client and server. Outputs stay in the isolated Gradle validation
+directory; no game window, world or mod JAR is created.

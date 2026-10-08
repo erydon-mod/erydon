@@ -75,7 +75,8 @@ final class GlazingShallowSlopeLaunchChecks {
                                 + ",waterlogged=" + water;
                         JsonObject render = variants.getAsJsonObject(key);
                         require(render != null && !render.has("x"), "Render still inverts the section: " + id + " " + key);
-                        samples += checkMesh(fixed, render, id + " " + key);
+                        samples += shape == SlopeShape.STRAIGHT ? checkMesh(fixed, render, id + " " + key)
+                                : checkSmoothCorner(fixed, variant, facing, shape, half, id + " " + key);
                         for (BlockRotation rotation : BlockRotation.values()) {
                             require(block.rotate(state, rotation).get(FACING) == rotation.rotate(facing), "Rotation changed facing");
                         }
@@ -87,6 +88,7 @@ final class GlazingShallowSlopeLaunchChecks {
         }
         System.out.println("ERYDON_SHALLOW_GLAZING_OK: placementCases=" + placements + " savedStates=" + states
                 + " meshSamples=" + samples + " finishes=4");
+        com.oliver.erydon.client.model.GlazingSlopeReviewLaunchProbe.runChecks();
     }
 
     private static void corners(GlazingShallowSlopeBlock block, TestWorld world) {
@@ -159,6 +161,24 @@ final class GlazingShallowSlopeLaunchChecks {
                 triangles.add(new double[][]{vertices[indices[0]], vertices[indices[2]], vertices[indices[3]]});
             }
         }
+        return checkTriangles(shape, triangles, label);
+    }
+
+    private static int checkSmoothCorner(VoxelShape shape, Variant variant, Direction facing, SlopeShape corner,
+                                         BlockHalf half, String label) {
+        var profile = variant == Variant.UPPER ? GlazingSlopeGeometry.Profile.SHALLOW_UPPER
+                : GlazingSlopeGeometry.Profile.SHALLOW_LOWER;
+        List<double[][]> triangles = new ArrayList<>();
+        for (var face : GlazingSlopeGeometry.faces(profile, facing, corner.asString(), half)) {
+            for (int i = 1; i < face.vertices().size() - 1; i++) {
+                var a = face.vertices().get(0); var b = face.vertices().get(i); var c = face.vertices().get(i + 1);
+                triangles.add(new double[][]{{a.x(), a.y(), a.z()}, {b.x(), b.y(), b.z()}, {c.x(), c.y(), c.z()}});
+            }
+        }
+        return checkTriangles(shape, triangles, label);
+    }
+
+    private static int checkTriangles(VoxelShape shape, List<double[][]> triangles, String label) {
         int samples = 0;
         for (int ix = 0; ix < 32; ix++) for (int iz = 0; iz < 32; iz++) {
             double x = (ix + .5) / 32, z = (iz + .5) / 32;

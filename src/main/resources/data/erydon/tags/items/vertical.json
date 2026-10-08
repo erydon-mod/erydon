@@ -1785,9 +1785,9 @@
     "erydon:striatus_trim_silver_slope_vertical",
     "erydon:striatus_trim_silver_slope_vertical_shallow_broad",
     "erydon:striatus_trim_silver_slope_vertical_shallow_narrow",
-    "erydon:glazing_framed_bronze_slope_vertical",
-    "erydon:glazing_framed_crystal_slope_vertical",
-    "erydon:glazing_framed_silver_slope_vertical",
-    "erydon:glazing_framed_tinted_slope_vertical"
+    "erydon:glazing_framed_bronze_vertical_diagonal",
+    "erydon:glazing_framed_crystal_vertical_diagonal",
+    "erydon:glazing_framed_silver_vertical_diagonal",
+    "erydon:glazing_framed_tinted_vertical_diagonal"
   ]
 }

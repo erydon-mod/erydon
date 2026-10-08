@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.oliver.erydon.block.GlazingShallowSlopeBlock;
 import com.oliver.erydon.block.GlazingSlopeBlock;
+import com.oliver.erydon.block.GlazingSlopeGeometry;
 import com.oliver.erydon.block.GlazingVerticalSlopeBlock;
 import com.oliver.erydon.block.SlopeVerticalBlock;
 import com.oliver.erydon.block.SlopeVerticalShallowBroadBlock;
@@ -118,9 +119,11 @@ public final class VerticalSlopeGeometryLaunchChecks {
         for (String finish : FINISHES) {
             for (Block glass : List.of(new GlazingSlopeBlock(AbstractBlock.Settings.copy(Blocks.GLASS)),
                     new GlazingVerticalSlopeBlock(AbstractBlock.Settings.copy(Blocks.GLASS)))) {
-                String id = "glazing_framed_" + finish + (glass instanceof GlazingSlopeBlock ? "_slope" : "_slope_vertical");
+                String id = "glazing_framed_" + finish + (glass instanceof GlazingSlopeBlock ? "_slope" : "_vertical_diagonal");
                 for (BlockState state : glass.getStateManager().getStates()) {
-                    List<Triangle> mesh = authored(render(id, state));
+                    List<Triangle> mesh = glass instanceof GlazingSlopeBlock
+                            && state.get(GlazingSlopeBlock.SHAPE) != GlazingSlopeBlock.SlopeShape.STRAIGHT
+                            ? geometry(GlazingSlopeGeometry.Profile.STANDARD, state) : authored(render(id, state));
                     VoxelShape shape = sameInteractionShapes(glass, state);
                     if (glass instanceof GlazingSlopeBlock) {
                         // Both top and bottom authored variants use their full X/Y blockstate transform.
@@ -147,17 +150,19 @@ public final class VerticalSlopeGeometryLaunchChecks {
                 for (BlockState state : glass.getStateManager().getStates()) {
                     if (state.get(Properties.WATERLOGGED)) continue;
                     sameInteractionShapes(glass, state);
-                    List<Triangle> original = authored(render(id, state));
+                    var profile = variant == GlazingShallowSlopeBlock.Variant.UPPER ? GlazingSlopeGeometry.Profile.SHALLOW_UPPER
+                            : GlazingSlopeGeometry.Profile.SHALLOW_LOWER;
+                    List<Triangle> original = geometry(profile, state);
                     for (BlockMirror mirror : BlockMirror.values()) {
                         BlockState reflected = glass.mirror(state, mirror);
                         if (mirror == BlockMirror.NONE) require(reflected == state, "NONE changed saved glass state");
                         require(reflected.get(Properties.BLOCK_HALF) == state.get(Properties.BLOCK_HALF), "Mirror changed saved section");
-                        List<Triangle> result = authored(render(id, reflected));
+                        List<Triangle> result = geometry(profile, reflected);
                         for (double x : new double[]{.15, .25, .4, .6, .75, .85}) {
                             for (double z : new double[]{.15, .25, .4, .6, .75, .85}) {
                                 double originalX = mirror == BlockMirror.FRONT_BACK ? 1 - x : x;
                                 double originalZ = mirror == BlockMirror.LEFT_RIGHT ? 1 - z : z;
-                                // The authored inner/outer glass arms differ by up to .0029 after reflection.
+                                // Smooth corner arms now share the same approved straight parent.
                                 compare(bounds(original, 1, originalX, originalZ), bounds(result, 1, x, z), .0031,
                                         "Authored shallow glass mirror points to the wrong arm: " + state + " " + mirror);
                                 mirrorRays++;
@@ -280,6 +285,20 @@ public final class VerticalSlopeGeometryLaunchChecks {
                 };
                 result.add(new Triangle(vertices[index[0]], vertices[index[1]], vertices[index[2]]));
                 result.add(new Triangle(vertices[index[0]], vertices[index[2]], vertices[index[3]]));
+            }
+        }
+        return result;
+    }
+
+    private static List<Triangle> geometry(GlazingSlopeGeometry.Profile profile, BlockState state) {
+        String shape = profile == GlazingSlopeGeometry.Profile.STANDARD ? state.get(GlazingSlopeBlock.SHAPE).asString()
+                : state.get(GlazingShallowSlopeBlock.SHAPE).asString();
+        List<Triangle> result = new ArrayList<>();
+        for (var face : GlazingSlopeGeometry.faces(profile, state.get(Properties.HORIZONTAL_FACING), shape, state.get(Properties.BLOCK_HALF))) {
+            for (int i = 1; i < face.vertices().size() - 1; i++) {
+                var a = face.vertices().get(0); var b = face.vertices().get(i); var c = face.vertices().get(i + 1);
+                result.add(new Triangle(new Vector3f((float) a.x(), (float) a.y(), (float) a.z()),
+                        new Vector3f((float) b.x(), (float) b.y(), (float) b.z()), new Vector3f((float) c.x(), (float) c.y(), (float) c.z())));
             }
         }
         return result;
