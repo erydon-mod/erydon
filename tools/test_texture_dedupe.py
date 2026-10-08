@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import argparse
+import contextlib
 import importlib.util
+import io
 import json
 import shutil
 import subprocess
@@ -9,6 +12,7 @@ import tempfile
 import unittest
 import zipfile
 from pathlib import Path
+from unittest import mock
 
 from PIL import Image
 
@@ -363,6 +367,108 @@ class TextureDedupeAnalysisTest(unittest.TestCase):
             self.assertTrue(
                 (stage_root / "assets/erydon/texture_aliases/v1.json").is_file()
             )
+
+
+class TextureDedupeValidationCacheTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temporary.cleanup)
+        root = Path(self.temporary.name)
+        self.source_root = root / "source"
+        self.texture_root = self.source_root / "assets/erydon/textures/block"
+        self.texture_root.mkdir(parents=True)
+        for names, color in (("ab", (10, 20, 30, 40)), ("cd", (50, 60, 70, 80))):
+            for name in names:
+                Image.new("RGBA", (4, 4), color).save(self.texture_root / f"{name}.png")
+        self.config = root / "config.json"
+        self.config.write_text(json.dumps({
+            "schema_version": 1,
+            "sources": [{
+                "id": "fixture", "tier": "native", "root": "source",
+                "namespaces": ["erydon"], "include": ["**/*.png"], "exclude": [],
+                "role_rules": [], "metadata_overrides": {}, "intentionally_native_high_res": [],
+            }],
+            "pilot_groups": [{
+                "id": f"fixture-{names}", "selected_by_default": True,
+                "source": "fixture", "tier": "native", "namespace": "erydon", "role": "albedo",
+                "paths": [f"textures/block/{name}.png" for name in names],
+            } for names in ("ab", "cd")],
+        }), encoding="utf-8")
+        self.stage_root = root / "stage"
+        shutil.copytree(self.source_root, self.stage_root)
+        self.args = argparse.Namespace(config=self.config, group=[], stage_root=self.stage_root, report_out=None)
+        with contextlib.redirect_stdout(io.StringIO()):
+            texture_dedupe.command_apply(self.args)
+
+    def validate(self) -> None:
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(0, texture_dedupe.command_validate(self.args))
+
+    def test_shared_targets_checked_once_but_all_baselines_checked(self) -> None:
+        with mock.patch.object(texture_dedupe, "inspect_png", wraps=texture_dedupe.inspect_png) as inspect:
+            with mock.patch.object(texture_dedupe, "sha256_file", wraps=texture_dedupe.sha256_file) as sha:
+                self.validate()
+        decoded_paths = [call.args[3] for call in inspect.call_args_list]
+        hashed_paths = [call.args[0] for call in sha.call_args_list]
+        self.assertEqual(2, sum(path.parent.name == "texture_blobs" for path in decoded_paths))
+        self.assertEqual(2, sum(path.parent.name == "texture_blobs" for path in hashed_paths))
+        for name in "abcd":
+            baseline = self.texture_root / f"{name}.png"
+            self.assertEqual(1, decoded_paths.count(baseline))
+            self.assertEqual(1, hashed_paths.count(baseline))
+
+    def test_later_alias_metadata_still_checked_for_shared_target(self) -> None:
+        path = texture_dedupe.manifest_path(self.stage_root, "erydon")
+        manifest = texture_dedupe.read_manifest(path)
+        manifest["aliases"][1]["role"] = "specular"
+        texture_dedupe.write_json(path, manifest)
+        with self.assertRaisesRegex(texture_dedupe.TextureToolError, "Alias differs from baseline"):
+            self.validate()
+
+    def test_cached_decode_is_compared_with_each_alias_baseline(self) -> None:
+        select = texture_dedupe.selected_records
+
+        def alter_later_decoded_field(*args: object) -> dict:
+            records = select(*args)
+            for record in records.values():
+                if record["path"] == "textures/block/b.png":
+                    record["alpha_max"] += 1
+            return records
+
+        with mock.patch.object(texture_dedupe, "selected_records", side_effect=alter_later_decoded_field):
+            with self.assertRaisesRegex(texture_dedupe.TextureToolError, "Decoded alpha_max differs from baseline"):
+                self.validate()
+
+    def test_later_baseline_changed_during_validation_is_rejected(self) -> None:
+        inspect = texture_dedupe.inspect_png
+        changed = False
+
+        def change_later_baseline(*args: object) -> dict:
+            nonlocal changed
+            result = inspect(*args)
+            if args[3].parent.name == "texture_blobs" and not changed:
+                Image.new("RGBA", (4, 4), (90, 100, 110, 120)).save(self.texture_root / "b.png")
+                changed = True
+            return result
+
+        with mock.patch.object(texture_dedupe, "inspect_png", side_effect=change_later_baseline):
+            with self.assertRaisesRegex(texture_dedupe.TextureToolError, "Baseline changed during validation"):
+                self.validate()
+        self.assertTrue(changed)
+
+    def test_corrupt_blob_is_rechecked_on_the_next_invocation(self) -> None:
+        self.validate()
+        path = next((self.stage_root / "assets/erydon/texture_blobs").glob("*.png"))
+        path.write_bytes(b"corrupt")
+        with self.assertRaisesRegex(texture_dedupe.TextureToolError, "Blob SHA mismatch"):
+            self.validate()
+
+    def test_missing_other_blob_is_not_hidden_by_a_cached_target(self) -> None:
+        manifest = texture_dedupe.read_manifest(texture_dedupe.manifest_path(self.stage_root, "erydon"))
+        later_target = self.stage_root / manifest["aliases"][-1]["target"]
+        later_target.unlink()
+        with self.assertRaisesRegex(texture_dedupe.TextureToolError, "Dangling blob target"):
+            self.validate()
 
 
 class TextureDedupeReferenceTest(unittest.TestCase):

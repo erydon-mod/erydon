@@ -53,9 +53,11 @@ import java.util.function.Function;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.LongSupplier;
 
 public final class ErydonLoadProfiler {
     private static final Identifier RELOAD_LISTENER_ID = new Identifier(Erydon.MOD_ID, "load_profile");
@@ -77,12 +79,16 @@ public final class ErydonLoadProfiler {
         thread.setDaemon(true);
         return thread;
     });
+    private static final ModelSummaryDebouncer MODEL_SUMMARY = new ModelSummaryDebouncer(
+            TimeUnit.SECONDS.toNanos(2L), System::nanoTime, (task, delayNanos) -> {
+                ScheduledFuture<?> future = SUMMARY_EXECUTOR.schedule(task, delayNanos, TimeUnit.NANOSECONDS);
+                return () -> future.cancel(false);
+            }, ErydonLoadProfiler::writeModelSummary);
     private static final EnumMap<WrapBucket, AtomicInteger> CREATED_BY_BUCKET = countersByBucket();
     private static final EnumMap<WrapBucket, AtomicInteger> REUSED_BY_BUCKET = countersByBucket();
     private static final AtomicInteger OLD_SLOPE_PARENT_MODELS_BAKED = new AtomicInteger();
     private static final AtomicInteger CONTINUITY_SKIP_REQUESTED = new AtomicInteger();
     private static final AtomicInteger CONTINUITY_SKIP_APPLIED = new AtomicInteger();
-    private static final AtomicInteger SUMMARY_GENERATION = new AtomicInteger();
     private static final Map<String, AtomicInteger> CONTINUITY_SKIP_REASONS = new ConcurrentHashMap<>();
     private static final Map<String, FamilyRuntimeCounters> CUSTOM_FAMILY_COUNTERS = new ConcurrentHashMap<>();
     private static final AtomicInteger CUSTOM_MODELS_CREATED = new AtomicInteger();
@@ -503,6 +509,10 @@ public final class ErydonLoadProfiler {
     }
 
     private static void resetReloadCounters() {
+        MODEL_SUMMARY.reset(ErydonLoadProfiler::clearReloadCounters);
+    }
+
+    private static void clearReloadCounters() {
         CREATED_BY_BUCKET.values().forEach(counter -> counter.set(0));
         REUSED_BY_BUCKET.values().forEach(counter -> counter.set(0));
         OLD_SLOPE_PARENT_MODELS_BAKED.set(0);
@@ -528,27 +538,95 @@ public final class ErydonLoadProfiler {
         FINAL_MODEL_CHAIN_SAMPLES.clear();
         TRACKED_FINAL_MODEL_CHAINS.clear();
         CONTINUITY_TRANSFORM_CALLS.set(0);
-        SUMMARY_GENERATION.incrementAndGet();
     }
 
     private static void scheduleModelSummary() {
-        int generation = SUMMARY_GENERATION.incrementAndGet();
-        SUMMARY_EXECUTOR.schedule(() -> {
-            if (generation == SUMMARY_GENERATION.get() && enabled()) {
-                Erydon.LOGGER.info("[erydon/prof] old_slope_parent_models_baked={}; wrapped_models_created_by_family={}; wrapped_models_reused_by_family={}",
-                        OLD_SLOPE_PARENT_MODELS_BAKED.get(),
-                        formatBuckets(CREATED_BY_BUCKET),
-                        formatBuckets(REUSED_BY_BUCKET));
-                Erydon.LOGGER.info("[erydon/prof] custom_models_created={}; cache_hits={}; cache_misses={}; inventory_creations={}; wrapper_generation_ms={}.",
-                        CUSTOM_MODELS_CREATED.get(),
-                        CUSTOM_MODEL_CACHE_HITS.get(),
-                        CUSTOM_MODEL_CACHE_MISSES.get(),
-                        CUSTOM_MODEL_INVENTORY_CREATIONS.get(),
-                        toMillis(CUSTOM_MODEL_WRAP_NANOS.get()));
-                logContinuitySummary();
-                writeRuntimeReport("model-summary");
+        MODEL_SUMMARY.request();
+    }
+
+    private static void writeModelSummary() {
+        if (!enabled()) {
+            return;
+        }
+        Erydon.LOGGER.info("[erydon/prof] old_slope_parent_models_baked={}; wrapped_models_created_by_family={}; wrapped_models_reused_by_family={}",
+                OLD_SLOPE_PARENT_MODELS_BAKED.get(),
+                formatBuckets(CREATED_BY_BUCKET),
+                formatBuckets(REUSED_BY_BUCKET));
+        Erydon.LOGGER.info("[erydon/prof] custom_models_created={}; cache_hits={}; cache_misses={}; inventory_creations={}; wrapper_generation_ms={}.",
+                CUSTOM_MODELS_CREATED.get(),
+                CUSTOM_MODEL_CACHE_HITS.get(),
+                CUSTOM_MODEL_CACHE_MISSES.get(),
+                CUSTOM_MODEL_INVENTORY_CREATIONS.get(),
+                toMillis(CUSTOM_MODEL_WRAP_NANOS.get()));
+        logContinuitySummary();
+        writeRuntimeReport("model-summary");
+    }
+
+    /** Keeps at most one delayed summary pending, regardless of the number of model events. */
+    static final class ModelSummaryDebouncer {
+        @FunctionalInterface
+        interface Scheduler {
+            Cancellation schedule(Runnable task, long delayNanos);
+        }
+
+        @FunctionalInterface
+        interface Cancellation {
+            void cancel();
+        }
+
+        private final long quietPeriodNanos;
+        private final LongSupplier nanoTime;
+        private final Scheduler scheduler;
+        private final Runnable summary;
+        private long lastActivityNanos;
+        private Pending pending;
+
+        ModelSummaryDebouncer(long quietPeriodNanos, LongSupplier nanoTime, Scheduler scheduler, Runnable summary) {
+            this.quietPeriodNanos = quietPeriodNanos;
+            this.nanoTime = nanoTime;
+            this.scheduler = scheduler;
+            this.summary = summary;
+        }
+
+        synchronized void request() {
+            lastActivityNanos = nanoTime.getAsLong();
+            if (pending == null) {
+                schedule(quietPeriodNanos);
             }
-        }, 2L, TimeUnit.SECONDS);
+        }
+
+        synchronized void reset(Runnable resetCounters) {
+            if (pending != null) {
+                pending.cancellation.cancel();
+                pending = null;
+            }
+            // A running summary and counter reset must not overlap across reloads.
+            resetCounters.run();
+        }
+
+        private void schedule(long delayNanos) {
+            Pending task = new Pending();
+            pending = task;
+            task.cancellation = scheduler.schedule(() -> run(task), delayNanos);
+        }
+
+        private synchronized void run(Pending task) {
+            // A canceled task may already be waiting for this monitor when a reload starts.
+            if (pending != task) {
+                return;
+            }
+            long remainingNanos = quietPeriodNanos - (nanoTime.getAsLong() - lastActivityNanos);
+            if (remainingNanos > 0L) {
+                schedule(remainingNanos);
+                return;
+            }
+            pending = null;
+            summary.run();
+        }
+
+        private static final class Pending {
+            private Cancellation cancellation;
+        }
     }
 
     private static FamilyRuntimeCounters familyCounters(String family) {

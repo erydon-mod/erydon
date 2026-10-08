@@ -1849,6 +1849,7 @@ def validate_manifest_structure(
     alias_nodes: set[str] = set()
     targets: set[str] = set()
     alias_paths: set[str] = set()
+    verified_targets: set[tuple[Path, str]] = set()
     for index, item in enumerate(aliases_raw):
         alias = dict(require_mapping(item, f"{manifest_file}.aliases[{index}]"))
         relative_path = normalize_relative_path(
@@ -1894,10 +1895,15 @@ def validate_manifest_structure(
         alias_nodes.add(alias_node)
         targets.add(target)
         target_path = stage_root / Path(PurePosixPath(target).as_posix())
-        if not target_path.is_file():
-            raise TextureToolError(f"Dangling blob target: {target_path}")
-        if sha256_file(target_path) != file_sha:
-            raise TextureToolError(f"Blob SHA mismatch: {target_path}")
+        target_key = (target_path, file_sha)
+        # Blobs are immutable during this validation invocation. Every alias
+        # still passes the structural checks above; shared bytes need one hash.
+        if target_key not in verified_targets:
+            if not target_path.is_file():
+                raise TextureToolError(f"Dangling blob target: {target_path}")
+            if sha256_file(target_path) != file_sha:
+                raise TextureToolError(f"Blob SHA mismatch: {target_path}")
+            verified_targets.add(target_key)
         aliases.append(alias)
 
     if alias_nodes & targets:
@@ -1951,6 +1957,18 @@ def command_validate(args: argparse.Namespace) -> int:
     all_alias_nodes: set[str] = set()
     decoded_rgba_validated = 0
     alpha_validated = 0
+    decoded_fields = (
+        "width",
+        "height",
+        "mode",
+        "bit_depth",
+        "rgba_sha256",
+        "alpha_min",
+        "alpha_max",
+        "alpha_varies",
+        "png_metadata_sha256",
+    )
+    decoded_targets: dict[tuple[Path, str], dict[str, Any]] = {}
     for manifest_file in manifest_files:
         manifest, aliases = validate_manifest_structure(stage_root, manifest_file)
         namespace = str(manifest["namespace"])
@@ -1980,23 +1998,19 @@ def command_validate(args: argparse.Namespace) -> int:
             target_path = stage_root / Path(
                 PurePosixPath(str(alias["target"])).as_posix()
             )
-            decoded_target = inspect_png(
-                source,
-                namespace,
-                str(record["path"]),
-                target_path,
-            )
-            decoded_fields = (
-                "width",
-                "height",
-                "mode",
-                "bit_depth",
-                "rgba_sha256",
-                "alpha_min",
-                "alpha_max",
-                "alpha_varies",
-                "png_metadata_sha256",
-            )
+            target_key = (target_path, str(alias["file_sha256"]))
+            decoded_target = decoded_targets.get(target_key)
+            if decoded_target is None:
+                inspected = inspect_png(
+                    source,
+                    namespace,
+                    str(record["path"]),
+                    target_path,
+                )
+                # Cache only byte-derived fields, never alias-specific roles,
+                # references or sidecar state. Baselines remain checked per alias.
+                decoded_target = {field: inspected[field] for field in decoded_fields}
+                decoded_targets[target_key] = decoded_target
             for field in decoded_fields:
                 if decoded_target[field] != record[field]:
                     raise TextureToolError(
