@@ -24,6 +24,8 @@ import net.minecraft.world.BlockRenderView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 public final class ArchRomanesqueBakedModel implements BakedModel, FabricBakedModel {
@@ -71,6 +73,9 @@ public final class ArchRomanesqueBakedModel implements BakedModel, FabricBakedMo
 
     private final BakedModel wrapped;
     private final Sprite particle;
+    private record WideKey(net.minecraft.block.Block block, ArchRomanesqueBlock.Arrangement arrangement,
+                           int width, Direction facing, boolean reflected) { }
+    private final Map<WideKey, List<BakedQuad>> wideQuads = new ConcurrentHashMap<>();
 
     public ArchRomanesqueBakedModel(BakedModel wrapped) {
         this.wrapped = wrapped;
@@ -97,6 +102,14 @@ public final class ArchRomanesqueBakedModel implements BakedModel, FabricBakedMo
         }
 
         ArchRomanesqueBlock.Arrangement arrangement = state.get(ArchRomanesqueBlock.ARRANGEMENT);
+        if (arrangement.isWide()) {
+            var renderer = net.fabricmc.fabric.api.renderer.v1.RendererAccess.INSTANCE.getRenderer();
+            if (renderer != null) {
+                var material = renderer.materialFinder().find();
+                for (BakedQuad quad : wideQuads(state)) context.getEmitter().fromVanilla(quad, material, null).emit();
+            }
+            return;
+        }
         Direction facing = state.get(ArchRomanesqueBlock.FACING);
         boolean reflected = state.get(ArchRomanesqueBlock.REFLECTED);
         if (reflected) {
@@ -261,6 +274,14 @@ public final class ArchRomanesqueBakedModel implements BakedModel, FabricBakedMo
         WorldAlignedYRotation.emit(context, model, degrees);
     }
 
+    private List<BakedQuad> wideQuads(BlockState state) {
+        WideKey key = new WideKey(state.getBlock(), state.get(ArchRomanesqueBlock.ARRANGEMENT),
+                state.get(ArchRomanesqueBlock.WIDTH), state.get(ArchRomanesqueBlock.FACING),
+                state.get(ArchRomanesqueBlock.REFLECTED));
+        return wideQuads.computeIfAbsent(key, ignored -> WideArchQuads.create(state,
+                (child, face) -> getQuads(child, face, Random.create(0))));
+    }
+
     @Override
     public List<BakedQuad> getQuads(BlockState state, Direction face, Random random) {
         if (!(state != null
@@ -271,6 +292,7 @@ public final class ArchRomanesqueBakedModel implements BakedModel, FabricBakedMo
         }
 
         ArchRomanesqueBlock.Arrangement arrangement = state.get(ArchRomanesqueBlock.ARRANGEMENT);
+        if (arrangement.isWide()) return face == null ? wideQuads(state) : List.of();
         Direction facing = state.get(ArchRomanesqueBlock.FACING);
         ArchHorizontalReflection reflection = state.get(ArchRomanesqueBlock.REFLECTED)
                 ? ArchHorizontalReflection.forState(facing, arrangement.hasTopLarge()) : null;

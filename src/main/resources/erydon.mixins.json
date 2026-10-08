@@ -5,6 +5,8 @@
   "plugin": "com.oliver.erydon.mixin.ErydonMixinPlugin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "ArchShapeCacheMixin",
+    "ArchStateTransitionsMixin",
     "CopingRaycastMixin",
     "BlockItemMixin",
     "DebugStickItemMixin",
@@ -14,6 +16,7 @@
     "compat.worldedit.WorldEditBlockStateMixin"
   ],
   "client": [
+    "client.ArchModelIdentifierMixin",
     "client.WindowArchBreakParticlesMixin",
     "client.HighPolishResourceManagerMixin",
     "client.HighPolishCommandSuggestionsMixin",

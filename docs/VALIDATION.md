@@ -41,6 +41,30 @@ Additional model geometry tooling remains available through:
 In-game visual and lighting validation remains a release test; it is not
 represented as a clean-clone CI assertion.
 
+`verifyWideArches` exercises the shared Romanesque, Modern and Gothic cluster
+callbacks with widths one to six, mixed materials, placement inheritance,
+removal and recalc. It checks taller crowns, column transitions, selectable
+empty cells, all horizontal facings and reversible mirrors, plus clipped mesh
+area and rotated normals. Larger arches reuse the existing registered IDs and
+child models; their geometry is cached and split between owning block cells.
+The default maximum width remains three; the debug stick selects wider runs.
+The probe also checks every canonical state transition and requires the compact
+arch transition lookup to be active under Fabric. For a complete registration
+and collision-cache startup regression check, run
+`./gradlew verifyWideArches -Perydon.arch.fullStartup=true` (8 GiB heap, no window
+or JAR). This exercises all 486 registered arch variants instead of only one
+block per style.
+Arch model identifiers are shared per registered material, since the family
+wrapper renders the supplied state at runtime. Immutable Minecraft shape caches
+are shared only when collision, side, culling and outline shapes plus fluid,
+opacity and offset inputs match. The probe compares every cached field against a fresh vanilla
+cache across its layout cases, and compares batched collision geometry with the
+original per-piece unions, including reflections and every facing. It reports unique model and shape counts in the
+full startup check. Saved state values and the authored component geometry remain
+unchanged.
+Texture phase, lighting, shader relief and Axiom's live preview still require
+the restarted-client visual check.
+
 `verifyAlcoveTransforms` checks Gothic and Georgian alcoves through Minecraft's
 actual block-state transform entry points under Fabric. It covers widths one to
 three, both flip/rotation orders, and the resulting whole-cluster shape bounds,

@@ -26,6 +26,10 @@ public class ArchGothicBlock extends ArchModernBlock {
 
     @Override
     public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+        if (state.get(ARRANGEMENT).isWide()) {
+            VoxelShape shape = WideArchShapes.shape(state);
+            return shape.isEmpty() ? VoxelShapes.fullCube() : shape;
+        }
         if (state.get(ARRANGEMENT).isVoid()) {
             return VoxelShapes.fullCube();
         }
@@ -34,6 +38,7 @@ public class ArchGothicBlock extends ArchModernBlock {
 
     @Override
     public VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+        if (state.get(ARRANGEMENT).isWide()) return WideArchShapes.shape(state);
         if (state.get(ARRANGEMENT).isVoid()) {
             return SHAPE_EMPTY;
         }

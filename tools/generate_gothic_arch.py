@@ -49,17 +49,17 @@ LANGUAGE_PROFILE_NAMES = {
 
 TOOLTIPS = {
     "de_de.json": (
-        "Baut automatisch gotische Bögen mit 1-3 Metern Breite in beliebiger Höhe.",
+        "Baut automatisch gotische Bögen mit bis zu 3 Metern Breite. Mit dem Debug-Stab sind Breiten von 1-6 Metern wählbar; breitere Bögen werden auch höher.",
         "Verwendet einen einfachen Rahmen ohne den romanischen Säulenstil.",
         "Nutze /recalc, um Gruppen neu aufzubauen.",
     ),
     "en_us.json": (
-        "Auto-assembles Gothic arches 1-3 metres wide at any height.",
+        "Auto-assembles Gothic arches up to 3 metres wide by default. Use the debug stick to select widths 1-6; wider curves also grow taller.",
         "Uses a simple frame without the Romanesque column style.",
         "Use /recalc to rebuild clusters.",
     ),
     "es_es.json": (
-        "Ensambla automáticamente arcos góticos de 1 a 3 metros de ancho a cualquier altura.",
+        "Ensambla arcos góticos de hasta 3 metros de ancho de forma predeterminada. Usa el palo de depuración para elegir anchos de 1 a 6 metros; las curvas más anchas también son más altas.",
         "Utiliza un marco sencillo sin el estilo de columnas románico.",
         "Usa /recalc para reconstruir los grupos.",
     ),
@@ -380,6 +380,10 @@ public class ArchGothicBlock extends ArchModernBlock {{
 
     @Override
     public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {{
+        if (state.get(ARRANGEMENT).isWide()) {{
+            VoxelShape shape = WideArchShapes.shape(state);
+            return shape.isEmpty() ? VoxelShapes.fullCube() : shape;
+        }}
         if (state.get(ARRANGEMENT).isVoid()) {{
             return VoxelShapes.fullCube();
         }}
@@ -388,6 +392,7 @@ public class ArchGothicBlock extends ArchModernBlock {{
 
     @Override
     public VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {{
+        if (state.get(ARRANGEMENT).isWide()) return WideArchShapes.shape(state);
         if (state.get(ARRANGEMENT).isVoid()) {{
             return SHAPE_EMPTY;
         }}

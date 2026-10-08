@@ -1,0 +1,28 @@
+// Exercise real Minecraft states and cluster callbacks without a window or test JAR.
+tasks.register('verifyWideArches', JavaExec) {
+    group = 'verification'
+    description = 'Checks arch widths 1-6, cluster reflow, transforms, collision and clipped component meshes.'
+    dependsOn tasks.named('testClasses'), tasks.named('configureLaunch')
+    def fixture = layout.buildDirectory.dir('wide-arch-probe')
+    classpath = sourceSets.test.runtimeClasspath + files(fixture.map { new File(it.asFile, 'probe-mod') })
+    mainClass = 'net.fabricmc.loader.impl.launch.knot.KnotClient'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(17) }
+    maxHeapSize = '3G'
+    if (providers.gradleProperty('erydon.arch.fullStartup').map { it.toBoolean() }.getOrElse(false)) {
+        maxHeapSize = '8G'
+        systemProperty 'erydon.arch.fullStartup', 'true'
+    }
+    doFirst {
+        def root = fixture.get().asFile
+        def mod = new File(root, 'probe-mod')
+        mod.mkdirs()
+        workingDir root
+        new File(mod, 'fabric.mod.json').text = groovy.json.JsonOutput.toJson([
+                schemaVersion: 1, id: 'erydon_wide_arch_probe', version: '1.0.0', environment: 'client',
+                entrypoints: [preLaunch: ['com.oliver.erydon.block.WideArchLaunchProbe']]
+        ])
+        systemProperty 'fabric.development', 'true'
+        args '--gameDir', root.absolutePath, '--version', '1.20.1', '--accessToken', '0'
+    }
+}
+tasks.named('check') { dependsOn tasks.named('verifyWideArches') }

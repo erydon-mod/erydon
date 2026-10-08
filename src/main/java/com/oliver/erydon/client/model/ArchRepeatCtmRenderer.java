@@ -78,6 +78,7 @@ public final class ArchRepeatCtmRenderer extends ForwardingBakedModel {
         StateKey key = new StateKey(
                 family,
                 state.get(ArchRomanesqueBlock.ARRANGEMENT),
+                state.get(ArchRomanesqueBlock.WIDTH),
                 state.get(ArchRomanesqueBlock.FACING),
                 state.get(ArchRomanesqueBlock.REFLECTED)
         );
@@ -718,6 +719,7 @@ public final class ArchRepeatCtmRenderer extends ForwardingBakedModel {
 
     private record StateKey(Family family,
                             ArchRomanesqueBlock.Arrangement arrangement,
+                            int width,
                             Direction facing,
                             boolean reflected) {
     }
