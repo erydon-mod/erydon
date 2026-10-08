@@ -243,13 +243,11 @@ public class ShallowSlopeBlock extends HorizontalFacingBlock implements Waterlog
         Direction facing = state.get(FACING);
         SlopeShape shape = state.get(SHAPE);
 
-        if (mirror == BlockMirror.LEFT_RIGHT && facing.getAxis() == Direction.Axis.Z) {
-            return rotate(state, BlockRotation.CLOCKWISE_180).with(SHAPE, swapLeftRight(shape));
+        if (mirror == BlockMirror.NONE) {
+            return state;
         }
-        if (mirror == BlockMirror.FRONT_BACK && facing.getAxis() == Direction.Axis.X) {
-            return rotate(state, BlockRotation.CLOCKWISE_180).with(SHAPE, swapOuter(shape));
-        }
-        return state;
+        // A reflection reverses every corner's hand, even when its facing is unchanged.
+        return state.with(FACING, mirror.apply(facing)).with(SHAPE, swapLeftRight(shape));
     }
 
     private static SlopeShape swapLeftRight(SlopeShape shape) {
@@ -262,13 +260,6 @@ public class ShallowSlopeBlock extends HorizontalFacingBlock implements Waterlog
         };
     }
 
-    private static SlopeShape swapOuter(SlopeShape shape) {
-        return switch (shape) {
-            case OUTER_LEFT -> SlopeShape.OUTER_RIGHT;
-            case OUTER_RIGHT -> SlopeShape.OUTER_LEFT;
-            default -> shape;
-        };
-    }
 
     private VoxelShape getVoxelForState(BlockState state) {
         Direction facing = state.get(FACING);

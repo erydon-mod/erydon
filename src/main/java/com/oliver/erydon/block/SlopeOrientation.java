@@ -10,7 +10,7 @@ public final class SlopeOrientation {
         int rotation=degrees(facing); boolean top=half==BlockHalf.TOP;
         return switch(shape) {
             case STRAIGHT -> rotation;
-            case INNER_RIGHT -> rotation+180;
+            case INNER_RIGHT -> top ? rotation : rotation+90;
             case INNER_LEFT -> top ? rotation-90 : rotation;
             case OUTER_LEFT -> top ? rotation : rotation-90;
             case OUTER_RIGHT -> top ? rotation+90 : rotation;
@@ -19,7 +19,8 @@ public final class SlopeOrientation {
     public static int shallow(Direction facing,BlockHalf half,ShallowSlopeBlock.SlopeShape shape) {
         int rotation=degrees(facing); boolean top=half==BlockHalf.TOP;
         return switch(shape) {
-            case STRAIGHT,INNER_RIGHT -> rotation;
+            case STRAIGHT -> rotation;
+            case INNER_RIGHT -> top ? rotation : rotation+90;
             case INNER_LEFT -> top ? rotation-90 : rotation;
             case OUTER_LEFT -> top ? rotation : rotation-90;
             case OUTER_RIGHT -> top ? rotation+90 : rotation;

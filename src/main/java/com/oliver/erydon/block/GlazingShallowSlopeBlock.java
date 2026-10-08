@@ -153,16 +153,11 @@ public class GlazingShallowSlopeBlock extends HorizontalFacingBlock implements W
 
     @Override
     public BlockState mirror(BlockState state, BlockMirror mirror) {
+        if (mirror == BlockMirror.NONE) return state;
         Direction facing = state.get(FACING);
-        SlopeShape shape = state.get(SHAPE);
-
-        if (mirror == BlockMirror.LEFT_RIGHT && facing.getAxis() == Direction.Axis.Z) {
-            return rotate(state, BlockRotation.CLOCKWISE_180).with(SHAPE, swapLeftRight(shape));
-        }
-        if (mirror == BlockMirror.FRONT_BACK && facing.getAxis() == Direction.Axis.X) {
-            return rotate(state, BlockRotation.CLOCKWISE_180).with(SHAPE, swapOuter(shape));
-        }
-        return state;
+        // Reflection reverses corner handedness even when the facing itself is unchanged.
+        return state.with(FACING, mirror.getRotation(facing).rotate(facing))
+                .with(SHAPE, swapLeftRight(state.get(SHAPE)));
     }
 
     @Override
@@ -435,14 +430,6 @@ public class GlazingShallowSlopeBlock extends HorizontalFacingBlock implements W
         return switch (shape) {
             case INNER_LEFT -> SlopeShape.INNER_RIGHT;
             case INNER_RIGHT -> SlopeShape.INNER_LEFT;
-            case OUTER_LEFT -> SlopeShape.OUTER_RIGHT;
-            case OUTER_RIGHT -> SlopeShape.OUTER_LEFT;
-            default -> shape;
-        };
-    }
-
-    private static SlopeShape swapOuter(SlopeShape shape) {
-        return switch (shape) {
             case OUTER_LEFT -> SlopeShape.OUTER_RIGHT;
             case OUTER_RIGHT -> SlopeShape.OUTER_LEFT;
             default -> shape;

@@ -33,7 +33,7 @@ public class GlazingSlopeBlock extends HorizontalFacingBlock implements Waterlog
             Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST
     };
     private static final VoxelShape BOTTOM_SOUTH_SHAPE = createBottomSouthShape();
-    private static final VoxelShape TOP_SOUTH_SHAPE = flipY(BOTTOM_SOUTH_SHAPE);
+    private static final VoxelShape TOP_SOUTH_SHAPE = rotateX180(BOTTOM_SOUTH_SHAPE);
     private static final VoxelShape[] BOTTOM_CACHE = buildShapeCache(BOTTOM_SOUTH_SHAPE);
     private static final VoxelShape[] TOP_CACHE = buildShapeCache(TOP_SOUTH_SHAPE);
 
@@ -142,11 +142,12 @@ public class GlazingSlopeBlock extends HorizontalFacingBlock implements Waterlog
         return shape.simplify();
     }
 
-    private static VoxelShape flipY(VoxelShape shape) {
+    private static VoxelShape rotateX180(VoxelShape shape) {
         final VoxelShape[] flipped = {VoxelShapes.empty()};
         shape.forEachBox((minX, minY, minZ, maxX, maxY, maxZ) -> flipped[0] = VoxelShapes.union(
                 flipped[0],
-                VoxelShapes.cuboid(minX, 1.0d - maxY, minZ, maxX, 1.0d - minY, maxZ)
+                // Match the authored blockstate's X=180 rotation, including its Z reversal.
+                VoxelShapes.cuboid(minX, 1.0d - maxY, 1.0d - maxZ, maxX, 1.0d - minY, 1.0d - minZ)
         ));
         return flipped[0];
     }

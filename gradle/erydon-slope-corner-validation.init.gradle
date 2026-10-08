@@ -1,0 +1,32 @@
+// Isolated outputs keep the slope review separate from other active tasks.
+gradle.beforeProject { project ->
+    project.layout.buildDirectory.set(new File(project.projectDir, '.gradle/slope-corner-validation/build'))
+    project.afterEvaluate {
+        project.tasks.register('verifySlopeCorners', JavaExec) {
+            group = 'verification'
+            description = 'Checks automatic slope corners, reflected placement and rendered interaction shapes under Fabric.'
+            dependsOn project.tasks.named('testClasses')
+            dependsOn project.tasks.named('configureLaunch')
+            classpath = project.sourceSets.test.runtimeClasspath
+            mainClass = 'net.fabricmc.loader.impl.launch.knot.KnotClient'
+            javaLauncher = project.javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(17) }
+            maxHeapSize = '3G'
+            def fixture = project.layout.buildDirectory.dir('slope-corner-probe')
+            classpath += project.files(fixture.map { it.dir('probe-mod') })
+            doFirst {
+                def root = fixture.get().asFile
+                root.mkdirs()
+                workingDir root
+                def mod = new File(root, 'probe-mod')
+                mod.mkdirs()
+                new File(mod, 'fabric.mod.json').text = groovy.json.JsonOutput.toJson([
+                    schemaVersion: 1, id: 'erydon_slope_corner_probe', version: '1.0.0',
+                    environment: 'client', entrypoints: [preLaunch: ['com.oliver.erydon.client.model.SlopeCornerReviewLaunchProbe']]
+                ])
+                systemProperty 'fabric.development', 'true'
+                systemProperty 'fabric.remapClasspathFile', project.file('.gradle/loom-cache/remapClasspath.txt').absolutePath
+                args '--gameDir', root.absolutePath, '--version', '1.20.1', '--accessToken', '0'
+            }
+        }
+    }
+}

@@ -70,11 +70,11 @@ public class SlopeVerticalShallowBroadBlock extends HorizontalFacingBlock implem
         for (int i = 0; i < steps; i++) {
             double zMin = i / 16.0;
             double zMax = (i + 1) / 16.0;
-            double zMid = (zMin + zMax) * 0.5;
 
             double xMin = 0.5;
             // Extra width shrinks linearly from 0.5 -> 0 as Z goes 0 -> 1
-            double xMax = 0.5 + 0.5 * (1.0 - zMid);
+            // Cover the leading edge of each slice, including the visible acute tip.
+            double xMax = 0.5 + 0.5 * (1.0 - zMin);
             if (xMax <= xMin) continue;
 
             shape = VoxelShapes.union(shape,
