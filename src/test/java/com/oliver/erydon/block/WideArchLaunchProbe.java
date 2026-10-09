@@ -154,6 +154,11 @@ public final class WideArchLaunchProbe implements PreLaunchEntrypoint {
                 var cached = (net.minecraft.util.shape.VoxelShape[]) actual;
                 for (int i = 0; i < shapes.length; i++) require(!net.minecraft.util.shape.VoxelShapes.matchesAnywhere(
                         shapes[i], cached[i], net.minecraft.util.function.BooleanBiFunction.NOT_SAME), "Shared culling changed");
+            } else if (expected instanceof net.minecraft.util.shape.VoxelShape shape) {
+                require(actual instanceof net.minecraft.util.shape.VoxelShape cached
+                                && !net.minecraft.util.shape.VoxelShapes.matchesAnywhere(shape, cached,
+                                net.minecraft.util.function.BooleanBiFunction.NOT_SAME),
+                        "Shared collision geometry changed: " + field.getName());
             } else require(java.util.Objects.equals(expected, actual), "Shared shape/light field changed: " + field.getName());
         }
         var id = net.minecraft.client.render.block.BlockModels.getModelId(state);
@@ -165,8 +170,19 @@ public final class WideArchLaunchProbe implements PreLaunchEntrypoint {
     private void transitions(ArchRomanesqueBlock block) throws Exception {
         var field = net.minecraft.state.State.class.getDeclaredField("withTable");
         field.setAccessible(true);
-        require(field.get(block.getDefaultState()) instanceof com.oliver.erydon.state.ArchStateTransitions,
-                "Arch startup fell back to dense vanilla transition tables");
+        Object table = field.get(block.getDefaultState());
+        if (Boolean.getBoolean("erydon.arch.foreignInitializer")) {
+            require(table instanceof com.oliver.erydon.compat.state.ForeignArchStateTable,
+                    "Arch startup replaced another optimizer's table");
+        } else if (net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("ferritecore")) {
+            require(table != null && !(table instanceof com.oliver.erydon.state.ArchStateTransitions),
+                    "Arch startup bypassed FerriteCore initialization");
+            var fastMap = block.getDefaultState().getClass().getMethod("getStateMap");
+            require(fastMap.invoke(block.getDefaultState()) != null, "FerriteCore lookup was not initialized");
+        } else {
+            require(table instanceof com.oliver.erydon.state.ArchStateTransitions,
+                    "Arch startup fell back to dense vanilla transition tables");
+        }
         for (BlockState state : block.getStateManager().getStates()) {
             for (int width = 1; width <= 6; width++) {
                 BlockState changed = state.with(WIDTH, width);

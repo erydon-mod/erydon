@@ -54,6 +54,14 @@ and collision-cache startup regression check, run
 `./gradlew verifyWideArches -Perydon.arch.fullStartup=true` (8 GiB heap, no window
 or JAR). This exercises all 486 registered arch variants instead of only one
 block per style.
+The compact lookup intercepts only vanilla's dense-table allocation, allowing
+FerriteCore and other replacement state initializers to retain their own lookups.
+Pass `-Perydon.arch.testMods=<existing optimizer JAR>` to test a production
+optimizer without installing it or packaging ERYDON. The same exhaustive state
+transitions must pass, with FerriteCore's lookup initialized when it is present.
+`-Perydon.arch.foreignInitializer=true` tests a separate probe-only optimizer
+with a redirected lookup and a later-priority initializer, without relying on
+a known mod ID. These options also work with the full startup check.
 Arch model identifiers are shared per registered material, since the family
 wrapper renders the supplied state at runtime. Immutable Minecraft shape caches
 are shared only when collision, side, culling and outline shapes plus fluid,
