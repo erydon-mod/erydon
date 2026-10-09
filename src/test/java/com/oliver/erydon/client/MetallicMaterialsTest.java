@@ -9,6 +9,35 @@ import javax.imageio.ImageIO;
 import static org.junit.jupiter.api.Assertions.*;
 
 class MetallicMaterialsTest {
+    @Test void onlyTheTwoExactErydonGlossInsetSpritesReceiveNonmetalFinishMarkers() {
+        for (String colour : List.of("white", "black")) {
+            String path = "block/cover_" + colour + "_gloss";
+            var marker = MetallicMaterials.classify("erydon", path);
+            assertEquals(MetallicMaterials.GLOSS_COVER, marker.kind());
+            assertEquals(MetallicMaterials.AUTHORED, marker.alloy());
+            assertFalse(marker.pureMetalFallback());
+            for (String namespace : List.of("themelios", "daedalon")) {
+                var unchanged = MetallicMaterials.classify(namespace, path);
+                assertEquals(MetallicMaterials.STANDALONE, unchanged.kind());
+                assertEquals(MetallicMaterials.AUTHORED, unchanged.alloy(),
+                        "Unrecognised alloy sprites retain their existing native-PBR path");
+            }
+            assertNull(MetallicMaterials.classify("othermod", path));
+            assertNull(MetallicMaterials.classify("erydon", path + "_s"));
+            assertNull(MetallicMaterials.classify("erydon", path + "_n"));
+            for (String unrelated : List.of(path + "_extra", path.replace("_gloss", "_matte"),
+                    path.replace("block/", "block/decor/"), "block/aganite_block")) {
+                assertNotEquals(MetallicMaterials.GLOSS_COVER,
+                        MetallicMaterials.classify("erydon", unrelated).kind(), unrelated);
+            }
+        }
+        for (String alloy : List.of("bronze", "silver")) {
+            var metal = MetallicMaterials.classify("erydon", "block/cover_" + alloy + "_gloss");
+            assertEquals(MetallicMaterials.STANDALONE, metal.kind());
+            assertEquals(alloy.equals("bronze") ? MetallicMaterials.BRONZE : MetallicMaterials.SILVER, metal.alloy());
+        }
+    }
+
     @Test void commonOverlaysAndEmbeddedPatternsCoverBothAlloysAndEveryShapeThroughTheirSprites() {
         for (String root : List.of("optifine/ctm/", "mcpatcher/ctm/")) {
             for (String motif : List.of("trim", "guilloche", "quatrefoil", "rose", "rosette")) {

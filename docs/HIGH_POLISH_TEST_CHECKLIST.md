@@ -43,6 +43,20 @@ and the latest high-polish performance trial. The items above are new checks.
 
 ## 1. Three stone finishes
 
+Cover enum review (2026-10-09): with supported Complementary, compare Matte and
+Gloss on White, Black, Bronze and Silver covers, both sizes and all six attachment
+faces. Gloss should match Mirror stone's sharp reflections; Silver + Gloss should
+match the outward two-way mirror coating, including a dark reflected scene.
+Check Off/Dim/Bright light states, clustered extensions and waterlogging. Turn
+the stone/glazing/two-way preferences off and restart: cover Gloss should still
+work. Toggle the shader's reflection blur and check that Silver stays reflective.
+Check Gloss coffered-ceiling insets too. Matte Silver/Bronze should retain their
+soft sheen without a dark square at the central owner block, with WSR and player
+reflections enabled. Walk sideways to distinguish any real scene reflection from
+fixed false geometry. Test isolated 3x3 covers and joined panels on all six faces;
+White/Black matte and non-Complementary rendering retain their previous appearance. Automated shader/material checks do not replace this
+restarted-client visual review.
+
 - In Mods > ERYDON > Configure > High polish, enable the master. Compare the
   same Glacium wall and Gothic/Georgian alcove view at Honed, Polished and Mirror,
   restarting each time and keeping the camera, time, weather and shader settings

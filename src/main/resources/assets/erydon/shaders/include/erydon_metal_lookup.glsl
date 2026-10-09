@@ -10,6 +10,7 @@ int erydonMetalU32(ivec4 value) { return value.x + value.y * 256 + value.z * 655
 
 // A record is exact pixel bounds plus (kind, alloy, roughness byte, mask byte offset).
 // A negative mask offset represents a completely covered, uniform metal sprite.
+// Kind 4 is an exact Gloss inset marker with zero metal coverage and no mask.
 bool erydonReadMetal(vec2 uv, ivec2 atlasSize, out ivec4 bounds, out ivec4 info, out vec3 authoredAlbedo) {
     bounds = ivec4(0);
     info = ivec4(0);
@@ -25,9 +26,17 @@ bool erydonReadMetal(vec2 uv, ivec2 atlasSize, out ivec4 bounds, out ivec4 info,
                    erydonMetalU16(size.xy), erydonMetalU16(size.zw));
     if (any(lessThan(pixel, bounds.xy)) || any(greaterThanEqual(pixel, bounds.xy + bounds.zw))) return false;
     ivec4 flags = erydonMetalBytes(record + 2);
+    if (flags.x == 4) {
+        if (flags.y != 0 || flags.z != 0 || flags.w != 0) {
+            bounds = ivec4(0);
+            return false;
+        }
+        info = ivec4(4, 0, 0, 0);
+        return true;
+    }
     // The deferred buffers have explicit bronze/silver tags only. Unknown
     // alloys must not get a silver reflection after an authored direct lobe.
-    if (flags.y < 1 || flags.y > 2) {
+    if (flags.x < 1 || flags.x > 3 || flags.y < 1 || flags.y > 2) {
         bounds = ivec4(0);
         return false;
     }

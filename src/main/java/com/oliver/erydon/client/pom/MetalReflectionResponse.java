@@ -139,7 +139,10 @@ public final class MetalReflectionResponse {
             body = after(MATERIAL_FETCH, body, """
 
                         int erydonBlendMask = int(texture6.g * 255.1);
-                        if (erydonBlendMask == 243 || erydonBlendMask == 244) {
+                        // A negative sentinel carries only the opaque silver coating.
+                        if (erydonBlendMask == 245) {
+                            erydonMetalBlend = vec2(-1.0, 0.0);
+                        } else if (erydonBlendMask == 243 || erydonBlendMask == 244) {
                             float erydonMaterialWord = floor(clamp(texture6.a, 0.0, 1.0) * 65535.0 + 0.5);
                             float erydonMaterialByte = floor(erydonMaterialWord / 256.0);
                             float erydonCoverage = floor(erydonMaterialByte / 4.0) / 63.0;
@@ -163,7 +166,10 @@ public final class MetalReflectionResponse {
                                                                    erydonMetalBlend);
                 """);
         result = replace(FINAL_BLEND, result, """
-                if (erydonMetalBlend.x > 0.0) {
+                if (erydonMetalBlend.x < 0.0) {
+                    // Match the two-way coating: reflection is not lifted by lit albedo.
+                    color = mix(color, compositeReflection.rgb, fresnelM);
+                } else if (erydonMetalBlend.x > 0.0) {
                     // Surface lighting has removed only metal diffuse, retaining direct
                     // highlights and the broad illumination approximation. Absorption is not
                     // replaced with a coat of lit albedo. At fractional coverage we use

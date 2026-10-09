@@ -7,6 +7,64 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class MetallicLookupLayoutTest {
+    @Test void glossInsetMetadataSurvivesZeroMetalCoverageWithoutAllocatingAPyramid() {
+        for (int size : new int[]{16, 32, 64}) {
+            var marker = MetallicLookupLayout.glossCover(0, 0, size, size);
+            assertArrayEquals(new byte[size * size], marker.coverage());
+            byte[] uniform = new byte[size * size];
+            Arrays.fill(uniform, (byte) 255);
+            var metal = sprite(size, 0, size, size, uniform, MetallicMaterials.SILVER, false);
+            var emptyMetal = sprite(size * 2, 0, size, size, new byte[size * size], MetallicMaterials.SILVER, false);
+            var encoded = MetallicLookupLayout.encode(size * 3, size, List.of(marker, metal, emptyMetal));
+            assertEquals(2, encoded.recordCount());
+            assertEquals(0, encoded.uniqueMasks());
+            byte[] bytes = encoded.rgba();
+            int markerRecord = MetallicLookupLayout.getU32(bytes, MetallicLookupLayout.HEADER_TEXELS);
+            assertEquals(0, MetallicLookupLayout.getU32(bytes, markerRecord));
+            assertEquals(size | (size << 16), MetallicLookupLayout.getU32(bytes, markerRecord + 1));
+            assertEquals(MetallicMaterials.GLOSS_COVER, MetallicLookupLayout.getU32(bytes, markerRecord + 2),
+                    "Kind4 must carry alloy0, roughness0 and no full-metal/fallback flags");
+            assertEquals(0, MetallicLookupLayout.getU32(bytes, markerRecord + 3));
+            assertEquals(0xff000000, MetallicLookupLayout.getU32(bytes, markerRecord + 4));
+            int metalRecord = MetallicLookupLayout.getU32(bytes, MetallicLookupLayout.HEADER_TEXELS + size / 16);
+            assertEquals(MetallicLookupLayout.UNIFORM, bytes[(metalRecord + 2) * 4 + 3]);
+            assertEquals(0, MetallicLookupLayout.getU32(bytes, MetallicLookupLayout.HEADER_TEXELS + size * 2 / 16),
+                    "Ordinary zero-metal sprites remain absent");
+        }
+    }
+
+    @Test void glossMarkerLeavesExistingMetalCoverageBytesAndUnknownAlloyMetadataUnchanged() {
+        byte[] mask = new byte[256];
+        mask[30] = (byte) 255;
+        var metal = sprite(16, 0, 16, 16, mask, MetallicMaterials.AUTHORED, false);
+        var original = MetallicLookupLayout.encode(32, 16, List.of(metal));
+        var withMarker = MetallicLookupLayout.encode(32, 16,
+                List.of(MetallicLookupLayout.glossCover(0, 0, 16, 16), metal));
+        assertEquals(original.uniqueMasks(), withMarker.uniqueMasks());
+        byte[] a = original.rgba(), b = withMarker.rgba();
+        int oldRecord = MetallicLookupLayout.getU32(a, 5), newRecord = MetallicLookupLayout.getU32(b, 5);
+        assertEquals(MetallicLookupLayout.getU32(a, oldRecord + 2), MetallicLookupLayout.getU32(b, newRecord + 2));
+        assertEquals(0, b[(newRecord + 2) * 4 + 1], "Unknown alloy remains zero rather than becoming silver");
+        int oldStart = MetallicLookupLayout.getU32(a, oldRecord + 3);
+        int newStart = MetallicLookupLayout.getU32(b, newRecord + 3);
+        byte[] pyramid = MetallicLookupLayout.pyramid(mask, 16, 16);
+        assertArrayEquals(pyramid, Arrays.copyOfRange(a, oldStart, oldStart + pyramid.length));
+        assertArrayEquals(pyramid, Arrays.copyOfRange(b, newStart, newStart + pyramid.length));
+    }
+
+    @Test void nonmetalGlossMarkersRejectMetalCoverageAlloysAndFallbackFlags() {
+        byte[] zero = new byte[256], metal = new byte[256];
+        metal[0] = (byte) 255;
+        assertThrows(IllegalArgumentException.class, () -> new MetallicLookupLayout.SpriteData(
+                0, 0, 16, 16, MetallicMaterials.GLOSS_COVER, MetallicMaterials.SILVER, 0, false, zero));
+        assertThrows(IllegalArgumentException.class, () -> new MetallicLookupLayout.SpriteData(
+                0, 0, 16, 16, MetallicMaterials.GLOSS_COVER, MetallicMaterials.AUTHORED, 1, false, zero));
+        assertThrows(IllegalArgumentException.class, () -> new MetallicLookupLayout.SpriteData(
+                0, 0, 16, 16, MetallicMaterials.GLOSS_COVER, MetallicMaterials.AUTHORED, 0, true, zero));
+        assertThrows(IllegalArgumentException.class, () -> new MetallicLookupLayout.SpriteData(
+                0, 0, 16, 16, MetallicMaterials.GLOSS_COVER, MetallicMaterials.AUTHORED, 0, false, metal));
+    }
+
     @Test void singlePixelMetalLineRetainsItsFractionThroughEveryMipAtEverySupportedPackResolution() {
         for (int size : new int[]{16, 32, 64}) {
             byte[] source = new byte[size * size];

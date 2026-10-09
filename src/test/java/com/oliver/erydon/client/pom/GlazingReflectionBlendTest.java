@@ -190,11 +190,11 @@ class GlazingReflectionBlendTest {
     }
 
     /** Single-pixel floating target plus CU's actual signed-normalized reflection format. */
-    private static final class PixelGpu implements AutoCloseable {
+    static final class PixelGpu implements AutoCloseable {
         private final List<Integer> programs = new ArrayList<>(), textures = new ArrayList<>();
         private final int framebuffer = GL30.glGenFramebuffers(), vao = GL30.glGenVertexArrays();
         private final int floating = texture(GL30.GL_RGBA32F), snorm = texture(GL31.GL_RGBA8_SNORM);
-        private int readback;
+        private int readback, sampled;
 
         PixelGpu() {
             GL30.glBindVertexArray(vao);
@@ -231,6 +231,15 @@ class GlazingReflectionBlendTest {
             GL20.glUseProgram(program);
             scalar(program, "testSkyFade", skyFade);
             scalar(program, "testFogAlpha", fogAlpha);
+        }
+
+        void sample(float red, float green, float blue, float alpha) {
+            GL13.glActiveTexture(GL13.GL_TEXTURE0);
+            if (sampled == 0) sampled = texture(GL30.GL_RGBA32F);
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, sampled);
+            var pixel = BufferUtils.createFloatBuffer(4);
+            pixel.put(new float[]{red, green, blue, alpha}).flip();
+            GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, 1, 1, GL11.GL_RGBA, GL11.GL_FLOAT, pixel);
         }
 
         float[] draw(int program, int output, boolean blend) {

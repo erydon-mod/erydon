@@ -1,5 +1,6 @@
 package com.oliver.erydon.client.pom;
 
+import com.oliver.erydon.client.MetallicMaterials;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,7 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Compact RGBA8 lookup with categorical sprite records and independently filtered metal coverage. */
+/** Compact RGBA8 lookup with categorical finish records and independently filtered metal coverage. */
 public final class MetallicLookupLayout {
     public static final int WIDTH = 1024;
     public static final int MAX_HEIGHT = 8192;
@@ -33,9 +34,13 @@ public final class MetallicLookupLayout {
                     || Integer.bitCount(width) != 1 || Integer.bitCount(height) != 1) {
                 throw new IllegalArgumentException("Metal sprite must have power-of-two, 16-aligned atlas bounds");
             }
-            if (coverage.length != (long) width * height || kind < 1 || kind > 3
+            if (coverage.length != (long) width * height || kind < 1 || kind > MetallicMaterials.GLOSS_COVER
                     || alloy < 0 || alloy > 2 || roughness < 0 || roughness > 255) {
                 throw new IllegalArgumentException("Invalid metal sprite payload");
+            }
+            if (kind == MetallicMaterials.GLOSS_COVER
+                    && (alloy != MetallicMaterials.AUTHORED || roughness != 0 || pureMetalFallback || anyCoverage(coverage))) {
+                throw new IllegalArgumentException("Gloss cover markers must not contain metal");
             }
             coverage = coverage.clone();
             metalAlbedoAbgr |= 0xff000000;
@@ -50,13 +55,20 @@ public final class MetallicLookupLayout {
 
     private MetallicLookupLayout() { }
 
+    /** A categorical inset marker carries no metal mask or authored metal colour. */
+    public static SpriteData glossCover(int x, int y, int width, int height) {
+        return new SpriteData(x, y, width, height, MetallicMaterials.GLOSS_COVER,
+                MetallicMaterials.AUTHORED, 0, false, new byte[Math.multiplyExact(width, height)], 0xff000000);
+    }
+
     public static Encoded encode(int atlasWidth, int atlasHeight, List<SpriteData> sprites) {
         if (atlasWidth <= 0 || atlasHeight <= 0 || atlasWidth > MAX_ATLAS_SIZE || atlasHeight > MAX_ATLAS_SIZE) {
             throw new IllegalArgumentException("Metal lookup atlas size exceeds 16384");
         }
         int columns = (atlasWidth + QUANTUM - 1) / QUANTUM;
         int rows = (atlasHeight + QUANTUM - 1) / QUANTUM;
-        List<SpriteData> active = sprites.stream().filter(sprite -> anyCoverage(sprite.coverage)).toList();
+        List<SpriteData> active = sprites.stream().filter(sprite -> sprite.kind == MetallicMaterials.GLOSS_COVER
+                || anyCoverage(sprite.coverage)).toList();
         long recordsBase = HEADER_TEXELS + (long) columns * rows;
         long masksBase = (recordsBase + (long) active.size() * RECORD_TEXELS) * 4;
         requireCapacity(masksBase);
@@ -67,7 +79,7 @@ public final class MetallicLookupLayout {
             if ((long) sprite.x + sprite.width > atlasWidth || (long) sprite.y + sprite.height > atlasHeight) {
                 throw new IllegalArgumentException("Metal sprite extends outside atlas");
             }
-            if (uniform(sprite.coverage)) {
+            if (sprite.kind == MetallicMaterials.GLOSS_COVER || uniform(sprite.coverage)) {
                 starts.add(0);
                 continue;
             }
@@ -100,7 +112,7 @@ public final class MetallicLookupLayout {
             rgba[meta] = (byte) sprite.kind;
             rgba[meta + 1] = (byte) sprite.alloy;
             rgba[meta + 2] = (byte) sprite.roughness;
-            rgba[meta + 3] = (byte) ((starts.get(i) == 0 ? UNIFORM : 0)
+            rgba[meta + 3] = (byte) ((starts.get(i) == 0 && sprite.kind != MetallicMaterials.GLOSS_COVER ? UNIFORM : 0)
                     | (sprite.pureMetalFallback ? PURE_METAL_FALLBACK : 0));
             putU32(rgba, record + 3, starts.get(i));
             putU32(rgba, record + 4, sprite.metalAlbedoAbgr);

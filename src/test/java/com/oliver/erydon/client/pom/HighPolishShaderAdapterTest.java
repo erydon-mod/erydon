@@ -10,6 +10,7 @@ class HighPolishShaderAdapterTest {
             normalMap = ReadNormal(vTexCoord.st);
             normalM = normalMap.rgb;
             vec4 specularMap = texture2D(specular, texCoordM);
+            emission = GetCustomEmission(specularMap, texCoordM);
             float smoothnessM = pow2(specularMap.r);
             if (specularMap.g < OSIEBCA * 229.1) {
                 materialMask = specularMap.g * OSIEBCA * 214.0;
@@ -59,7 +60,7 @@ class HighPolishShaderAdapterTest {
     @Test void onlyOpaqueProgramsChangeAndHeightSamplingIsPreserved() {
         var result = HighPolishShaderAdapter.adaptFragment("gbuffers_terrain", TERRAIN, true);
         assertTrue(result.changed());
-        assertTrue(result.text().startsWith(TERRAIN.substring(0, TERRAIN.indexOf("float smoothnessM"))));
+        assertTrue(result.text().startsWith(TERRAIN.substring(0, TERRAIN.indexOf("emission ="))));
         assertTrue(result.text().contains("materialMask = specularMap.g - OSIEBCA * 15.0;"));
         assertEquals(1, result.text().split("texture2D", -1).length - 1);
         assertTrue(result.text().contains("specularMap.r >= 0.68"), "Grout must retain its authored roughness");
@@ -81,7 +82,7 @@ class HighPolishShaderAdapterTest {
         assertFalse(deferred.contains("materialMaskInt == 243"), "Metal response belongs to the separate material adapter");
         assertFalse(terrain.contains("OSIEBCA * 243.0"));
         assertFalse(deferred.contains("reflectColor ="), "deferred1 cannot carry the tint into composite");
-        String mirrorMask = terrain.substring(terrain.indexOf("if (", terrain.indexOf("materialMask =")), terrain.indexOf("} else"));
+        String mirrorMask = terrain.substring(terrain.indexOf("if (", terrain.indexOf("materialMask = specularMap.g *")), terrain.indexOf("} else"));
         assertTrue(mirrorMask.contains("mat == 12024"));
         assertFalse(mirrorMask.contains("mat == 12032"), "Honed must not receive the Mirror floor");
         assertFalse(mirrorMask.contains("mat == 12040"), "Polished has no added reflection boost");
@@ -89,7 +90,9 @@ class HighPolishShaderAdapterTest {
 
     @Test void disabledMissingAndAmbiguousSourcesAreByteExact() {
         assertSame(TERRAIN, HighPolishShaderAdapter.adaptFragment("gbuffers_terrain", TERRAIN, false).text());
-        for (String source : new String[]{"unrecognised", TERRAIN + TERRAIN}) {
+        for (String source : new String[]{"unrecognised", TERRAIN + TERRAIN,
+                TERRAIN.replace("emission = GetCustomEmission(specularMap, texCoordM);", ""),
+                TERRAIN + "\nemission = GetCustomEmission(specularMap, texCoordM);"}) {
             var result = HighPolishShaderAdapter.adaptFragment("gbuffers_terrain", source, true);
             assertEquals("UNSUPPORTED_SOURCE", result.status());
             assertSame(source, result.text());
@@ -135,7 +138,7 @@ class HighPolishShaderAdapterTest {
     }
 
     @Test void collisionRejectsBeforeAnyShaderIsPatched() {
-        for (int id = 12000; id < 12060; id++) {
+        for (int id = 12000; id < 12064; id++) {
             assertEquals(HighPolishShaderAdapter.RESERVED_IDS.contains(id), HighPolishShaderAdapter.isReservedMaterial(id));
         }
         for (int used : HighPolishShaderAdapter.RESERVED_IDS) {
@@ -144,6 +147,29 @@ class HighPolishShaderAdapterTest {
             assertSame(TERRAIN, HighPolishShaderAdapter.adaptFragment("gbuffers_terrain", TERRAIN).text());
             assertFalse(HighPolishShaderAdapter.ready());
         }
+    }
+
+    @Test void matteCoverClassificationChangesOnlyGeometryNotItsSurfaceResponse() {
+        assertEquals(12063, HighPolishShaderAdapter.COVER_MATTE_ID);
+        assertEquals(1, HighPolishShaderAdapter.COVER_MATTE_ID % 2,
+                "Paper-thin Matte covers must not anchor a full reflection voxel");
+        assertTrue(HighPolishShaderAdapter.RESERVED_IDS.contains(HighPolishShaderAdapter.COVER_MATTE_ID));
+        assertTrue(HighPolishShaderAdapter.isReservedMaterial(HighPolishShaderAdapter.COVER_MATTE_ID));
+        String terrain = HighPolishShaderAdapter.adaptFragment("gbuffers_terrain", TERRAIN, true).text();
+        String deferred = HighPolishShaderAdapter.adaptFragment("deferred1", DEFERRED, true).text();
+        String water = HighPolishShaderAdapter.adaptFragment("gbuffers_water", WATER, true).text();
+        for (String transformed : new String[]{terrain, deferred, water}) {
+            assertFalse(transformed.contains("12063"),
+                    "Matte's geometry ID must never receive a smoothness, colour, mask or Fresnel override");
+        }
+        assertEquals(1, terrain.split("emission = GetCustomEmission", -1).length - 1);
+        assertTrue(terrain.contains("float smoothnessM = pow2(specularMap.r);"));
+        assertTrue(terrain.contains("materialMask = specularMap.g - OSIEBCA * 15.0;"),
+                "Authored metallic channels and roughness must retain their existing path");
+        HighPolishShaderAdapter.beginShaderLoad(true, true);
+        HighPolishShaderAdapter.acceptMaterialIds(id -> id == HighPolishShaderAdapter.COVER_MATTE_ID);
+        assertSame(TERRAIN, HighPolishShaderAdapter.adaptFragment("gbuffers_terrain", TERRAIN).text());
+        assertFalse(HighPolishShaderAdapter.ready(), "Matte ID collisions must reject the whole shader patch");
     }
 
     @Test void repeatedTransformsAndSpiralPredicateAreIdempotent() {

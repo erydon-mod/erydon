@@ -9,6 +9,8 @@ public final class MetallicMaterials {
     public static final int OVERLAY = 1;
     public static final int EMBEDDED = 2;
     public static final int STANDALONE = 3;
+    /** Exact nonmetal finish marker for shared cover/coffered-ceiling inset sprites. */
+    public static final int GLOSS_COVER = 4;
     public static final int AUTHORED = 0;
     public static final int BRONZE = 1;
     public static final int SILVER = 2;
@@ -23,6 +25,10 @@ public final class MetallicMaterials {
     public static Candidate classify(String namespace, String path) {
         if (path.endsWith("_n") || path.endsWith("_s") || path.contains("window_arch_mirror")
                 || path.contains("two_way") || path.contains("glazing_")) return null;
+        if ("erydon".equals(namespace)
+                && (path.equals("block/cover_white_gloss") || path.equals("block/cover_black_gloss"))) {
+            return new Candidate(GLOSS_COVER, AUTHORED, false);
+        }
         if (NAMESPACES.contains(namespace)) {
             boolean matte = path.equals("block/cover_bronze_matte") || path.equals("block/cover_silver_matte");
             int kind = path.contains("herringbone") || path.contains("weave")

@@ -14,6 +14,7 @@ public final class MetallicShaderAdapter {
     private static final Pattern FIRST_FUNCTION = Pattern.compile("(?m)^(?:void|float|int|bool|[biu]?vec[234]|mat[234])\\s+\\w+\\s*\\([^;{}]*\\)\\s*\\{");
     private static final Pattern MAIN = Pattern.compile("void\\s+main\\s*\\(\\s*\\)\\s*\\{");
     private static final Pattern SPECULAR = Pattern.compile("vec4\\s+specularMap\\s*=\\s*texture2D\\(specular,\\s*texCoordM\\)\\s*;");
+    private static final Pattern CUSTOM_EMISSION = Pattern.compile("emission\\s*=\\s*GetCustomEmission\\(specularMap,\\s*texCoordM\\)\\s*;");
     private static final Pattern TERRAIN_BUFFER = Pattern.compile("gl_FragData\\[1\\]\\s*=\\s*vec4\\(smoothnessD,\\s*materialMask,\\s*skyLightFactor,\\s*1\\.0\\)\\s*;");
     private static final Pattern WATER_BUFFER = Pattern.compile("vec4\\(1\\.0,\\s*materialMask,\\s*skyLightFactor,\\s*1\\.0\\)");
     private static final Pattern WATER_REFLECT = Pattern.compile("reflectMult\\s*=\\s*smoothnessD\\s*;");
@@ -48,6 +49,11 @@ public final class MetallicShaderAdapter {
                 // The metadata encodes labPBR categories. Other PBR formats remain native.
                 require(Pattern.compile("highlightMult\\s*\\*=\\s*0\\.5\\s*\\+\\s*0\\.5\\s*\\*\\s*specularMap\\.g").matcher(fragment).find());
                 require(unique(SPECULAR, f) && unique(MAIN, v));
+                // Mask242 is valid only after the high-polish pipeline passed its
+                // source/material-ID preflight. Metal-only fallback stays native.
+                boolean glossMarkers = program.equals("gbuffers_terrain")
+                        && f.contains("// ERYDON opaque high polish");
+                if (glossMarkers) require(unique(CUSTOM_EMISSION, f));
                 boolean recess = program.equals("gbuffers_terrain")
                         && v.contains(ComplementaryUnboundDev5SourceTransformer.HELPER_SENTINEL)
                         && f.contains("vec2 erydonCtmPomAtlasUv(")
@@ -120,7 +126,7 @@ public final class MetallicShaderAdapter {
                         """ : "";
                 f = injectHelpers(f, MARKER + "\n" + LOOKUP + recessDeclarations + FRAGMENT);
                 boolean temporalCoverage = Pattern.compile("TAAJitter\\(gl_Position\\.xy,\\s*gl_Position\\.w\\)").matcher(vertex).find();
-                f = surface(f, program.equals("gbuffers_water"), temporalCoverage, recess);
+                f = surface(f, program.equals("gbuffers_water"), temporalCoverage, recess, glossMarkers);
                 if (recess) f = recess(f, temporalCoverage);
                 var light = MetalLightingTransform.adapt(program, f);
                 require(accepted(light.status()));
@@ -139,7 +145,8 @@ public final class MetallicShaderAdapter {
         }
     }
 
-    private static String surface(String source, boolean water, boolean temporalCoverage, boolean recess) {
+    private static String surface(String source, boolean water, boolean temporalCoverage, boolean recess,
+                                  boolean glossMarkers) {
         // Resolve coverage before the finish adapter sees the mixed specular sample.
         // At a partly covered pixel it still computes the user's underlying stone finish.
         String s = after(SPECULAR, source, """
@@ -152,14 +159,17 @@ public final class MetallicShaderAdapter {
                     float erydonFootprint = max(length(erydonDx), length(erydonDy));
                     float erydonAuthoredRoughness = 1.0 - specularMap.r;
                     bool erydonHasAuthoredMetal = specularMap.g >= 229.5 / 255.0;
-                    if (erydonInfo.x > 0) {
+                    // Gloss covers share sprites with matte covers and ceilings.
+                    // Their state-selected finish must win before any metal mutation.
+                    bool erydonGlossCover = mat == 12059 || mat == 12061;
+                    if (!erydonGlossCover && erydonInfo.x > 0 && erydonInfo.x < 4) {
                         // A CTM-aware POM ray may finish on another sprite in the atlas.
                         ivec2 erydonPixel = ivec2(floor(texCoordM * vec2(erydonMetalAtlas)));
                         if (any(lessThan(erydonPixel, erydonBounds.xy))
                                 || any(greaterThanEqual(erydonPixel, erydonBounds.xy + erydonBounds.zw))) {
                             erydonReadMetal(texCoordM, erydonMetalAtlas, erydonBounds, erydonInfo, erydonAuthoredMetalColor);
                         }
-                        if (erydonInfo.x > 0) {
+                        if (erydonInfo.x > 0 && erydonInfo.x < 4) {
                             // Overlay visibility already represents coverage: admitted samples are solid metal.
                             // Do not filter the same mask a second time for those admitted samples.
                             erydonMetalCoverage = erydonInfo.x == 1 ? 1.0
@@ -178,7 +188,7 @@ public final class MetallicShaderAdapter {
         int end = matchingBrace(s, body);
         String apply = """
 
-                    if (erydonMetalCoverage >= 1.0 / 126.0 && erydonInfo.x > 0) {
+                    if (!erydonGlossCover && erydonMetalCoverage >= 1.0 / 126.0 && erydonInfo.x > 0 && erydonInfo.x < 4) {
                         erydonMetalF0 = erydonConductorF0(erydonInfo.y, color.rgb);
                         float erydonRoughness = erydonMetalCoverage > 0.95 && erydonHasAuthoredMetal ? erydonAuthoredRoughness : float(erydonInfo.z) / 255.0;
                         // Preserve authored polish: a .22 floor turns CU's reflection
@@ -224,6 +234,18 @@ public final class MetallicShaderAdapter {
                 """.formatted(Pattern.compile("normalM\\s*=\\s*normalMap\\.xyz").matcher(source).find() ? "true" : "false",
                                 water ? "// Keep materialMaskPh exclusively for the approved two-way coating."
                                      : "materialMask = erydonMetalTag;");
+        if (glossMarkers) {
+            apply += """
+                    // The Gloss inset marker carries no conductor coverage/alloy.
+                    // Original emission has already been sampled; framework sprites
+                    // retain their separately selected stone finish.
+                    if (erydonInfo.x == 4) {
+                        smoothnessG = 1.0;
+                        smoothnessD = 1.0;
+                        materialMask = 242.0 / 255.0;
+                    }
+                """;
+        }
         s = s.substring(0, end) + apply + s.substring(end);
         if (water) {
             require(unique(WATER_REFLECT, s));

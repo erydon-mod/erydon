@@ -4,6 +4,7 @@ import com.oliver.erydon.Erydon;
 import com.oliver.erydon.client.ErydonHighPolish;
 import com.oliver.erydon.client.PolishedStoneMaterials;
 import com.oliver.erydon.client.pom.HighPolishShaderAdapter;
+import com.oliver.erydon.block.CoverBlock;
 import com.oliver.erydon.block.WindowArchBlock;
 import com.oliver.erydon.block.WindowFrenchGeorgianBlock;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -43,6 +44,18 @@ abstract class HighPolishBlockMaterialMixin {
         for (var block : Registries.BLOCK) {
             var id = Registries.BLOCK.getId(block);
             boolean erydon = Erydon.MOD_ID.equals(id.getNamespace());
+            // Cover material IDs preserve paper-thin geometry, including lit covers.
+            // It must not inherit the player's stone, glazing or two-way options.
+            if (erydon && block instanceof CoverBlock) {
+                int coverMaterial = "cover_silver".equals(id.getPath())
+                        ? HighPolishShaderAdapter.COVER_SILVER_GLOSS_ID : HighPolishShaderAdapter.COVER_GLOSS_ID;
+                for (BlockState state : block.getStateManager().getStates()) {
+                    ids.put(state, state.get(CoverBlock.FINISH) == CoverBlock.CoverFinish.GLOSS
+                            ? coverMaterial : HighPolishShaderAdapter.COVER_MATTE_ID);
+                    count++;
+                }
+                continue;
+            }
             boolean stone = PolishedStoneMaterials.includes(id.getNamespace(), id.getPath());
             var level = stone ? PolishedStoneMaterials.level(ErydonHighPolish.activeSettings(), id.getPath()) : null;
             boolean window = erydon && (block instanceof WindowArchBlock || block instanceof WindowFrenchGeorgianBlock);

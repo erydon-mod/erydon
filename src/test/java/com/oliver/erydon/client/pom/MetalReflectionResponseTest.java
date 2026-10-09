@@ -119,6 +119,26 @@ class MetalReflectionResponseTest {
         assertTrue(MetalReflectionFilter.adapt("composite1", result.text()).changed());
     }
 
+    @Test void silverGlossUsesTheCoatingBlendWithoutMetalTintOrAlbedoPreservation() throws Exception {
+        var result = MetalReflectionResponse.adapt("composite1", BLEND);
+        assertTrue(result.changed(), result.status());
+        assertTrue(result.text().matches("(?s).*if \\(erydonBlendMask == 245\\) \\{\\s*erydonMetalBlend = vec2\\(-1\\.0, 0\\.0\\);.*"));
+        assertTrue(result.text().contains("} else if (erydonBlendMask == 243 || erydonBlendMask == 244)"),
+                "The silver coating must not enter the bronze/silver conductor reconstruction");
+        int coating = result.text().indexOf("if (erydonMetalBlend.x < 0.0)");
+        int conductor = result.text().indexOf("else if (erydonMetalBlend.x > 0.0)", coating);
+        String coatingBranch = result.text().substring(coating, conductor);
+        assertTrue(coatingBranch.contains("color = mix(color, compositeReflection.rgb, fresnelM);"));
+        assertFalse(coatingBranch.contains("texturePreservation"));
+        assertFalse(coatingBranch.contains("pow("));
+        assertEquals(1, occurrences(result.text(), "texelFetch("), "Reuse the existing material read");
+        var filtered = MetalReflectionFilter.adapt("composite1", result.text());
+        assertTrue(filtered.changed(), filtered.status());
+        assertTrue(filtered.text().contains("erydonFilterMask == 243 ? 0.5 : (erydonFilterMask == 244 ? 1.0 : 0.0)"),
+                "The neutral coating must stay outside conductor-only material filtering");
+        HighPolishShaderPackTest.parse(filtered.text());
+    }
+
     @Test void lowSamplerProfileRetainsNativePreservationAndSamplerCount() {
         String input = BLEND.replace("    " + FETCH + "\n", "").replace("    float smoothnessD = texture6.r;\n", "");
         var result = MetalReflectionResponse.adapt("composite1", input);
@@ -127,6 +147,10 @@ class MetalReflectionResponseTest {
         assertFalse(result.text().contains("texelFetch"));
         assertFalse(result.text().contains("0.35"));
         assertTrue(result.text().contains("erydonMetalBlend = vec2(0.0);"));
+        assertFalse(result.text().contains("erydonBlendMask == 245"),
+                "The real Mac low-sampler profile must retain native preservation without activating colortex6");
+        assertEquals(1, occurrences(result.text(),
+                "compositeReflection.rgb = mix(compositeReflection.rgb, max(color, compositeReflection.rgb), texturePreservation);"));
     }
 
     @Test void waterChangesOnlyMetalCoverageAndLeavesMirrorCoatingIntact() {

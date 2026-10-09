@@ -31,11 +31,16 @@ public final class HighPolishShaderAdapter {
     public static final int POLISHED_COLUMN_ID = 12053;
     public static final int NORMAL_COLUMN_ID = 12055;
     public static final int GLAZING_ID = 12057;
+    public static final int COVER_GLOSS_ID = 12059;
+    public static final int COVER_SILVER_GLOSS_ID = 12061;
+    // Geometry only: Matte keeps its authored PBR and metal response.
+    public static final int COVER_MATTE_ID = 12063;
     public static final float GLAZING_REFLECTION_FLOOR = 0.5F;
     public static final List<Integer> RESERVED_IDS = List.of(SOLID_ID, SHAPE_ID, SPIRAL_ID,
             MIRROR_POLISHED_FRAME_ID, MIRROR_NORMAL_FRAME_ID, HONED_SOLID_ID, HONED_SHAPE_ID,
             HONED_SPIRAL_ID, HONED_FRAME_ID, POLISHED_SOLID_ID, POLISHED_SHAPE_ID, POLISHED_SPIRAL_ID, POLISHED_FRAME_ID,
-            MIRROR_COLUMN_ID, HONED_COLUMN_ID, POLISHED_COLUMN_ID, NORMAL_COLUMN_ID, GLAZING_ID);
+            MIRROR_COLUMN_ID, HONED_COLUMN_ID, POLISHED_COLUMN_ID, NORMAL_COLUMN_ID, GLAZING_ID,
+            COVER_GLOSS_ID, COVER_SILVER_GLOSS_ID, COVER_MATTE_ID);
     private static final String HONED = "(mat == 12032 || mat == 12033 || mat == 12035 || mat == 12037 || mat == 12051)";
     private static final String POLISHED = "(mat == 12040 || mat == 12041 || mat == 12043 || mat == 12045 || mat == 12053)";
     private static final String MIRROR = "(mat == 12024 || mat == 12025 || mat == 12027 || mat == 12029 || mat == 12049)";
@@ -100,7 +105,8 @@ public final class HighPolishShaderAdapter {
             case SOLID_ID, SHAPE_ID, SPIRAL_ID, MIRROR_POLISHED_FRAME_ID, MIRROR_NORMAL_FRAME_ID,
                     HONED_SOLID_ID, HONED_SHAPE_ID, HONED_SPIRAL_ID, HONED_FRAME_ID,
                     POLISHED_SOLID_ID, POLISHED_SHAPE_ID, POLISHED_SPIRAL_ID, POLISHED_FRAME_ID,
-                    MIRROR_COLUMN_ID, HONED_COLUMN_ID, POLISHED_COLUMN_ID, NORMAL_COLUMN_ID, GLAZING_ID -> true;
+                    MIRROR_COLUMN_ID, HONED_COLUMN_ID, POLISHED_COLUMN_ID, NORMAL_COLUMN_ID, GLAZING_ID,
+                    COVER_GLOSS_ID, COVER_SILVER_GLOSS_ID, COVER_MATTE_ID -> true;
             default -> false;
         };
     }
@@ -215,7 +221,7 @@ public final class HighPolishShaderAdapter {
     private static Result adaptTerrain(String source) {
         // Preflight all anchors before changing anything. Metals and grout retain
         // their own masks; no specular image is swapped or sampled a second time.
-        if (!unique(SMOOTHNESS, source) || !unique(DIELECTRIC, source))
+        if (!unique(SMOOTHNESS, source) || !unique(DIELECTRIC, source) || !unique(CUSTOM_EMISSION, source))
             return new Result(source, false, "UNSUPPORTED_SOURCE");
         String finish = """
                     // ERYDON opaque high polish
@@ -228,6 +234,16 @@ public final class HighPolishShaderAdapter {
         result = DIELECTRIC.matcher(result).replaceFirst("$0\n" + """
                     if (%s && specularMap.r >= 0.99) materialMask = OSIEBCA * 242.0;
                 """.formatted(MIRROR));
+        result = CUSTOM_EMISSION.matcher(result).replaceFirst("$0\n" + """
+                    // Cover Gloss is an authored block-state finish, independent of player options.
+                    // Keep the original emission sample and all of its channels intact.
+                    if (mat == 12059 || mat == 12061) {
+                        smoothnessG = 1.0;
+                        smoothnessD = 1.0;
+                        materialMask = OSIEBCA * (mat == 12061 ? 245.0 : 242.0);
+                        return;
+                    }
+                """);
         return new Result(result, true, "TRANSFORMED");
     }
 
@@ -252,7 +268,13 @@ public final class HighPolishShaderAdapter {
                     // ERYDON opaque high polish
                     // Mirror stone: 50% floor. Honed/Polished use CU's ordinary response.
                     if (materialMaskInt == 242) {
-                        fresnelM = (pow3(fresnel) * 0.5 + 0.5) * smoothnessD;
+                        // RGBA8_SNORM must not round sqrt(R) to CU's exact-one rejection sentinel.
+                        fresnelM = min(0.99, (pow3(fresnel) * 0.5 + 0.5) * smoothnessD);
+                    }
+                    // Silver Gloss has the two-way mirror coating's 90% floor.
+                    // Preserve CU's native coating curve and avoid the SNORM exact-one sentinel.
+                    if (materialMaskInt == 245) {
+                        fresnelM = min(0.99, max(pow3(fresnel) * 0.85 + 0.15, 0.9) * smoothnessD);
                     }
                 """;
         return new Result(source.substring(0, end) + insertion + source.substring(end), true, "TRANSFORMED");

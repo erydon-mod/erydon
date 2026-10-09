@@ -39,7 +39,8 @@ public final class MetallicLookupTexture {
                 var material = MetallicMaterials.classify(id.getNamespace(), id.getPath());
                 // Unknown alloys retain native PBR. Do not decode every ordinary stone
                 // sprite merely to discover that it is outside the supported alloy set.
-                if (material == null || material.alloy() == MetallicMaterials.AUTHORED) continue;
+                if (material == null || material.alloy() == MetallicMaterials.AUTHORED
+                        && material.kind() != MetallicMaterials.GLOSS_COVER) continue;
                 try {
                     MetallicLookupLayout.SpriteData record = readSprite(resources, sprite, material);
                     if (record != null) {
@@ -66,6 +67,11 @@ public final class MetallicLookupTexture {
                                                                MetallicMaterials.Candidate material) throws IOException {
         Identifier id = sprite.getContents().getId();
         int width = sprite.getContents().getWidth(), height = sprite.getContents().getHeight();
+        // The saved finish enum selects these exact sprites. No colour/PBR
+        // heuristic or texture decoding is needed to identify the inset.
+        if (material.kind() == MetallicMaterials.GLOSS_COVER) {
+            return MetallicLookupLayout.glossCover(sprite.getX(), sprite.getY(), width, height);
+        }
         Identifier specularId = resourceId(id, "_s");
         int[] specular;
         boolean nativePair = false;

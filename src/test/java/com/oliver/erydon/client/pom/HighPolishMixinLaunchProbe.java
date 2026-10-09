@@ -1,7 +1,14 @@
 package com.oliver.erydon.client.pom;
 
 import com.oliver.erydon.mixin.client.compat.iris.HighPolishIdMapAccessor;
+import com.oliver.erydon.ErydonConfig;
+import com.oliver.erydon.HighPolishSettings;
+import com.oliver.erydon.block.CoverBlock;
+import com.oliver.erydon.block.CeilingBlock;
+import com.oliver.erydon.client.ErydonHighPolish;
 import com.google.common.collect.ImmutableList;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
 import net.irisshaders.iris.Iris;
 import net.irisshaders.iris.config.IrisConfig;
@@ -10,6 +17,15 @@ import net.irisshaders.iris.shaderpack.option.ShaderPackOptions;
 import net.irisshaders.iris.shaderpack.properties.ShaderProperties;
 import net.minecraft.resource.LifecycledResourceManagerImpl;
 import net.minecraft.resource.ResourceType;
+import net.minecraft.Bootstrap;
+import net.minecraft.SharedConstants;
+import net.minecraft.block.AbstractBlock;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
+import net.minecraft.util.Identifier;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.ClassNode;
@@ -17,6 +33,7 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import net.irisshaders.iris.compat.sodium.impl.block_context.BlockContextHolder;
 import net.irisshaders.iris.compat.sodium.impl.vertex_format.terrain_xhfp.XHFPTerrainVertex;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEncoder;
@@ -25,9 +42,11 @@ import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.parameters
 import org.lwjgl.system.MemoryUtil;
 
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -35,6 +54,7 @@ import java.util.Map;
 public final class HighPolishMixinLaunchProbe implements PreLaunchEntrypoint {
     @Override public void onPreLaunch() {
         try {
+            verifyCoverClassification();
             Class<?> resources = Class.forName("net.minecraft.resource.LifecycledResourceManagerImpl");
             var handler = Arrays.stream(resources.getDeclaredMethods())
                     .filter(m -> m.getName().contains("stoneFinishLabels")).findFirst().orElseThrow();
@@ -78,11 +98,225 @@ public final class HighPolishMixinLaunchProbe implements PreLaunchEntrypoint {
             verifyMetalPreflightOrdering();
             verifyMetalSamplerProfiles(emptyShader);
             verifyInlayVertexTransport();
-            System.out.println("ERYDON_HIGH_POLISH_MIXIN_PROBE_OK: resources installed; ID preflight precedes base programs; parsed map reused; metal preflight precedes every source read; metal sampler profile gate executed; multiface placement hook applied; ordinary and diagonal-ribbon substrate shorts written by real Iris encoder with all other bytes preserved.");
+            System.out.println("ERYDON_HIGH_POLISH_MIXIN_PROBE_OK: cover Matte/Gloss classification and lit vertex transport verified; resources installed; ID preflight precedes base programs; parsed map reused; metal preflight precedes every source read; metal sampler profile gate executed; multiface placement hook applied; ordinary and diagonal-ribbon substrate shorts written by real Iris encoder with all other bytes preserved.");
             System.exit(0);
         } catch (Throwable failure) {
             failure.printStackTrace();
             System.exit(1);
+        }
+    }
+
+    private static void verifyCoverClassification() throws Exception {
+        // Capture the same restart-bound settings as production, with every optional control off.
+        // Replace only the in-memory snapshot: never write or load a player's config.
+        var settingsField = ErydonConfig.class.getDeclaredField("clientSettings");
+        settingsField.setAccessible(true);
+        var previous = (ErydonConfig.ClientSnapshot) settingsField.get(null);
+        settingsField.set(null, new ErydonConfig.ClientSnapshot(previous.tooltipsEnabled(), previous.tooltipDelayMs(),
+                new HighPolishSettings(false, false, false, Map.of())));
+        try {
+            require(!ErydonHighPolish.activeSettings().enabled() && !ErydonHighPolish.activeSettings().glazing()
+                            && !ErydonHighPolish.activeSettings().twoWay(), "Probe must capture all optional polish controls off");
+            SharedConstants.createGameVersion();
+            Bootstrap.initialize();
+            var covers = new ArrayList<CoverBlock>();
+            for (String finish : List.of("white", "black", "bronze", "silver")) {
+                covers.add(registerProbeBlock("erydon", "cover_" + finish,
+                        new CoverBlock(AbstractBlock.Settings.copy(Blocks.WHITE_CONCRETE).nonOpaque()
+                                .luminance(CoverBlock::luminance))));
+            }
+            var foreignCover = registerProbeBlock("cover_probe", "cover_silver",
+                    new CoverBlock(AbstractBlock.Settings.copy(Blocks.WHITE_CONCRETE).nonOpaque()
+                            .luminance(CoverBlock::luminance)));
+            var misleadingName = registerProbeBlock("erydon", "cover_probe_foreign",
+                    new Block(AbstractBlock.Settings.copy(Blocks.WHITE_CONCRETE)));
+            var ceilings = new ArrayList<CeilingBlock>();
+            for (String style : List.of("georgian", "modern", "byzantine")) {
+                for (String stone : List.of("", "glacium_")) {
+                    for (String inset : List.of("white", "black")) {
+                        ceilings.add(registerProbeBlock("erydon", stone + "ceiling_coffered_" + style + "_" + inset + "_small",
+                        new CeilingBlock(AbstractBlock.Settings.copy(Blocks.WHITE_CONCRETE).nonOpaque()
+                                .luminance(CeilingBlock::luminance))));
+                    }
+                }
+            }
+            var states = new ArrayList<BlockState>();
+            for (var cover : covers) states.addAll(cover.getStateManager().getStates());
+            states.addAll(foreignCover.getStateManager().getStates());
+            states.addAll(misleadingName.getStateManager().getStates());
+            for (var ceiling : ceilings) states.addAll(ceiling.getStateManager().getStates());
+            states.add(Blocks.GLASS.getDefaultState());
+            states.add(Blocks.STONE.getDefaultState());
+            Class<?> mapping = Class.forName("net.irisshaders.iris.shaderpack.materialmap.BlockMaterialMapping");
+            Method handler = Arrays.stream(mapping.getDeclaredMethods())
+                    .filter(method -> method.getName().contains("assignOpaquePolish")).findFirst().orElseThrow();
+            require(Modifier.isStatic(handler.getModifiers()), "Actual woven material-map handler must be static");
+            handler.setAccessible(true);
+            var baseline = new Object2IntOpenHashMap<BlockState>();
+            baseline.defaultReturnValue(-1);
+            for (int i = 0; i < states.size(); i++) baseline.put(states.get(i), 700 + i % 37);
+
+            prepareCoverShader(HighPolishShaderAdapter.Profile.COMPLEMENTARY, -1);
+            require(HighPolishShaderAdapter.ready(), "Supported source fixtures must complete real shader preparation");
+            var classified = new Object2IntOpenHashMap<BlockState>(baseline);
+            invokeMaterialHandler(handler, classified);
+            int gloss = 0, litGloss = 0, matte = 0, litMatte = 0;
+            for (BlockState state : states) {
+                var id = Registries.BLOCK.getId(state.getBlock());
+                boolean cover = covers.contains(state.getBlock());
+                boolean coverGloss = cover
+                        && state.get(CoverBlock.FINISH) == CoverBlock.CoverFinish.GLOSS;
+                int expected = coverGloss ? (id.getPath().equals("cover_silver")
+                        ? 12061 : 12059) : cover ? 12063 : baseline.getInt(state);
+                // The ceiling inset is selected by its Gloss sprite, not by replacing the
+                // entire block's material. The stone frame retains its existing Honed ID
+                // with master polish off; lit states retain the shader's original ID.
+                if (state.getBlock() instanceof CeilingBlock && id.getPath().startsWith("glacium_")
+                        && state.getLuminance() == 0) expected = 12033;
+                require(classified.getInt(state) == expected, "Wrong actual shader classification: " + state);
+                if (cover) {
+                    if (coverGloss) gloss++; else matte++;
+                    int light = switch (((net.minecraft.util.StringIdentifiable)
+                            state.getEntries().get(CoverBlock.LIGHT)).asString()) {
+                        case "off" -> 0;
+                        case "low" -> 13;
+                        case "bright" -> 15;
+                        default -> throw new AssertionError("Unexpected Cover light state: " + state);
+                    };
+                    require(state.getLuminance() == light && CoverBlock.luminance(state) == light,
+                            "Classification changed Cover light level: " + state);
+                    require((expected & 1) == 1, "Paper-thin covers must retain partial-block voxel lighting");
+                    if (light > 0) {
+                        if (coverGloss) litGloss++; else litMatte++;
+                    }
+                }
+                if (state.getBlock() instanceof CeilingBlock) {
+                    require(classified.getInt(state) != 12059 && classified.getInt(state) != 12061
+                                    && classified.getInt(state) != 12063,
+                            "Gloss ceiling inset must not overwrite its stone frame's material ID");
+                    require(state.getLuminance() == CeilingBlock.luminance(state),
+                            "Classification changed ceiling luminance: " + state);
+                }
+            }
+            require(gloss == 4608 && litGloss == 3072 && matte == 4608 && litMatte == 3072,
+                    "Every attachment/size/extension/light/water Cover combination must be checked");
+            for (int material : List.of(12059, 12061, 12063)) {
+                for (int light : List.of(0, 13, 15)) verifyCoverLightTransport(material, light);
+            }
+            for (var profile : HighPolishShaderAdapter.Profile.values()) {
+                if (profile == HighPolishShaderAdapter.Profile.COMPLEMENTARY) continue;
+                prepareCoverShader(profile, -1);
+                var skipped = new Object2IntOpenHashMap<BlockState>(baseline);
+                invokeMaterialHandler(handler, skipped);
+                require(skipped.equals(baseline), "Unsupported shader changed cover material states: " + profile);
+            }
+            for (int material : List.of(12059, 12061, 12063)) {
+                prepareCoverShader(HighPolishShaderAdapter.Profile.COMPLEMENTARY, material);
+                var skipped = new Object2IntOpenHashMap<BlockState>(baseline);
+                invokeMaterialHandler(handler, skipped);
+                require(skipped.equals(baseline), "Preflight collision changed existing material states: " + material);
+                prepareCoverShader(HighPolishShaderAdapter.Profile.COMPLEMENTARY, -1);
+                skipped.put(Blocks.STONE.getDefaultState(), material);
+                var collisionBaseline = new Object2IntOpenHashMap<BlockState>(skipped);
+                invokeMaterialHandler(handler, skipped);
+                require(skipped.equals(collisionBaseline), "Mapping collision must leave the entire map unchanged");
+            }
+            HighPolishShaderAdapter.beginShaderLoad(HighPolishShaderAdapter.Profile.COMPLEMENTARY, true);
+            var incomplete = new Object2IntOpenHashMap<BlockState>(baseline);
+            invokeMaterialHandler(handler, incomplete);
+            require(incomplete.equals(baseline), "Incomplete shader preparation must preserve existing materials");
+            for (String program : List.of("gbuffers_terrain", "deferred1", "gbuffers_water")) {
+                prepareCoverShader(HighPolishShaderAdapter.Profile.COMPLEMENTARY, -1);
+                HighPolishShaderAdapter.adaptFragment(program, "missing required shader anchors");
+                require(!HighPolishShaderAdapter.ready(), "Missing required sources must fail closed: " + program);
+                var skipped = new Object2IntOpenHashMap<BlockState>(baseline);
+                invokeMaterialHandler(handler, skipped);
+                require(skipped.equals(baseline), "Missing shader sources changed existing materials: " + program);
+            }
+            System.out.println("ERYDON_COVER_GLOSS_CLASSIFICATION_OK gloss=" + gloss + " lit=" + litGloss
+                    + " matte=" + matte + " litMatte=" + litMatte
+                    + " states=" + states.size() + " optionalSettings=off nativeLightEncodings=9");
+        } finally {
+            settingsField.set(null, previous);
+            HighPolishShaderAdapter.beginShaderLoad(HighPolishShaderAdapter.Profile.UNSUPPORTED, false);
+        }
+    }
+
+    private static <T extends Block> T registerProbeBlock(String namespace, String path, T block) {
+        Identifier id = new Identifier(namespace, path);
+        require(!Registries.BLOCK.containsId(id), "Probe unexpectedly overlaps a pre-existing block: " + id);
+        return Registry.register(Registries.BLOCK, id, block);
+    }
+
+    private static void invokeMaterialHandler(Method handler, Object2IntMap<BlockState> map) throws Exception {
+        handler.invoke(null, new CallbackInfoReturnable<>("createBlockStateIdMap", false, map));
+    }
+
+    private static void prepareCoverShader(HighPolishShaderAdapter.Profile profile, int collision) {
+        HighPolishShaderAdapter.beginShaderLoad(profile, true, false);
+        HighPolishShaderAdapter.acceptMaterialIds(id -> id == collision);
+        HighPolishShaderAdapter.adaptFragment("gbuffers_terrain", """
+                normalMap = ReadNormal(vTexCoord.st);
+                normalM = normalMap.rgb;
+                vec4 specularMap = texture2D(specular, texCoordM);
+                emission = GetCustomEmission(specularMap, texCoordM);
+                float smoothnessM = pow2(specularMap.r);
+                if (specularMap.g < OSIEBCA * 229.1) {
+                    materialMask = specularMap.g * OSIEBCA * 214.0;
+                } else {
+                    materialMask = specularMap.g - OSIEBCA * 15.0;
+                }
+                """);
+        HighPolishShaderAdapter.adaptFragment("deferred1", "fresnelM = fresnelM * sqrt1(smoothnessD) - dither * 0.01;");
+        HighPolishShaderAdapter.adaptFragment("gbuffers_water",
+                "emission = GetCustomEmission(specularMap, texCoordM);\nreflectMult = smoothnessD;");
+    }
+
+    private static void verifyCoverLightTransport(int materialId, int lightLevel) {
+        var writer = new XHFPTerrainVertex();
+        var context = new BlockContextHolder();
+        context.blockId = 701;
+        context.renderType = 0;
+        context.lightValue = (byte) lightLevel;
+        writer.iris$setContextHolder(context);
+        var vertices = ChunkVertexEncoder.Vertex.uninitializedQuad();
+        for (int i = 0; i < vertices.length; i++) {
+            vertices[i].x = i >= 2 ? 1 : 0;
+            vertices[i].y = .5F;
+            vertices[i].z = i == 1 || i == 2 ? 1 : 0;
+            vertices[i].u = .25F;
+            vertices[i].v = .5F;
+            vertices[i].color = 0xffd0c0b0;
+            vertices[i].light = 0x00f00000 | lightLevel << 4;
+        }
+        var material = new Material(null, AlphaCutoffParameter.HALF, true);
+        long memory = MemoryUtil.nmemAlloc(160);
+        require(memory != 0, "Cover light probe allocation failed");
+        try {
+            writer.write(memory, material, vertices, 3);
+            byte[] baseline = new byte[160];
+            for (int i = 0; i < baseline.length; i++) baseline[i] = MemoryUtil.memGetByte(memory + i);
+            context.blockId = (short) materialId;
+            writer.write(memory, material, vertices, 3);
+            for (int vertex = 0; vertex < 4; vertex++) {
+                require(MemoryUtil.memGetShort(memory + vertex * 40L + 32) == materialId,
+                        "Real Iris encoder lost the Cover material ID");
+                require(MemoryUtil.memGetByte(memory + vertex * 40L + 39) == lightLevel,
+                        "Real Iris encoder lost Cover's luminance byte");
+            }
+            boolean materialChanged = false;
+            for (int i = 0; i < baseline.length; i++) {
+                if (i % 40 == 32 || i % 40 == 33) {
+                    materialChanged |= MemoryUtil.memGetByte(memory + i) != baseline[i];
+                } else {
+                    require(MemoryUtil.memGetByte(memory + i) == baseline[i],
+                            "Cover material changed light/geometry vertex byte " + i + " for light=" + lightLevel);
+                }
+            }
+            require(materialChanged && context.lightValue == lightLevel,
+                    "Cover classification must change only its material ID and retain native luminance transport");
+        } finally {
+            MemoryUtil.nmemFree(memory);
         }
     }
 
