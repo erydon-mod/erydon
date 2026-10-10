@@ -62,6 +62,12 @@ transitions must pass, with FerriteCore's lookup initialized when it is present.
 `-Perydon.arch.foreignInitializer=true` tests a separate probe-only optimizer
 with a redirected lookup and a later-priority initializer, without relying on
 a known mod ID. These options also work with the full startup check.
+Passing an existing Continuity 3.0 JAR through `erydon.arch.testMods` exercises
+its actual reload-time model map. Shared arch models retain one entry per block,
+while every other registered state retains its original entry. The probe also
+checks real Continuity CTM wrappers for ordinary blocks and excludes inventories;
+it can run with FerriteCore too, separating JAR paths with the platform separator.
+Emissive rendering still requires a live client check.
 Arch model identifiers are shared per registered material, since the family
 wrapper renders the supplied state at runtime. Immutable Minecraft shape caches
 are shared only when collision, side, culling and outline shapes plus fluid,

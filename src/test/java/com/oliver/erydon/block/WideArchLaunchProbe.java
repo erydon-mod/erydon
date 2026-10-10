@@ -95,6 +95,7 @@ public final class WideArchLaunchProbe implements PreLaunchEntrypoint {
                 callbacks(block);
             }
             com.oliver.erydon.client.model.WideArchMeshLaunchChecks.run(families);
+            com.oliver.erydon.client.model.ArchContinuityLaunchChecks.run();
             System.out.println("ERYDON_WIDE_ARCHES_OK cases=" + cases);
             System.exit(0);
         } catch (Throwable failure) { failure.printStackTrace(); System.exit(1); }
@@ -225,6 +226,7 @@ public final class WideArchLaunchProbe implements PreLaunchEntrypoint {
         }
         require(arches == 486, "Full startup omitted registered arches: " + arches);
         require(modelIds.size() == arches, "Arch model registrations grew with state count");
+        com.oliver.erydon.client.model.ArchContinuityLaunchChecks.run();
         long completed = System.nanoTime();
         System.gc();
         Runtime runtime = Runtime.getRuntime();

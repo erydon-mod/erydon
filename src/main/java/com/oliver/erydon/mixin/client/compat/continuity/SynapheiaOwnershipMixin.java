@@ -1,9 +1,14 @@
 package com.oliver.erydon.mixin.client.compat.continuity;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableList;
 import com.oliver.erydon.Erydon;
+import com.oliver.erydon.block.ArchRomanesqueBlock;
 import com.oliver.erydon.client.model.SynapheiaModelLoadingPlugin;
 import com.oliver.erydon.client.profile.ErydonLoadProfiler;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.state.StateManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
@@ -16,6 +21,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Mixin(targets = "me.pepperbell.continuity.client.resource.ModelWrappingHandler", remap = false)
 public abstract class SynapheiaOwnershipMixin {
     private static final AtomicBoolean ERYDON$OWNERSHIP_LOGGED = new AtomicBoolean();
+
+    // All states of these runtime-rendered arches share one model ID. Avoid both
+    // duplicate ImmutableMap keys and enumerating millions of identical entries.
+    @Redirect(method = "createBlockStateModelIdMap", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/state/StateManager;getStates()Lcom/google/common/collect/ImmutableList;",
+            remap = true), require = 1, expect = 1, allow = 1, remap = false)
+    private static ImmutableList<BlockState> erydon$sharedArchModelStates(StateManager<Block, BlockState> states) {
+        if (states.getOwner() instanceof ArchRomanesqueBlock arch) {
+            return ImmutableList.of(arch.getDefaultState());
+        }
+        return states.getStates();
+    }
 
     @Redirect(
             method = "wrap",

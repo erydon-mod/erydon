@@ -195,10 +195,16 @@ tasks.register('verifyCtmIsolation') {
         ]
 
         def forbiddenChecks = [
-                check(!allJavaSource.contains('ModelWrappingHandlerMixin') && !allJavaSource.contains('createBlockStateModelIdMap')
+                check(!allJavaSource.contains('ModelWrappingHandlerMixin')
+                                && !allJavaSource.replace(continuityOwnershipSource, '').contains('createBlockStateModelIdMap')
+                                && continuityOwnershipSource.contains('states.getOwner() instanceof ArchRomanesqueBlock')
+                                && continuityOwnershipSource.contains('return ImmutableList.of(arch.getDefaultState());')
+                                && continuityOwnershipSource.contains('return states.getStates();')
+                                && !continuityOwnershipSource.contains('@Overwrite')
+                                && !continuityOwnershipSource.contains('@Inject')
                                 && !continuityOwnershipSource.contains('wrapEmissive'),
                         'No global Continuity model-map or emissive replacement remains',
-                        'The legacy global replacement is absent; only the narrow Synapheia ownership redirect is allowed.'),
+                        'Only shared arch model enumeration and Synapheia ownership lookups are redirected; foreign state lists and emissive wrapping are untouched.'),
                 check(!allJavaSource.contains('erydon.continuity.mode')
                                 && !allJavaSource.contains('erydon.continuity.disable_global_emissive'),
                         'No ERYDON Continuity mode/emissive config path remains',
