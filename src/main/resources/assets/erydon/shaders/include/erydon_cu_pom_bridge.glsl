@@ -69,9 +69,22 @@ bool erydonCtmPomHeaderValid(vec2 currentAtlasSize) {
         abs(erydonCtmPomDecodeU16(layoutBytes.zw) - ERYDON_CTM_POM_PHASES_PER_FAMILY) < 0.5;
 }
 
+#ifdef ERYDON_CTM_POM_FRAGMENT_STAGE
+// Invocation-local metadata: POM and shadow rays often revisit one CTM tile.
+float erydonPomFragmentRecordCount = -1.0;
+#endif
+
 float erydonCtmPomRecordCount() {
+#ifdef ERYDON_CTM_POM_FRAGMENT_STAGE
+    if (erydonPomFragmentRecordCount < 0.0) {
+        vec4 counts = erydonCtmPomReadBytes(2.0);
+        erydonPomFragmentRecordCount = erydonCtmPomDecodeU16(counts.xy);
+    }
+    return erydonPomFragmentRecordCount;
+#else
     vec4 counts = erydonCtmPomReadBytes(2.0);
     return erydonCtmPomDecodeU16(counts.xy);
+#endif
 }
 
 vec4 erydonCtmPomReadBoundsPx(float record) {
@@ -147,6 +160,8 @@ void erydonCtmPomApplyExactBounds(
  * The large spiral already supplies its record from the vertex stage.
  */
 int erydonPomFragmentRecord = -2;
+float erydonPomLastTargetRecord = -1.0;
+vec2 erydonPomLastTargetMidpoint = vec2(0.0);
 
 int erydonCtmPomResolveFragmentRecord() {
     if (erydonPomRecord >= 0) return erydonPomRecord;
@@ -248,8 +263,11 @@ vec2 erydonCtmPomAtlasUv(vec2 unwrappedLocalUv) {
         familyBase + targetPhase.y * ERYDON_CTM_POM_GRID_WIDTH + targetPhase.x;
     if (targetRecord >= erydonCtmPomRecordCount()) return ordinaryUv;
 
-    vec4 targetBounds = erydonCtmPomReadBoundsUv(targetRecord, vec2(atlasSize));
-    vec2 targetMidpoint = targetBounds.xy + 0.5 * targetBounds.zw;
-    return targetMidpoint + (wrapped - 0.5) * vTexCoordAM.pq;
+    if (targetRecord != erydonPomLastTargetRecord) {
+        vec4 targetBounds = erydonCtmPomReadBoundsUv(targetRecord, vec2(atlasSize));
+        erydonPomLastTargetMidpoint = targetBounds.xy + 0.5 * targetBounds.zw;
+        erydonPomLastTargetRecord = targetRecord;
+    }
+    return erydonPomLastTargetMidpoint + (wrapped - 0.5) * vTexCoordAM.pq;
 }
 #endif
