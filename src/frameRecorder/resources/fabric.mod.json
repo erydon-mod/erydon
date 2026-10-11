@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "erydon_frame_recorder",
+  "version": "1.0.0",
+  "name": "ERYDON Frame Recorder",
+  "description": "Optional local frame-time measurement companion. Dormant until a capture request is queued.",
+  "environment": "client",
+  "entrypoints": {"client": ["com.oliver.erydon.recorder.FrameRecorder"]},
+  "mixins": ["erydon-frame-recorder.mixins.json"],
+  "depends": {"fabricloader": ">=0.16.10", "minecraft": "1.20.1", "java": ">=17"},
+  "custom": {"erydon:family_compatibility_generation": 2},
+  "license": "MIT"
+}

@@ -1,0 +1,58 @@
+// Opt-in companion only. None of its classes/resources enter the ERYDON production source set.
+sourceSets {
+    frameRecorder {
+        compileClasspath += sourceSets.main.compileClasspath
+        runtimeClasspath += compileClasspath
+    }
+    frameRecorderTest {
+        compileClasspath += sourceSets.frameRecorder.output + sourceSets.frameRecorder.compileClasspath + configurations.testCompileClasspath + configurations.testRuntimeClasspath
+        runtimeClasspath += output + compileClasspath
+    }
+}
+
+configurations.frameRecorderAnnotationProcessor.extendsFrom(configurations.annotationProcessor)
+loom.mixin.add(sourceSets.frameRecorder, 'erydon-frame-recorder.refmap.json')
+
+tasks.register('frameRecorderTest', Test) {
+    group = 'verification'
+    testClassesDirs = sourceSets.frameRecorderTest.output.classesDirs
+    classpath = sourceSets.frameRecorderTest.runtimeClasspath
+    useJUnitPlatform()
+    maxParallelForks = 1
+}
+
+tasks.register('frameRecorderJar', Jar) {
+    group = 'build'
+    description = 'Builds the optional standalone frame recorder in named development mappings.'
+    from sourceSets.frameRecorder.output
+    from('LICENSE-CODE.md')
+    archiveBaseName = 'erydon-frame-recorder-fabric-mc1.20.1-compat2'
+    archiveVersion = '1.0.0'
+    archiveClassifier = 'dev'
+    destinationDirectory = layout.buildDirectory.dir('frame-recorder')
+}
+
+def frameRecorderRemapTaskType = tasks.named('remapJar').get().class.classLoader.loadClass('net.fabricmc.loom.task.RemapJarTask')
+tasks.register('remapFrameRecorderJar', frameRecorderRemapTaskType) {
+    group = 'build'
+    description = 'Builds the optional installable client recorder; leaves the ERYDON JAR untouched.'
+    dependsOn tasks.named('frameRecorderJar')
+    inputFile = tasks.named('frameRecorderJar').flatMap { it.archiveFile }
+    classpath.from(sourceSets.frameRecorder.compileClasspath)
+    addNestedDependencies = false
+    archiveBaseName = 'erydon-frame-recorder-fabric-mc1.20.1-compat2'
+    archiveVersion = '1.0.0'
+    archiveClassifier = ''
+    destinationDirectory = layout.buildDirectory.dir('frame-recorder')
+}
+
+tasks.register('verifyFrameRecorderIsolation') {
+    group = 'verification'
+    doLast {
+        assert !sourceSets.main.allSource.srcDirs.any { it.toPath().startsWith(file('src/frameRecorder').toPath()) }
+        assert sourceSets.main.output.files.intersect(sourceSets.frameRecorder.output.files).empty
+        assert !file('src/main/resources/fabric.mod.json').text.contains('erydon_frame_recorder')
+        assert !file('src/main/resources/erydon.mixins.json').text.contains('recorder')
+        logger.lifecycle('PASS: optional recorder source/output/mixins are excluded from the production mod')
+    }
+}
