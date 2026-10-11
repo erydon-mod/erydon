@@ -4,11 +4,13 @@ import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.fabricmc.fabric.impl.client.indigo.renderer.IndigoRenderer;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
+import net.minecraft.world.BlockRenderView;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
@@ -47,12 +49,19 @@ final class SlopeRenderCapture implements AutoCloseable {
     List<float[][]> emit(BakedModel model,BlockState state) {
         var builder=IndigoRenderer.INSTANCE.meshBuilder();
         var emitter=builder.getEmitter();
+        // Capture an isolated placed slope: neighbour culling must see real air states.
+        BlockRenderView view=(BlockRenderView)Proxy.newProxyInstance(BlockRenderView.class.getClassLoader(),
+                new Class<?>[]{BlockRenderView.class},(proxy,method,args) -> {
+                    if(method.getName().equals("getBlockState"))
+                        return BlockPos.ORIGIN.equals(args[0]) ? state : Blocks.AIR.getDefaultState();
+                    throw new AssertionError("Unexpected isolated slope world query: "+method.getName());
+                });
         RenderContext context=(RenderContext)Proxy.newProxyInstance(RenderContext.class.getClassLoader(),
                 new Class<?>[]{RenderContext.class},(proxy,method,args) -> {
                     if(method.getName().equals("getEmitter")) return emitter;
                     throw new AssertionError("Slope bypassed its native emitter: "+method.getName());
                 });
-        ((FabricBakedModel)model).emitBlockQuads(null,state,BlockPos.ORIGIN,() -> Random.create(0),context);
+        ((FabricBakedModel)model).emitBlockQuads(view,state,BlockPos.ORIGIN,() -> Random.create(0),context);
         List<float[][]> quads=new ArrayList<>();
         builder.build().forEach(quad -> {
             float[][] points=new float[4][3];
