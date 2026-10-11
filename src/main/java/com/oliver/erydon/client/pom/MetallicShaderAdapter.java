@@ -319,7 +319,7 @@ public final class MetallicShaderAdapter {
                 """) + "$0");
         result = result.replace("float erydonOverlayAlpha = erydonMetalCutout(",
                 "float erydonOverlayAlpha = erydonInlayActive ? 1.0 : erydonMetalCutout(");
-        return InlayInitialAlbedoFilter.adapt(result);
+        return PomShadowCeilingFilter.adapt(InlayInitialAlbedoFilter.adapt(result));
     }
 
     private static int matchingBrace(String text, int start) {
