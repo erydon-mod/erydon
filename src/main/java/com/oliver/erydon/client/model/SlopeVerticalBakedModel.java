@@ -64,9 +64,14 @@ public final class SlopeVerticalBakedModel implements BakedModel, FabricBakedMod
             return;
         }
 
-        FixedSlopeRotation transform = FixedSlopeRotation.of(0, rotationForFacing(choice.facing));
-        FaceSprites sprites = repeatCtmSprites(state, pos, particle);
-        emitPrism(context, sprites, transform, choice.points);
+        boolean occlusion = SlopeNeighbourOcclusion.push(view, state, pos, context);
+        try {
+            FixedSlopeRotation transform = FixedSlopeRotation.of(0, rotationForFacing(choice.facing));
+            FaceSprites sprites = repeatCtmSprites(state, pos, particle);
+            emitPrism(context, sprites, transform, choice.points);
+        } finally {
+            if (occlusion) context.popTransform();
+        }
     }
 
     @Override

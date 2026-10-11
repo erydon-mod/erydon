@@ -820,6 +820,7 @@ apply from: 'gradle/erydon-shallow-stair-validation.gradle'
 apply from: 'gradle/erydon-coping-validation.gradle'
 apply from: 'gradle/erydon-arch-validation.gradle'
 apply from: 'gradle/erydon-finial-compat-validation.gradle'
+apply from: 'gradle/erydon-slope-occlusion-validation.gradle'
 
 publishing {
     publications {

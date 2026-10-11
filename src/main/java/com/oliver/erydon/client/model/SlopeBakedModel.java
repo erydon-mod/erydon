@@ -71,18 +71,22 @@ public final class SlopeBakedModel implements BakedModel, FabricBakedModel {
             return;
         }
 
-        int xDegrees = state.get(SlopeBlock.HALF) == BlockHalf.TOP ? 180 : 0;
-        int yDegrees = state.get(SlopeBlock.SHAPE) == SlopeBlock.SlopeShape.STRAIGHT
-                ? rotationForFacing(state.get(SlopeBlock.FACING))
-                : normalRotationForState(state);
-        FixedSlopeRotation transform = FixedSlopeRotation.of(xDegrees, yDegrees);
-        FaceSprites sprites = repeatCtmSprites(state, pos, particle);
-        if (state.get(SlopeBlock.SHAPE) != SlopeBlock.SlopeShape.STRAIGHT) {
-            emitNativeCornerSlope(state, context, sprites, transform);
-            return;
+        boolean occlusion = SlopeNeighbourOcclusion.push(view, state, pos, context);
+        try {
+            int xDegrees = state.get(SlopeBlock.HALF) == BlockHalf.TOP ? 180 : 0;
+            int yDegrees = state.get(SlopeBlock.SHAPE) == SlopeBlock.SlopeShape.STRAIGHT
+                    ? rotationForFacing(state.get(SlopeBlock.FACING))
+                    : normalRotationForState(state);
+            FixedSlopeRotation transform = FixedSlopeRotation.of(xDegrees, yDegrees);
+            FaceSprites sprites = repeatCtmSprites(state, pos, particle);
+            if (state.get(SlopeBlock.SHAPE) != SlopeBlock.SlopeShape.STRAIGHT) {
+                emitNativeCornerSlope(state, context, sprites, transform);
+            } else {
+                emitNativeStraightSlope(context, sprites, transform);
+            }
+        } finally {
+            if (occlusion) context.popTransform();
         }
-
-        emitNativeStraightSlope(context, sprites, transform);
     }
 
     private static void emitNativeCornerSlope(BlockState state, RenderContext context, FaceSprites sprites, FixedSlopeRotation transform) {

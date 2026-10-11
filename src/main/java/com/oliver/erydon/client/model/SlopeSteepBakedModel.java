@@ -69,19 +69,23 @@ public final class SlopeSteepBakedModel implements BakedModel, FabricBakedModel 
             return;
         }
 
-        int xDegrees = state.get(SlopeSteepBlock.HALF) == BlockHalf.TOP ? 180 : 0;
-        int yDegrees = state.get(SlopeSteepBlock.SHAPE) == SlopeSteepBlock.SlopeShape.STRAIGHT
-                ? rotationForFacing(state.get(SlopeSteepBlock.FACING))
-                : normalRotationForState(state);
-        FixedSlopeRotation transform = FixedSlopeRotation.of(xDegrees, yDegrees);
-        FaceSprites sprites = repeatCtmSprites(state, pos, particle);
-        boolean upperVariant = isUpperVariant(state);
-        if (state.get(SlopeSteepBlock.SHAPE) != SlopeSteepBlock.SlopeShape.STRAIGHT) {
-            emitNativeCornerSlope(state, context, sprites, transform, upperVariant);
-            return;
+        boolean occlusion = SlopeNeighbourOcclusion.push(view, state, pos, context);
+        try {
+            int xDegrees = state.get(SlopeSteepBlock.HALF) == BlockHalf.TOP ? 180 : 0;
+            int yDegrees = state.get(SlopeSteepBlock.SHAPE) == SlopeSteepBlock.SlopeShape.STRAIGHT
+                    ? rotationForFacing(state.get(SlopeSteepBlock.FACING))
+                    : normalRotationForState(state);
+            FixedSlopeRotation transform = FixedSlopeRotation.of(xDegrees, yDegrees);
+            FaceSprites sprites = repeatCtmSprites(state, pos, particle);
+            boolean upperVariant = isUpperVariant(state);
+            if (state.get(SlopeSteepBlock.SHAPE) != SlopeSteepBlock.SlopeShape.STRAIGHT) {
+                emitNativeCornerSlope(state, context, sprites, transform, upperVariant);
+            } else {
+                emitNativeStraightSlope(context, sprites, transform, upperVariant);
+            }
+        } finally {
+            if (occlusion) context.popTransform();
         }
-
-        emitNativeStraightSlope(context, sprites, transform, upperVariant);
     }
 
     private static void emitNativeCornerSlope(BlockState state, RenderContext context, FaceSprites sprites, FixedSlopeRotation transform, boolean upperVariant) {

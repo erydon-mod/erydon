@@ -71,19 +71,23 @@ public final class ShallowSlopeBakedModel implements BakedModel, FabricBakedMode
             return;
         }
 
-        int xDegrees = state.get(ShallowSlopeBlock.HALF) == BlockHalf.TOP ? 180 : 0;
-        int yDegrees = state.get(ShallowSlopeBlock.SHAPE) == ShallowSlopeBlock.SlopeShape.STRAIGHT
-                ? rotationForFacing(state.get(ShallowSlopeBlock.FACING))
-                : normalRotationForState(state);
-        FixedSlopeRotation transform = FixedSlopeRotation.of(xDegrees, yDegrees);
-        FaceSprites sprites = repeatCtmSprites(state, pos, particle);
-        boolean upperVariant = isUpperVariant(state);
-        if (state.get(ShallowSlopeBlock.SHAPE) != ShallowSlopeBlock.SlopeShape.STRAIGHT) {
-            emitNativeCornerSlope(state, context, sprites, transform, upperVariant);
-            return;
+        boolean occlusion = SlopeNeighbourOcclusion.push(view, state, pos, context);
+        try {
+            int xDegrees = state.get(ShallowSlopeBlock.HALF) == BlockHalf.TOP ? 180 : 0;
+            int yDegrees = state.get(ShallowSlopeBlock.SHAPE) == ShallowSlopeBlock.SlopeShape.STRAIGHT
+                    ? rotationForFacing(state.get(ShallowSlopeBlock.FACING))
+                    : normalRotationForState(state);
+            FixedSlopeRotation transform = FixedSlopeRotation.of(xDegrees, yDegrees);
+            FaceSprites sprites = repeatCtmSprites(state, pos, particle);
+            boolean upperVariant = isUpperVariant(state);
+            if (state.get(ShallowSlopeBlock.SHAPE) != ShallowSlopeBlock.SlopeShape.STRAIGHT) {
+                emitNativeCornerSlope(state, context, sprites, transform, upperVariant);
+            } else {
+                emitNativeStraightSlope(context, sprites, transform, upperVariant);
+            }
+        } finally {
+            if (occlusion) context.popTransform();
         }
-
-        emitNativeStraightSlope(context, sprites, transform, upperVariant);
     }
 
     private static void emitNativeCornerSlope(BlockState state, RenderContext context, FaceSprites sprites, FixedSlopeRotation transform, boolean upperVariant) {
