@@ -279,7 +279,7 @@ public final class ArchRomanesqueBakedModel implements BakedModel, FabricBakedMo
                 state.get(ArchRomanesqueBlock.WIDTH), state.get(ArchRomanesqueBlock.FACING),
                 state.get(ArchRomanesqueBlock.REFLECTED));
         return wideQuads.computeIfAbsent(key, ignored -> WideArchQuads.create(state,
-                (child, face) -> getQuads(child, face, Random.create(0))));
+                child -> getQuads(child, null, Random.create(0))));
     }
 
     @Override

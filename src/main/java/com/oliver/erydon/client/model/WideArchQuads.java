@@ -8,13 +8,14 @@ import net.minecraft.util.math.Direction;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 
 /** Clips enlarged component surfaces into their owning cells, without adding seam faces. */
 final class WideArchQuads {
     private WideArchQuads() { }
 
-    static List<BakedQuad> create(BlockState state, BiFunction<BlockState, Direction, List<BakedQuad>> source) {
+    /** The provider returns the complete assembled component, including every source face bucket. */
+    static List<BakedQuad> create(BlockState state, Function<BlockState, List<BakedQuad>> source) {
         var target = state.get(ArchRomanesqueBlock.ARRANGEMENT);
         int width = state.get(ArchRomanesqueBlock.WIDTH);
         Direction facing = state.get(ArchRomanesqueBlock.FACING);
@@ -22,32 +23,27 @@ final class WideArchQuads {
         for (var component : WideArchLayout.components(target)) {
             BlockState child = state.with(ArchRomanesqueBlock.ARRANGEMENT, component.arrangement())
                     .with(ArchRomanesqueBlock.WIDTH, 3).with(ArchRomanesqueBlock.FACING, Direction.NORTH);
-            List<Direction> buckets = new ArrayList<>();
-            buckets.add(null);
-            buckets.addAll(List.of(Direction.values()));
-            for (Direction bucket : buckets) {
-                for (BakedQuad quad : source.apply(child, bucket)) {
-                    List<Vertex> polygon = new ArrayList<>();
-                    for (int i = 0; i < 4; i++) {
-                        int[] data = quad.getVertexData();
-                        int start = i * 8;
-                        polygon.add(new Vertex(
-                                (float) WideArchLayout.x(Float.intBitsToFloat(data[start]), component, target, width),
-                                (float) WideArchLayout.y(Float.intBitsToFloat(data[start + 1]), component, target, width),
-                                Float.intBitsToFloat(data[start + 2]), Float.intBitsToFloat(data[start + 4]),
-                                Float.intBitsToFloat(data[start + 5]), data[start + 3], data[start + 6],
-                                normal(data[start + 7], WideArchLayout.scaleX(width), WideArchLayout.scaleY(target, width))));
-                    }
-                    polygon = clip(polygon, 0, 0, true);
-                    polygon = clip(polygon, 0, 1, false);
-                    polygon = clip(polygon, 1, 0, true);
-                    polygon = clip(polygon, 1, 1, false);
-                    if (polygon.size() == 4) {
-                        add(result, quad, facing, polygon.get(0), polygon.get(1), polygon.get(2), polygon.get(3));
-                    } else if (polygon.size() >= 3) {
-                        for (int i = 1; i < polygon.size() - 1; i++) {
-                            add(result, quad, facing, polygon.get(0), polygon.get(i), polygon.get(i + 1), polygon.get(i + 1));
-                        }
+            for (BakedQuad quad : source.apply(child)) {
+                List<Vertex> polygon = new ArrayList<>();
+                for (int i = 0; i < 4; i++) {
+                    int[] data = quad.getVertexData();
+                    int start = i * 8;
+                    polygon.add(new Vertex(
+                            (float) WideArchLayout.x(Float.intBitsToFloat(data[start]), component, target, width),
+                            (float) WideArchLayout.y(Float.intBitsToFloat(data[start + 1]), component, target, width),
+                            Float.intBitsToFloat(data[start + 2]), Float.intBitsToFloat(data[start + 4]),
+                            Float.intBitsToFloat(data[start + 5]), data[start + 3], data[start + 6],
+                            normal(data[start + 7], WideArchLayout.scaleX(width), WideArchLayout.scaleY(target, width))));
+                }
+                polygon = clip(polygon, 0, 0, true);
+                polygon = clip(polygon, 0, 1, false);
+                polygon = clip(polygon, 1, 0, true);
+                polygon = clip(polygon, 1, 1, false);
+                if (polygon.size() == 4) {
+                    add(result, quad, facing, polygon.get(0), polygon.get(1), polygon.get(2), polygon.get(3));
+                } else if (polygon.size() >= 3) {
+                    for (int i = 1; i < polygon.size() - 1; i++) {
+                        add(result, quad, facing, polygon.get(0), polygon.get(i), polygon.get(i + 1), polygon.get(i + 1));
                     }
                 }
             }
