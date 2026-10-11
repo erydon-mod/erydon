@@ -83,6 +83,35 @@ class ErydonCuPomNeighbourCacheTest {
         }
     }
 
+    @Test void finiteUvRecoversAfterRepeatedKeysAndUncacheableIntermediateTiles() {
+        InstalledShaderTestSupport.ensureContext();
+        float[] a = {1.25f, .4f};
+        float[] b = {2.25f, .4f};
+        float[][][] sequences = {
+                {a, a, a}, {a, b, a}, {a, {.25f, .4f}, a},
+                // These calls can replace the shared midpoint without being cacheable keys.
+                {a, {16777216f, .25f}, a}, {a, {-33554432f, 7.25f}, a},
+                {a, {Float.NaN, 1.25f}, a}, {a, {Float.POSITIVE_INFINITY, -1.25f}, a}
+        };
+        try (Gpu gpu = new Gpu()) {
+            gpu.upload(ErydonCuPomLookupLayout.encode(ATLAS, ATLAS, List.of(BOUNDS)).rgba());
+            gpu.basis(new float[]{1, 0, 0}, new float[]{0, 0, 1}, new float[]{0, 1, 0});
+            for (int phase : new int[]{0, 14, 35}) {
+                float[] expected = gpu.sample(phase, phase, new float[][]{a}, true);
+                for (float[][] sequence : sequences) {
+                    // The non-finite intermediate sample is undefined. Only its following
+                    // finite result is asserted, against a fresh invocation with the same A.
+                    float[] actual = gpu.sample(phase, phase, sequence, true);
+                    for (int channel = 0; channel < 2; channel++) {
+                        assertTrue(Float.isFinite(actual[channel]), "Finite UV after an intermediate miss");
+                        assertEquals(Float.floatToRawIntBits(expected[channel]),
+                                Float.floatToRawIntBits(actual[channel]), "Fresh-invocation UV after cache reuse");
+                    }
+                }
+            }
+        }
+    }
+
     private static void assertSample(Gpu gpu, int phase, int vertexRecord, float[][] samples,
                                      boolean mapped, int reads) {
         float[] actual = gpu.sample(phase, vertexRecord, samples);
@@ -140,13 +169,18 @@ class ErydonCuPomNeighbourCacheTest {
                     uniform mat4 gbufferModelViewInverse;
                     uniform vec3 tangent, binormal, normal;
                     uniform int testCount;
+                    uniform bool testLastOnly;
                     uniform vec2 testUv[16];
                     int erydonTestReads = 0;
                     out vec4 result;
                     """ + helper + """
                     void main() {
                         vec2 total = vec2(0);
-                        for (int i = 0; i < testCount; i++) total += erydonCtmPomAtlasUv(testUv[i]);
+                        for (int i = 0; i < testCount; i++) {
+                            vec2 current = erydonCtmPomAtlasUv(testUv[i]);
+                            if (testLastOnly) total = current;
+                            else total += current;
+                        }
                         result = vec4(total, float(erydonTestReads), 1);
                     }
                     """;
@@ -196,10 +230,15 @@ class ErydonCuPomNeighbourCacheTest {
         }
 
         float[] sample(int phase, int vertexRecord, float[][] samples) {
+            return sample(phase, vertexRecord, samples, false);
+        }
+
+        float[] sample(int phase, int vertexRecord, float[][] samples, boolean lastOnly) {
             var source = phase < 0 ? new ErydonCuPomLookupLayout.SpriteBounds(512, 512, 16, 16) : BOUNDS.get(phase);
             GL20.glUniform4f(uniform("vTexCoordAM"), (source.x() + 3.2f) / ATLAS, (source.y() + 3.2f) / ATLAS, SPAN, SPAN);
             GL20.glUniform1i(uniform("erydonPomRecord"), vertexRecord);
             GL20.glUniform1i(uniform("testCount"), samples.length);
+            GL20.glUniform1i(uniform("testLastOnly"), lastOnly ? 1 : 0);
             FloatBuffer coordinates = BufferUtils.createFloatBuffer(samples.length * 2);
             for (float[] uv : samples) coordinates.put(uv);
             coordinates.flip();

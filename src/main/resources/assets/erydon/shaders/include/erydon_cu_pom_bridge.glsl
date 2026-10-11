@@ -162,6 +162,9 @@ void erydonCtmPomApplyExactBounds(
 int erydonPomFragmentRecord = -2;
 float erydonPomLastTargetRecord = -1.0;
 vec2 erydonPomLastTargetMidpoint = vec2(0.0);
+// Invocation-local key for consecutive samples in the same crossed tile.
+vec2 erydonPomLastLocalTile = vec2(0.0);
+bool erydonPomLastLocalTileValid = false;
 
 int erydonCtmPomResolveFragmentRecord() {
     if (erydonPomRecord >= 0) return erydonPomRecord;
@@ -244,8 +247,14 @@ vec2 erydonCtmPomAtlasUv(vec2 unwrappedLocalUv) {
     int resolvedRecord = erydonCtmPomResolveFragmentRecord();
     if (resolvedRecord < 0) return ordinaryUv;
 
+    vec2 localTile = floor(unwrappedLocalUv);
+    if (erydonPomLastLocalTileValid && all(equal(localTile, erydonPomLastLocalTile))) {
+        return erydonPomLastTargetMidpoint + (wrapped - 0.5) * vTexCoordAM.pq;
+    }
+    // A miss can alter the shared target midpoint even when this key is not cacheable.
+    erydonPomLastLocalTileValid = false;
     vec2 repeatDelta;
-    if (!erydonCtmPomRepeatDelta(floor(unwrappedLocalUv), repeatDelta)) {
+    if (!erydonCtmPomRepeatDelta(localTile, repeatDelta)) {
         return ordinaryUv;
     }
 
@@ -267,6 +276,10 @@ vec2 erydonCtmPomAtlasUv(vec2 unwrappedLocalUv) {
         vec4 targetBounds = erydonCtmPomReadBoundsUv(targetRecord, vec2(atlasSize));
         erydonPomLastTargetMidpoint = targetBounds.xy + 0.5 * targetBounds.zw;
         erydonPomLastTargetRecord = targetRecord;
+    }
+    if (all(lessThan(abs(localTile), vec2(16777216.0)))) {
+        erydonPomLastLocalTile = localTile;
+        erydonPomLastLocalTileValid = true;
     }
     return erydonPomLastTargetMidpoint + (wrapped - 0.5) * vTexCoordAM.pq;
 }
