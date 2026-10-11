@@ -46,11 +46,13 @@ public final class ArchRepeatCtmRenderer extends ForwardingBakedModel {
 
     private final String ctmSet;
     private final Family family;
+    private final int firstSourceFace;
 
     public ArchRepeatCtmRenderer(BakedModel wrapped, String ctmSet, Family family) {
         this.wrapped = wrapped;
         this.ctmSet = ctmSet;
         this.family = family;
+        this.firstSourceFace = ArchQuadSources.hasCompleteNullBucket(wrapped) ? ModelHelper.NULL_FACE_ID : 0;
     }
 
     @Override
@@ -80,7 +82,8 @@ public final class ArchRepeatCtmRenderer extends ForwardingBakedModel {
                 state.get(ArchRomanesqueBlock.ARRANGEMENT),
                 state.get(ArchRomanesqueBlock.WIDTH),
                 state.get(ArchRomanesqueBlock.FACING),
-                state.get(ArchRomanesqueBlock.REFLECTED)
+                state.get(ArchRomanesqueBlock.REFLECTED),
+                firstSourceFace
         );
         List<QuadTemplate> templates = geometryForState(
                 key, state, randomSupplier, context.getEmitter());
@@ -135,7 +138,10 @@ public final class ArchRepeatCtmRenderer extends ForwardingBakedModel {
                 : noAmbientOcclusionMaterial;
         List<QuadTemplate> result = new ArrayList<>();
 
-        for (int faceIndex = 0; faceIndex <= ModelHelper.NULL_FACE_ID; faceIndex++) {
+        // The assembled family's null bucket already includes its directional
+        // sources. Keep that exact stream, including legitimate coincident layers;
+        // querying the other buckets again duplicates their geometry.
+        for (int faceIndex = firstSourceFace; faceIndex <= ModelHelper.NULL_FACE_ID; faceIndex++) {
             Direction sourceCullFace = ModelHelper.faceFromIndex(faceIndex);
             List<BakedQuad> quads = wrapped.getQuads(state, sourceCullFace, randomSupplier.get());
             for (BakedQuad quad : quads) {
@@ -721,7 +727,8 @@ public final class ArchRepeatCtmRenderer extends ForwardingBakedModel {
                             ArchRomanesqueBlock.Arrangement arrangement,
                             int width,
                             Direction facing,
-                            boolean reflected) {
+                            boolean reflected,
+                            int firstSourceFace) {
     }
 
     private record SourceProperties(Direction lightFace,

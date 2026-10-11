@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
-public final class ArchRomanesqueBakedModel implements BakedModel, FabricBakedModel {
+public final class ArchRomanesqueBakedModel implements BakedModel, FabricBakedModel, ArchQuadSources.Complete {
     private static final String ROMANESQUE_MODEL_PATH = "block/arch/romanesque/";
     private static final String MODERN_MODEL_PATH = "block/arch/modern/";
     private static final String GOTHIC_MODEL_PATH = "block/arch/gothic/";
