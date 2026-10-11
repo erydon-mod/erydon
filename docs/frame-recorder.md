@@ -12,7 +12,7 @@ Build only when a test artifact has been authorised:
 gradlew -Perydon.frameRecorder=true frameRecorderTest verifyFrameRecorderIsolation remapFrameRecorderJar
 ```
 
-The installable output is `build/frame-recorder/erydon-frame-recorder-fabric-mc1.20.1-compat2-1.0.0.jar`. The adjacent `-dev.jar` is not an installable remapped artifact. Install the ordinary JAR in the selected closed client's `mods` folder, then start Minecraft normally. It has its own mod ID/version and can be removed independently. Its sources, resources and mixins are excluded from ordinary ERYDON builds, including when the opt-in tasks are present.
+The installable output is `build/frame-recorder/erydon-frame-recorder-fabric-mc1.20.1-compat2-1.1.1.jar`. The adjacent `-dev.jar` is not an installable remapped artifact. Install the ordinary JAR in the selected closed client's `mods` folder, then start Minecraft normally. It has its own mod ID/version and can be removed independently. Its sources, resources and mixins are excluded from ordinary ERYDON builds, including when the opt-in tasks are present.
 
 No service, scheduled task, driver, Java agent, launch argument or security change is required. Compilation/unit tests do not replace first-launch verification that the mixin loaded and a real game capture completed.
 
@@ -25,6 +25,16 @@ The root is `<gameDir>/erydon-frame-recorder`. Place a UTF-8 JSON file in `reque
 ```
 
 IDs are 1–48 ASCII letters/digits/underscores/hyphens, start with a letter/digit, and exclude Windows device names. The ID must match the filename. Unknown fields, output paths and commands are rejected. Bounds are warmup 2–60 seconds, capture 1–120 seconds, and timeout at least warmup + capture + 5 seconds and at most 600 seconds. Defaults are 5/60/300. Use a new ID for every run; existing results are never replaced.
+
+## Optional GPU stage diagnostics
+
+Version 1.1.1 also accepts `"gpuStages":true`, or the helper's `request --gpu-stages` option. Ordinary requests remain compatible and issue no OpenGL timing queries. Explicitly opted-in captures sample roughly one frame per second using bounded asynchronous timestamp queries on OpenGL 3.3 or its timer-query extension. Query results are read only after availability; there is no GPU finish, blocking wait, render-state change or rendering change.
+
+Supported Iris 1.7.6/Sodium 0.5.13 hooks measure main terrain, shadows, depth-copy/deferred, composite/final, and output color-space conversion separately. Terrain inside the shadow span is excluded from the main terrain total. The separate `gpu-stages.json` reports samples, availability, errors and unresolved queries dropped at capture completion. Missing hooks or unavailable results must not be interpreted as zero cost.
+
+These durations are elapsed time on the GPU command timeline, potentially including idle time while the CPU submits work. They are not GPU-busy telemetry or display scanout, and they do not cover every rendering operation. Instrumented frames may incur query overhead, so use them to locate expensive stages; use ordinary paired captures for final FPS comparisons. The existing focus, camera, scene and file guards still apply.
+
+## Capture lifecycle
 
 One request runs at a time. Output lives in `results/<id>/`: the original request, atomic `status.json`, runtime/configuration snapshots, file fingerprints and, only after successful validation, `frames.csv`. Status is `WAITING`, `CAPTURING`, `COMPLETE`, `INVALID` or `TIMED_OUT`. `CAPTURING` is published immediately before the first eligible sampling frame; its reason identifies this short armed interval. No status or heartbeat disk writes occur during timed sampling, so a capture's interval count updates when it finishes. `heartbeat.json` records the process ID and completed-frame hook count while idle/waiting; it intentionally stays unchanged during capture.
 

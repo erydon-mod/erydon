@@ -23,7 +23,7 @@ def read_json(path):
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def queue(instance, identifier, warmup=5, duration=60, timeout=300):
+def queue(instance, identifier, warmup=5, duration=60, timeout=300, gpu_stages=False):
     identifier = check_id(identifier)
     if not instance.is_dir():
         raise ValueError("Instance directory does not exist")
@@ -35,6 +35,8 @@ def queue(instance, identifier, warmup=5, duration=60, timeout=300):
         raise ValueError("This ID already exists; use a new ID")
     request.parent.mkdir(parents=True, exist_ok=True)
     payload = dict(id=identifier, warmupSeconds=warmup, captureSeconds=duration, timeoutSeconds=timeout)
+    if gpu_stages:
+        payload["gpuStages"] = True
     descriptor, temporary = tempfile.mkstemp(prefix=".request-", suffix=".tmp", dir=request.parent)
     try:
         with os.fdopen(descriptor, "w", encoding="utf-8", newline="\n") as stream:
@@ -98,6 +100,8 @@ def main():
     request.add_argument("--warmup", type=int, default=5)
     request.add_argument("--seconds", type=int, default=60)
     request.add_argument("--timeout", type=int, default=300)
+    request.add_argument("--gpu-stages", action="store_true",
+                         help="Opt in to sparse GPU stage timestamps; records a separate diagnostic file")
     status = sub.add_parser("status")
     status.add_argument("--instance", type=Path, required=True)
     status.add_argument("--id")
@@ -106,7 +110,7 @@ def main():
     args = parser.parse_args()
     try:
         if args.command == "request":
-            result = queue(args.instance, args.id, args.warmup, args.seconds, args.timeout)
+            result = queue(args.instance, args.id, args.warmup, args.seconds, args.timeout, args.gpu_stages)
         elif args.command == "status":
             result = inspect(args.instance, args.id)
         else:

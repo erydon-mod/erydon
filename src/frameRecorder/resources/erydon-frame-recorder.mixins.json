@@ -1,7 +1,8 @@
 {
   "required": true,
   "package": "com.oliver.erydon.recorder.mixin",
+  "plugin": "com.oliver.erydon.recorder.mixin.GpuStageMixinPlugin",
   "compatibilityLevel": "JAVA_17",
-  "client": ["CompletedFrameMixin"],
+  "client": ["CompletedFrameMixin", "GpuShadowMixin", "GpuTerrainMixin", "GpuDeferredMixin", "GpuCompositeMixin", "GpuColorSpaceMixin"],
   "injectors": {"defaultRequire": 1}
 }

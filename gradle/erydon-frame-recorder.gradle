@@ -27,7 +27,7 @@ tasks.register('frameRecorderJar', Jar) {
     from sourceSets.frameRecorder.output
     from('LICENSE-CODE.md')
     archiveBaseName = 'erydon-frame-recorder-fabric-mc1.20.1-compat2'
-    archiveVersion = '1.0.0'
+    archiveVersion = '1.1.1'
     archiveClassifier = 'dev'
     destinationDirectory = layout.buildDirectory.dir('frame-recorder')
 }
@@ -41,7 +41,7 @@ tasks.register('remapFrameRecorderJar', frameRecorderRemapTaskType) {
     classpath.from(sourceSets.frameRecorder.compileClasspath)
     addNestedDependencies = false
     archiveBaseName = 'erydon-frame-recorder-fabric-mc1.20.1-compat2'
-    archiveVersion = '1.0.0'
+    archiveVersion = '1.1.1'
     archiveClassifier = ''
     destinationDirectory = layout.buildDirectory.dir('frame-recorder')
 }

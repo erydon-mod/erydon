@@ -9,6 +9,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(MinecraftClient.class)
 abstract class CompletedFrameMixin {
+    @Inject(method = "render(Z)V", at = @At("HEAD"))
+    private void startingFrame(boolean tick, CallbackInfo callback) {
+        FrameRecorder.frameStart();
+    }
+
     // The proven 1.20.1 frame boundary includes swapBuffers and frame limiting.
     @Inject(method = "render(Z)V", at = @At("RETURN"))
     private void completedFrame(boolean tick, CallbackInfo callback) {

@@ -7,6 +7,14 @@ from frame_recorder import queue, summarize
 
 
 class FrameRecorderCliTest(unittest.TestCase):
+    def test_gpu_sampling_is_explicit_and_ordinary_requests_stay_compatible(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            ordinary = queue(root, "ordinary")
+            self.assertNotIn("gpuStages", json.loads(Path(ordinary["queued"]).read_text()))
+            enabled = queue(root, "gpu", gpu_stages=True)
+            self.assertIs(json.loads(Path(enabled["queued"]).read_text())["gpuStages"], True)
+
     def test_request_publication_is_complete_and_cannot_overwrite(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)

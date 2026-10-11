@@ -9,6 +9,13 @@ import static org.junit.jupiter.api.Assertions.*;
 class ResultStoreTest {
     @TempDir Path directory;
 
+    @Test void gpuObservationRequiresAnExplicitBoolean() {
+        assertFalse(CaptureRequest.parse("{\"id\":\"a\"}", "a.json").gpuStages());
+        assertTrue(CaptureRequest.parse("{\"id\":\"a\",\"gpuStages\":true}", "a.json").gpuStages());
+        for (String value : new String[]{"1", "\"true\"", "null", "[]", "{}"})
+            assertThrows(Exception.class, () -> CaptureRequest.parse("{\"id\":\"a\",\"gpuStages\":" + value + "}", "a.json"));
+    }
+
     @Test void requestCannotSupplyPathsCommandsFractionalNumbersOrUnboundedTime() {
         assertThrows(Exception.class, () -> CaptureRequest.parse("{\"id\":\"../escape\"}", "../escape.json"));
         assertThrows(Exception.class, () -> CaptureRequest.parse("{\"id\":\"a\",\"command\":\"quit\"}", "a.json"));

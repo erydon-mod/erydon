@@ -5,8 +5,12 @@ import com.google.gson.JsonParser;
 import java.util.Set;
 
 /** An intentionally small data-only protocol. Requests cannot specify paths or commands. */
-public record CaptureRequest(String id, int warmupSeconds, int captureSeconds, int timeoutSeconds) {
-    private static final Set<String> FIELDS = Set.of("id", "warmupSeconds", "captureSeconds", "timeoutSeconds");
+public record CaptureRequest(String id, int warmupSeconds, int captureSeconds, int timeoutSeconds, boolean gpuStages) {
+    private static final Set<String> FIELDS = Set.of("id", "warmupSeconds", "captureSeconds", "timeoutSeconds", "gpuStages");
+
+    public CaptureRequest(String id, int warmupSeconds, int captureSeconds, int timeoutSeconds) {
+        this(id, warmupSeconds, captureSeconds, timeoutSeconds, false);
+    }
 
     public CaptureRequest {
         if (!safeId(id)) throw new IllegalArgumentException("Invalid capture id");
@@ -28,7 +32,15 @@ public record CaptureRequest(String id, int warmupSeconds, int captureSeconds, i
         String id = object.get("id").getAsString();
         if (!(id + ".json").equals(filename)) throw new IllegalArgumentException("Request filename must match id");
         return new CaptureRequest(id, integer(object, "warmupSeconds", 5), integer(object, "captureSeconds", 60),
-                integer(object, "timeoutSeconds", 300));
+                integer(object, "timeoutSeconds", 300), bool(object, "gpuStages"));
+    }
+
+    private static boolean bool(JsonObject object, String name) {
+        if (!object.has(name)) return false;
+        var element = object.get(name);
+        if (!element.isJsonPrimitive() || !element.getAsJsonPrimitive().isBoolean())
+            throw new IllegalArgumentException(name + " must be a boolean");
+        return element.getAsBoolean();
     }
 
     private static int integer(JsonObject object, String name, int fallback) {

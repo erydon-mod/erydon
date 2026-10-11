@@ -19,9 +19,38 @@ public final class FrameRecorder implements ClientModInitializer {
     private static final Logger LOG = LoggerFactory.getLogger("erydon-frame-recorder");
     private static volatile FrameRecorder instance;
     private static volatile long completedFrames;
+    // Render-thread owner ensures an IO timeout cannot strand pending OpenGL query objects.
+    private static Work gpuOwner;
     private volatile Work active;
     private ResultStore store;
     private boolean failed;
+
+    public static void frameStart() {
+        FrameRecorder recorder = instance;
+        Work work = recorder == null ? null : recorder.active;
+        if (gpuOwner != null && (gpuOwner != work || gpuOwner.session.finished())) {
+            finishGpu(gpuOwner);
+            gpuOwner = null;
+        }
+        if (work == null || !work.request.gpuStages()) return;
+        synchronized (work) {
+            if (work.session.state() != CaptureSession.State.CAPTURING || work.gpuFailure != null) return;
+            try {
+                if (work.gpu == null) work.gpu = new GpuStageRecorder();
+                gpuOwner = work;
+                GpuStageRecorder.beginFrame(work.gpu);
+            } catch (Exception | LinkageError error) {
+                work.gpuFailure = "GPU stage observation unavailable: " + error.getClass().getSimpleName();
+            }
+        }
+    }
+
+    private static void finishGpu(Work work) {
+        try { work.gpuSnapshot = work.gpu.finish(); }
+        catch (Exception | LinkageError error) {
+            work.gpuFailure = "GPU stage export unavailable: " + error.getClass().getSimpleName();
+        }
+    }
 
     @Override public void onInitializeClient() {
         instance = this;
@@ -35,6 +64,7 @@ public final class FrameRecorder implements ClientModInitializer {
     }
 
     public static void frame(MinecraftClient client) {
+        GpuStageRecorder.endFrame();
         completedFrames++;
         FrameRecorder recorder = instance;
         Work work = recorder == null ? null : recorder.active;
@@ -153,6 +183,9 @@ public final class FrameRecorder implements ClientModInitializer {
         }
         if (work.session.state() == CaptureSession.State.COMPLETE) {
             ResultStore.frames(work.output, work.session.completedIntervals());
+            if (work.request.gpuStages()) ResultStore.atomicJson(work.output.resolve("gpu-stages.json"),
+                    work.gpuSnapshot == null ? Map.of("available", false, "reason",
+                            work.gpuFailure == null ? "No eligible GPU samples" : work.gpuFailure) : work.gpuSnapshot);
             writeStatus(work, "COMPLETE", "Valid completed frame intervals; all recorded runtime inputs match");
         } else {
             writeStatus(work, work.session.state().name(), work.session.status().reason());
@@ -163,17 +196,18 @@ public final class FrameRecorder implements ClientModInitializer {
         var sample = work.session.status();
         var value = new LinkedHashMap<String, Object>();
         value.put("id", work.request.id()); value.put("state", state); value.put("reason", reason);
-        value.put("version", "1.0.0"); value.put("pid", ProcessHandle.current().pid());
+        value.put("version", "1.1.1"); value.put("pid", ProcessHandle.current().pid());
         value.put("intervals", sample.intervals()); value.put("elapsedSeconds", sample.elapsedNanos() / 1_000_000_000.0);
         value.put("longestFrameMs", sample.longestFrameNanos() / 1_000_000.0);
-        value.put("longFramesRetained", true); value.put("gpuTimingAvailable", false);
+        value.put("longFramesRetained", true);
+        value.put("gpuTimingAvailable", work.gpuSnapshot != null && Boolean.TRUE.equals(work.gpuSnapshot.get("available")));
         value.put("wallTimeMillis", System.currentTimeMillis());
         value.put("request", work.request);
         ResultStore.atomicJson(work.output.resolve("status.json"), value);
     }
 
     private void heartbeat(Work work) throws Exception {
-        ResultStore.atomicJson(store.root.resolve("heartbeat.json"), Map.of("version", "1.0.0",
+        ResultStore.atomicJson(store.root.resolve("heartbeat.json"), Map.of("version", "1.1.1",
                 "pid", ProcessHandle.current().pid(), "completedFrames", completedFrames,
                 "activeId", work == null ? "" : work.request.id(),
                 "state", work == null ? "IDLE" : work.session.state().name(), "wallTimeMillis", System.currentTimeMillis()));
@@ -187,6 +221,9 @@ public final class FrameRecorder implements ClientModInitializer {
         volatile boolean startReady, filesReady, endReady;
         boolean armed;
         Map<String, Object> before, after, filesBefore;
+        GpuStageRecorder gpu;
+        Map<String, Object> gpuSnapshot;
+        String gpuFailure;
         List<String> packs;
         Object metadataWorld;
         int viewDistance, simulationDistance, maxFps, fov;
@@ -242,6 +279,10 @@ public final class FrameRecorder implements ClientModInitializer {
 
         private void captureEnd(MinecraftClient client) throws Exception {
             if (endReady) return;
+            if (gpu != null) {
+                finishGpu(this);
+                if (gpuOwner == this) gpuOwner = null;
+            }
             after = RecorderInventory.configuration(client);
             if (client.world != null) { endScene.dimension = client.world.getRegistryKey().getValue().toString(); endScene.read(client); }
             endReady = true;
