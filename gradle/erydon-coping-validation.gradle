@@ -1,7 +1,7 @@
 // Real block-state, registration and raycast checks, without opening a game window.
 tasks.register('verifyCopingPlacement', JavaExec) {
     group = 'verification'
-    description = 'Checks coping support profiles, stacked steep placement, transforms and targeting under Fabric.'
+    description = 'Checks coping and cornice support profiles, transforms, angled joins and targeting under Fabric.'
     dependsOn tasks.named('testClasses')
     dependsOn tasks.named('configureLaunch')
     def fixture = layout.buildDirectory.dir('coping-placement-probe')
@@ -12,6 +12,7 @@ tasks.register('verifyCopingPlacement', JavaExec) {
     // Optional compatibility proof against an existing companion JAR; never packages or installs one.
     def legacyCapitalJar = providers.gradleProperty('erydon.capitalCompat.legacyJar')
     mainClass = 'net.fabricmc.loader.impl.launch.knot.KnotClient'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(17) }
     maxHeapSize = '2G'
     doFirst {
         def root = fixture.get().asFile
@@ -24,6 +25,25 @@ tasks.register('verifyCopingPlacement', JavaExec) {
                 environment: 'client', entrypoints: [preLaunch: ['com.oliver.erydon.block.CopingPlacementLaunchProbe']]
         ])
         systemProperty 'fabric.development', 'true'
+        // Gradle shortens long Windows classpaths to a manifest JAR. Loader's
+        // game discovery needs the actual game archive in that configuration.
+        def gameJar = classpath.files.find { candidate ->
+            if (!candidate.name.startsWith('minecraft-merged-') || !candidate.name.endsWith('.jar')) return false
+            def archive = new java.util.jar.JarFile(candidate)
+            try { return archive.getEntry('net/minecraft/client/main/Main.class') != null }
+            finally { archive.close() }
+        }
+        if (gameJar == null) throw new GradleException('The named Minecraft client archive is missing from the probe classpath')
+        systemProperty 'fabric.gameJarPath', gameJar.absolutePath
+        if (System.getProperty('os.name').toLowerCase(java.util.Locale.ROOT).contains('windows')) {
+            // A manifest-only classpath also gives Knot an incomplete parent
+            // classpath and can load Fabric interfaces twice. Java 17 argument
+            // files keep the real classpath visible without the command limit.
+            def argumentFile = new File(root, 'launch-classpath.args')
+            argumentFile.setText('-classpath\n"' + classpath.asPath.replace('\\', '\\\\').replace('"', '\\"') + '"\n', 'UTF-8')
+            classpath = files()
+            jvmArgs '@' + argumentFile.absolutePath
+        }
         def extraMods = []
         // Only this probe sees the existing intermediary EMI dependency.
         // Loader remaps it into its cache; other Fabric probes retain their classpaths.
