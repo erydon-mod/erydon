@@ -32,6 +32,7 @@ public final class ShallowStairShapeLaunchProbe implements PreLaunchEntrypoint {
             SharedConstants.createGameVersion();
             Bootstrap.initialize();
             GlazingShallowSlopeLaunchChecks.run();
+            verifySpiralCollisionShapes();
             Method original = ShallowStairsBlockBase.class.getDeclaredMethod("calculateShape", BlockState.class);
             Method shared = ShallowStairsBlockBase.class.getDeclaredMethod("sharedShape", BlockState.class);
             original.setAccessible(true);
@@ -138,5 +139,47 @@ public final class ShallowStairShapeLaunchProbe implements PreLaunchEntrypoint {
 
     private static ShallowStairsBlockBase top(Block base) {
         return new ShallowStairsTopBlock(base.getDefaultState(), AbstractBlock.Settings.copy(base));
+    }
+
+    private static void verifySpiralCollisionShapes() throws Exception {
+        var block = new StairsSpiralLargeBlock(AbstractBlock.Settings.copy(Blocks.STONE));
+        var otherMaterial = new StairsSpiralLargeBlock(AbstractBlock.Settings.copy(Blocks.OAK_PLANKS));
+        int cases = 0;
+        for (Direction facing : Direction.Type.HORIZONTAL) {
+            String suffix = facing.rotateYClockwise().name();
+            for (var part : StairsSpiralLargeBlock.Part.values()) {
+                for (boolean cap : new boolean[]{false, true}) {
+                    BlockState state = block.getDefaultState().with(StairsSpiralLargeBlock.FACING, facing)
+                            .with(StairsSpiralLargeBlock.PART, part).with(StairsSpiralLargeBlock.CAP, cap);
+                    VoxelShape expected = spiralShape((part == StairsSpiralLargeBlock.Part.B
+                            ? "BASE_SECTION_" : "COLLISION_" + part.name() + "_") + suffix);
+                    if (part == StairsSpiralLargeBlock.Part.B && cap) {
+                        expected = VoxelShapes.union(expected, spiralShape("OFFSTEP_SECTION_" + suffix));
+                    }
+                    VoxelShape actual = block.getCollisionShape(state, null, BlockPos.ORIGIN, null);
+                    if (VoxelShapes.matchesAnywhere(expected, actual, BooleanBiFunction.NOT_SAME)) {
+                        throw new AssertionError("Spiral collision changed: " + state);
+                    }
+                    BlockState other = otherMaterial.getDefaultState().with(StairsSpiralLargeBlock.FACING, facing)
+                            .with(StairsSpiralLargeBlock.PART, part).with(StairsSpiralLargeBlock.CAP, cap);
+                    for (int repeated = 0; repeated < 10; repeated++) {
+                        if (actual != block.getCollisionShape(state, null, BlockPos.ORIGIN, null)
+                                || actual != block.getOutlineShape(state, null, BlockPos.ORIGIN, null)
+                                || actual != block.getRaycastShape(state, null, BlockPos.ORIGIN)
+                                || actual != otherMaterial.getCollisionShape(other, null, BlockPos.ORIGIN, null)) {
+                            throw new AssertionError("Spiral shape was rebuilt instead of shared: " + state);
+                        }
+                    }
+                    cases++;
+                }
+            }
+        }
+        System.out.println("ERYDON_SPIRAL_COLLISION_OK: states=" + cases + " cappedSlots=4");
+    }
+
+    private static VoxelShape spiralShape(String name) throws Exception {
+        var field = StairsSpiralLargeBlock.class.getDeclaredField(name);
+        field.setAccessible(true);
+        return (VoxelShape) field.get(null);
     }
 }

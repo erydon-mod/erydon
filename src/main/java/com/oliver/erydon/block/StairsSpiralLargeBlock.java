@@ -130,6 +130,10 @@ public class StairsSpiralLargeBlock extends HorizontalFacingBlock implements Clu
     private static final VoxelShape OFFSTEP_SECTION_EAST = rotateShape(Direction.NORTH, Direction.EAST, OFFSTEP_SECTION_NORTH);
     private static final VoxelShape OFFSTEP_SECTION_SOUTH = rotateShape(Direction.NORTH, Direction.SOUTH, OFFSTEP_SECTION_NORTH);
     private static final VoxelShape OFFSTEP_SECTION_WEST = rotateShape(Direction.NORTH, Direction.WEST, OFFSTEP_SECTION_NORTH);
+    private static final VoxelShape CAPPED_SECTION_NORTH = VoxelShapes.union(BASE_SECTION_NORTH, OFFSTEP_SECTION_NORTH);
+    private static final VoxelShape CAPPED_SECTION_EAST = VoxelShapes.union(BASE_SECTION_EAST, OFFSTEP_SECTION_EAST);
+    private static final VoxelShape CAPPED_SECTION_SOUTH = VoxelShapes.union(BASE_SECTION_SOUTH, OFFSTEP_SECTION_SOUTH);
+    private static final VoxelShape CAPPED_SECTION_WEST = VoxelShapes.union(BASE_SECTION_WEST, OFFSTEP_SECTION_WEST);
 
     private static final VoxelShape COLLISION_A_EAST = rotateShape(Direction.NORTH, Direction.EAST, COLLISION_A_NORTH);
     private static final VoxelShape COLLISION_A_SOUTH = rotateShape(Direction.NORTH, Direction.SOUTH, COLLISION_A_NORTH);
@@ -318,9 +322,8 @@ public class StairsSpiralLargeBlock extends HorizontalFacingBlock implements Clu
             if (!state.get(CAP)) {
                 return section;
             }
-            VoxelShape offstep = orientedShape(facing, OFFSTEP_SECTION_NORTH, OFFSTEP_SECTION_EAST,
-                    OFFSTEP_SECTION_SOUTH, OFFSTEP_SECTION_WEST);
-            return VoxelShapes.union(section, offstep);
+            return orientedShape(facing, CAPPED_SECTION_NORTH, CAPPED_SECTION_EAST,
+                    CAPPED_SECTION_SOUTH, CAPPED_SECTION_WEST);
         }
         return switch (state.get(PART)) {
             case A -> orientedShape(facing, COLLISION_A_NORTH, COLLISION_A_EAST,
