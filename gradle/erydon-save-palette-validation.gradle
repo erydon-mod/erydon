@@ -1,0 +1,91 @@
+// The two launches compare vanilla codec output with the save-only cap disabled and enabled.
+['baseline': false, 'candidate': true].each { variant, enabled ->
+    tasks.register("verifySavePalette${variant.capitalize()}", JavaExec) {
+        group = 'verification'
+        dependsOn tasks.named('testClasses')
+        classpath = sourceSets.test.runtimeClasspath
+        mainClass = 'net.fabricmc.loader.impl.launch.knot.KnotClient'
+        maxHeapSize = enabled ? '1G' : '2G'
+        def fixture = layout.buildDirectory.dir("save-palette-probe/${variant}")
+        doFirst {
+            def root = fixture.get().asFile
+            root.mkdirs()
+            workingDir root
+            def mod = new File(root, 'probe-mod')
+            mod.mkdirs()
+            new File(mod, 'fabric.mod.json').text = groovy.json.JsonOutput.toJson([
+                    schemaVersion: 1, id: 'erydon_save_palette_probe', version: '1.0.0',
+                    environment: 'client', entrypoints: [preLaunch: ['com.oliver.erydon.perf.SavePaletteLaunchProbe']]
+            ])
+            systemProperty 'fabric.development', 'true'
+            systemProperty 'fabric.addMods', mod.absolutePath
+            systemProperty 'erydon.perf.save_palette_cap', enabled.toString()
+            args '--gameDir', root.absolutePath, '--version', '1.20.1', '--accessToken', '0'
+        }
+    }
+}
+
+tasks.named('verifySavePaletteCandidate') { dependsOn tasks.named('verifySavePaletteBaseline') }
+
+tasks.register('verifySavePaletteCap') {
+    group = 'verification'
+    dependsOn tasks.named('verifySavePaletteBaseline'), tasks.named('verifySavePaletteCandidate')
+    doLast {
+        def baseline = layout.buildDirectory.file('save-palette-probe/baseline/palette-report.txt').get().asFile.readLines()
+        def candidate = layout.buildDirectory.file('save-palette-probe/candidate/palette-report.txt').get().asFile.readLines()
+        if (candidate != baseline || !candidate.last().startsWith('block-24bit-4096=')) {
+            throw new GradleException('The save-palette cap changed vanilla serialized NBT')
+        }
+        println 'ERYDON_SAVE_PALETTE_EQUIVALENT: identical NBT and round-trip for block and biome palettes, including 24-bit/4096-state case'
+    }
+}
+
+tasks.named('check') { dependsOn tasks.named('verifySavePaletteCap') }
+
+// Separate from check: two headless launches create and reload only this disposable world.
+['Save': false, 'Reload': true].each { phase, verify ->
+    tasks.register("verifySavePaletteWorld${phase}", JavaExec) {
+        group = 'verification'
+        dependsOn tasks.named('testClasses')
+        classpath = sourceSets.test.runtimeClasspath
+        mainClass = 'net.fabricmc.loader.impl.launch.knot.KnotServer'
+        maxHeapSize = '12G'
+        def fixture = layout.buildDirectory.dir('save-palette-probe/world')
+        doFirst {
+            def root = fixture.get().asFile
+            root.mkdirs()
+            workingDir root
+            def marker = new File(root, verify ? 'verified.txt' : 'saved.txt')
+            marker.delete()
+            new File(root, 'eula.txt').text = 'eula=true\n'
+            new File(root, 'server.properties').text =
+                    'level-name=world\nlevel-type=minecraft:flat\nonline-mode=false\nserver-ip=127.0.0.1\nserver-port=0\n'
+            def mod = new File(root, 'probe-mod')
+            mod.mkdirs()
+            new File(mod, 'fabric.mod.json').text = groovy.json.JsonOutput.toJson([
+                    schemaVersion: 1, id: 'erydon_save_palette_world_probe', version: '1.0.0',
+                    environment: 'server', entrypoints: [main: ['com.oliver.erydon.perf.SavePaletteWorldProbe']]
+            ])
+            systemProperty 'fabric.development', 'true'
+            systemProperty 'fabric.addMods', mod.absolutePath
+            systemProperty 'erydon.perf.save_palette_cap', 'true'
+            systemProperty 'erydon.perf.save_palette_world_verify', verify.toString()
+        }
+        doLast {
+            def root = fixture.get().asFile
+            if (!new File(root, verify ? 'verified.txt' : 'saved.txt').exists()) {
+                throw new GradleException("Disposable world ${phase.toLowerCase()} phase did not finish")
+            }
+        }
+    }
+}
+
+tasks.named('verifySavePaletteWorldReload') {
+    dependsOn tasks.named('verifySavePaletteWorldSave')
+    doLast {
+        def root = layout.buildDirectory.dir('save-palette-probe/world').get().asFile
+        if (!new File(root, 'saved.txt').exists() || !new File(root, 'verified.txt').exists()) {
+            throw new GradleException('Disposable save/reload probe did not finish both phases')
+        }
+    }
+}

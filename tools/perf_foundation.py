@@ -17,6 +17,8 @@ FLAGS = {
     'erydon.perf.pause_self_test': 'false',
     'erydon.perf.frame_capture': 'true', 'erydon.perf.alias_index': 'false',
     'erydon.perf.shared_stair_shapes': 'false', 'erydon.perf.sprite_handles': 'false',
+    'erydon.perf.save_palette_cap': 'false',
+    'erydon.perf.worldedit_compact_transitions': 'false',
     'erydon.perf.clip_plans': 'false', 'erydon.shared_geometry.mode': 'baseline',
     'erydon.shared_geometry.metrics': 'false', 'erydon.synapheia.metrics': 'false',
 }

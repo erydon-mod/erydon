@@ -18,7 +18,8 @@ import org.lwjgl.opengl.GL11;
 
 final class RuntimeInventory {
     static final List<String> FLAGS = List.of("erydon.perf.pause_self_test", "erydon.perf.frame_capture", "erydon.perf.alias_index",
-            "erydon.perf.shared_stair_shapes", "erydon.perf.sprite_handles", "erydon.perf.clip_plans",
+            "erydon.perf.shared_stair_shapes", "erydon.perf.sprite_handles", "erydon.perf.save_palette_cap",
+            "erydon.perf.worldedit_compact_transitions", "erydon.perf.clip_plans",
             "erydon.shared_geometry.mode", "erydon.shared_geometry.metrics", "erydon.synapheia.metrics");
     static void requireOneErydon(Collection<String> identities) {
         if (identities.stream().filter("erydon"::equals).count() != 1) throw new IllegalStateException("Expected exactly one loaded ERYDON identity");
