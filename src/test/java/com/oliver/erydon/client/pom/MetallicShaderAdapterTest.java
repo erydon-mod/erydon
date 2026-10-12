@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class MetallicShaderAdapterTest {
-    private static final String COVER_SURFACE = """
+    static final String COVER_SURFACE = """
             void GetCustomMaterials(inout vec4 color, inout vec3 normalM, inout float materialMask) {
                 vec4 specularMap = texture2D(specular, texCoordM);
                 highlightMult *= 0.5 + 0.5 * specularMap.g;

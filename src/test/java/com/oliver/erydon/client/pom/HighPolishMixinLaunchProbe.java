@@ -166,8 +166,11 @@ public final class HighPolishMixinLaunchProbe implements PreLaunchEntrypoint {
                 boolean cover = covers.contains(state.getBlock());
                 boolean coverGloss = cover
                         && state.get(CoverBlock.FINISH) == CoverBlock.CoverFinish.GLOSS;
-                int expected = coverGloss ? (id.getPath().equals("cover_silver")
-                        ? 12061 : 12059) : cover ? 12063 : baseline.getInt(state);
+                int expected = coverGloss ? switch (id.getPath()) {
+                    case "cover_bronze" -> 12065;
+                    case "cover_silver" -> 12061;
+                    default -> 12059;
+                } : cover ? 12063 : baseline.getInt(state);
                 // The ceiling inset is selected by its Gloss sprite, not by replacing the
                 // entire block's material. The stone frame retains its existing Honed ID
                 // with master polish off; lit states retain the shader's original ID.
@@ -192,7 +195,7 @@ public final class HighPolishMixinLaunchProbe implements PreLaunchEntrypoint {
                 }
                 if (state.getBlock() instanceof CeilingBlock) {
                     require(classified.getInt(state) != 12059 && classified.getInt(state) != 12061
-                                    && classified.getInt(state) != 12063,
+                                    && classified.getInt(state) != 12063 && classified.getInt(state) != 12065,
                             "Gloss ceiling inset must not overwrite its stone frame's material ID");
                     require(state.getLuminance() == CeilingBlock.luminance(state),
                             "Classification changed ceiling luminance: " + state);
@@ -200,7 +203,7 @@ public final class HighPolishMixinLaunchProbe implements PreLaunchEntrypoint {
             }
             require(gloss == 4608 && litGloss == 3072 && matte == 4608 && litMatte == 3072,
                     "Every attachment/size/extension/light/water Cover combination must be checked");
-            for (int material : List.of(12059, 12061, 12063)) {
+            for (int material : List.of(12059, 12061, 12063, 12065)) {
                 for (int light : List.of(0, 13, 15)) verifyCoverLightTransport(material, light);
             }
             for (var profile : HighPolishShaderAdapter.Profile.values()) {
@@ -210,7 +213,7 @@ public final class HighPolishMixinLaunchProbe implements PreLaunchEntrypoint {
                 invokeMaterialHandler(handler, skipped);
                 require(skipped.equals(baseline), "Unsupported shader changed cover material states: " + profile);
             }
-            for (int material : List.of(12059, 12061, 12063)) {
+            for (int material : List.of(12059, 12061, 12063, 12065)) {
                 prepareCoverShader(HighPolishShaderAdapter.Profile.COMPLEMENTARY, material);
                 var skipped = new Object2IntOpenHashMap<BlockState>(baseline);
                 invokeMaterialHandler(handler, skipped);
@@ -235,7 +238,7 @@ public final class HighPolishMixinLaunchProbe implements PreLaunchEntrypoint {
             }
             System.out.println("ERYDON_COVER_GLOSS_CLASSIFICATION_OK gloss=" + gloss + " lit=" + litGloss
                     + " matte=" + matte + " litMatte=" + litMatte
-                    + " states=" + states.size() + " optionalSettings=off nativeLightEncodings=9");
+                    + " states=" + states.size() + " optionalSettings=off nativeLightEncodings=12");
         } finally {
             settingsField.set(null, previous);
             HighPolishShaderAdapter.beginShaderLoad(HighPolishShaderAdapter.Profile.UNSUPPORTED, false);
@@ -351,6 +354,18 @@ public final class HighPolishMixinLaunchProbe implements PreLaunchEntrypoint {
         }
         require(transform >= 0 && accepted > transform,
                 "Woven preflight must transform and validate all required sources before accepting metal eligibility");
+        int polishPreflight = -1, polishAccepted = -1;
+        for (int i = 0; i < handler.instructions.size(); i++) {
+            var instruction = handler.instructions.get(i);
+            if (instruction instanceof MethodInsnNode call && call.owner.endsWith("/HighPolishShaderAdapter")
+                    && call.name.equals("preflight")) polishPreflight = i;
+            if (instruction instanceof FieldInsnNode field && field.getOpcode() == Opcodes.PUTFIELD
+                    && field.name.contains("highPolishEligible")) polishAccepted = i;
+        }
+        require(polishPreflight >= 0 && polishAccepted > polishPreflight && transform > polishAccepted,
+                "Woven reflection preflight must accept all three stages before metal preflight or program writes");
+        require(transformed.methods.stream().anyMatch(method -> method.name.equals("erydon$isHighPolishEligible")),
+                "Per-dimension reflection eligibility accessor must be woven into Iris");
     }
 
     private static void verifyMetalSamplerProfiles(Path emptyShader) throws Exception {
@@ -392,8 +407,10 @@ public final class HighPolishMixinLaunchProbe implements PreLaunchEntrypoint {
         InlaySubstrateTransport.restoreRecord(-1);
         require(InlaySubstrateTransport.rendererSupported(), "Pinned renderer format and synchronous emitter must pass substrate guard");
         require(Arrays.stream(XHFPTerrainVertex.class.getDeclaredMethods())
-                        .anyMatch(method -> method.getName().contains("writeInlaySubstrate")),
-                "Substrate transport mixin must be applied to the real Iris encoder");
+                        .anyMatch(method -> method.getName().contains("writeInlaySubstrate")
+                                && method.getReturnType() == long.class
+                                && method.getParameterTypes()[0] == long.class),
+                "Substrate transport must use a primitive return-value hook in the real Iris encoder");
         var writer = new XHFPTerrainVertex();
         var context = new BlockContextHolder();
         context.blockId = 12040;
@@ -426,7 +443,8 @@ public final class HighPolishMixinLaunchProbe implements PreLaunchEntrypoint {
             require(InlaySubstrateTransport.enabled(), "Substrate path must be active after successful preflight/link");
             int previous = InlaySubstrateTransport.pushRecord(17);
             try {
-                writer.write(start, material, vertices, 3);
+                require(writer.write(start, material, vertices, 3) == start + 160,
+                        "Active substrate transport changed the returned vertex pointer");
             } finally {
                 InlaySubstrateTransport.restoreRecord(previous);
             }
@@ -444,7 +462,8 @@ public final class HighPolishMixinLaunchProbe implements PreLaunchEntrypoint {
                         require(method.getName().equals("emit"), "Ribbon transport unexpectedly touched emitter state");
                         require(InlaySubstrateTransport.currentRecord() == 17 && InlaySubstrateTransport.currentRibbon(),
                                 "Ribbon emission lost its phase or projection flag");
-                        writer.write(start, material, vertices, 3);
+                        require(writer.write(start, material, vertices, 3) == start + 160,
+                                "Ribbon transport changed the returned vertex pointer");
                         return proxy;
                     });
             InlaySubstrateTransport.emitRibbon(ribbonEmitter, 17);

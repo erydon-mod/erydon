@@ -19,6 +19,12 @@ tasks.named('test', Test) {
         }
     }
     def shaderDirectory = providers.environmentVariable('ERYDON_CU_TEST_SHADER_DIR')
+    def shaderList = providers.environmentVariable('ERYDON_CU_TEST_SHADER_LIST')
+    inputs.property('ERYDON_CU_TEST_SHADER_LIST', shaderList.isPresent())
+    if (shaderList.isPresent()) {
+        inputs.files(shaderList.get().split(java.util.regex.Pattern.quote(File.pathSeparator)))
+                .withPropertyName('ERYDON_CU_TEST_SHADER_LIST_sources').withPathSensitivity(PathSensitivity.NONE)
+    }
     inputs.property('ERYDON_CU_TEST_SHADER_DIR', shaderDirectory.isPresent())
     if (shaderDirectory.isPresent()) {
         inputs.files(fileTree(shaderDirectory.get()) { include 'Complementary*.zip' })
@@ -26,7 +32,7 @@ tasks.named('test', Test) {
     }
     inputs.property('ERYDON_CU_GL_VALIDATE', providers.environmentVariable('ERYDON_CU_GL_VALIDATE').getOrElse('false'))
     // Real shader matrices retain considerably more compiler data than ordinary unit fixtures.
-    if (providers.environmentVariable('ERYDON_CU_TEST_SHADER').isPresent() || shaderDirectory.isPresent()
+    if (providers.environmentVariable('ERYDON_CU_TEST_SHADER').isPresent() || shaderDirectory.isPresent() || shaderList.isPresent()
             || providers.environmentVariable('ERYDON_CU_GL_VALIDATE').map { it in ['true', '1'] }.getOrElse(false)) {
         maxHeapSize = '2G'
     }

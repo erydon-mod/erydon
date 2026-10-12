@@ -162,6 +162,89 @@ class CoverReflectionBlendTest {
         }
     }
 
+    @Test @EnabledIf("driverConfigured")
+    void bronzeGlossReachesTheProductionConductorWithoutChangingOtherCoverFinishes() {
+        InstalledShaderTestSupport.ensureContext();
+        var finish = HighPolishShaderAdapter.adaptFragment("gbuffers_terrain",
+                MetallicShaderAdapterTest.COVER_SURFACE, true);
+        var adapted = MetallicShaderAdapter.adapt("gbuffers_terrain",
+                "attribute vec4 mc_midTexCoord;\nvoid main() { gl_Position = gl_Vertex; }", finish.text(), true);
+        assertTrue(adapted.changed(), adapted.status());
+        // Execute the complete composed material function, including the earlier
+        // emission/return boundary and both metal guards. Only the uniform sprite
+        // lookup is stubbed; selection, polish, palette and packing stay production.
+        String fragment = """
+                #version 330 compatibility
+                uniform int mat, testOutput;
+                uniform sampler2D specular;
+                const float OSIEBCA = 1.0 / 255.0;
+                const vec2 texCoord = vec2(0.5), texCoordM = vec2(0.5);
+                const ivec2 erydonMetalAtlas = ivec2(16);
+                const ivec4 erydonMetalBounds = ivec4(0, 0, 16, 16);
+                const ivec4 erydonMetalInfo = ivec4(3, 1, 166, -1);
+                const vec3 erydonMetalAlbedoMean = vec3(0.8, 0.6, 0.1);
+                const vec4 glColor = vec4(1.0);
+                const vec3 upVec = vec3(0.0, 1.0, 0.0);
+                const mat3 tbnMatrix = mat3(1.0);
+                float smoothnessG = 1.0, smoothnessD = 1.0, emission = 0.0, highlightMult = 1.0;
+                float erydonMetalCoverage = 0.0, erydonMetalRoughness = 0.0;
+                float erydonMetalPacked = 1.0, erydonMetalTag = 0.0, NdotU = 0.0, NdotUmax0 = 0.0;
+                vec3 erydonMetalF0 = vec3(0.0), erydonMetalDiffuseComponent = vec3(0.0);
+                float pow2(float x) { return x * x; }
+                float max0(float x) { return max(x, 0.0); }
+                float GetCustomEmission(vec4 value, vec2 uv) { return value.a; }
+                void erydonReadMetal(vec2 uv, ivec2 atlas, out ivec4 bounds, out ivec4 info, out vec3 mean) {
+                    bounds = ivec4(0, 0, 16, 16);
+                    info = ivec4(3, 1, 166, -1);
+                    mean = vec3(0.8, 0.6, 0.1);
+                }
+                float erydonMetalMask(vec2 uv, ivec4 bounds, ivec4 info, vec2 dx, vec2 dy) { return 1.0; }
+                vec2 erydonMetalBevel(vec2 uv, ivec4 bounds, ivec4 info, float footprint) { return vec2(0.0); }
+                vec3 erydonMetalNormal(vec3 normal, vec2 bevel, int kind) { return normal; }
+                """ + function(adapted.fragment(), "vec3 erydonConductorF0(")
+                + function(adapted.fragment(), "vec3 erydonMetalAlbedo(")
+                + function(adapted.fragment(), "void GetCustomMaterials(") + """
+                void main() {
+                    vec4 color = vec4(0.8, 0.6, 0.1, 1.0);
+                    vec3 normal = vec3(0.0, 0.0, 1.0);
+                    float mask = 0.0;
+                    GetCustomMaterials(color, normal, mask);
+                    gl_FragData[0] = testOutput == 1 ? vec4(emission, erydonMetalF0)
+                            : vec4(float(int(mask * 255.1)), erydonMetalCoverage, erydonMetalRoughness, smoothnessD);
+                }
+                """;
+        try (var gpu = new GlazingReflectionBlendTest.PixelGpu()) {
+            int program = gpu.program(fragment);
+            for (int id : new int[]{HighPolishShaderAdapter.COVER_BRONZE_GLOSS_ID,
+                    HighPolishShaderAdapter.COVER_MATTE_ID, HighPolishShaderAdapter.COVER_GLOSS_ID,
+                    HighPolishShaderAdapter.COVER_SILVER_GLOSS_ID}) {
+                GL20.glUseProgram(program);
+                GL20.glUniform1i(GL20.glGetUniformLocation(program, "mat"), id);
+                boolean matte = id == HighPolishShaderAdapter.COVER_MATTE_ID;
+                gpu.sample(matte ? 89.0F / 255.0F : 1.0F, 1.0F, 0.0F, .37F);
+                float[] material = gpu.draw(program, 0, false);
+                boolean conductor = matte || id == HighPolishShaderAdapter.COVER_BRONZE_GLOSS_ID;
+                if (conductor) {
+                    double roughness = (matte ? 166.0 : 2.0) / 255.0;
+                    assertEquals(243, material[0], .000004, "Bronze retains its conductor tag");
+                    assertEquals(1, material[1], .000004, "Full metallic coverage");
+                    assertEquals(roughness, material[2], .000004, "Gloss keeps authored polish; Matte stays rough");
+                    assertEquals(Math.pow(1 - roughness, 2), material[3], .000004);
+                    if (!matte) assertTrue(material[3] > .98, "Gloss enters CU's sharp-reflection range");
+                } else {
+                    assertEquals(id == HighPolishShaderAdapter.COVER_SILVER_GLOSS_ID ? 245 : 242,
+                            material[0], .000004, "Mirror/coating tags survive the complete material function");
+                    assertEquals(0, material[1], .000004, "Mirror/coating stays outside the conductor path");
+                    assertEquals(1, material[3], .000004);
+                }
+                float[] emissionAndF0 = gpu.draw(program, 1, false);
+                assertEquals(.37, emissionAndF0[0], .000004, "Authored emission survives every finish");
+                if (conductor) assertArrayEquals(new float[]{.37F, .92F, .418036F, .00975945F},
+                        emissionAndF0, .000004F, "Canonical coloured bronze reflectance");
+            }
+        }
+    }
+
     @Test @EnabledIf("voxelDriverConfigured")
     void actualWorldReflectionVoxelizerRejectsThinCoversAndRetainsFullBlocks() throws Exception {
         InstalledShaderTestSupport.ensureContext();
@@ -221,6 +304,7 @@ class CoverReflectionBlendTest {
                     Integer.parseInt(stages.get("MC_RENDER_STAGE_TERRAIN_SOLID")));
             gpu.sample(1, 1, 1, 1);
             for (int material : new int[]{-1, 0, 10080, HighPolishShaderAdapter.COVER_MATTE_ID,
+                    HighPolishShaderAdapter.COVER_BRONZE_GLOSS_ID,
                     HighPolishShaderAdapter.COVER_GLOSS_ID, HighPolishShaderAdapter.COVER_SILVER_GLOSS_ID}) {
                 for (float[] normal : List.of(new float[]{1, 0, 0}, new float[]{-1, 0, 0},
                         new float[]{0, 1, 0}, new float[]{0, -1, 0},

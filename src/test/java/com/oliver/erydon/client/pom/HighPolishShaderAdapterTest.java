@@ -35,6 +35,42 @@ class HighPolishShaderAdapterTest {
 
     @AfterEach void reset() { HighPolishShaderAdapter.beginShaderLoad(false, false); }
 
+    @Test void dimensionPreflightRejectsBeforeAnyStageOrGeometryPredicateChanges() {
+        HighPolishShaderAdapter.beginShaderLoad(true, true);
+        HighPolishShaderAdapter.acceptMaterialIds(id -> false);
+        var valid = java.util.Map.of("gbuffers_terrain", TERRAIN, "deferred1", DEFERRED, "gbuffers_water", WATER);
+        assertTrue(HighPolishShaderAdapter.preflight(valid::get).supported());
+        assertEquals("EMPTY_PROGRAM_SET", HighPolishShaderAdapter.preflight(program -> null).status());
+        assertEquals("INCOMPLETE_PROGRAM_SET", HighPolishShaderAdapter.preflight(program ->
+                "gbuffers_water".equals(program) ? null : valid.get(program)).status());
+        var ambiguous = new java.util.HashMap<>(valid);
+        ambiguous.put("deferred1", DEFERRED + DEFERRED);
+        var rejected = HighPolishShaderAdapter.preflight(ambiguous::get);
+        assertFalse(rejected.supported());
+        assertTrue(rejected.status().contains("deferred1"));
+        assertSame(TERRAIN, HighPolishShaderAdapter.adaptProgramFragment("gbuffers_terrain", TERRAIN, false).text());
+        HighPolishShaderAdapter.rejectPrograms(rejected.status());
+        assertSame(TERRAIN, HighPolishShaderAdapter.adaptProgramFragment("gbuffers_terrain", TERRAIN, true).text());
+        String spiral = "mat == 32120";
+        assertSame(spiral, HighPolishShaderAdapter.adaptSpiralPredicate(spiral));
+        assertFalse(HighPolishShaderAdapter.ready());
+        assertTrue(HighPolishShaderAdapter.status().contains("deferred1: UNSUPPORTED_SOURCE"));
+        HighPolishShaderAdapter.beginShaderLoad(true, true);
+        assertFalse(HighPolishShaderAdapter.status().contains("deferred1:"), "Shader reload resets the rejection");
+    }
+
+    @Test void unknownPropertiesNeverEnableEitherAdapterAndExplainTheFallback() {
+        for (String properties : new String[]{"other pack", "# ComplementaryUnbound_r5.10_dev2\n", ""}) {
+            assertFalse(ComplementaryShaderProfiles.supported(properties));
+            assertEquals(HighPolishShaderAdapter.Profile.UNSUPPORTED, HighPolishShaderAdapter.profileForProperties(properties));
+            assertFalse(ComplementaryUnboundDev5SourceTransformer.adaptProperties(properties,
+                    ComplementaryUnboundDev5SourceTransformer.Mode.AUTO).eligible());
+            assertTrue(ComplementaryShaderProfiles.diagnostic(properties).contains("UNSUPPORTED_PROPERTIES sha256="));
+        }
+        assertFalse(ComplementaryShaderProfiles.supported(null));
+        assertTrue(ComplementaryShaderProfiles.diagnostic(null).contains("missing"));
+    }
+
     @Test void circularColumnApproximationChangesOnlyReflectionEligibility() {
         String source = "void UpdateSceneVoxelMap(int mat, vec3 normal, vec3 position) {\n"
                 + "bool doSolidBlockCheck = true;\nif (doSolidBlockCheck) { if (mat % 2 == 1) return; }\n"

@@ -159,8 +159,8 @@ public final class MetallicShaderAdapter {
                     float erydonFootprint = max(length(erydonDx), length(erydonDy));
                     float erydonAuthoredRoughness = 1.0 - specularMap.r;
                     bool erydonHasAuthoredMetal = specularMap.g >= 229.5 / 255.0;
-                    // Gloss covers share sprites with matte covers and ceilings.
-                    // Their state-selected finish must win before any metal mutation.
+                    // White/Black Gloss and Silver's coating override the metal path.
+                    // Bronze Gloss (12065) retains authored polish and full conductor response.
                     bool erydonGlossCover = mat == 12059 || mat == 12061;
                     if (!erydonGlossCover && erydonInfo.x > 0 && erydonInfo.x < 4) {
                         // A CTM-aware POM ray may finish on another sprite in the atlas.

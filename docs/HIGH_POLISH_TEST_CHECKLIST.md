@@ -1,7 +1,7 @@
 # High polish and architectural fixes: test checklist
 
-Use the IDEA development client first, with Complementary Unbound r5.9 dev5
-or Unbound/Reimagined r5.9.3 or Unbound r5.9.4 dev1, labPBR and your usual Collection pack. Full
+Use a separately authorized development client with a profile from the
+[audited shader matrix](HIGH_POLISH_SHADER_COMPATIBILITY.md), labPBR and your usual Collection pack. Full
 Minecraft restarts are required after saving finish or glass settings. No test
 JAR was produced.
 
@@ -45,12 +45,16 @@ and the latest high-polish performance trial. The items above are new checks.
 
 Cover enum review (2026-10-09): with supported Complementary, compare Matte and
 Gloss on White, Black, Bronze and Silver covers, both sizes and all six attachment
-faces. Gloss should match Mirror stone's sharp reflections; Silver + Gloss should
+faces. White/Black Gloss should match Mirror stone's sharp reflections; Bronze
+Gloss should retain strong coloured metallic reflections and authored smoothness,
+with dark marble detail visible in the matched diagnostic scene. Silver + Gloss should
 match the outward two-way mirror coating, including a dark reflected scene.
 Check Off/Dim/Bright light states, clustered extensions and waterlogging. Turn
 the stone/glazing/two-way preferences off and restart: cover Gloss should still
 work. Toggle the shader's reflection blur and check that Silver stays reflective.
-Check Gloss coffered-ceiling insets too. Matte Silver/Bronze should retain their
+Compare Bronze Gloss against the earlier metal response with WSR both off and on;
+check reflected-pattern sharpness while still and moving. Check Gloss coffered-ceiling
+insets too. Matte Silver/Bronze should retain their
 soft sheen without a dark square at the central owner block, with WSR and player
 reflections enabled. Walk sideways to distinguish any real scene reflection from
 fixed false geometry. Test isolated 3x3 covers and joined panels on all six faces;

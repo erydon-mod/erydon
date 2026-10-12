@@ -13,6 +13,8 @@ smoothness. The 90% two-way coating is unchanged. The new finish levels and
 metal adjustment still need large-scene profiling. The user approved Mirror;
 the subsequent metal-tint/20%-preservation revision needs in-game comparison.
 Unbound and Reimagined r5.9.3 are now recognised alongside Unbound r5.9 dev5.
+For the current supported release list and atomic program preflight, see the
+[shader compatibility matrix](HIGH_POLISH_SHADER_COMPATIBILITY.md).
 
 The [material and shader review](POLISH_MATERIAL_AND_SHADER_REVIEW.md) records
 the implementation and compatibility scope. No test JAR was produced.

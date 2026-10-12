@@ -8,12 +8,10 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/** Exact, fail-closed adapter for CU r5.9 dev5 and both Complementary r5.9.3 styles. */
+/** Exact, fail-closed CTM-POM adapter for audited Complementary release profiles. */
 public final class ComplementaryUnboundDev5SourceTransformer {
     public static final String EXPECTED_PROPERTIES_SHA256 =
             "a4c4e2156ad5aeb66c0ad495a2721ea092952f2cdebfaaf89a20dfa3409ef2e8";
-    private static final String COMPLEMENTARY_5_9_3_PROPERTIES_SHA256 =
-            "b29be050d6296bc5df769a66e351adbaaa9108eec801eb0442137a7a81266ab7";
     public static final String TEXTURE_DIRECTIVE =
             "texture.erydonCtmPomLookup=erydon:ctm_pom_lookup";
     public static final String HELPER_SENTINEL = "uniform sampler2D erydonCtmPomLookup;";
@@ -87,8 +85,7 @@ public final class ComplementaryUnboundDev5SourceTransformer {
     }
 
     public static boolean matchesSupportedProperties(String contents) {
-        String hash = sha256(contents);
-        return EXPECTED_PROPERTIES_SHA256.equals(hash) || COMPLEMENTARY_5_9_3_PROPERTIES_SHA256.equals(hash);
+        return ComplementaryShaderProfiles.supported(contents);
     }
 
     static Result adaptProperties(String contents, Mode mode, String expectedHash) {

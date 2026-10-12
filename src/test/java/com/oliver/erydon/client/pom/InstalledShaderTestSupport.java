@@ -40,7 +40,7 @@ final class InstalledShaderTestSupport {
     private static Object previousIrisConfig;
 
     static boolean configured() {
-        return nonBlank("ERYDON_CU_TEST_SHADER") || nonBlank("ERYDON_CU_TEST_SHADER_DIR");
+        return nonBlank("ERYDON_CU_TEST_SHADER") || nonBlank("ERYDON_CU_TEST_SHADER_DIR") || nonBlank("ERYDON_CU_TEST_SHADER_LIST");
     }
 
     private static boolean nonBlank(String name) {
@@ -50,6 +50,13 @@ final class InstalledShaderTestSupport {
 
     static List<Path> shaderPaths() throws Exception {
         var paths = new LinkedHashSet<Path>();
+        if (nonBlank("ERYDON_CU_TEST_SHADER_LIST")) {
+            for (String selected : System.getenv("ERYDON_CU_TEST_SHADER_LIST").split(Pattern.quote(java.io.File.pathSeparator))) {
+                Path path = Path.of(selected).toAbsolutePath().normalize();
+                assertTrue(Files.isRegularFile(path), "Missing explicitly selected shader: " + path);
+                paths.add(path);
+            }
+        }
         if (nonBlank("ERYDON_CU_TEST_SHADER")) {
             Path path = Path.of(System.getenv("ERYDON_CU_TEST_SHADER")).toAbsolutePath().normalize();
             assertTrue(Files.isRegularFile(path), "Missing explicitly selected shader: " + path);

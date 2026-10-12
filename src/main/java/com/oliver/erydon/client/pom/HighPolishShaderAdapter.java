@@ -4,6 +4,7 @@ import java.util.regex.Pattern;
 import java.util.List;
 import com.oliver.erydon.HighPolishSettings.Level;
 import java.util.function.IntPredicate;
+import java.util.function.Function;
 
 /** Stone finish and glass controls; no extra draw or texture sample. */
 public final class HighPolishShaderAdapter {
@@ -35,12 +36,14 @@ public final class HighPolishShaderAdapter {
     public static final int COVER_SILVER_GLOSS_ID = 12061;
     // Geometry only: Matte keeps its authored PBR and metal response.
     public static final int COVER_MATTE_ID = 12063;
+    // Bronze Gloss keeps the shared conductor response and paper-thin geometry.
+    public static final int COVER_BRONZE_GLOSS_ID = 12065;
     public static final float GLAZING_REFLECTION_FLOOR = 0.5F;
     public static final List<Integer> RESERVED_IDS = List.of(SOLID_ID, SHAPE_ID, SPIRAL_ID,
             MIRROR_POLISHED_FRAME_ID, MIRROR_NORMAL_FRAME_ID, HONED_SOLID_ID, HONED_SHAPE_ID,
             HONED_SPIRAL_ID, HONED_FRAME_ID, POLISHED_SOLID_ID, POLISHED_SHAPE_ID, POLISHED_SPIRAL_ID, POLISHED_FRAME_ID,
             MIRROR_COLUMN_ID, HONED_COLUMN_ID, POLISHED_COLUMN_ID, NORMAL_COLUMN_ID, GLAZING_ID,
-            COVER_GLOSS_ID, COVER_SILVER_GLOSS_ID, COVER_MATTE_ID);
+            COVER_GLOSS_ID, COVER_SILVER_GLOSS_ID, COVER_MATTE_ID, COVER_BRONZE_GLOSS_ID);
     private static final String HONED = "(mat == 12032 || mat == 12033 || mat == 12035 || mat == 12037 || mat == 12051)";
     private static final String POLISHED = "(mat == 12040 || mat == 12041 || mat == 12043 || mat == 12045 || mat == 12053)";
     private static final String MIRROR = "(mat == 12024 || mat == 12025 || mat == 12027 || mat == 12029 || mat == 12049)";
@@ -64,8 +67,32 @@ public final class HighPolishShaderAdapter {
     private static volatile Profile profile = Profile.UNSUPPORTED;
     private static volatile boolean requested, eligible, terrainReady, deferredReady, waterReady, columnsReady, failed;
     private static volatile boolean glazingRequested;
+    private static volatile String failureReason = "NONE";
+    public static final List<String> REQUIRED_PROGRAMS = List.of("gbuffers_terrain", "deferred1", "gbuffers_water");
 
     public record Result(String text, boolean changed, String status) { }
+    public record Preflight(boolean supported, String status) { }
+
+    /** Check the whole dimension before writing any stage; an empty base set is harmless. */
+    public static Preflight preflight(Function<String, String> fragments) {
+        int present = 0;
+        String mismatch = null;
+        for (String program : REQUIRED_PROGRAMS) {
+            String source = fragments.apply(program);
+            if (source == null) continue;
+            present++;
+            Result result = adaptFragment(program, source, true);
+            if (!result.changed() && !"ALREADY_TRANSFORMED".equals(result.status())) mismatch = program + ": " + result.status();
+        }
+        if (present == 0) return new Preflight(false, "EMPTY_PROGRAM_SET");
+        if (present != REQUIRED_PROGRAMS.size()) return new Preflight(false, "INCOMPLETE_PROGRAM_SET");
+        return mismatch == null ? new Preflight(true, "SUPPORTED_SOURCE") : new Preflight(false, mismatch);
+    }
+
+    public static void rejectPrograms(String reason) {
+        failed = true;
+        failureReason = reason;
+    }
 
     public static Profile profileForProperties(String contents) {
         if (ComplementaryUnboundDev5SourceTransformer.matchesSupportedProperties(contents)) return Profile.COMPLEMENTARY;
@@ -90,6 +117,7 @@ public final class HighPolishShaderAdapter {
         glazingRequested = requested && glazing;
         eligible = false;
         terrainReady = deferredReady = waterReady = columnsReady = failed = false;
+        failureReason = "NONE";
     }
 
     public static boolean requested() { return requested; }
@@ -97,6 +125,7 @@ public final class HighPolishShaderAdapter {
     /** Called before any ProgramSet, including Iris's eagerly loaded base dimension. */
     public static void acceptMaterialIds(IntPredicate alreadyUsed) {
         eligible = requested && RESERVED_IDS.stream().noneMatch(alreadyUsed::test);
+        if (requested && !eligible) failureReason = "RESERVED_MATERIAL_ID_COLLISION";
     }
 
     /** Avoid boxing each entry while checking the large, existing block-state map. */
@@ -106,7 +135,7 @@ public final class HighPolishShaderAdapter {
                     HONED_SOLID_ID, HONED_SHAPE_ID, HONED_SPIRAL_ID, HONED_FRAME_ID,
                     POLISHED_SOLID_ID, POLISHED_SHAPE_ID, POLISHED_SPIRAL_ID, POLISHED_FRAME_ID,
                     MIRROR_COLUMN_ID, HONED_COLUMN_ID, POLISHED_COLUMN_ID, NORMAL_COLUMN_ID, GLAZING_ID,
-                    COVER_GLOSS_ID, COVER_SILVER_GLOSS_ID, COVER_MATTE_ID -> true;
+                    COVER_GLOSS_ID, COVER_SILVER_GLOSS_ID, COVER_MATTE_ID, COVER_BRONZE_GLOSS_ID -> true;
             default -> false;
         };
     }
@@ -135,7 +164,7 @@ public final class HighPolishShaderAdapter {
     }
 
     public static Result adaptColumnReflections(String source) {
-        Result result = adaptColumnReflections(source, eligible && profile == Profile.COMPLEMENTARY);
+        Result result = adaptColumnReflections(source, eligible && !failed && profile == Profile.COMPLEMENTARY);
         if (eligible && source != null) {
             columnsReady = result.changed() || "ALREADY_TRANSFORMED".equals(result.status());
         }
@@ -154,7 +183,7 @@ public final class HighPolishShaderAdapter {
     public static String status() {
         return profile + " ids=" + eligible + " terrain=" + terrainReady + " deferred=" + deferredReady
                 + " glass=" + waterReady
-                + " failed=" + failed;
+                + " failed=" + failed + " reason=" + failureReason;
     }
 
     private static Result adaptMirror(String source) {
@@ -281,10 +310,15 @@ public final class HighPolishShaderAdapter {
     }
 
     public static Result adaptFragment(String program, String source) {
-        Result result = adaptFragment(program, source, eligible);
-        if (eligible && source != null && (opaqueProgram(program) || "gbuffers_water".equals(program))) {
+        return adaptProgramFragment(program, source, true);
+    }
+
+    public static Result adaptProgramFragment(String program, String source, boolean preflightSupported) {
+        boolean enabled = eligible && !failed && preflightSupported;
+        Result result = adaptFragment(program, source, enabled);
+        if (enabled && source != null && (opaqueProgram(program) || "gbuffers_water".equals(program))) {
             boolean ok = result.changed() || "ALREADY_TRANSFORMED".equals(result.status());
-            if (!ok) failed = true;
+            if (!ok) rejectPrograms(program + ": " + result.status());
             if ("gbuffers_terrain".equals(program)) terrainReady = ok;
             else if ("deferred1".equals(program)) deferredReady = ok;
             else waterReady = ok;
@@ -294,7 +328,7 @@ public final class HighPolishShaderAdapter {
 
     /** Preserve the existing exact-bounds spiral bridge under its polish ID. */
     public static String adaptSpiralPredicate(String source) {
-        return eligible && profile == Profile.COMPLEMENTARY && source != null && !source.contains("mat == 12035")
+        return eligible && !failed && profile == Profile.COMPLEMENTARY && source != null && !source.contains("mat == 12035")
                 ? source.replace("mat == 32120", "(mat == 32120 || mat == 12027 || mat == 12035 || mat == 12043)") : source;
     }
 

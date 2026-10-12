@@ -35,6 +35,7 @@ abstract class HighPolishShaderPackMixin {
         erydon$earlyIdMap = ids;
         HighPolishShaderAdapter.acceptMaterialIds(id -> ids.getBlockProperties().containsKey(id)
                 || ids.getTagEntries().containsKey(id));
+        com.oliver.erydon.Erydon.LOGGER.info("[erydon] High polish/glazing material preflight: {}", HighPolishShaderAdapter.status());
     }
 
     @Redirect(method = "<init>(Ljava/nio/file/Path;Ljava/util/Map;Lcom/google/common/collect/ImmutableList;)V",

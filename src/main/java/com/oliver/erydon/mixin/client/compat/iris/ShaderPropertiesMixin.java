@@ -47,6 +47,8 @@ public abstract class ShaderPropertiesMixin implements ErydonIrisShaderPropertie
                 com.oliver.erydon.client.pom.HighPolishShaderAdapter.profileForProperties(contents),
                 true, // CU also supplies the common Honed baseline when the master is off.
                 com.oliver.erydon.client.ErydonHighPolish.activeSettings().glazingEnabled());
+        Erydon.LOGGER.info("[erydon] High polish/glazing shader profile: {}",
+                com.oliver.erydon.client.pom.ComplementaryShaderProfiles.diagnostic(contents));
         ErydonCuPomRuntimeState.beginShaderLoad(result.eligible());
         if (result.changed()) {
             Erydon.LOGGER.info("[{}] Enabled the supported Complementary CTM-POM adapter in memory.",

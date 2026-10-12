@@ -47,8 +47,11 @@ abstract class HighPolishBlockMaterialMixin {
             // Cover material IDs preserve paper-thin geometry, including lit covers.
             // It must not inherit the player's stone, glazing or two-way options.
             if (erydon && block instanceof CoverBlock) {
-                int coverMaterial = "cover_silver".equals(id.getPath())
-                        ? HighPolishShaderAdapter.COVER_SILVER_GLOSS_ID : HighPolishShaderAdapter.COVER_GLOSS_ID;
+                int coverMaterial = switch (id.getPath()) {
+                    case "cover_bronze" -> HighPolishShaderAdapter.COVER_BRONZE_GLOSS_ID;
+                    case "cover_silver" -> HighPolishShaderAdapter.COVER_SILVER_GLOSS_ID;
+                    default -> HighPolishShaderAdapter.COVER_GLOSS_ID;
+                };
                 for (BlockState state : block.getStateManager().getStates()) {
                     ids.put(state, state.get(CoverBlock.FINISH) == CoverBlock.CoverFinish.GLOSS
                             ? coverMaterial : HighPolishShaderAdapter.COVER_MATTE_ID);

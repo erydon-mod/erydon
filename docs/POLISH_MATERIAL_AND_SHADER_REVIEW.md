@@ -122,14 +122,19 @@ The native maps remain non-metallic under the
 ### Cover finish enum
 
 Cover blocks select their reflection treatment through the existing `finish`
-property. With supported Complementary shaders, Gloss uses Mirror stone's
+property. With supported Complementary shaders, White/Black Gloss uses Mirror stone's
 perfect smoothness and 50% frontal reflection response. Silver + Gloss instead
 uses the outward two-way window coating's 90% reflection floor and neutral
 reflection blend. This is opaque mirror cladding: the cover remains opaque.
+Bronze Gloss retains the shared full conductor response, canonical bronze colour
+and authored polish, with only the finite 2/255 roughness minimum. It does not
+receive Mirror stone's opaque albedo preservation. The 2026-10-09 revision restores
+this treatment after the first cover override also sent Bronze through Mirror stone.
 
 The treatment belongs to actual CoverBlock Gloss states, including lit covers,
-and is independent of the stone, glazing and two-way-glass preferences. Gloss
-coffered-ceiling insets use the same treatment; Matte retains its existing material. No texture,
+and is independent of the stone, glazing and two-way-glass preferences. White/Black Gloss
+coffered-ceiling insets use the Mirror treatment; bronze inset sprites retain their
+conductor response. Matte retains its existing material. No texture,
 model, geometry, CTM rule or Collection pack changes are involved. Shader state
 classification runs at shader load; changing the placed finish uses the existing
 block-state update. Other shader packs retain native PBR.
@@ -139,13 +144,16 @@ atlas metadata lookup. Their surrounding stone and cornices retain the selected
 stone finish. These panel markers carry no metal coverage or conductor alloy.
 
 Dedicated partial-block material IDs 12059/12061 preserve voxel-lighting rules.
+Bronze Gloss uses geometry-only ID 12065, keeping its metallic sprite treatment
+without either Mirror override or a false full-cube reflection voxel.
 Matte covers use geometry-only ID 12063. An unmapped thin cover previously entered
 CU's world reflection map as a full cube at its owner cell, producing a false
 central square on the 3x3 metal panel. The odd ID excludes that phantom cube;
 metal coverage, roughness 166/255, alloy colour and soft direct-light sheen are
 unchanged. White and Black matte covers receive the same thin geometry classification.
-Opaque mask 242 carries ordinary Gloss and 245 carries Silver + Gloss; the
-sprite-metal adapter leaves these explicit finishes alone. Authored emission is
+Opaque mask 242 carries White/Black Gloss and 245 carries Silver + Gloss; the
+sprite-metal adapter leaves these explicit finishes alone. Bronze Gloss uses
+conductor mask 243 with full authored metal coverage. Authored emission is
 evaluated before the cover override. Mirror and Silver reflections are capped at .99 to
 survive CU's signed-normalized history storage. The normal composite path reuses
 its material read to distinguish the Silver coating from native opaque albedo
@@ -182,7 +190,7 @@ retain the flush overlay. Embedded patterns keep their authored POM normals.
 Colored conductor Fresnel, finite roughness and material-aware reflection history
 replace the previous high-contrast metal boost. Ordinary stone is unchanged at
 zero metal coverage. Mixed pixels retain the selected underlying finish. Material
-mask 242 remains Mirror stone/Gloss covers, 243 is bronze and 244 silver; Silver
+mask 242 remains Mirror stone/White/Black Gloss covers, 243 is bronze and 244 silver; Silver
 Gloss covers use mask 245 and the window coating keeps its separate path.
 The metal adapter preflights all eight affected programs
 before enabling a dimension, including the existing buffer-format declarations.
