@@ -1,0 +1,33 @@
+// Verify optional WorldEdit mixins before Minecraft opens a window or world.
+def worldEditStateProbes = [true, false].collect { enabled ->
+    tasks.register("verifyWorldEditCompactStates${enabled ? 'Enabled' : 'Disabled'}", JavaExec) {
+        group = 'verification'
+        description = "Checks WorldEdit state transitions with compact tables ${enabled ? 'enabled' : 'disabled'}."
+        dependsOn tasks.named('testClasses')
+        classpath = sourceSets.test.runtimeClasspath
+        mainClass = 'net.fabricmc.loader.impl.launch.knot.KnotClient'
+        maxHeapSize = '512M'
+        def fixture = layout.buildDirectory.dir("worldedit-state-probe-${enabled}")
+        doFirst {
+            def root = fixture.get().asFile
+            root.mkdirs()
+            workingDir root
+            def mod = new File(root, 'probe-mod')
+            mod.mkdirs()
+            new File(mod, 'fabric.mod.json').text = groovy.json.JsonOutput.toJson([
+                    schemaVersion: 1, id: 'erydon_worldedit_state_probe', version: '1.0.0',
+                    environment: 'client', entrypoints: [preLaunch: ['com.oliver.erydon.compat.worldedit.WorldEditCompactStateLaunchProbe']]
+            ])
+            systemProperty 'fabric.development', 'true'
+            systemProperty 'fabric.addMods', mod.absolutePath
+            systemProperty 'erydon.perf.worldedit_compact_transitions', enabled.toString()
+            args '--gameDir', root.absolutePath, '--version', '1.20.1', '--accessToken', '0'
+        }
+    }
+}
+tasks.register('verifyWorldEditCompactStates') {
+    group = 'verification'
+    description = 'Checks compact and original WorldEdit state tables through Fabric.'
+    dependsOn worldEditStateProbes
+}
+tasks.named('check') { dependsOn tasks.named('verifyWorldEditCompactStates') }

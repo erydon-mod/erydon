@@ -116,6 +116,8 @@ dependencies {
 
     // Optional compat surface for post-WorldEdit repair hooks
     modCompileOnly "com.sk89q.worldedit:worldedit-fabric-mc1.20:7.2.15"
+    // Exercise optional state-table compatibility through the real test-only mod.
+    modTestImplementation "com.sk89q.worldedit:worldedit-fabric-mc1.20:7.2.15"
 }
 
 
@@ -817,6 +819,7 @@ apply from: 'gradle/erydon-axiom-icon-audit.gradle'
 apply from: 'gradle/erydon-high-polish-validation.gradle'
 apply from: 'gradle/erydon-alcove-transform-validation.gradle'
 apply from: 'gradle/erydon-shallow-stair-validation.gradle'
+apply from: 'gradle/erydon-worldedit-state-validation.gradle'
 apply from: 'gradle/erydon-coping-validation.gradle'
 apply from: 'gradle/erydon-arch-validation.gradle'
 apply from: 'gradle/erydon-finial-compat-validation.gradle'

@@ -2,7 +2,9 @@ package com.oliver.erydon.mixin.compat.worldedit;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableTable;
+import com.google.common.collect.Table;
 import com.oliver.erydon.Erydon;
+import com.oliver.erydon.compat.worldedit.CompactWorldEditStateTable;
 import com.sk89q.worldedit.fabric.FabricAdapter;
 import com.sk89q.worldedit.registry.state.Property;
 import com.sk89q.worldedit.world.block.BlockState;
@@ -16,9 +18,11 @@ import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Comparator;
 import java.util.Map;
@@ -31,6 +35,31 @@ public abstract class WorldEditBlockStateMixin {
     private static final int ERYDON_MAX_FULL_WORLD_EDIT_STATES =
             Integer.getInteger("erydon.worldedit.max_full_states", 128);
     private static final AtomicInteger ERYDON_SLIMMED_BLOCK_TYPES = new AtomicInteger();
+
+    @Unique
+    private static final boolean ERYDON_COMPACT_WORLD_EDIT_TRANSITIONS = Boolean.parseBoolean(
+            System.getProperty("erydon.perf.worldedit_compact_transitions", "true"));
+    @Unique
+    private static final CompactWorldEditStateTable.Factory<BlockState> ERYDON_WORLD_EDIT_TABLES =
+            new CompactWorldEditStateTable.Factory<>();
+
+    // Exact WorldEdit 7.2.15 private descriptor. If absent, leave WorldEdit's original path alone.
+    // This does not change the separate >128-state slim guard below: those tables remain empty.
+    @Inject(method = "populate(Ljava/util/Map;)V", at = @At("HEAD"), cancellable = true, require = 0)
+    private void erydon$useCompactTransitions(
+            Map<Map<Property<?>, Object>, BlockState> stateMap, CallbackInfo ci) {
+        if (!ERYDON_COMPACT_WORLD_EDIT_TRANSITIONS) {
+            return;
+        }
+        BlockState state = (BlockState) (Object) this;
+        WorldEditBlockStateAccessor accessor = (WorldEditBlockStateAccessor) (Object) this;
+        Table<Property<?>, Object, BlockState> table = ERYDON_WORLD_EDIT_TABLES.create(
+                state.getBlockType(), stateMap, accessor.erydon$getValues());
+        if (table != null) {
+            accessor.erydon$setStates(table);
+            ci.cancel();
+        }
+    }
 
     @Inject(method = "generateStateMap", at = @At("HEAD"), cancellable = true, require = 0)
     private static void erydon$useSlimStateMapForLargeErydonBlocks(

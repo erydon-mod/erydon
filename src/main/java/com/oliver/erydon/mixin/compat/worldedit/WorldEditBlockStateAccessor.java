@@ -5,9 +5,13 @@ import com.sk89q.worldedit.registry.state.Property;
 import com.sk89q.worldedit.world.block.BlockState;
 import com.sk89q.worldedit.world.block.BlockType;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
+import java.util.Map;
+
+@Pseudo
 @Mixin(value = BlockState.class, remap = false)
 public interface WorldEditBlockStateAccessor {
     @Invoker("<init>")
@@ -20,4 +24,7 @@ public interface WorldEditBlockStateAccessor {
 
     @Accessor("states")
     void erydon$setStates(Table<Property<?>, Object, BlockState> states);
+
+    @Accessor("values")
+    Map<Property<?>, Object> erydon$getValues();
 }
