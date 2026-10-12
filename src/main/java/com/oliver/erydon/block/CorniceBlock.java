@@ -6,10 +6,9 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.HorizontalFacingBlock;
 import net.minecraft.block.ShapeContext;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.EnumProperty;
@@ -267,7 +266,7 @@ public class CorniceBlock extends HorizontalFacingBlock implements ClusterRebuil
     }
 
     public CorniceBlock(Settings settings) {
-        super(settings.nonOpaque());
+        super(settings.nonOpaque().dynamicBounds());
         this.setDefaultState(this.stateManager.getDefaultState()
                 .with(FACING, Direction.NORTH)
                 .with(SHAPE, CorniceShape.STRAIGHT));
@@ -285,6 +284,7 @@ public class CorniceBlock extends HorizontalFacingBlock implements ClusterRebuil
 
     @Override
     public BlockState mirror(BlockState state, BlockMirror mirror) {
+        if (state.get(SHAPE).isAngled()) return CorniceSlopePlacement.mirror(state, mirror);
         EnumSet<Direction> mirroredWalls = EnumSet.noneOf(Direction.class);
         for (Direction wall : coveredWalls(state)) {
             mirroredWalls.add(mirrorWall(wall, mirror));
@@ -296,6 +296,11 @@ public class CorniceBlock extends HorizontalFacingBlock implements ClusterRebuil
     @Override
     public BlockState getPlacementState(ItemPlacementContext ctx) {
         Direction preferredWall = getPreferredWall(ctx);
+        BlockState angled = CorniceSlopePlacement.resolve(this.getDefaultState(), ctx.getWorld(), ctx.getBlockPos(), preferredWall);
+        if (angled != null) return angled;
+        // A clicked hypotenuse cannot fall back to another attachment after duplicate rejection.
+        if (CorniceSlopePlacement.shapeFor(ctx.getWorld().getBlockState(ctx.getBlockPos().offset(preferredWall)),
+                preferredWall.getOpposite()) != null) return null;
         BlockState resolved = this.resolveState(
                 this.getDefaultState().with(FACING, preferredWall),
                 ctx.getWorld(),
@@ -321,13 +326,19 @@ public class CorniceBlock extends HorizontalFacingBlock implements ClusterRebuil
             BlockPos neighborPos
     ) {
         BlockState resolved = this.resolveState(state, world, pos, state.get(FACING));
+        if (state.get(SHAPE).isAngled() && direction.getAxis().isHorizontal()
+                && world instanceof World live && !live.isClient) {
+            // A full return wall can change both live arms while leaving the
+            // saved slope pose untouched. Its reciprocal peers must redraw too.
+            redrawNearbyCornices(live, pos);
+        }
         return resolved.canPlaceAt(world, pos) ? resolved : net.minecraft.block.Blocks.AIR.getDefaultState();
     }
 
     @Override
-    public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack) {
-        super.onPlaced(world, pos, state, placer, itemStack);
-        if (world.isClient) {
+    public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
+        super.onBlockAdded(state, world, pos, oldState, notify);
+        if (world.isClient || state.getBlock() == oldState.getBlock()) {
             return;
         }
 
@@ -338,12 +349,10 @@ public class CorniceBlock extends HorizontalFacingBlock implements ClusterRebuil
     @Override
     public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
         if (!world.isClient) {
-            if (state.getBlock() instanceof CorniceBlock) {
-                refreshNearbyCornices(world, pos);
-            }
-
             if (newState.getBlock() instanceof CorniceBlock) {
                 refreshCorniceAt(world, pos);
+            }
+            if (state.getBlock() instanceof CorniceBlock || newState.getBlock() instanceof CorniceBlock) {
                 refreshNearbyCornices(world, pos);
             }
         }
@@ -352,6 +361,7 @@ public class CorniceBlock extends HorizontalFacingBlock implements ClusterRebuil
     }
 
     private BlockState resolveState(BlockState state, BlockView world, BlockPos pos, Direction preferredWall) {
+        if (state.get(SHAPE).isAngled()) return state;
         boolean northWall = isWall(world, pos, Direction.NORTH);
         boolean eastWall = isWall(world, pos, Direction.EAST);
         boolean southWall = isWall(world, pos, Direction.SOUTH);
@@ -441,6 +451,7 @@ public class CorniceBlock extends HorizontalFacingBlock implements ClusterRebuil
 
         Direction facing = state.get(FACING);
         CorniceShape shape = state.get(SHAPE);
+        if (shape.isAngled()) return false;
 
         if (shape == CorniceShape.STRAIGHT) {
             return facing == wallDirection;
@@ -450,6 +461,7 @@ public class CorniceBlock extends HorizontalFacingBlock implements ClusterRebuil
     }
 
     private boolean hasAttachment(BlockState state, BlockView world, BlockPos pos) {
+        if (state.get(SHAPE).isAngled()) return CorniceSlopePlacement.attached(state, world, pos);
         Direction facing = state.get(FACING);
         CorniceShape shape = state.get(SHAPE);
 
@@ -514,12 +526,14 @@ public class CorniceBlock extends HorizontalFacingBlock implements ClusterRebuil
     private static boolean isWall(BlockView world, BlockPos pos, Direction direction) {
         BlockPos wallPos = pos.offset(direction);
         BlockState wallState = world.getBlockState(wallPos);
+        if (wallState.getBlock() instanceof CorniceBlock) return false;
         return wallState.isSideSolidFullSquare(world, wallPos, direction.getOpposite());
     }
 
     private static boolean hasFilledCorner(BlockView world, BlockPos pos, Direction first, Direction second) {
         BlockPos cornerPos = pos.offset(first).offset(second);
         BlockState cornerState = world.getBlockState(cornerPos);
+        if (cornerState.getBlock() instanceof CorniceBlock) return false;
         return cornerState.isSideSolidFullSquare(world, cornerPos, first.getOpposite())
                 && cornerState.isSideSolidFullSquare(world, cornerPos, second.getOpposite());
     }
@@ -630,14 +644,26 @@ public class CorniceBlock extends HorizontalFacingBlock implements ClusterRebuil
     }
 
     private static void refreshNearbyCornices(WorldAccess world, BlockPos pos) {
-        for (Direction direction : Direction.Type.HORIZONTAL) {
-            refreshCorniceAt(world, pos.offset(direction));
+        for (int x = -2; x <= 2; x++) for (int z = -2; z <= 2; z++) {
+            if (x == 0 && z == 0) continue;
+            BlockPos neighbour = pos.add(x, 0, z);
+            refreshCorniceAt(world, neighbour);
         }
+        if (world instanceof World live) redrawNearbyCornices(live, pos);
+    }
 
-        refreshCorniceAt(world, pos.north().east());
-        refreshCorniceAt(world, pos.east().south());
-        refreshCorniceAt(world, pos.south().west());
-        refreshCorniceAt(world, pos.west().north());
+    private static void redrawNearbyCornices(World world, BlockPos pos) {
+        // A source discovers an adjacent target within two cells, and the
+        // target's own two-cell search can reject that source as ambiguous.
+        for (int x = -4; x <= 4; x++) for (int z = -4; z <= 4; z++) {
+            BlockPos owner = pos.add(x, 0, z);
+            BlockState current = world.getBlockState(owner);
+            if (current.getBlock() instanceof CorniceBlock) {
+                // Listener-only flags redraw remote owner chunks without
+                // invoking neighbour updates or altering their saved poses.
+                world.updateListeners(owner, current, current, Block.NOTIFY_LISTENERS);
+            }
+        }
     }
 
     private static void refreshCorniceAt(WorldAccess world, BlockPos pos) {
@@ -658,6 +684,26 @@ public class CorniceBlock extends HorizontalFacingBlock implements ClusterRebuil
         CorniceShape shape = state.get(SHAPE);
         CorniceProfile profile = resolveProfile(state);
 
+        boolean lightingWorker = world instanceof ServerWorld serverWorld && !serverWorld.getServer().isOnThread();
+        List<CorniceConnections.Segment> components = lightingWorker
+                ? CorniceConnections.nativeComponents(state) : CorniceConnections.components(world, state, pos);
+        if (shape.isAngled() || components.stream().anyMatch(component -> component.joinedStart() || component.joinedEnd())) {
+            double[][] boxes = switch (profile) {
+                case GEORGIAN -> GEORGIAN_STRAIGHT_BOXES;
+                case GUILLOCHE -> GUILLOCHE_STRAIGHT_BOXES;
+                case GOTHIC -> GOTHIC_STRAIGHT_BOXES;
+                case MODERN -> MODERN_STRAIGHT_BOXES;
+            };
+            String style = switch (profile) {
+                case GEORGIAN -> "georgian";
+                case GUILLOCHE -> "guilloche";
+                case GOTHIC -> "gothic";
+                case MODERN -> "modern";
+            };
+            boxes = CorniceInteractionShapes.profileBoxes(style, boxes);
+            return CorniceInteractionShapes.shape(state, components, boxes);
+        }
+
         if (shape == CorniceShape.OUTER_CORNER) {
             return runShape(outerShapes(profile), facing);
         }
@@ -674,15 +720,36 @@ public class CorniceBlock extends HorizontalFacingBlock implements ClusterRebuil
         return getOutlineShape(state, world, pos, context);
     }
 
+    /** Keep vanilla debris bounded while detailed outlines retain their fine moulding geometry. */
+    public VoxelShape getBreakParticleShape(BlockState state) {
+        CorniceRun.Point centre = state.get(SHAPE).isAngled()
+                ? CorniceSlopePlacement.run(state).point(.5, .125) : new CorniceRun.Point(.5, .5);
+        return VoxelShapes.cuboid(centre.x() - .5, .25, centre.z() - .5, centre.x() + .5, 1, centre.z() + .5);
+    }
+
     public enum CorniceShape implements StringIdentifiable {
         STRAIGHT("straight"),
         INNER_CORNER("inner_corner"),
-        OUTER_CORNER("outer_corner");
+        OUTER_CORNER("outer_corner"),
+        DIAGONAL_PRIMARY("diagonal_primary"),
+        DIAGONAL_SECONDARY("diagonal_secondary"),
+        BROAD_RIGHT_PRIMARY("broad_right_primary"),
+        BROAD_RIGHT_SECONDARY("broad_right_secondary"),
+        BROAD_LEFT_PRIMARY("broad_left_primary"),
+        BROAD_LEFT_SECONDARY("broad_left_secondary"),
+        NARROW_RIGHT_PRIMARY("narrow_right_primary"),
+        NARROW_RIGHT_SECONDARY("narrow_right_secondary"),
+        NARROW_LEFT_PRIMARY("narrow_left_primary"),
+        NARROW_LEFT_SECONDARY("narrow_left_secondary");
 
         private final String name;
 
         CorniceShape(String name) {
             this.name = name;
+        }
+
+        public boolean isAngled() {
+            return ordinal() >= DIAGONAL_PRIMARY.ordinal();
         }
 
         @Override

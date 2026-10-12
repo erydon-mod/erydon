@@ -18,6 +18,7 @@ public final class ErydonFamilyModelLoadingPlugin implements ModelLoadingPlugin 
     @Override
     public void onInitializeModelLoader(Context pluginContext) {
         DynamicBakedModelCache cache = new DynamicBakedModelCache();
+        CorniceFittedCache fittedQuads = new CorniceFittedCache();
         pluginContext.addModels(extraModels());
 
         pluginContext.modifyModelAfterBake().register((model, context) -> {
@@ -35,7 +36,7 @@ public final class ErydonFamilyModelLoadingPlugin implements ModelLoadingPlugin 
                 return wrap(cache, mid, model, ColumnBakedModel::new, "columns", itemModel);
             }
             if (ErydonModelFamilyIndex.isCorniceBlock(path)) {
-                return wrap(cache, mid, model, CorniceBakedModel::new, "cornices", itemModel);
+                return wrap(cache, mid, model, wrapped -> new CorniceBakedModel(wrapped, fittedQuads), "cornices", itemModel);
             }
             if (ErydonModelFamilyIndex.isCofferedCeilingBlock(path)) {
                 return wrap(cache, mid, model, CeilingCofferedBakedModel::new, "coffered_ceilings", itemModel);

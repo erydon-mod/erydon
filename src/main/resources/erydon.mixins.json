@@ -9,6 +9,7 @@
     "ArchStateTransitionsMixin",
     "PalettedContainerSaveMixin",
     "CopingRaycastMixin",
+    "CorniceCollisionIteratorMixin",
     "BlockItemMixin",
     "DebugStickItemMixin",
     "WorldMixin",
@@ -19,6 +20,8 @@
   "client": [
     "client.ArchModelIdentifierMixin",
     "client.WindowArchBreakParticlesMixin",
+    "client.CorniceRedrawMixin",
+    "client.CorniceChangedBlockRedrawMixin",
     "client.HighPolishResourceManagerMixin",
     "client.HighPolishCommandSuggestionsMixin",
     "client.BakedQuadFactoryMixin",

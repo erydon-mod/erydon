@@ -2,9 +2,11 @@ package com.oliver.erydon.client.model;
 
 import com.oliver.erydon.Erydon;
 import com.oliver.erydon.block.CorniceBlock;
+import com.oliver.erydon.block.CorniceConnections;
 import com.oliver.erydon.migration.ErydonIdMigration;
 import com.oliver.erydon.util.ErydonIdNaming;
 import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
+import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
@@ -30,10 +32,17 @@ public final class CorniceBakedModel implements BakedModel, FabricBakedModel {
 
     private final BakedModel wrapped;
     private final Sprite particle;
+    private final CorniceFittedCache fittedQuads;
+    private volatile List<BakedQuad> straightQuads;
 
     public CorniceBakedModel(BakedModel wrapped) {
+        this(wrapped, new CorniceFittedCache());
+    }
+
+    CorniceBakedModel(BakedModel wrapped, CorniceFittedCache fittedQuads) {
         this.wrapped = wrapped;
         this.particle = wrapped.getParticleSprite();
+        this.fittedQuads = fittedQuads;
     }
 
     @Override
@@ -67,12 +76,37 @@ public final class CorniceBakedModel implements BakedModel, FabricBakedModel {
             return;
         }
 
+        var components = CorniceConnections.components(view, state, pos);
+        if (state.get(CorniceBlock.SHAPE).isAngled()
+                || components.stream().anyMatch(component -> component.joinedStart() || component.joinedEnd())) {
+            var material = RendererAccess.INSTANCE.getRenderer().materialFinder().find();
+            for (BakedQuad quad : fitted(blockId.getPath(), components)) {
+                context.getEmitter().fromVanilla(quad, material, null)
+                        .tag(CopingTexturePlane.corniceTag(quad.getFace())).emit();
+            }
+            return;
+        }
+
         int rotation = rotationForFacing(state.get(CorniceBlock.FACING));
         switch (state.get(CorniceBlock.SHAPE)) {
             case STRAIGHT -> emit(context, blockId.getPath(), "straight", rotation);
             case INNER_CORNER -> emitInnerCorner(context, blockId.getPath(), style, rotation);
             case OUTER_CORNER -> emit(context, blockId.getPath(), style.outerSuffix, style.outerRotation(rotation));
         }
+    }
+
+    private List<BakedQuad> fitted(String blockPath, List<CorniceConnections.Segment> segments) {
+        List<BakedQuad> cached = fittedQuads.get(blockPath, segments);
+        if (cached != null) return cached;
+        if (straightQuads == null) {
+            BakedModel model = MinecraftClient.getInstance().getBakedModelManager().getModel(modelId(blockPath, "straight"));
+            straightQuads = List.copyOf(AxiomFallbackQuads.collect(model, null, Random.create(0)));
+        }
+        List<BakedQuad> result = new ArrayList<>();
+        for (var segment : segments) result.addAll(CorniceAngledGeometry.fit(straightQuads, segment));
+        cached = List.copyOf(result);
+        fittedQuads.put(blockPath, segments, cached);
+        return cached;
     }
 
     @Override
@@ -189,6 +223,10 @@ public final class CorniceBakedModel implements BakedModel, FabricBakedModel {
         Style style = styleForBlockPath(blockId.getPath());
         if (style == null) {
             return wrapped.getQuads(state, face, random);
+        }
+
+        if (state.get(CorniceBlock.SHAPE).isAngled()) {
+            return face == null ? fitted(blockId.getPath(), CorniceConnections.nativeComponents(state)) : List.of();
         }
 
         int rotation = rotationForFacing(state.get(CorniceBlock.FACING));

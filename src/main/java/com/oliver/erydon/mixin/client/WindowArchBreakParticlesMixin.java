@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.oliver.erydon.block.WindowArchBlock;
 import com.oliver.erydon.block.CopingBlock;
+import com.oliver.erydon.block.CorniceBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.util.math.BlockPos;
@@ -24,6 +25,9 @@ public abstract class WindowArchBreakParticlesMixin {
         }
         if (state.getBlock() instanceof CopingBlock coping) {
             return coping.getBreakParticleShape(state);
+        }
+        if (state.getBlock() instanceof CorniceBlock cornice) {
+            return cornice.getBreakParticleShape(state);
         }
         return original.call(state, world, pos);
     }

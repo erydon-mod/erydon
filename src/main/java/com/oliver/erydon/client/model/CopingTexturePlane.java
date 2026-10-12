@@ -5,12 +5,15 @@ import net.minecraft.util.math.Direction;
 /** Nominal faces are not serialized by Fabric meshes; tags preserve the authored CTM plane. */
 final class CopingTexturePlane {
     private static final int MARKER=0x43504C00;
+    private static final int CORNICE=0x434E4300;
     private CopingTexturePlane() { }
 
     static int tag(Direction face) { return MARKER | face.getId(); }
+    static int corniceTag(Direction face) { return CORNICE | face.getId(); }
+    static boolean isCornice(int tag) { return (tag & ~7) == CORNICE && (tag & 7) < 6; }
 
     static Direction face(int tag) {
-        return (tag & ~7)==MARKER && (tag & 7)<6 ? Direction.byId(tag & 7) : null;
+        return ((tag & ~7)==MARKER || isCornice(tag)) && (tag & 7)<6 ? Direction.byId(tag & 7) : null;
     }
 
     static int rotate(int tag,int turns) {

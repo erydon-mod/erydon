@@ -26428,6 +26428,10 @@ private static Block registerBlock(String name, Block block) {
 
     private static Item registerBlockItem(String name, Block block) {
         Item.Settings settings = new Item.Settings();
+        if (block instanceof CorniceBlock) {
+            return Registry.register(Registries.ITEM, new Identifier(Erydon.MOD_ID, name),
+                    new com.oliver.erydon.item.CorniceItem(block, settings));
+        }
         if (block instanceof CopingBlock) {
             return Registry.register(Registries.ITEM, new Identifier(Erydon.MOD_ID, name),
                     new com.oliver.erydon.item.CopingItem(block, settings));

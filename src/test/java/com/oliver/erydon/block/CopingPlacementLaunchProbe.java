@@ -45,11 +45,19 @@ public final class CopingPlacementLaunchProbe implements PreLaunchEntrypoint {
             fixture("glacium_slope_vertical",new SlopeVerticalBlock(Block.Settings.copy(Blocks.STONE)));
             fixture("glacium_slope_vertical_shallow_broad",new SlopeVerticalShallowBroadBlock(Block.Settings.copy(Blocks.STONE)));
             fixture("glacium_slope_vertical_shallow_narrow",new SlopeVerticalShallowNarrowBlock(Block.Settings.copy(Blocks.STONE)));
+            for (String style : new String[]{"modern", "georgian", "byzantine", "gothic"})
+                fixture("glacium_cornice_" + style, new CorniceBlock(Block.Settings.copy(Blocks.STONE).nonOpaque()));
             // Minecraft normally initialises these caches after mod registration, later than preLaunch.
             for (Block block:Registries.BLOCK) if (Registries.BLOCK.getId(block).getNamespace().equals("erydon")) {
                 block.getStateManager().getStates().forEach(BlockState::initShapeCache);
             }
             com.oliver.erydon.client.model.SlopeShapeLaunchChecks.run();
+            CornicePlacementLaunchChecks.run();
+            CorniceClientRedrawLaunchChecks.run();
+            CorniceCollisionLaunchChecks.run();
+            CornicePerformanceLaunchChecks.run();
+            com.oliver.erydon.client.model.CorniceModelLoadingLaunchChecks.run();
+            com.oliver.erydon.client.model.CorniceGeometryPerformanceLaunchChecks.run();
             com.oliver.erydon.client.model.CopingMeshProjectionLaunchChecks.run();
             com.oliver.erydon.client.model.SynapheiaCubeConnectionsLaunchChecks.run();
             com.oliver.erydon.migration.ReiSearchLaunchChecks.run();
@@ -217,7 +225,9 @@ public final class CopingPlacementLaunchProbe implements PreLaunchEntrypoint {
     private static void fixture(String path,Block block) {
         Identifier id=new Identifier("erydon",path);
         net.minecraft.registry.Registry.register(Registries.BLOCK,id,block);
-        net.minecraft.registry.Registry.register(Registries.ITEM,id,new net.minecraft.item.BlockItem(block,new net.minecraft.item.Item.Settings()));
+        net.minecraft.registry.Registry.register(Registries.ITEM,id,block instanceof CorniceBlock
+                ? new com.oliver.erydon.item.CorniceItem(block,new net.minecraft.item.Item.Settings())
+                : new net.minecraft.item.BlockItem(block,new net.minecraft.item.Item.Settings()));
     }
     private static Block block(String path) {
         Block block=Registries.BLOCK.get(new Identifier("erydon",path));

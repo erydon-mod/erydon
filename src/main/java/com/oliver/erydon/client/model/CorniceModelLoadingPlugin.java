@@ -14,6 +14,7 @@ public final class CorniceModelLoadingPlugin implements ModelLoadingPlugin {
     @Override
     public void onInitializeModelLoader(Context pluginContext) {
         DynamicBakedModelCache cache = new DynamicBakedModelCache();
+        CorniceFittedCache fittedQuads = new CorniceFittedCache();
         pluginContext.addModels(extraModels());
 
         pluginContext.modifyModelAfterBake().register((model, context) -> {
@@ -26,7 +27,7 @@ public final class CorniceModelLoadingPlugin implements ModelLoadingPlugin {
                 return model;
             }
 
-            return cache.wrap(mid, model, CorniceBakedModel::new,
+            return cache.wrap(mid, model, wrapped -> new CorniceBakedModel(wrapped, fittedQuads),
                     ErydonLoadProfiler.customWrapObserver("cornices", "inventory".equals(mid.getVariant())));
         });
     }

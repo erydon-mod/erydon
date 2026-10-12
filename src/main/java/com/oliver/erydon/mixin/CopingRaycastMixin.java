@@ -1,6 +1,7 @@
 package com.oliver.erydon.mixin;
 
 import com.oliver.erydon.block.CopingRaycast;
+import com.oliver.erydon.block.CorniceRaycast;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.hit.BlockHitResult;
@@ -15,6 +16,7 @@ import org.spongepowered.asm.mixin.injection.At;
 public interface CopingRaycastMixin {
     @ModifyReturnValue(method="raycastBlock",at=@At("RETURN"))
     default BlockHitResult erydon$targetCoping(BlockHitResult original,Vec3d start,Vec3d end,BlockPos pos,VoxelShape shape,BlockState state) {
-        return CopingRaycast.closest((BlockView)this,start,end,pos,state,original);
+        BlockHitResult cap = CopingRaycast.closest((BlockView)this,start,end,pos,state,original);
+        return CorniceRaycast.closest((BlockView)this,start,end,pos,state,cap);
     }
 }

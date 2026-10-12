@@ -196,6 +196,8 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
 
     static Direction repeatProjectionFace(Identifier id, Direction lightingFace, Direction authoredFace,int tag) {
         Direction stored=CopingTexturePlane.face(tag);
+        if (stored != null && id != null && Erydon.MOD_ID.equals(id.getNamespace())
+                && id.getPath().contains("_cornice_")) return stored;
         return id != null && Erydon.MOD_ID.equals(id.getNamespace())
                 && id.getPath().endsWith("_coping_georgian")
                 ? (stored != null ? stored : authoredFace != null ? authoredFace : lightingFace) : lightingFace;

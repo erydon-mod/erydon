@@ -26,9 +26,9 @@ public final class ViewerSearchLaunchChecks {
 
     public static void run() throws Exception {
         List<ItemStack> stacks = ErydonItemOrdering.orderedBlockStacks();
-        require(stacks.size() == 144, "Incomplete viewer block/item fixture: " + stacks.size());
-        require(stacks.stream().filter(stack -> ErydonBlockCategories.isStandardFinish(ErydonItemOrdering.path(stack))).count() == 36,
-                "Viewer fixture must include 27 standard copings and 9 plain shapes");
+        require(stacks.size() == 148, "Incomplete viewer block/item fixture: " + stacks.size());
+        require(stacks.stream().filter(stack -> ErydonBlockCategories.isStandardFinish(ErydonItemOrdering.path(stack))).count() == 40,
+                "Viewer fixture must include 27 standard copings, 9 plain shapes and 4 cornices");
         Language original = Language.getInstance();
         try {
             for (String locale : List.of("en_us", "de_de", "es_es")) {
@@ -42,7 +42,7 @@ public final class ViewerSearchLaunchChecks {
         } finally {
             Language.setInstance(original);
         }
-        System.out.println("ERYDON_VIEWER_ALIASES_OK: JEI alias manager and EMI alias queries; 144 placed-item fixtures, 36 standard, 3 languages");
+        System.out.println("ERYDON_VIEWER_ALIASES_OK: JEI alias manager and EMI alias queries; 148 placed-item fixtures, 40 standard, 3 languages");
     }
 
     private static void checkJei(List<ItemStack> stacks, List<String> terms, List<String> localized) throws Exception {
