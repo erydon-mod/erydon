@@ -135,8 +135,9 @@ roughness coefficient was changed. Silver keeps its separate 90% mirror coating.
 This restores the earlier Bronze smoothness of approximately 0.984 with the native
 Gloss specular red of 255. It also restores material-boundary-aware reflection
 filtering and removes the opaque base-colour preservation that obscured dark detail.
-It does not establish that all perceived softness in the diagnostic scene has
-been resolved; that still requires a new matched client capture.
+The regression checks establish material handling; visual acceptance is separate.
+On 2026-10-12, the user confirmed Bronze Gloss covers were checked and approved
+in the current client.
 
 The new GPU regression test executes the complete composed material function,
 including both conductor guards and the earlier emission/return boundary. A
@@ -156,8 +157,9 @@ The native placed-model chains for all four cover colours retain their uniform
 finish sprites. The active Collection 64x compat2 v1.5.17 pack provides no overrides
 for these cover sprites or companion maps; native Bronze Gloss specular remains
 `(255,255,0,255)` and has no authored normal map. Native and active-pack CTM rules
-do not match Bronze covers. No models, textures, normals or CTM rules were edited;
-joined texture phase and all facings still require the fresh in-game review.
+do not match Bronze covers. No models, textures, normals or CTM rules were edited.
+The current cover appearance was user-approved on 2026-10-12; the checks above
+do not constitute an exhaustive visual review of every facing and shader profile.
 
 Existing changelog entry `2.0.0-049` was amended and read back; its change date is
 2026-10-09 and launch date remains blank. No packaging, installation, commit,

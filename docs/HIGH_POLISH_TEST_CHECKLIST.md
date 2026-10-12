@@ -1,5 +1,9 @@
 # High polish and architectural fixes: test checklist
 
+Current visual acceptance (2026-10-12): the user checked and approved bronze
+inlays, Bronze Gloss covers and glazing in the current client. The checklist
+below remains available for future rendering changes and shader profiles.
+
 Use a separately authorized development client with a profile from the
 [audited shader matrix](HIGH_POLISH_SHADER_COMPATIBILITY.md), labPBR and your usual Collection pack. Full
 Minecraft restarts are required after saving finish or glass settings. No test

@@ -79,20 +79,27 @@ through the same NVIDIA compiler/linker, including both installed and
 screen-space-only capture presets. All eight metal programs passed source
 preflight in each case. The focused suite passed 40 tests without skips or
 failures, and the Fabric/Iris pre-launch probe verified Gloss/Matte cover
-classification and native light transport. This confirms source compatibility;
-the reported in-world appearance still requires a matched visual check.
+classification and native light transport. These checks confirm source
+compatibility; live user acceptance is recorded separately below.
 
-## Remaining visual proof
+## Live visual acceptance
 
-Compiler and pre-launch checks do not prove the appearance in a world. Compare
+On 2026-10-12, the user confirmed bronze inlays, Bronze Gloss covers and glazing
+were checked and approved in the current client. Their appearance is accepted
+for the performance changes. This approval does not certify every shader release,
+optional setting or third-party modification.
+
+Compiler and pre-launch checks do not prove the appearance in a world. For future
+shader profiles or rendering changes, compare
 Honed/Polished/Mirror, tinted/clear glazing, frame finishes, two-way glass, Gloss
 covers and patterned CTM-POM joins in a separately authorized client. Inspect
 reflection opacity and world texture phase across joins and all four facings.
 No active capture profile, protected instance, save or player configuration is
 changed by this source validation.
 
-The reported horizontal striation in stacked glazing remains a separate visual
-investigation. The capture subject uses ordinary `PaneBlock` connection flags,
+The earlier horizontal striation in stacked glazing was investigated separately;
+its cause was not established. The current glazing appearance was approved on
+2026-10-12. The capture subject uses ordinary `PaneBlock` connection flags,
 vanilla pane templates, a uniform tinted surface texture and fully transparent
 edge texture. The inspected Collection pack does not replace those textures;
 the built-in glazing override supplies specular maps only. The compatibility
