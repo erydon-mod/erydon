@@ -11,7 +11,17 @@ sourceSets {
 }
 
 configurations.frameRecorderAnnotationProcessor.extendsFrom(configurations.annotationProcessor)
-loom.mixin.add(sourceSets.frameRecorder, 'erydon-frame-recorder.refmap.json')
+// An explicit Mixin source set disables Loom's automatic registrations. Preserve
+// its default mappings for every other source set before adding our custom refmap.
+sourceSets.each { sourceSet ->
+    if (sourceSet.name == 'frameRecorder') {
+        loom.mixin.add(sourceSet, 'erydon-frame-recorder.refmap.json')
+    } else if (sourceSet.name == 'main') {
+        loom.mixin.add(sourceSet)
+    } else {
+        loom.mixin.add(sourceSet, sourceSet.name + '-' + loom.mixin.defaultRefmapName.get())
+    }
+}
 
 tasks.register('frameRecorderTest', Test) {
     group = 'verification'
