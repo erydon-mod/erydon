@@ -11,6 +11,7 @@ import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -124,7 +125,9 @@ public final class ErydonItemOrdering {
                 .filter(ErydonItemOrdering::isErydonBlock)
                 .map(Block::asItem)
                 .filter(item -> item != Items.AIR)
-                .sorted((left, right) -> sortKey(left).compareTo(sortKey(right)))
+                .map(item -> new KeyedItem(item, sortKey(item)))
+                .sorted(Comparator.comparing(KeyedItem::key))
+                .map(KeyedItem::item)
                 .toList();
     }
 
@@ -164,7 +167,7 @@ public final class ErydonItemOrdering {
         return id != null && Erydon.MOD_ID.equals(id.getNamespace());
     }
 
-    private static SortKey sortKey(Item item) {
+    static SortKey sortKey(Item item) {
         Identifier id = Registries.ITEM.getId(item);
         if (id == null) {
             return SortKey.fallback("unknown", Integer.MAX_VALUE);
@@ -380,6 +383,9 @@ public final class ErydonItemOrdering {
     private record Family(String material, String remainder) {
     }
 
+    private record KeyedItem(Item item, SortKey key) {
+    }
+
     private record TextureShape(
             int textureOrder,
             String textureName,
@@ -389,7 +395,7 @@ public final class ErydonItemOrdering {
     ) {
     }
 
-    private record SortKey(
+    record SortKey(
             int section,
             int materialOrder,
             String materialName,

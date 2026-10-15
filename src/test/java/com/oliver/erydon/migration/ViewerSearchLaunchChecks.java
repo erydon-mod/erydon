@@ -25,6 +25,7 @@ public final class ViewerSearchLaunchChecks {
     private ViewerSearchLaunchChecks() { }
 
     public static void run() throws Exception {
+        com.oliver.erydon.item.ItemOrderingLaunchChecks.run();
         List<ItemStack> stacks = ErydonItemOrdering.orderedBlockStacks();
         require(stacks.size() == 148, "Incomplete viewer block/item fixture: " + stacks.size());
         require(stacks.stream().filter(stack -> ErydonBlockCategories.isStandardFinish(ErydonItemOrdering.path(stack))).count() == 40,
@@ -34,6 +35,7 @@ public final class ViewerSearchLaunchChecks {
             for (String locale : List.of("en_us", "de_de", "es_es")) {
                 JsonObject language = resource("/assets/erydon/lang/" + locale + ".json");
                 Language.setInstance(language(language));
+                com.oliver.erydon.compat.rei.ReiRegistrationLaunchChecks.run();
                 List<String> terms = List.of("polished", "honed", "mirror");
                 List<String> localized = List.of(language.get("search.erydon.standard_finish").getAsString().split(" "));
                 checkJei(stacks, terms, localized);
