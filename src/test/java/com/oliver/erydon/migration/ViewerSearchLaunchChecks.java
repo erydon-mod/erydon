@@ -27,9 +27,11 @@ public final class ViewerSearchLaunchChecks {
     public static void run() throws Exception {
         com.oliver.erydon.item.ItemOrderingLaunchChecks.run();
         List<ItemStack> stacks = ErydonItemOrdering.orderedBlockStacks();
-        require(stacks.size() == 148, "Incomplete viewer block/item fixture: " + stacks.size());
-        require(stacks.stream().filter(stack -> ErydonBlockCategories.isStandardFinish(ErydonItemOrdering.path(stack))).count() == 40,
-                "Viewer fixture must include 27 standard copings, 9 plain shapes and 4 cornices");
+        require(stacks.size() == 148+135, "Incomplete viewer block/item fixture: " + stacks.size());
+        require(stacks.stream().filter(stack -> ErydonItemOrdering.path(stack).endsWith("_coping_georgian_grand")).count()==135,
+                "Viewer fixture must retain all Grand materials and finishes");
+        require(stacks.stream().filter(stack -> ErydonBlockCategories.isStandardFinish(ErydonItemOrdering.path(stack))).count() == 40+27,
+                "Viewer fixture must include both sets of 27 standard copings, 9 plain shapes and 4 cornices");
         Language original = Language.getInstance();
         try {
             for (String locale : List.of("en_us", "de_de", "es_es")) {
@@ -44,7 +46,7 @@ public final class ViewerSearchLaunchChecks {
         } finally {
             Language.setInstance(original);
         }
-        System.out.println("ERYDON_VIEWER_ALIASES_OK: JEI alias manager and EMI alias queries; 148 placed-item fixtures, 40 standard, 3 languages");
+        System.out.println("ERYDON_VIEWER_ALIASES_OK: JEI alias manager and EMI alias queries; 283 placed-item fixtures, 67 standard, 3 languages; Grand/large coping aliases covered");
     }
 
     private static void checkJei(List<ItemStack> stacks, List<String> terms, List<String> localized) throws Exception {
@@ -120,6 +122,11 @@ public final class ViewerSearchLaunchChecks {
                         try { return queryType.getConstructor(String.class).newInstance(term); }
                         catch (ReflectiveOperationException failure) { throw new IllegalStateException(failure); }
                     }));
+            Map<String,Object> grandQueries=List.of("grand coping","large coping","large wall cap").stream()
+                    .collect(Collectors.toMap(term -> term,term -> {
+                        try { return queryType.getConstructor(String.class).newInstance(term); }
+                        catch(ReflectiveOperationException failure) { throw new IllegalStateException(failure); }
+                    }));
             for (ItemStack stack : stacks) {
                 boolean standard = ErydonBlockCategories.isStandardFinish(ErydonItemOrdering.path(stack));
                 Object emiStack = stackType.getMethod("of", ItemStack.class).invoke(null, stack);
@@ -127,6 +134,9 @@ public final class ViewerSearchLaunchChecks {
                     boolean matches = (boolean) queryType.getMethod("matches", stackType).invoke(query.getValue(), emiStack);
                     require(matches == standard, "Wrong EMI alias query: " + ErydonItemOrdering.path(stack) + " / " + query.getKey());
                 }
+                boolean grand=ErydonItemOrdering.path(stack).endsWith("_coping_georgian_grand");
+                for(var query:grandQueries.entrySet()) require((boolean)queryType.getMethod("matches",stackType)
+                        .invoke(query.getValue(),emiStack)==grand,"Wrong EMI Grand/large family alias: "+ErydonItemOrdering.path(stack)+" / "+query.getKey());
             }
         } finally {
             registryAliases.clear(); registryAliases.addAll(previousAliases);
@@ -142,6 +152,8 @@ public final class ViewerSearchLaunchChecks {
         String indexed = String.join(" ", aliases).toLowerCase(Locale.ROOT);
         for (String term : localized) require(indexed.contains(term) == standard, "Wrong localized " + viewer + " alias: " + path + " / " + term);
         require(aliases.containsAll(ErydonBlockCategories.searchTerms(path)), viewer + " lost existing search vocabulary: " + path);
+        for(String term:List.of("grand coping","large coping","large wall cap")) require(aliases.contains(term)==path.endsWith("_coping_georgian_grand"),
+                "Wrong "+viewer+" Grand/large family alias: "+path+" / "+term);
     }
 
     private static Object proxy(Class<?> type, InvocationHandler handler) {

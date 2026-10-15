@@ -482,6 +482,11 @@
     "erydon:calacattum_ashlar_arch_georgian",
     "erydon:calacattum_hewn_arch_georgian",
     "erydon:calacattum_rock_arch_georgian",
-    "erydon:calacattum_rusticated_arch_georgian"
+    "erydon:calacattum_rusticated_arch_georgian",
+    "erydon:calacattum_aged_coping_georgian_grand",
+    "erydon:calacattum_ashlar_coping_georgian_grand",
+    "erydon:calacattum_coping_georgian_grand",
+    "erydon:calacattum_hewn_coping_georgian_grand",
+    "erydon:calacattum_rusticated_coping_georgian_grand"
   ]
 }

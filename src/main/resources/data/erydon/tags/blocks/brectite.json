@@ -356,6 +356,11 @@
     "erydon:brectite_ashlar_arch_georgian",
     "erydon:brectite_hewn_arch_georgian",
     "erydon:brectite_rock_arch_georgian",
-    "erydon:brectite_rusticated_arch_georgian"
+    "erydon:brectite_rusticated_arch_georgian",
+    "erydon:brectite_aged_coping_georgian_grand",
+    "erydon:brectite_ashlar_coping_georgian_grand",
+    "erydon:brectite_coping_georgian_grand",
+    "erydon:brectite_hewn_coping_georgian_grand",
+    "erydon:brectite_rusticated_coping_georgian_grand"
   ]
 }

@@ -19,8 +19,11 @@ public final class CopingConnections {
     private CopingConnections() {}
 
     /** Three bits per end, plus the two crosswise joins. Zero means a free end. */
-    public record HorizontalEnd(int axis,int sign,double halfLength,double halfWidth,List<CopingHorizontalMitre.Cut> cuts) {
+    public record HorizontalEnd(int axis,int sign,double halfLength,double halfWidth,List<CopingHorizontalMitre.Cut> cuts,double overhang) {
         public HorizontalEnd { cuts=List.copyOf(cuts); }
+        public HorizontalEnd(int axis,int sign,double halfLength,double halfWidth,List<CopingHorizontalMitre.Cut> cuts) {
+            this(axis,sign,halfLength,halfWidth,cuts,.125);
+        }
         public double lateral(double x,double z) { return axis==0 ? z-.5 : .5-x; }
         public double run(double x,double z) { return (axis==0 ? x : z)-.5; }
         public double cut(double lateral,int branch) {
@@ -31,7 +34,7 @@ public final class CopingConnections {
         public double distance(double x,double z,int branch) { return run(x,z)-cut(lateral(x,z),branch); }
         public double expansion() {
             double reach=halfLength;
-            for(double lateral:new double[]{-halfWidth-.125,-halfWidth,0,halfWidth,halfWidth+.125})
+            for(double lateral:new double[]{-halfWidth-overhang,-halfWidth,0,halfWidth,halfWidth+overhang})
                 reach=Math.max(reach,sign*cut(lateral,0));
             return reach/halfLength;
         }
@@ -74,33 +77,36 @@ public final class CopingConnections {
         CopingBlock.Surface surface=state.get(CopingBlock.SURFACE);
         if(!surface.flat()) return facing;
         for(Direction direction:Direction.Type.HORIZONTAL) for(int distance=1;distance<=2;distance++) for(int y=-1;y<=1;y++) {
-            Direction axis=joiningFacing(world,surface,pos,pos.offset(direction,distance).up(y));
+            Direction axis=joiningFacing(world,state,pos,pos.offset(direction,distance).up(y));
             if (axis!=null) return axis;
         }
         for(int y=-1;y<=1;y+=2) {
-            Direction axis=joiningFacing(world,surface,pos,pos.up(y));
+            Direction axis=joiningFacing(world,state,pos,pos.up(y));
             if (axis!=null) return axis;
         }
         return facing;
     }
 
-    private static Direction joiningFacing(BlockView world,CopingBlock.Surface surface,BlockPos pos,BlockPos owner) {
+    private static Direction joiningFacing(BlockView world,BlockState state,BlockPos pos,BlockPos owner) {
         BlockState other=world.getBlockState(owner);
-        if (!(other.getBlock() instanceof CopingBlock) || other.get(CopingBlock.SURFACE).flat()) return null;
+        if (!sameDesign(state,other) || other.get(CopingBlock.SURFACE).flat()) return null;
         if(other.get(CopingBlock.SURFACE).aligned()) return null;
         Direction axis=other.get(CopingBlock.FACING);
         int dx=owner.getX()-pos.getX()-(other.get(CopingBlock.OFFSET) ? axis.getOffsetX() : 0);
         int dz=owner.getZ()-pos.getZ()-(other.get(CopingBlock.OFFSET) ? axis.getOffsetZ() : 0);
-        return joins(surface,axis,other.get(CopingBlock.SURFACE),axis,dx,owner.getY()-pos.getY(),dz)!=0 ? axis : null;
+        return joins(state.get(CopingBlock.SURFACE),axis,other.get(CopingBlock.SURFACE),axis,dx,owner.getY()-pos.getY(),dz)!=0 ? axis : null;
     }
 
     public static int mask(BlockView world,BlockState state,BlockPos pos) { return resolve(world,state,pos).mask(); }
 
     /** Ordinary flat caps keep their cached outline unless a new horizontal fit is adjacent. */
     public static boolean hasAlignedNeighbour(BlockView world,BlockPos pos) {
+        return hasAlignedNeighbour(world,world.getBlockState(pos),pos);
+    }
+    public static boolean hasAlignedNeighbour(BlockView world,BlockState source,BlockPos pos) {
         for(int x=-1;x<=1;x++) for(int z=-1;z<=1;z++) if(x!=0 || z!=0) {
             BlockState state=world.getBlockState(pos.add(x,0,z));
-            if(state.getBlock() instanceof CopingBlock && state.get(CopingBlock.SURFACE).aligned()) return true;
+            if(sameDesign(source,state) && state.get(CopingBlock.SURFACE).aligned()) return true;
         }
         return false;
     }
@@ -116,8 +122,8 @@ public final class CopingConnections {
         int key=0;
         // Offset steep owners can be two cells away even when the physical ends meet.
         for(Direction direction:Direction.Type.HORIZONTAL) for(int distance=1;distance<=2;distance++) for(int y=-1;y<=1;y++)
-            key=add(world,surface,facing,anchor,pos.offset(direction,distance).up(y),key);
-        for(int y=-1;y<=1;y+=2) key=add(world,surface,facing,anchor,pos.up(y),key);
+            key=add(world,state,facing,anchor,pos.offset(direction,distance).up(y),key);
+        for(int y=-1;y<=1;y+=2) key=add(world,state,facing,anchor,pos.up(y),key);
         Joins legacy=new Joins(key);
         // Horizontal fits use the full-height plane at this owner Y. Lower flat
         // caps keep height-aware legacy joins and cannot mitre with that plane.
@@ -156,7 +162,8 @@ public final class CopingConnections {
             if(reverse==null || best.dx+reverse.dx!=0 || best.dz+reverse.dz!=0
                     || reverse.targetAxis!=axis || reverse.targetSign!=sign) continue;
             var rail=rail(state,facing,axis,0,0);
-            HorizontalEnd end=new HorizontalEnd(axis,sign,rail.length()/2,rail.width()/2,best.mitre.sourceCuts());
+            HorizontalEnd end=new HorizontalEnd(axis,sign,rail.length()/2,rail.width()/2,best.mitre.sourceCuts(),
+                    ((CopingBlock)state.getBlock()).design().overhang());
             ends.add(end);
             key|=switch(end.edge()) { case WEST -> 1; case EAST -> 8; case NORTH -> 64; default -> 128; };
         }
@@ -168,7 +175,7 @@ public final class CopingConnections {
         for(int x=-1;x<=1;x++) for(int z=-1;z<=1;z++) {
             if(x==0 && z==0) continue;
             BlockState other=neighbours.get(ownerX+x,ownerZ+z);
-            if(!(other.getBlock() instanceof CopingBlock)) continue;
+            if(!sameDesign(state,other)) continue;
             var surface=other.get(CopingBlock.SURFACE);
             if(surface!=CopingBlock.Surface.FLAT && !surface.aligned()) continue;
             if(!state.get(CopingBlock.SURFACE).aligned() && !surface.aligned()) continue;
@@ -186,7 +193,8 @@ public final class CopingConnections {
                     if(mitre==null || !mitre.reaches(extension)
                             || (mitre.sourceDistance()>source.length()/2+.00001
                                 && mitre.targetDistance()>target.length()/2+.00001)
-                            || !finiteEnd(source,sign,mitre.sourceCuts()) || !finiteEnd(target,targetSign,mitre.targetCuts())) continue;
+                            || !finiteEnd(source,sign,mitre.sourceCuts(),((CopingBlock)state.getBlock()).design())
+                            || !finiteEnd(target,targetSign,mitre.targetCuts(),((CopingBlock)other.getBlock()).design())) continue;
                     double score=mitre.sourceDistance()+mitre.targetDistance();
                     Candidate candidate=new Candidate(axis,sign,x,z,targetAxis,targetSign,mitre,score);
                     if(best==null || score<best.score-.00001 || (equal(score,best.score)
@@ -197,20 +205,22 @@ public final class CopingConnections {
         return best;
     }
     /** A join may extend its own end, but cannot erase the rail's opposite free end. */
-    private static boolean finiteEnd(CopingHorizontalMitre.Rail rail,int sign,List<CopingHorizontalMitre.Cut> cuts) {
+    private static boolean finiteEnd(CopingHorizontalMitre.Rail rail,int sign,List<CopingHorizontalMitre.Cut> cuts,CopingDesign design) {
         double width=rail.width()/2;
-        for(double p:new double[]{-width-.125,-width-.03125,-width,0,width,width+.03125,width+.125}) {
+        for(double p:new double[]{-width-design.overhang(),-width-.03125,-width,0,width,width+.03125,width+design.overhang()}) {
             int branch=p < -width ? 0 : p > width ? 2 : 1;
             double overhang=Math.max(0,Math.abs(p)-width);
             if(sign*cuts.get(branch).at(p)<-rail.length()/2-overhang-.00001) return false;
         }
         // Side bevels retain their authored run span. Their lateral cross-section
         // must not borrow the base's larger longitudinal overhang at the free end.
-        double bevelLimit=-rail.length()/2-SIDE_BEVEL_RUN_OVERHANG-.00001;
-        if(sign*cuts.get(0).at(-width-SIDE_BEVEL_OUTER_OVERHANG)<bevelLimit
-                || sign*cuts.get(0).at(-width+SIDE_BEVEL_INNER_REACH)<bevelLimit
-                || sign*cuts.get(2).at(width+SIDE_BEVEL_OUTER_OVERHANG)<bevelLimit
-                || sign*cuts.get(2).at(width-SIDE_BEVEL_INNER_REACH)<bevelLimit) return false;
+        for(var bevel:design.bevels()) {
+            double bevelLimit=-rail.length()/2-bevel.runOverhang()-.00001;
+            if(sign*cuts.get(0).at(-width-bevel.outerOverhang())<bevelLimit
+                    || sign*cuts.get(0).at(-width+bevel.innerReach())<bevelLimit
+                    || sign*cuts.get(2).at(width+bevel.outerOverhang())<bevelLimit
+                    || sign*cuts.get(2).at(width-bevel.innerReach())<bevelLimit) return false;
+        }
         return true;
     }
 
@@ -240,14 +250,14 @@ public final class CopingConnections {
         return true;
     }
 
-    private static int add(BlockView world,CopingBlock.Surface surface,Direction facing,BlockPos anchor,BlockPos owner,int key) {
+    private static int add(BlockView world,BlockState state,Direction facing,BlockPos anchor,BlockPos owner,int key) {
         BlockState other=world.getBlockState(owner);
-        if (!(other.getBlock() instanceof CopingBlock)) return key;
+        if (!sameDesign(state,other)) return key;
         if(other.get(CopingBlock.SURFACE).aligned()) return key;
         Direction otherFacing=other.get(CopingBlock.FACING);
         BlockPos otherAnchor=other.get(CopingBlock.OFFSET) ? owner.offset(otherFacing.getOpposite()) : owner;
         CopingBlock.Surface otherSurface=other.get(CopingBlock.SURFACE);
-        int mask=joins(surface,facing,otherSurface,otherFacing,otherAnchor.getX()-anchor.getX(),
+        int mask=joins(state.get(CopingBlock.SURFACE),facing,otherSurface,otherFacing,otherAnchor.getX()-anchor.getX(),
                 otherAnchor.getY()-anchor.getY(),otherAnchor.getZ()-anchor.getZ());
         double gradient=otherSurface.gradient()*(facing==otherFacing.getOpposite() ? -1 : 1);
         int code=code(gradient);
@@ -279,6 +289,10 @@ public final class CopingConnections {
     private static int code(double gradient) {
         for(int i=1;i<GRADIENTS.length;i++) if (equal(gradient,GRADIENTS[i])) return i;
         throw new IllegalArgumentException("Unsupported coping incline "+gradient);
+    }
+    private static boolean sameDesign(BlockState a,BlockState b) {
+        return a.getBlock() instanceof CopingBlock first && b.getBlock() instanceof CopingBlock second
+                && first.design()==second.design();
     }
     private static boolean equal(double a,double b) { return Math.abs(a-b)<.00001; }
 }

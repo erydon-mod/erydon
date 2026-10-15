@@ -13,6 +13,7 @@ import net.minecraft.util.math.Direction;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /** Parses editable 1.21.11 geometry once per reload; joins trim the overlapping ends. */
 public final class CopingGeometry {
@@ -22,11 +23,17 @@ public final class CopingGeometry {
         }
     }
     record Normal(float x, float y, float z) { }
-    record Surface(List<Vertex> vertices, int edge, Direction face, boolean bandEnd, List<Normal> normals) { }
+    record Surface(List<Vertex> vertices, int edge, Direction face, boolean bandEnd, List<Normal> normals, String band) {
+        Surface(List<Vertex> vertices,int edge,Direction face,boolean bandEnd,List<Normal> normals) {
+            this(vertices,edge,face,bandEnd,normals,"upper_band");
+        }
+    }
     private final List<Surface> surfaces;
-    private final List<Vertex> bandVertices;
-    private CopingGeometry(List<Surface> surfaces, List<Vertex> bandVertices) {
-        this.surfaces = List.copyOf(surfaces); this.bandVertices = List.copyOf(bandVertices);
+    private final Map<String,List<Vertex>> bands;
+    private CopingGeometry(List<Surface> surfaces, Map<String,List<Vertex>> bands) {
+        this.surfaces = List.copyOf(surfaces);
+        this.bands=bands.entrySet().stream().collect(java.util.stream.Collectors.toUnmodifiableMap(
+                Map.Entry::getKey,e -> List.copyOf(e.getValue())));
     }
 
     /** Reuse a parsed profile at another support height without changing its texture plane or normals. */
@@ -34,8 +41,9 @@ public final class CopingGeometry {
         if(offset==0) return this;
         List<Surface> result=new ArrayList<>(surfaces.size());
         for(Surface surface:surfaces) result.add(new Surface(surface.vertices.stream()
-                .map(v -> translatedY(v,offset)).toList(),surface.edge,surface.face,surface.bandEnd,surface.normals));
-        return new CopingGeometry(result,bandVertices.stream().map(v -> translatedY(v,offset)).toList());
+                .map(v -> translatedY(v,offset)).toList(),surface.edge,surface.face,surface.bandEnd,surface.normals,surface.band));
+        return new CopingGeometry(result,bands.entrySet().stream().collect(java.util.stream.Collectors.toMap(
+                Map.Entry::getKey,e -> e.getValue().stream().map(v -> translatedY(v,offset)).toList())));
     }
 
     private static Vertex translatedY(Vertex v,float offset) {
@@ -47,8 +55,9 @@ public final class CopingGeometry {
         if(fit==CopingHorizontalFit.AXIS) return this;
         List<Surface> result=new ArrayList<>();
         for(Surface surface:surfaces) result.add(new Surface(surface.vertices.stream()
-                .map(v -> fitted(v,fit,surface.edge)).toList(),surface.edge,surface.face,surface.bandEnd,surface.normals));
-        return new CopingGeometry(result,bandVertices.stream().map(v -> fitted(v,fit,0)).toList());
+                .map(v -> fitted(v,fit,surface.edge)).toList(),surface.edge,surface.face,surface.bandEnd,surface.normals,surface.band));
+        return new CopingGeometry(result,bands.entrySet().stream().collect(java.util.stream.Collectors.toMap(
+                Map.Entry::getKey,e -> e.getValue().stream().map(v -> fitted(v,fit,0)).toList())));
     }
 
     private static Vertex fitted(Vertex v,CopingHorizontalFit fit,int edge) {
@@ -69,17 +78,13 @@ public final class CopingGeometry {
         var elements = model.getAsJsonArray("elements");
         if (elements == null || elements.isEmpty()) throw new IllegalArgumentException("Empty coping model: " + id);
         List<Surface> result = new ArrayList<>();
-        List<Vertex> bandVertices = new ArrayList<>();
+        Map<String,List<Vertex>> bands = new java.util.HashMap<>();
         for (int elementIndex = 0; elementIndex < elements.size(); elementIndex++) {
             JsonObject element = elements.get(elementIndex).getAsJsonObject();
             String name = element.has("name") ? element.get("name").getAsString() : "";
-            int edge = switch (name) {
-                case "edge_west" -> CopingConnections.WEST;
-                case "edge_east" -> CopingConnections.EAST;
-                case "edge_north" -> CopingConnections.NORTH;
-                case "edge_south" -> CopingConnections.SOUTH;
-                default -> 0;
-            };
+            int edge=edgeMask(name);
+            String band=element.has("erydon_coping_band") ? element.get("erydon_coping_band").getAsString() : "upper_band";
+            boolean corner=element.has("erydon_coping_corner") && element.get("erydon_coping_corner").getAsBoolean();
             for (var face : element.getAsJsonObject("faces").entrySet()) {
                 // Preserve original group indices and use the established raw parser for every rotation.
                 JsonObject singleFace = model.deepCopy();
@@ -99,17 +104,35 @@ public final class CopingGeometry {
                         && (face.getKey().equals("north") || face.getKey().equals("south")))
                         || ((edge == CopingConnections.NORTH || edge == CopingConnections.SOUTH)
                         && (face.getKey().equals("east") || face.getKey().equals("west")));
-                if (name.equals("upper_band")) bandVertices.addAll(vertices);
+                if (edge==0 && !name.isEmpty()) bands.computeIfAbsent(name,ignored -> new ArrayList<>()).addAll(vertices);
                 // Keep the authored texture plane as the profile pitches or its
                 // mitre changes slope. Dominant lighting normals can flip at 45 degrees.
                 Direction direction=Direction.byName(face.getKey());
-                boolean profilePlane=direction.getAxis()==Direction.Axis.Y && unrotated(element);
+                boolean profilePlane=!corner && direction.getAxis()==Direction.Axis.Y && unrotated(element);
                 List<Normal> normals=profilePlane ? vertices.stream()
                         .map(v -> profileNormal(profile,CopingConnections.Joins.samePlane(profile,0),direction,run(v,profile))).toList() : List.of();
-                result.add(new Surface(List.copyOf(vertices), edge, direction,bandEnd,normals));
+                result.add(new Surface(List.copyOf(vertices), edge, direction,bandEnd,normals,band));
             }
         }
-        return new CopingGeometry(result,bandVertices);
+        return new CopingGeometry(result,bands);
+    }
+
+    private static int edgeMask(String name) {
+        if(!name.startsWith("edge_")) return 0;
+        int mask=0;
+        for(String side:name.substring(5).split("_")) mask|=switch(side) {
+            case "west" -> CopingConnections.WEST; case "east" -> CopingConnections.EAST;
+            case "north" -> CopingConnections.NORTH; case "south" -> CopingConnections.SOUTH;
+            default -> 0;
+        };
+        return mask;
+    }
+
+    private List<Vertex> exposedBandEnd(Surface source,CopingBlock.Surface profile) {
+        List<Vertex> band=bands.get(source.band);
+        if(!source.bandEnd || band==null || band.isEmpty()) return source.vertices;
+        float bottom=(float)band.stream().mapToDouble(v -> normalHeight(v,profile)).min().orElseThrow();
+        return clipBandEnd(source.vertices,profile,bottom);
     }
 
     List<Surface> joined(CopingBlock.Surface profile, int mask) {
@@ -120,12 +143,11 @@ public final class CopingGeometry {
         if(!joins.horizontal().isEmpty()) return joinedHorizontal(profile,joins);
         int mask=joins.mask();
         List<Surface> result = new ArrayList<>();
-        float bandBottom = (float)bandVertices.stream().mapToDouble(v -> normalHeight(v,profile)).min().orElse(0);
         for (Surface source : surfaces) {
             if ((source.edge & mask) != 0) continue;
             List<Vertex> vertices = source.vertices;
             // Bevel end caps share a plane with the band's sides. Keep only their exposed lower part.
-            if (source.bandEnd && !bandVertices.isEmpty()) vertices = clipBandEnd(vertices,profile,bandBottom);
+            if (source.bandEnd) vertices = exposedBandEnd(source,profile);
             if ((mask & CopingConnections.WEST) != 0) vertices = clipRun(vertices,profile,(float)joins.westCut(),true);
             if ((mask & CopingConnections.EAST) != 0) vertices = clipRun(vertices,profile,(float)joins.eastCut(),false);
             if ((mask & CopingConnections.NORTH) != 0) vertices = clip(vertices, 2, 0, true);
@@ -142,7 +164,7 @@ public final class CopingGeometry {
                 // Named rotated bevels retain their own sharp geometric normals.
                 List<Normal> normals=source.normals.isEmpty() ? List.of() : piece.stream()
                         .map(v -> profileNormal(profile,joins,source.face,run(v,profile))).toList();
-                result.add(new Surface(joined,0,source.face,source.bandEnd,normals));
+                result.add(new Surface(joined,0,source.face,source.bandEnd,normals,source.band));
             }
         }
         return result;
@@ -156,10 +178,9 @@ public final class CopingGeometry {
                 |((horizontalMask&CopingConnections.EAST)!=0 ? 56 : 0)
                 |((horizontalMask&CopingConnections.NORTH)!=0 ? 64 : 0)|((horizontalMask&CopingConnections.SOUTH)!=0 ? 128 : 0));
         var legacyJoins=new CopingConnections.Joins(legacyKey);
-        float bandBottom=(float)bandVertices.stream().mapToDouble(v -> v.y).min().orElse(0);
         for(Surface source:surfaces) {
             if((source.edge&joins.mask())!=0) continue;
-            List<Vertex> polygon=source.bandEnd ? clipBandEnd(source.vertices,profile,bandBottom) : source.vertices;
+            List<Vertex> polygon=exposedBandEnd(source,profile);
             if((legacyMask&CopingConnections.WEST)!=0) polygon=clip(polygon,0,0,true);
             if((legacyMask&CopingConnections.EAST)!=0) polygon=clip(polygon,0,1,false);
             if((legacyMask&CopingConnections.NORTH)!=0) polygon=clip(polygon,2,0,true);
@@ -197,7 +218,7 @@ public final class CopingGeometry {
                             .map(v -> profileNormal(profile,legacyJoins,source.face,legacyOriginalRun(v,legacyJoins))).toList();
                     // Keep authored bevel ownership for geometric seam diagnostics.
                     // Emission uses only vertices, face and normals.
-                    result.add(new Surface(warped,source.edge,source.face,source.bandEnd,normals));
+                    result.add(new Surface(warped,source.edge,source.face,source.bandEnd,normals,source.band));
                 }
             }
         }

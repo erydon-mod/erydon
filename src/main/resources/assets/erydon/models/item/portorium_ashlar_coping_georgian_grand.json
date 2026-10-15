@@ -1,0 +1,22 @@
+{
+  "parent": "erydon:block/internal/wrapped/portorium_ashlar_coping_georgian_grand",
+  "display": {
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "translation": [
+        0,
+        3,
+        0
+      ],
+      "scale": [
+        0.6,
+        0.6,
+        0.6
+      ]
+    }
+  }
+}

@@ -18,14 +18,15 @@ class FullBlockSearchTest {
     @Test
     void standardFinishTermsCoverPlainFormsAndExcludeAlternateFinishes() {
         for (String path : List.of("glacium_block", "glacium_slab", "glacium_arch_gothic", "glacium_arch_georgian",
-                "glacium_slope_steep_upper", "glacium_coping_georgian", "glacium_column_circular_double",
+                "glacium_slope_steep_upper", "glacium_coping_georgian", "glacium_coping_georgian_grand", "glacium_column_circular_double",
                 "glacium_cornice_byzantine", "glacium_cornice_guilloche", "latmion_block",
                 "psamatheon_window_arch", "kelastrion_light_wall")) {
             assertTrue(ErydonBlockCategories.isStandardFinish(path), path);
             assertTrue(ErydonBlockCategories.searchTerms(path).containsAll(List.of("polished", "honed", "mirror")), path);
         }
         for (String path : List.of("glacium_aged_block", "glacium_block_aged", "glacium_hewn_slab",
-                "glacium_ashlar_slope", "glacium_rusticated_coping_georgian", "glacium_rock_arch_gothic",
+                "glacium_ashlar_slope", "glacium_rusticated_coping_georgian", "glacium_aged_coping_georgian_grand",
+                "glacium_rusticated_coping_georgian_grand", "glacium_rock_arch_gothic",
                 "glacium_nerium_weave_bronze_block", "glacium_herringbone_grout_wall",
                 "glacium_trim_bronze_block", "glacium_block_bronzetrim", "glacium_guilloche_silver_block",
                 "glacium_quatrefoil_bronze_stairs", "glacium_rosette_silver_layer_multiface",
@@ -51,7 +52,9 @@ class FullBlockSearchTest {
         }
         assertEquals(27, expected.stream().filter(path -> path.endsWith("_arch_georgian")).count(),
                 "Every Georgian material has exactly one standard-finish arch");
-        assertEquals(1440 + 27, expected.size());
+        assertEquals(27,expected.stream().filter(path -> path.endsWith("_coping_georgian_grand")).count(),
+                "Every Grand material has exactly one standard-finish coping");
+        assertEquals(1440 + 27 + 27, expected.size());
         for (String kind : List.of("blocks", "items")) {
             for (String finish : List.of("polished", "honed", "mirror")) {
                 assertEquals(expected, tagMembers(kind, finish), kind + ": " + finish);

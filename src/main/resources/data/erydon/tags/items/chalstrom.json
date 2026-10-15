@@ -398,6 +398,11 @@
     "erydon:chalstrom_ashlar_arch_georgian",
     "erydon:chalstrom_hewn_arch_georgian",
     "erydon:chalstrom_rock_arch_georgian",
-    "erydon:chalstrom_rusticated_arch_georgian"
+    "erydon:chalstrom_rusticated_arch_georgian",
+    "erydon:chalstrom_aged_coping_georgian_grand",
+    "erydon:chalstrom_ashlar_coping_georgian_grand",
+    "erydon:chalstrom_coping_georgian_grand",
+    "erydon:chalstrom_hewn_coping_georgian_grand",
+    "erydon:chalstrom_rusticated_coping_georgian_grand"
   ]
 }

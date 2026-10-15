@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "erydon:block/nerium_ashlar_block"
+  }
+}

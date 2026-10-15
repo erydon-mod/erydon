@@ -180,8 +180,9 @@ public final class ErydonBlockCategories {
                 terms.add("spiral staircase");
             }
         }
-        if (path.endsWith("_coping_georgian")) {
+        if (path.endsWith("_coping_georgian") || path.endsWith("_coping_georgian_grand")) {
             addAll(terms, "coping", "wall cap", "capping", "wall top", "capstone", "georgian");
+            if (path.endsWith("_coping_georgian_grand")) addAll(terms, "grand coping", "large coping", "large wall cap");
         }
         if (isLayer(path)) {
             addAll(terms, "thin", "cladding", "panel");

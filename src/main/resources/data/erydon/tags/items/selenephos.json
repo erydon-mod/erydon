@@ -364,6 +364,11 @@
     "erydon:selenephos_ashlar_arch_georgian",
     "erydon:selenephos_hewn_arch_georgian",
     "erydon:selenephos_rock_arch_georgian",
-    "erydon:selenephos_rusticated_arch_georgian"
+    "erydon:selenephos_rusticated_arch_georgian",
+    "erydon:selenephos_aged_coping_georgian_grand",
+    "erydon:selenephos_ashlar_coping_georgian_grand",
+    "erydon:selenephos_coping_georgian_grand",
+    "erydon:selenephos_hewn_coping_georgian_grand",
+    "erydon:selenephos_rusticated_coping_georgian_grand"
   ]
 }

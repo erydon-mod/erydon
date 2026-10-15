@@ -356,6 +356,11 @@
     "erydon:porphyros_ashlar_arch_georgian",
     "erydon:porphyros_hewn_arch_georgian",
     "erydon:porphyros_rock_arch_georgian",
-    "erydon:porphyros_rusticated_arch_georgian"
+    "erydon:porphyros_rusticated_arch_georgian",
+    "erydon:porphyros_aged_coping_georgian_grand",
+    "erydon:porphyros_ashlar_coping_georgian_grand",
+    "erydon:porphyros_coping_georgian_grand",
+    "erydon:porphyros_hewn_coping_georgian_grand",
+    "erydon:porphyros_rusticated_coping_georgian_grand"
   ]
 }

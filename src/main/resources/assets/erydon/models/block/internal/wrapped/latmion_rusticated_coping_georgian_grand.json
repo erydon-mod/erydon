@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "erydon:block/latmion_rusticated_block"
+  }
+}

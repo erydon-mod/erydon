@@ -398,6 +398,11 @@
     "erydon:imperium_ashlar_arch_georgian",
     "erydon:imperium_hewn_arch_georgian",
     "erydon:imperium_rock_arch_georgian",
-    "erydon:imperium_rusticated_arch_georgian"
+    "erydon:imperium_rusticated_arch_georgian",
+    "erydon:imperium_aged_coping_georgian_grand",
+    "erydon:imperium_ashlar_coping_georgian_grand",
+    "erydon:imperium_coping_georgian_grand",
+    "erydon:imperium_hewn_coping_georgian_grand",
+    "erydon:imperium_rusticated_coping_georgian_grand"
   ]
 }

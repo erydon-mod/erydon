@@ -440,6 +440,11 @@
     "erydon:nerium_ashlar_arch_georgian",
     "erydon:nerium_hewn_arch_georgian",
     "erydon:nerium_rock_arch_georgian",
-    "erydon:nerium_rusticated_arch_georgian"
+    "erydon:nerium_rusticated_arch_georgian",
+    "erydon:nerium_aged_coping_georgian_grand",
+    "erydon:nerium_ashlar_coping_georgian_grand",
+    "erydon:nerium_coping_georgian_grand",
+    "erydon:nerium_hewn_coping_georgian_grand",
+    "erydon:nerium_rusticated_coping_georgian_grand"
   ]
 }

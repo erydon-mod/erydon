@@ -10,25 +10,25 @@ import java.util.List;
 
 /** Bounded joined outlines use the same expanded end cuts as the placed flat mesh. */
 final class CopingHorizontalShape {
-    private record Key(CopingBlock.Surface surface,Direction facing,CopingConnections.Joins joins) { }
+    private record Key(CopingDesign design,CopingBlock.Surface surface,Direction facing,CopingConnections.Joins joins) { }
     private record Point(double x,double z) { }
     private static final Cache<Key,VoxelShape> CACHE=CacheBuilder.newBuilder().maximumSize(1024).build();
     private CopingHorizontalShape() { }
-    static VoxelShape shape(CopingBlock.Surface surface,Direction facing,CopingConnections.Joins joins) {
-        Key key=new Key(surface,facing,joins); VoxelShape cached=CACHE.getIfPresent(key);
+    static VoxelShape shape(CopingDesign design,CopingBlock.Surface surface,Direction facing,CopingConnections.Joins joins) {
+        Key key=new Key(design,surface,facing,joins); VoxelShape cached=CACHE.getIfPresent(key);
         if(cached!=null) return cached;
-        VoxelShape result=create(surface.fit.pose(facing),joins); CACHE.put(key,result); return result;
+        VoxelShape result=create(design,surface.fit.pose(facing),joins); CACHE.put(key,result); return result;
     }
-    private static VoxelShape create(CopingHorizontalFit.Pose pose,CopingConnections.Joins joins) {
+    private static VoxelShape create(CopingDesign design,CopingHorizontalFit.Pose pose,CopingConnections.Joins joins) {
         double halfRun=pose.runLength()/2,halfWidth=pose.width()/2;
         int horizontalMask=joins.horizontal().stream().mapToInt(CopingConnections.HorizontalEnd::edge).reduce(0,(a,b)->a|b);
         int legacy=joins.mask()&~horizontalMask;
-        double lowX=.5-halfRun-((legacy&CopingConnections.WEST)!=0 ? 0 : .125);
-        double highX=.5+halfRun+((legacy&CopingConnections.EAST)!=0 ? 0 : .125);
-        double lowZ=.5-halfWidth-((legacy&CopingConnections.NORTH)!=0 ? 0 : .125);
-        double highZ=.5+halfWidth+((legacy&CopingConnections.SOUTH)!=0 ? 0 : .125);
-        if((legacy&CopingConnections.WEST)!=0) lowX+=Math.min(0,CopingBlock.THICKNESS*Math.tan(Math.atan(joins.westGradient())/2));
-        if((legacy&CopingConnections.EAST)!=0) highX+=Math.max(0,CopingBlock.THICKNESS*Math.tan(Math.atan(joins.eastGradient())/2));
+        double lowX=.5-halfRun-((legacy&CopingConnections.WEST)!=0 ? 0 : design.overhang());
+        double highX=.5+halfRun+((legacy&CopingConnections.EAST)!=0 ? 0 : design.overhang());
+        double lowZ=.5-halfWidth-((legacy&CopingConnections.NORTH)!=0 ? 0 : design.overhang());
+        double highZ=.5+halfWidth+((legacy&CopingConnections.SOUTH)!=0 ? 0 : design.overhang());
+        if((legacy&CopingConnections.WEST)!=0) lowX+=Math.min(0,design.thickness()*Math.tan(Math.atan(joins.westGradient())/2));
+        if((legacy&CopingConnections.EAST)!=0) highX+=Math.max(0,design.thickness()*Math.tan(Math.atan(joins.eastGradient())/2));
         List<Double> xs=coordinates(lowX,highX,.5-halfRun,.5,.5+halfRun);
         List<Double> zs=coordinates(lowZ,highZ,.5-halfWidth,.5,.5+halfWidth);
         VoxelShape result=VoxelShapes.empty();
@@ -47,41 +47,43 @@ final class CopingHorizontalShape {
             for(List<Point> piece:pieces) {
                 for(var end:joins.horizontal()) piece=clip(piece,p -> end.distance(p.x,p.z,0),0,end.sign()<0);
                 if(piece.size()<3) continue;
-                result=VoxelShapes.union(result,raster(piece,pose));
+                result=VoxelShapes.union(result,raster(piece,pose,design.thickness()));
             }
         }
         // Body cuts use proportional core widths. Named bevels instead use the
         // fixed outer branch even where their rotated lip projects inside the core.
         for(int edge:new int[]{CopingConnections.WEST,CopingConnections.EAST,CopingConnections.NORTH,CopingConnections.SOUTH}) {
             if((joins.mask()&edge)!=0) continue;
-            double bx0,bx1,bz0,bz1;
-            double run=CopingConnections.SIDE_BEVEL_RUN_OVERHANG,out=CopingConnections.SIDE_BEVEL_OUTER_OVERHANG,in=CopingConnections.SIDE_BEVEL_INNER_REACH;
-            if(edge==CopingConnections.NORTH || edge==CopingConnections.SOUTH) {
-                bx0=(legacy&CopingConnections.WEST)!=0 ? lowX : .5-halfRun-run;
-                bx1=(legacy&CopingConnections.EAST)!=0 ? highX : .5+halfRun+run;
-                bz0=edge==CopingConnections.NORTH ? .5-halfWidth-out : .5+halfWidth-in;
-                bz1=edge==CopingConnections.NORTH ? .5-halfWidth+in : .5+halfWidth+out;
-            } else {
-                bx0=edge==CopingConnections.WEST ? .5-halfRun-out : .5+halfRun-in;
-                bx1=edge==CopingConnections.WEST ? .5-halfRun+in : .5+halfRun+out;
-                bz0=(legacy&CopingConnections.NORTH)!=0 ? .5-halfWidth : .5-halfWidth-run;
-                bz1=(legacy&CopingConnections.SOUTH)!=0 ? .5+halfWidth : .5+halfWidth+run;
-            }
-            List<List<Point>> pieces=new ArrayList<>();
-            pieces.add(rectangle(bx0,bx1,bz0,bz1));
-            for(var end:joins.horizontal()) split(pieces,p -> end.run(p.x,p.z),0);
-            for(List<Point> piece:pieces) {
-                List<Point> expanded=piece.stream().map(p -> {
-                    var point=CopingConnections.expand(p.x,p.z,joins.horizontal()); return new Point(point.x(),point.z());
-                }).toList();
-                List<List<Point>> clipped=new ArrayList<>(); clipped.add(expanded);
-                for(var end:joins.horizontal()) if(CopingConnections.bevelBranch(edge,end)==0) {
-                    split(clipped,p -> end.lateral(p.x,p.z),-end.halfWidth());
-                    split(clipped,p -> end.lateral(p.x,p.z),end.halfWidth());
+            for(var bevel:design.bevels()) {
+                double bx0,bx1,bz0,bz1;
+                double run=bevel.runOverhang(),out=bevel.outerOverhang(),in=bevel.innerReach();
+                if(edge==CopingConnections.NORTH || edge==CopingConnections.SOUTH) {
+                    bx0=(legacy&CopingConnections.WEST)!=0 ? lowX : .5-halfRun-run;
+                    bx1=(legacy&CopingConnections.EAST)!=0 ? highX : .5+halfRun+run;
+                    bz0=edge==CopingConnections.NORTH ? .5-halfWidth-out : .5+halfWidth-in;
+                    bz1=edge==CopingConnections.NORTH ? .5-halfWidth+in : .5+halfWidth+out;
+                } else {
+                    bx0=edge==CopingConnections.WEST ? .5-halfRun-out : .5+halfRun-in;
+                    bx1=edge==CopingConnections.WEST ? .5-halfRun+in : .5+halfRun+out;
+                    bz0=(legacy&CopingConnections.NORTH)!=0 ? .5-halfWidth : .5-halfWidth-run;
+                    bz1=(legacy&CopingConnections.SOUTH)!=0 ? .5+halfWidth : .5+halfWidth+run;
                 }
-                for(List<Point> retained:clipped) {
-                    for(var end:joins.horizontal()) retained=clip(retained,p -> end.distance(p.x,p.z,CopingConnections.bevelBranch(edge,end)),0,end.sign()<0);
-                    if(retained.size()>=3) result=VoxelShapes.union(result,raster(retained,pose));
+                List<List<Point>> pieces=new ArrayList<>();
+                pieces.add(rectangle(bx0,bx1,bz0,bz1));
+                for(var end:joins.horizontal()) split(pieces,p -> end.run(p.x,p.z),0);
+                for(List<Point> piece:pieces) {
+                    List<Point> expanded=piece.stream().map(p -> {
+                        var point=CopingConnections.expand(p.x,p.z,joins.horizontal()); return new Point(point.x(),point.z());
+                    }).toList();
+                    List<List<Point>> clipped=new ArrayList<>(); clipped.add(expanded);
+                    for(var end:joins.horizontal()) if(CopingConnections.bevelBranch(edge,end)==0) {
+                        split(clipped,p -> end.lateral(p.x,p.z),-end.halfWidth());
+                        split(clipped,p -> end.lateral(p.x,p.z),end.halfWidth());
+                    }
+                    for(List<Point> retained:clipped) {
+                        for(var end:joins.horizontal()) retained=clip(retained,p -> end.distance(p.x,p.z,CopingConnections.bevelBranch(edge,end)),0,end.sign()<0);
+                        if(retained.size()>=3) result=VoxelShapes.union(result,raster(retained,pose,design.thickness()));
+                    }
                 }
             }
         }
@@ -90,7 +92,7 @@ final class CopingHorizontalShape {
     private static List<Point> rectangle(double lowX,double highX,double lowZ,double highZ) {
         return List.of(new Point(lowX,lowZ),new Point(highX,lowZ),new Point(highX,highZ),new Point(lowX,highZ));
     }
-    private static VoxelShape raster(List<Point> nativePolygon,CopingHorizontalFit.Pose pose) {
+    private static VoxelShape raster(List<Point> nativePolygon,CopingHorizontalFit.Pose pose,double thickness) {
         double cosine=Math.cos(pose.yawRadians()),sine=Math.sin(pose.yawRadians());
         List<Point> polygon=nativePolygon.stream().map(p -> new Point(pose.centreX()+(p.x-.5)*cosine-(p.z-.5)*sine,
                 pose.centreZ()+(p.x-.5)*sine+(p.z-.5)*cosine)).toList();
@@ -100,7 +102,7 @@ final class CopingHorizontalShape {
             List<Point> strip=clip(clip(polygon,row/32.0,true),(row+1)/32.0,false);
             if(strip.size()<3) continue;
             double low=strip.stream().mapToDouble(Point::x).min().orElseThrow(),high=strip.stream().mapToDouble(Point::x).max().orElseThrow();
-            if(high-low>.000001) result=VoxelShapes.union(result,VoxelShapes.cuboid(low,0,row/32.0,high,CopingBlock.THICKNESS,(row+1)/32.0));
+            if(high-low>.000001) result=VoxelShapes.union(result,VoxelShapes.cuboid(low,0,row/32.0,high,thickness,(row+1)/32.0));
         }
         return result;
     }

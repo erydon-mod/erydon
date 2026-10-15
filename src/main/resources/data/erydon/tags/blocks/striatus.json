@@ -398,6 +398,11 @@
     "erydon:striatus_ashlar_arch_georgian",
     "erydon:striatus_hewn_arch_georgian",
     "erydon:striatus_rock_arch_georgian",
-    "erydon:striatus_rusticated_arch_georgian"
+    "erydon:striatus_rusticated_arch_georgian",
+    "erydon:striatus_aged_coping_georgian_grand",
+    "erydon:striatus_ashlar_coping_georgian_grand",
+    "erydon:striatus_coping_georgian_grand",
+    "erydon:striatus_hewn_coping_georgian_grand",
+    "erydon:striatus_rusticated_coping_georgian_grand"
   ]
 }

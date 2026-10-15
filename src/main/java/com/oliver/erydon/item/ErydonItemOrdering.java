@@ -33,6 +33,7 @@ public final class ErydonItemOrdering {
             Map.entry("wall", 30),
             Map.entry("wall_georgian", 31),
             Map.entry("coping_georgian", 32),
+            Map.entry("coping_georgian_grand", 33),
             Map.entry("layer", 40),
             Map.entry("layer_multiface", 41),
             Map.entry("layer_vertical", 42),

@@ -91,7 +91,8 @@ def outputs() -> dict[Path, bytes]:
             "display": {"gui": {"rotation": [30, 225, 0], "translation": [0, 5, 0], "scale": [.65, .65, .65]}}})
         result[RESOURCES / f"data/erydon/loot_tables/blocks/{block_id}.json"] = encoded({"type": "minecraft:block", "pools": [{"rolls": 1, "entries": [{"type": "minecraft:item", "name": "erydon:" + block_id}], "conditions": [{"condition": "minecraft:survives_explosion"}]}]})
     for kind in ("blocks", "items"):
-        result[RESOURCES / f"data/erydon/tags/{kind}/coping.json"] = encoded({"replace": False, "values": ids})
+        path = RESOURCES / f"data/erydon/tags/{kind}/coping.json"
+        result[path] = append_tag(path, ids)
         for tag in ("georgian", "aged", "rusticated", "hewn", "ashlar"):
             path = RESOURCES / f"data/erydon/tags/{kind}/{tag}.json"
             selected = ["#erydon:coping"] if tag == "georgian" else ["erydon:" + block_id for _, finish, block_id, _ in variants() if finish == tag]

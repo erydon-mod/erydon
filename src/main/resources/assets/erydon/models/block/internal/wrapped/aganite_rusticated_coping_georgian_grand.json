@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "erydon:block/aganite_rusticated_block"
+  }
+}

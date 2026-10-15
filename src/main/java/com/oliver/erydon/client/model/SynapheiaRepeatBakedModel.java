@@ -204,7 +204,7 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
         if (stored != null && id != null && Erydon.MOD_ID.equals(id.getNamespace())
                 && id.getPath().contains("_cornice_")) return stored;
         return id != null && Erydon.MOD_ID.equals(id.getNamespace())
-                && id.getPath().endsWith("_coping_georgian")
+                && com.oliver.erydon.block.CopingDesign.fromBlockPath(id.getPath())!=null
                 ? (stored != null ? stored : authoredFace != null ? authoredFace : lightingFace) : lightingFace;
     }
 

@@ -356,6 +356,11 @@
     "erydon:aterzon_ashlar_arch_georgian",
     "erydon:aterzon_hewn_arch_georgian",
     "erydon:aterzon_rock_arch_georgian",
-    "erydon:aterzon_rusticated_arch_georgian"
+    "erydon:aterzon_rusticated_arch_georgian",
+    "erydon:aterzon_aged_coping_georgian_grand",
+    "erydon:aterzon_ashlar_coping_georgian_grand",
+    "erydon:aterzon_coping_georgian_grand",
+    "erydon:aterzon_hewn_coping_georgian_grand",
+    "erydon:aterzon_rusticated_coping_georgian_grand"
   ]
 }

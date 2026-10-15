@@ -16,7 +16,10 @@ public final class CopingBlocks {
             for (String finish : List.of("", "aged", "rusticated", "hewn", "ashlar")) {
                 String prefix = material + (finish.isEmpty() ? "" : "_" + finish);
                 String stone = finish.equals("aged") ? material + "_aged_block" : prefix + "_block";
-                register.accept(prefix + "_coping_georgian", new CopingBlock(AbstractBlock.Settings.copy(source.apply(stone))));
+                for (CopingDesign design : CopingDesign.values()) {
+                    register.accept(prefix + "_" + design.idSuffix(),
+                            new CopingBlock(AbstractBlock.Settings.copy(source.apply(stone)), design));
+                }
             }
         }
     }

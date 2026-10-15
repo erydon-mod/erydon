@@ -398,6 +398,11 @@
     "erydon:hesperion_ashlar_arch_georgian",
     "erydon:hesperion_hewn_arch_georgian",
     "erydon:hesperion_rock_arch_georgian",
-    "erydon:hesperion_rusticated_arch_georgian"
+    "erydon:hesperion_rusticated_arch_georgian",
+    "erydon:hesperion_aged_coping_georgian_grand",
+    "erydon:hesperion_ashlar_coping_georgian_grand",
+    "erydon:hesperion_coping_georgian_grand",
+    "erydon:hesperion_hewn_coping_georgian_grand",
+    "erydon:hesperion_rusticated_coping_georgian_grand"
   ]
 }

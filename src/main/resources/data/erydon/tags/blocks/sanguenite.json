@@ -398,6 +398,11 @@
     "erydon:sanguenite_ashlar_arch_georgian",
     "erydon:sanguenite_hewn_arch_georgian",
     "erydon:sanguenite_rock_arch_georgian",
-    "erydon:sanguenite_rusticated_arch_georgian"
+    "erydon:sanguenite_rusticated_arch_georgian",
+    "erydon:sanguenite_aged_coping_georgian_grand",
+    "erydon:sanguenite_ashlar_coping_georgian_grand",
+    "erydon:sanguenite_coping_georgian_grand",
+    "erydon:sanguenite_hewn_coping_georgian_grand",
+    "erydon:sanguenite_rusticated_coping_georgian_grand"
   ]
 }

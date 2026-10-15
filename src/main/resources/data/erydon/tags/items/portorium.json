@@ -398,6 +398,11 @@
     "erydon:portorium_ashlar_arch_georgian",
     "erydon:portorium_hewn_arch_georgian",
     "erydon:portorium_rock_arch_georgian",
-    "erydon:portorium_rusticated_arch_georgian"
+    "erydon:portorium_rusticated_arch_georgian",
+    "erydon:portorium_aged_coping_georgian_grand",
+    "erydon:portorium_ashlar_coping_georgian_grand",
+    "erydon:portorium_coping_georgian_grand",
+    "erydon:portorium_hewn_coping_georgian_grand",
+    "erydon:portorium_rusticated_coping_georgian_grand"
   ]
 }

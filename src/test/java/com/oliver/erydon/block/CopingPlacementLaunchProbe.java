@@ -66,12 +66,13 @@ public final class CopingPlacementLaunchProbe implements PreLaunchEntrypoint {
             com.oliver.erydon.migration.ReiSearchLaunchChecks.run();
             com.oliver.erydon.migration.ViewerSearchLaunchChecks.run();
             long registered=Registries.BLOCK.stream().filter(block -> block instanceof CopingBlock).count();
-            require(registered==135,"Expected all 135 material/finish copings, got "+registered);
+            require(registered==270,"Expected both sets of 135 material/finish copings, got "+registered);
             for (Block block:Registries.BLOCK) if (block instanceof CopingBlock) {
                 require(block.asItem() instanceof CopingItem,"Missing coping placement item");
                 require(Registries.BLOCK.getId(block).equals(Registries.ITEM.getId(block.asItem())),"Block/item ID mismatch");
             }
             CopingBlock coping=(CopingBlock)block("glacium_coping_georgian");
+            GrandCopingPlacementLaunchChecks.run(coping,(CopingBlock)block("glacium_coping_georgian_grand"));
             CopingHalfHeightPlacementLaunchChecks.run(coping);
             CopingLightingLaunchChecks.run(coping);
             CopingHorizontalPlacementLaunchChecks.run(coping);

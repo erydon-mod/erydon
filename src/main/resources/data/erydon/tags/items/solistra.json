@@ -398,6 +398,11 @@
     "erydon:solistra_ashlar_arch_georgian",
     "erydon:solistra_hewn_arch_georgian",
     "erydon:solistra_rock_arch_georgian",
-    "erydon:solistra_rusticated_arch_georgian"
+    "erydon:solistra_rusticated_arch_georgian",
+    "erydon:solistra_aged_coping_georgian_grand",
+    "erydon:solistra_ashlar_coping_georgian_grand",
+    "erydon:solistra_coping_georgian_grand",
+    "erydon:solistra_hewn_coping_georgian_grand",
+    "erydon:solistra_rusticated_coping_georgian_grand"
   ]
 }

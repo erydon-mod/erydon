@@ -406,6 +406,11 @@
     "erydon:gelastrum_ashlar_arch_georgian",
     "erydon:gelastrum_hewn_arch_georgian",
     "erydon:gelastrum_rock_arch_georgian",
-    "erydon:gelastrum_rusticated_arch_georgian"
+    "erydon:gelastrum_rusticated_arch_georgian",
+    "erydon:gelastrum_aged_coping_georgian_grand",
+    "erydon:gelastrum_ashlar_coping_georgian_grand",
+    "erydon:gelastrum_coping_georgian_grand",
+    "erydon:gelastrum_hewn_coping_georgian_grand",
+    "erydon:gelastrum_rusticated_coping_georgian_grand"
   ]
 }

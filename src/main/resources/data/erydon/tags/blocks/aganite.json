@@ -356,6 +356,11 @@
     "erydon:aganite_ashlar_arch_georgian",
     "erydon:aganite_hewn_arch_georgian",
     "erydon:aganite_rock_arch_georgian",
-    "erydon:aganite_rusticated_arch_georgian"
+    "erydon:aganite_rusticated_arch_georgian",
+    "erydon:aganite_aged_coping_georgian_grand",
+    "erydon:aganite_ashlar_coping_georgian_grand",
+    "erydon:aganite_coping_georgian_grand",
+    "erydon:aganite_hewn_coping_georgian_grand",
+    "erydon:aganite_rusticated_coping_georgian_grand"
   ]
 }

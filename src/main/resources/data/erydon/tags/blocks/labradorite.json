@@ -484,6 +484,11 @@
     "erydon:borealis_ashlar_arch_georgian",
     "erydon:borealis_hewn_arch_georgian",
     "erydon:borealis_rock_arch_georgian",
-    "erydon:borealis_rusticated_arch_georgian"
+    "erydon:borealis_rusticated_arch_georgian",
+    "erydon:borealis_aged_coping_georgian_grand",
+    "erydon:borealis_ashlar_coping_georgian_grand",
+    "erydon:borealis_coping_georgian_grand",
+    "erydon:borealis_hewn_coping_georgian_grand",
+    "erydon:borealis_rusticated_coping_georgian_grand"
   ]
 }

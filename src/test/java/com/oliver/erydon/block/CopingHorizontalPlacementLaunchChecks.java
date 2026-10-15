@@ -176,8 +176,11 @@ final class CopingHorizontalPlacementLaunchChecks {
                     if(method.getName().equals("getBlockState")) { reads[0]++; return net.minecraft.block.Blocks.AIR.getDefaultState(); }
                     throw new UnsupportedOperationException(method.toString());
                 });
-        CopingRaycast.closest(view,new Vec3d(-1,.8,.5),new Vec3d(2,.8,.5),BlockPos.ORIGIN,net.minecraft.block.Blocks.AIR.getDefaultState(),null);
+        CopingRaycast.closest(view,new Vec3d(-1,1.2,.5),new Vec3d(2,1.2,.5),BlockPos.ORIGIN,net.minecraft.block.Blocks.AIR.getDefaultState(),null);
         require(reads[0]==0,"High ray still scans coping owner neighbours");
+        CopingRaycast.closest(view,new Vec3d(-1,.8,.5),new Vec3d(2,.8,.5),BlockPos.ORIGIN,net.minecraft.block.Blocks.AIR.getDefaultState(),null);
+        require(reads[0]==9,"The Grand half-height band exceeded its nine-owner lookup bound");
+        reads[0]=0;
         CopingRaycast.closest(view,new Vec3d(-1,.1,.5),new Vec3d(2,.1,.5),BlockPos.ORIGIN,net.minecraft.block.Blocks.AIR.getDefaultState(),null);
         require(reads[0]==24,"Thin-slab empty ray did not keep the 24-owner lookup bound");
         reads[0]=0;

@@ -398,6 +398,11 @@
     "erydon:laurentium_ashlar_arch_georgian",
     "erydon:laurentium_hewn_arch_georgian",
     "erydon:laurentium_rock_arch_georgian",
-    "erydon:laurentium_rusticated_arch_georgian"
+    "erydon:laurentium_rusticated_arch_georgian",
+    "erydon:laurentium_aged_coping_georgian_grand",
+    "erydon:laurentium_ashlar_coping_georgian_grand",
+    "erydon:laurentium_coping_georgian_grand",
+    "erydon:laurentium_hewn_coping_georgian_grand",
+    "erydon:laurentium_rusticated_coping_georgian_grand"
   ]
 }

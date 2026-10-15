@@ -492,6 +492,16 @@
     "erydon:latmion_ashlar_arch_georgian",
     "erydon:latmion_hewn_arch_georgian",
     "erydon:latmion_rock_arch_georgian",
-    "erydon:latmion_rusticated_arch_georgian"
+    "erydon:latmion_rusticated_arch_georgian",
+    "erydon:kelastrion_aged_coping_georgian_grand",
+    "erydon:kelastrion_ashlar_coping_georgian_grand",
+    "erydon:kelastrion_coping_georgian_grand",
+    "erydon:kelastrion_hewn_coping_georgian_grand",
+    "erydon:kelastrion_rusticated_coping_georgian_grand",
+    "erydon:latmion_aged_coping_georgian_grand",
+    "erydon:latmion_ashlar_coping_georgian_grand",
+    "erydon:latmion_coping_georgian_grand",
+    "erydon:latmion_hewn_coping_georgian_grand",
+    "erydon:latmion_rusticated_coping_georgian_grand"
   ]
 }

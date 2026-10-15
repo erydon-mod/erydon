@@ -398,6 +398,11 @@
     "erydon:rosinium_ashlar_arch_georgian",
     "erydon:rosinium_hewn_arch_georgian",
     "erydon:rosinium_rock_arch_georgian",
-    "erydon:rosinium_rusticated_arch_georgian"
+    "erydon:rosinium_rusticated_arch_georgian",
+    "erydon:rosinium_aged_coping_georgian_grand",
+    "erydon:rosinium_ashlar_coping_georgian_grand",
+    "erydon:rosinium_coping_georgian_grand",
+    "erydon:rosinium_hewn_coping_georgian_grand",
+    "erydon:rosinium_rusticated_coping_georgian_grand"
   ]
 }

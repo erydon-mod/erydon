@@ -440,6 +440,11 @@
     "erydon:etruscus_ashlar_arch_georgian",
     "erydon:etruscus_hewn_arch_georgian",
     "erydon:etruscus_rock_arch_georgian",
-    "erydon:etruscus_rusticated_arch_georgian"
+    "erydon:etruscus_rusticated_arch_georgian",
+    "erydon:etruscus_aged_coping_georgian_grand",
+    "erydon:etruscus_ashlar_coping_georgian_grand",
+    "erydon:etruscus_coping_georgian_grand",
+    "erydon:etruscus_hewn_coping_georgian_grand",
+    "erydon:etruscus_rusticated_coping_georgian_grand"
   ]
 }

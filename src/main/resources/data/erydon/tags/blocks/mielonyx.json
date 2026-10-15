@@ -406,6 +406,11 @@
     "erydon:mielonyx_ashlar_arch_georgian",
     "erydon:mielonyx_hewn_arch_georgian",
     "erydon:mielonyx_rock_arch_georgian",
-    "erydon:mielonyx_rusticated_arch_georgian"
+    "erydon:mielonyx_rusticated_arch_georgian",
+    "erydon:mielonyx_aged_coping_georgian_grand",
+    "erydon:mielonyx_ashlar_coping_georgian_grand",
+    "erydon:mielonyx_coping_georgian_grand",
+    "erydon:mielonyx_hewn_coping_georgian_grand",
+    "erydon:mielonyx_rusticated_coping_georgian_grand"
   ]
 }

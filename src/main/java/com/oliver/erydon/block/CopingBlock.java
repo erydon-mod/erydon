@@ -27,16 +27,23 @@ public final class CopingBlock extends HorizontalFacingBlock implements Waterlog
     public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
     public static final BooleanProperty OFFSET = BooleanProperty.of("offset");
     public static final double THICKNESS = 3.6 / 16.0;
-    private static final VoxelShape[][] SHAPES = shapes();
-    private static final VoxelShape[][] OFFSET_SHAPES = offsetShapes();
-    private static final VoxelShape[][] PARTICLE_SHAPES = particleShapes();
-    private static final VoxelShape[][] OFFSET_PARTICLE_SHAPES = offsetParticleShapes();
+    private record Shapes(VoxelShape[][] outline,VoxelShape[][] offset,
+                          VoxelShape[][] particles,VoxelShape[][] offsetParticles) { }
+    private static final java.util.Map<CopingDesign,Shapes> SHAPES = shapeSets();
+    private final CopingDesign design;
+    private final Shapes shapes;
 
     public CopingBlock(Settings settings) {
+        this(settings,CopingDesign.GEORGIAN);
+    }
+    public CopingBlock(Settings settings,CopingDesign design) {
         super(settings.nonOpaque().dynamicBounds());
+        this.design=java.util.Objects.requireNonNull(design);
+        this.shapes=SHAPES.get(design);
         setDefaultState(stateManager.getDefaultState().with(FACING, Direction.EAST)
                 .with(SURFACE, Surface.FLAT).with(WATERLOGGED, false).with(OFFSET, false));
     }
+    public CopingDesign design() { return design; }
 
     public enum Surface implements StringIdentifiable {
         FLAT("flat", 0, 1, 0, 0),
@@ -176,11 +183,12 @@ public final class CopingBlock extends HorizontalFacingBlock implements Waterlog
         double g=profile.gradient();
         double normalX=g/Math.sqrt(1+g*g);
         double midpoint=(profile.start+profile.end)/2;
-        double x=midpoint+normalX*THICKNESS, z=.5;
+        double thickness=((CopingBlock)state.getBlock()).design.thickness();
+        double x=midpoint+normalX*thickness, z=.5;
         if(profile.aligned()) { x=pose.centreX(); z=pose.centreZ(); }
         else for(int turn=0;turn<CopingHorizontalFit.quarter(facing);turn++) { double next=1-z; z=x; x=next; }
         if(state.get(OFFSET) && !profile.aligned()) { x-=facing.getOffsetX(); z-=facing.getOffsetZ(); }
-        double top=profile.height(midpoint)+THICKNESS/Math.sqrt(1+g*g);
+        double top=profile.height(midpoint)+thickness/Math.sqrt(1+g*g);
         return new AttachmentPose(x,z,pose.yawRadians(),top,-g*facing.getOffsetX(),-g*facing.getOffsetZ(),
                 profile.aligned() ? pose.runLength() : profile.end-profile.start,pose.width());
     }
@@ -204,15 +212,15 @@ public final class CopingBlock extends HorizontalFacingBlock implements Waterlog
         // for this very lighting task. Use the saved profile's cached shape;
         // client and server-thread interaction still resolves joined outlines.
         if (world instanceof ServerWorld serverWorld && !serverWorld.getServer().isOnThread()) {
-            return (state.get(OFFSET) ? OFFSET_SHAPES : SHAPES)
+            return (state.get(OFFSET) ? shapes.offset : shapes.outline)
                     [surface.ordinal()][state.get(FACING).getHorizontal()];
         }
-        if(world!=null && (surface.aligned() || (surface==Surface.FLAT && CopingConnections.hasAlignedNeighbour(world,pos)))) {
+        if(world!=null && (surface.aligned() || (surface==Surface.FLAT && CopingConnections.hasAlignedNeighbour(world,state,pos)))) {
             Direction facing=CopingConnections.facing(world,state,pos);
             var joins=CopingConnections.resolve(world,state,pos,facing);
-            if(!joins.horizontal().isEmpty()) return CopingHorizontalShape.shape(surface,facing,joins);
+            if(!joins.horizontal().isEmpty()) return CopingHorizontalShape.shape(design,surface,facing,joins);
         }
-        return (state.get(OFFSET) ? OFFSET_SHAPES : SHAPES)
+        return (state.get(OFFSET) ? shapes.offset : shapes.outline)
                 [state.get(SURFACE).ordinal()][state.get(FACING).getHorizontal()];
     }
     @Override public VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
@@ -224,14 +232,24 @@ public final class CopingBlock extends HorizontalFacingBlock implements Waterlog
 
     /** One box bounds vanilla debris to at most 64 particles, regardless of slope detail. */
     public VoxelShape getBreakParticleShape(BlockState state) {
-        return (state.get(OFFSET) ? OFFSET_PARTICLE_SHAPES : PARTICLE_SHAPES)
+        return (state.get(OFFSET) ? shapes.offsetParticles : shapes.particles)
                 [state.get(SURFACE).ordinal()][state.get(FACING).getHorizontal()];
     }
 
-    private static VoxelShape[][] particleShapes() {
+    private static java.util.Map<CopingDesign,Shapes> shapeSets() {
+        var result=new java.util.EnumMap<CopingDesign,Shapes>(CopingDesign.class);
+        for(var design:CopingDesign.values()) {
+            var outline=shapes(design);
+            var particles=particleShapes(outline);
+            result.put(design,new Shapes(outline,offsetShapes(outline),particles,offsetShapes(particles)));
+        }
+        return java.util.Map.copyOf(result);
+    }
+
+    private static VoxelShape[][] particleShapes(VoxelShape[][] outline) {
         VoxelShape[][] result=new VoxelShape[Surface.values().length][4];
         for (Surface surface:Surface.values()) for (Direction facing:Direction.Type.HORIZONTAL) {
-            var box=SHAPES[surface.ordinal()][facing.getHorizontal()].getBoundingBox();
+            var box=outline[surface.ordinal()][facing.getHorizontal()].getBoundingBox();
             if(surface.aligned()) {
                 var pose=surface.fit.pose(facing);
                 result[surface.ordinal()][facing.getHorizontal()]=VoxelShapes.cuboid(
@@ -241,44 +259,37 @@ public final class CopingBlock extends HorizontalFacingBlock implements Waterlog
         return result;
     }
 
-    private static VoxelShape[][] offsetParticleShapes() {
-        VoxelShape[][] result=new VoxelShape[Surface.values().length][4];
-        for(Surface surface:Surface.values()) for(Direction facing:Direction.Type.HORIZONTAL)
-            result[surface.ordinal()][facing.getHorizontal()]=PARTICLE_SHAPES[surface.ordinal()][facing.getHorizontal()]
-                    .offset(surface.aligned() ? 0 : -facing.getOffsetX(),0,surface.aligned() ? 0 : -facing.getOffsetZ());
-        return result;
-    }
-
-    private static VoxelShape[][] offsetShapes() {
+    private static VoxelShape[][] offsetShapes(VoxelShape[][] source) {
         VoxelShape[][] result = new VoxelShape[Surface.values().length][4];
         for (Surface surface : Surface.values()) for (Direction facing : Direction.Type.HORIZONTAL) {
             if(surface.aligned()) {
-                result[surface.ordinal()][facing.getHorizontal()]=SHAPES[surface.ordinal()][facing.getHorizontal()];
+                result[surface.ordinal()][facing.getHorizontal()]=source[surface.ordinal()][facing.getHorizontal()];
                 continue;
             }
-            result[surface.ordinal()][facing.getHorizontal()] = SHAPES[surface.ordinal()][facing.getHorizontal()]
+            result[surface.ordinal()][facing.getHorizontal()] = source[surface.ordinal()][facing.getHorizontal()]
                     .offset(-facing.getOffsetX(),0,-facing.getOffsetZ());
         }
         return result;
     }
 
-    private static VoxelShape[][] shapes() {
+    private static VoxelShape[][] shapes(CopingDesign design) {
         VoxelShape[][] result = new VoxelShape[Surface.values().length][4];
         for (Surface surface : Surface.values()) for (Direction facing : Direction.Type.HORIZONTAL) {
             if(surface.aligned()) {
-                result[surface.ordinal()][facing.getHorizontal()]=alignedShape(surface.fit.pose(facing));
+                result[surface.ordinal()][facing.getHorizontal()]=alignedShape(surface.fit.pose(facing),design);
                 continue;
             }
             VoxelShape shape = VoxelShapes.empty();
             double gradient = surface.gradient(), length = Math.sqrt(1 + gradient * gradient);
             double normalX = gradient / length, normalY = 1 / length;
             // 1/32-cell sampling follows the support slopes' existing collision resolution.
-            for (int step = 0; step < 40; step++) {
-                double a = surface.start + (surface.end - surface.start) * (step - 4) / 32.0;
-                double b = surface.start + (surface.end - surface.start) * (step - 3) / 32.0;
-                double x1 = a, x2 = b + normalX * THICKNESS;
-                double y1 = surface.height(b), y2 = surface.height(a) + normalY * THICKNESS;
-                double z1 = -.125, z2 = 1.125;
+            int padding=design==CopingDesign.GEORGIAN ? 4 : (int)Math.ceil(design.overhang()*32/(surface.end-surface.start));
+            for (int step = 0; step < 32+2*padding; step++) {
+                double a = surface.start + (surface.end - surface.start) * (step - padding) / 32.0;
+                double b = surface.start + (surface.end - surface.start) * (step - padding + 1) / 32.0;
+                double x1 = a, x2 = b + normalX * design.thickness();
+                double y1 = surface.height(b), y2 = surface.height(a) + normalY * design.thickness();
+                double z1 = -design.overhang(), z2 = 1+design.overhang();
                 VoxelShape box = switch (facing) {
                     case SOUTH -> VoxelShapes.cuboid(1-z2, y1, x1, 1-z1, y2, x2);
                     case WEST -> VoxelShapes.cuboid(1-x2, y1, 1-z2, 1-x1, y2, 1-z1);
@@ -292,9 +303,9 @@ public final class CopingBlock extends HorizontalFacingBlock implements Waterlog
         return result;
     }
 
-    private static VoxelShape alignedShape(CopingHorizontalFit.Pose pose) {
+    private static VoxelShape alignedShape(CopingHorizontalFit.Pose pose,CopingDesign design) {
         double cosine=Math.cos(pose.yawRadians()),sine=Math.sin(pose.yawRadians());
-        double run=pose.runLength()/2+.125,cross=pose.width()/2+.125;
+        double run=pose.runLength()/2+design.overhang(),cross=pose.width()/2+design.overhang();
         double zRadius=Math.abs(sine)*run+Math.abs(cosine)*cross;
         double step=1/32.0;
         int first=(int)Math.floor((pose.centreZ()-zRadius)/step),last=(int)Math.ceil((pose.centreZ()+zRadius)/step);
@@ -307,7 +318,7 @@ public final class CopingBlock extends HorizontalFacingBlock implements Waterlog
             if(low>=high) continue;
             double margin=step/2*Math.max(Math.abs(sine/cosine),Math.abs(cosine/sine));
             shape=VoxelShapes.union(shape,VoxelShapes.cuboid(pose.centreX()+low-margin,0,row*step,
-                    pose.centreX()+high+margin,THICKNESS,(row+1)*step));
+                    pose.centreX()+high+margin,design.thickness(),(row+1)*step));
         }
         return shape.simplify();
     }

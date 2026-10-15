@@ -1,6 +1,7 @@
 package com.oliver.erydon.migration;
 
 import com.google.gson.JsonParser;
+import com.oliver.erydon.block.CopingDesign;
 import com.oliver.erydon.item.ErydonBlockCategories;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -35,6 +36,7 @@ public final class ReiSearchLaunchChecks {
                 ReiSearchLaunchChecks.class.getResourceAsStream("/assets/erydon/lang/en_us.json"),
                 StandardCharsets.UTF_8)).getAsJsonObject();
         int full=0,copings=0,standard=0,checked=0,georgianArches=0;
+        var copingDesigns=new java.util.EnumMap<CopingDesign,Integer>(CopingDesign.class);
         for(var name:language.entrySet()) {
             if(!name.getKey().startsWith("block.erydon.")) continue;
             String path=name.getKey().substring("block.erydon.".length());
@@ -55,8 +57,13 @@ public final class ReiSearchLaunchChecks {
             if(path.endsWith("_block")) {
                 if(!indexed.contains("full block")) throw new AssertionError("REI misses full-block aliases: "+path);
                 full++;
-            } else if(path.endsWith("_coping_georgian")) {
-                if(!indexed.contains("coping") || indexed.contains("full block")) throw new AssertionError("Wrong coping search classification: "+path);
+            } else if(CopingDesign.fromBlockPath(path)!=null) {
+                CopingDesign design=CopingDesign.fromBlockPath(path);
+                if(!indexed.contains("coping") || !indexed.contains("wall cap") || !indexed.contains("georgian")
+                        || indexed.contains("full block")) throw new AssertionError("Wrong coping search classification: "+path);
+                if(design==CopingDesign.GEORGIAN_GRAND && (!indexed.contains("grand coping") || !indexed.contains("large coping")))
+                    throw new AssertionError("REI misses Grand/large coping aliases: "+path);
+                copingDesigns.merge(design,1,Integer::sum);
                 copings++;
             }
             boolean standardFinish=ErydonBlockCategories.isStandardFinish(path);
@@ -67,8 +74,10 @@ public final class ReiSearchLaunchChecks {
             if(path.endsWith("_arch_georgian")) georgianArches++;
             checked++;
         }
-        if(full!=440 || copings!=135 || standard!=1440+27 || checked!=9698+162 || georgianArches!=162)
-            throw new AssertionError("Incomplete REI catalogue check");
+        if(full!=440 || copings!=270 || standard!=1440+27+27 || checked!=9698+162+135 || georgianArches!=162
+                || java.util.Arrays.stream(CopingDesign.values()).anyMatch(design -> !Integer.valueOf(135).equals(copingDesigns.get(design))))
+            throw new AssertionError("Incomplete REI catalogue check: full="+full+" coping="+copings+" standard="+standard
+                    +" catalogue="+checked+" georgianArches="+georgianArches+" copingDesigns="+copingDesigns);
         System.out.println("ERYDON_REI_SEARCH_OK: "+checked+" catalogue items, "+full+" full blocks, "+copings
                 +" copings, "+standard+" standard-finish items through actual REI cacheData");
     }

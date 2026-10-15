@@ -82,7 +82,7 @@ public final class CopingRaycast {
         }
         if(entry>exit) return false;
         double y1=start.y+(end.y-start.y)*entry,y2=start.y+(end.y-start.y)*exit;
-        return Math.min(y1,y2)<=cell.getY()+baseY+CopingBlock.THICKNESS+.00001
+        return Math.min(y1,y2)<=cell.getY()+baseY+CopingDesign.maxThickness()+.00001
                 && Math.max(y1,y2)>=cell.getY()+baseY-.00001;
     }
 }
