@@ -1,6 +1,7 @@
 package com.oliver.erydon.block;
 
 import net.minecraft.block.*;
+import net.minecraft.block.enums.SlabType;
 import net.minecraft.block.enums.BlockHalf;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
@@ -52,7 +53,8 @@ public final class CopingBlock extends HorizontalFacingBlock implements Waterlog
         SHALLOW_NARROW_RIGHT("shallow_narrow_right", CopingHorizontalFit.NARROW_RIGHT),
         SHALLOW_NARROW_LEFT("shallow_narrow_left", CopingHorizontalFit.NARROW_LEFT),
         SHALLOW_NARROW_THIN_RIGHT("shallow_narrow_thin_right", CopingHorizontalFit.NARROW_THIN_RIGHT),
-        SHALLOW_NARROW_THIN_LEFT("shallow_narrow_thin_left", CopingHorizontalFit.NARROW_THIN_LEFT);
+        SHALLOW_NARROW_THIN_LEFT("shallow_narrow_thin_left", CopingHorizontalFit.NARROW_THIN_LEFT),
+        FLAT_HALF("flat_half", 0, 1, -.5, -.5);
 
         private final String name;
         public final double start, end, high, low;
@@ -66,7 +68,8 @@ public final class CopingBlock extends HorizontalFacingBlock implements Waterlog
         public double gradient() { return (high - low) / (end - start); }
         public double height(double x) { return high - (x - start) * gradient(); }
         public boolean aligned() { return fit!=CopingHorizontalFit.AXIS; }
-        public Surface authoringProfile() { return aligned() ? FLAT : this; }
+        public boolean flat() { return fit == CopingHorizontalFit.AXIS && gradient() == 0; }
+        public Surface authoringProfile() { return aligned() || this == FLAT_HALF ? FLAT : this; }
         public Surface mirroredHand() {
             return switch(this) {
                 case SHALLOW_BROAD_RIGHT -> SHALLOW_BROAD_LEFT; case SHALLOW_BROAD_LEFT -> SHALLOW_BROAD_RIGHT;
@@ -104,7 +107,23 @@ public final class CopingBlock extends HorizontalFacingBlock implements Waterlog
         return flatSupport(state, world, pos);
     }
 
+    /** Partial horizontal blocks keep the coping owner above their occupied support cell. */
+    public static boolean hasHalfHeightTop(BlockState state) {
+        if (state.getBlock() instanceof SlabBlock) return state.get(SlabBlock.TYPE) == SlabType.BOTTOM;
+        if (state.getBlock() instanceof LayerBlock) {
+            return state.get(LayerBlock.LAYERS) == 4 && !state.get(LayerBlock.TOP);
+        }
+        if (state.getBlock() instanceof LayerMultifaceBlock) {
+            return state.get(LayerMultifaceBlock.LAYERS) == 4 && state.get(LayerMultifaceBlock.DOWN)
+                    && !state.get(LayerMultifaceBlock.UP) && !state.get(LayerMultifaceBlock.NORTH)
+                    && !state.get(LayerMultifaceBlock.SOUTH) && !state.get(LayerMultifaceBlock.EAST)
+                    && !state.get(LayerMultifaceBlock.WEST);
+        }
+        return false;
+    }
+
     private static Support flatSupport(BlockState state, BlockView world, BlockPos pos) {
+        if (hasHalfHeightTop(state)) return new Support(Surface.FLAT_HALF, Direction.EAST);
         return Block.isFaceFullSquare(state.getCollisionShape(world, pos), Direction.UP)
                 ? new Support(Surface.FLAT, Direction.EAST) : null;
     }

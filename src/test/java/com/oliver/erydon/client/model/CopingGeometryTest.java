@@ -17,7 +17,71 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CopingGeometryTest {
     private static CopingBlock.Surface[] authoredProfiles() {
-        return java.util.Arrays.stream(CopingBlock.Surface.values()).filter(p -> !p.aligned()).toArray(CopingBlock.Surface[]::new);
+        return java.util.Arrays.stream(CopingBlock.Surface.values()).filter(p -> p.authoringProfile()==p).toArray(CopingBlock.Surface[]::new);
+    }
+
+    @Test void halfHeightReusesFlatVerticesUvsAndNormalsThroughEveryLegacyJoin() throws Exception {
+        var flat=geometry(CopingBlock.Surface.FLAT);
+        var half=geometry(CopingBlock.Surface.FLAT_HALF);
+        assertSame(CopingBlock.Surface.FLAT,CopingBlock.Surface.FLAT_HALF.authoringProfile());
+        assertSame(flat,flat.translatedY(0));
+        for(int mask=0;mask<16;mask++) assertTranslatedHalf(
+                flat.joined(CopingBlock.Surface.FLAT,mask),half.joined(CopingBlock.Surface.FLAT_HALF,mask));
+        for(int code=1;code<8;code++) for(int shift:new int[]{0,3}) {
+            var joins=new CopingConnections.Joins(code<<shift);
+            assertTranslatedHalf(flat.joined(CopingBlock.Surface.FLAT,joins),half.joined(CopingBlock.Surface.FLAT_HALF,joins));
+        }
+    }
+
+    private static void assertTranslatedHalf(List<CopingGeometry.Surface> original,List<CopingGeometry.Surface> translated) {
+        assertEquals(original.size(),translated.size(),"Translation must retain every visible face");
+        for(int index=0;index<original.size();index++) {
+            var a=original.get(index); var b=translated.get(index);
+            assertEquals(a.edge(),b.edge()); assertEquals(a.face(),b.face()); assertEquals(a.bandEnd(),b.bandEnd());
+            assertEquals(a.normals(),b.normals(),"Lowering the cap must not change its normals");
+            assertEquals(a.vertices().size(),b.vertices().size());
+            for(int vertex=0;vertex<a.vertices().size();vertex++) {
+                var source=a.vertices().get(vertex); var lowered=b.vertices().get(vertex);
+                assertEquals(source.x(),lowered.x(),.000001);
+                assertEquals(source.y()-.5,lowered.y(),.000001);
+                assertEquals(source.z(),lowered.z(),.000001);
+                assertEquals(source.u(),lowered.u(),.00001,"Authored UVs must not shift to hide a world-phase change");
+                assertEquals(source.v(),lowered.v(),.00001);
+                assertEquals(CopingGeometry.normalHeight(source,CopingBlock.Surface.FLAT),
+                        CopingGeometry.normalHeight(lowered,CopingBlock.Surface.FLAT_HALF),.000001);
+            }
+        }
+    }
+
+    @Test void flatHalfJoinsUsePhysicalSupportHeightsAcrossEveryFacing() {
+        var half=CopingBlock.Surface.FLAT_HALF;
+        for(Direction facing:Direction.Type.HORIZONTAL) {
+            int x=facing.getOffsetX(),z=facing.getOffsetZ();
+            Direction cross=facing.rotateYClockwise();
+            for(Direction otherFacing:Direction.Type.HORIZONTAL) {
+                assertEquals(CopingConnections.EAST,CopingConnections.joins(half,facing,half,otherFacing,x,0,z));
+                assertEquals(CopingConnections.SOUTH,CopingConnections.joins(half,facing,half,otherFacing,
+                        cross.getOffsetX(),0,cross.getOffsetZ()));
+                for(int dy=-1;dy<=1;dy++) {
+                    assertEquals(0,CopingConnections.joins(half,facing,CopingBlock.Surface.FLAT,otherFacing,x,dy,z));
+                    assertEquals(0,CopingConnections.joins(CopingBlock.Surface.FLAT,facing,half,otherFacing,x,dy,z));
+                    assertEquals(0,CopingConnections.joins(half,facing,CopingBlock.Surface.FLAT,otherFacing,
+                            cross.getOffsetX(),dy,cross.getOffsetZ()));
+                    assertEquals(0,CopingConnections.joins(CopingBlock.Surface.FLAT,facing,half,otherFacing,
+                            cross.getOffsetX(),dy,cross.getOffsetZ()));
+                }
+            }
+            assertEquals(CopingConnections.EAST,join(half,CopingBlock.Surface.SHALLOW_LOWER,facing,x,0,z));
+            assertEquals(CopingConnections.WEST,join(CopingBlock.Surface.SHALLOW_LOWER,half,facing,-x,0,-z));
+            assertEquals(CopingConnections.WEST,join(half,CopingBlock.Surface.SHALLOW_UPPER,facing,-x,0,-z));
+            assertEquals(CopingConnections.EAST,join(CopingBlock.Surface.SHALLOW_UPPER,half,facing,x,0,z));
+            assertEquals(0,join(half,CopingBlock.Surface.SHALLOW_UPPER,facing,x,0,z));
+            assertEquals(0,join(half,CopingBlock.Surface.SHALLOW_LOWER,facing,-x,0,-z));
+            for(int dy=-1;dy<=1;dy++) {
+                assertEquals(0,join(half,CopingBlock.Surface.SLOPE,facing,x,dy,z));
+                assertEquals(0,join(half,CopingBlock.Surface.SLOPE,facing,-x,dy,-z));
+            }
+        }
     }
     @Test void axiomFallbackRotatesPackedNormalsWithoutLosingShaderData() {
         for(int x:new int[]{-127,-89,0,89,127}) for(int z:new int[]{-127,-89,0,89,127}) {
@@ -416,7 +480,9 @@ class CopingGeometryTest {
         return CopingConnections.joins(a,facing,b,facing,x,y,z);
     }
     private static CopingGeometry geometry(CopingBlock.Surface profile) throws Exception {
-        String name="coping_georgian_"+profile.asString()+".json";
-        return CopingGeometry.parse(JsonParser.parseString(Files.readString(ROOT.resolve(name))).getAsJsonObject(),new Identifier("erydon",name),profile);
+        var authored=profile.authoringProfile();
+        String name="coping_georgian_"+authored.asString()+".json";
+        return CopingGeometry.parse(JsonParser.parseString(Files.readString(ROOT.resolve(name))).getAsJsonObject(),new Identifier("erydon",name),authored)
+                .translatedY((float)(profile.high-authored.high));
     }
 }

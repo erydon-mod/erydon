@@ -29,6 +29,19 @@ public final class CopingGeometry {
         this.surfaces = List.copyOf(surfaces); this.bandVertices = List.copyOf(bandVertices);
     }
 
+    /** Reuse a parsed profile at another support height without changing its texture plane or normals. */
+    CopingGeometry translatedY(float offset) {
+        if(offset==0) return this;
+        List<Surface> result=new ArrayList<>(surfaces.size());
+        for(Surface surface:surfaces) result.add(new Surface(surface.vertices.stream()
+                .map(v -> translatedY(v,offset)).toList(),surface.edge,surface.face,surface.bandEnd,surface.normals));
+        return new CopingGeometry(result,bandVertices.stream().map(v -> translatedY(v,offset)).toList());
+    }
+
+    private static Vertex translatedY(Vertex v,float offset) {
+        return new Vertex(v.x,v.y+offset,v.z,v.u,v.v);
+    }
+
     /** Resize the flat core; translate end bevels and preserve authored overhang distances. */
     CopingGeometry fitted(CopingHorizontalFit fit) {
         if(fit==CopingHorizontalFit.AXIS) return this;

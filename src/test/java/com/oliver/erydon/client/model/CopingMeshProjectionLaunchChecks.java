@@ -19,14 +19,15 @@ public final class CopingMeshProjectionLaunchChecks {
         Identifier id=new Identifier("erydon","glacium_coping_georgian");
         for(var profile:CopingBlock.Surface.values()) {
             if(profile.aligned()) continue;
-            String resource="assets/erydon/authoring_models/block/coping/georgian/coping_georgian_"+profile.asString()+".json";
+            var authored=profile.authoringProfile();
+            String resource="assets/erydon/authoring_models/block/coping/georgian/coping_georgian_"+authored.asString()+".json";
             var stream=CopingMeshProjectionLaunchChecks.class.getClassLoader().getResourceAsStream(resource);
             if(stream==null) throw new AssertionError("Missing coping profile "+resource);
             com.google.gson.JsonObject json;
             try(var reader=new InputStreamReader(stream,StandardCharsets.UTF_8)) {
                 json=JsonParser.parseReader(reader).getAsJsonObject();
             }
-            var geometry=CopingGeometry.parse(json,id,profile);
+            var geometry=CopingGeometry.parse(json,id,authored).translatedY((float)(profile.high-authored.high));
             for(var other:CopingBlock.Surface.values()) {
                 if(other.aligned()) continue;
                 var joins=CopingConnections.Joins.samePlane(other,CopingConnections.WEST|CopingConnections.EAST);
@@ -36,12 +37,18 @@ public final class CopingMeshProjectionLaunchChecks {
                     var emitter=builder.getEmitter();
                     CopingGeometry.positions(emitter,surface,false,0,1,2,3);
                     for(int i=0;i<4;i++) {
-                        emitter.uv(i,0,0).color(i,-1).lightmap(i,0);
+                        var vertex=surface.vertices().get(i);
+                        emitter.uv(i,vertex.u(),vertex.v()).color(i,-1).lightmap(i,0);
                     }
                     emitter.emit();
                     builder.build().forEach(quad -> {
                         if(quad.nominalFace()!=surface.face()) changedNormals[0]++;
                         for(int vertex=0;vertex<4;vertex++) {
+                            var source=surface.vertices().get(vertex);
+                            if(Math.abs(quad.x(vertex)-source.x())>.000001 || Math.abs(quad.y(vertex)-source.y())>.000001
+                                    || Math.abs(quad.z(vertex)-source.z())>.000001
+                                    || Math.abs(quad.u(vertex)-source.u())>.000001 || Math.abs(quad.v(vertex)-source.v())>.000001)
+                                throw new AssertionError("Mesh replay changed coping source positions or authored UVs: "+profile);
                             boolean expected=!surface.normals().isEmpty();
                             if(quad.hasNormal(vertex)!=expected) throw new AssertionError("Mesh replay changed coping normals");
                             if(expected) {

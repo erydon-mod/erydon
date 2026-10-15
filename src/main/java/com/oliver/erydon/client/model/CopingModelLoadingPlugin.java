@@ -20,7 +20,7 @@ public final class CopingModelLoadingPlugin implements PreparableModelLoadingPlu
         return CompletableFuture.supplyAsync(() -> {
             Map<CopingBlock.Surface,CopingGeometry> models = new EnumMap<>(CopingBlock.Surface.class);
             for (CopingBlock.Surface surface : CopingBlock.Surface.values()) {
-                if(surface.aligned()) continue;
+                if(surface.authoringProfile()!=surface) continue;
                 Identifier id = new Identifier(Erydon.MOD_ID, "authoring_models/block/coping/georgian/coping_georgian_"+surface.asString()+".json");
                 try (var reader=resources.getResource(id).orElseThrow(() -> new IOException("Missing coping model: "+id)).getReader()) {
                     models.put(surface,CopingGeometry.parse(JsonParser.parseReader(reader).getAsJsonObject(),id,surface));
@@ -29,8 +29,12 @@ public final class CopingModelLoadingPlugin implements PreparableModelLoadingPlu
                 }
             }
             CopingGeometry flat=models.get(CopingBlock.Surface.FLAT);
-            for(CopingBlock.Surface surface:CopingBlock.Surface.values()) if(surface.aligned())
-                models.put(surface,flat.fitted(surface.fit));
+            for(CopingBlock.Surface surface:CopingBlock.Surface.values()) {
+                if(surface.aligned()) models.put(surface,flat.fitted(surface.fit));
+                else if(surface.authoringProfile()!=surface)
+                    models.put(surface,models.get(surface.authoringProfile())
+                            .translatedY((float)(surface.high-surface.authoringProfile().high)));
+            }
             return Map.copyOf(models);
         },executor);
     }

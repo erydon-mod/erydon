@@ -37,6 +37,9 @@ public final class CopingPlacementLaunchProbe implements PreLaunchEntrypoint {
                 net.minecraft.registry.Registry.register(Registries.ITEM,id,new CopingItem(block,new net.minecraft.item.Item.Settings()));
             });
             fixture("glacium_block",new Block(Block.Settings.copy(Blocks.STONE)));
+            supportFixture("glacium_slab",new net.minecraft.block.SlabBlock(Block.Settings.copy(Blocks.STONE)));
+            supportFixture("glacium_layer",new LayerBlock(Block.Settings.copy(Blocks.STONE)));
+            supportFixture("glacium_layer_multiface",new LayerMultifaceBlock(Block.Settings.copy(Blocks.STONE)));
             fixture("glacium_slope",new SlopeBlock(Block.Settings.copy(Blocks.STONE)));
             fixture("glacium_slope_shallow_lower",new ShallowSlopeBlock(Block.Settings.copy(Blocks.STONE),ShallowSlopeBlock.Variant.LOWER));
             fixture("glacium_slope_shallow_upper",new ShallowSlopeBlock(Block.Settings.copy(Blocks.STONE),ShallowSlopeBlock.Variant.UPPER));
@@ -48,7 +51,7 @@ public final class CopingPlacementLaunchProbe implements PreLaunchEntrypoint {
             for (String style : new String[]{"modern", "georgian", "byzantine", "gothic"})
                 fixture("glacium_cornice_" + style, new CorniceBlock(Block.Settings.copy(Blocks.STONE).nonOpaque()));
             // Minecraft normally initialises these caches after mod registration, later than preLaunch.
-            for (Block block:Registries.BLOCK) if (Registries.BLOCK.getId(block).getNamespace().equals("erydon")) {
+            for (Block block:Registries.BLOCK) if (java.util.Set.of("erydon", "erydon_coping_placement_probe").contains(Registries.BLOCK.getId(block).getNamespace())) {
                 block.getStateManager().getStates().forEach(BlockState::initShapeCache);
             }
             com.oliver.erydon.client.model.SlopeShapeLaunchChecks.run();
@@ -69,6 +72,7 @@ public final class CopingPlacementLaunchProbe implements PreLaunchEntrypoint {
                 require(Registries.BLOCK.getId(block).equals(Registries.ITEM.getId(block.asItem())),"Block/item ID mismatch");
             }
             CopingBlock coping=(CopingBlock)block("glacium_coping_georgian");
+            CopingHalfHeightPlacementLaunchChecks.run(coping);
             CopingLightingLaunchChecks.run(coping);
             CopingHorizontalPlacementLaunchChecks.run(coping);
             mixedJoins(coping);
@@ -221,6 +225,10 @@ public final class CopingPlacementLaunchProbe implements PreLaunchEntrypoint {
             joins++;
         }
         System.out.println("ERYDON_COPING_JOINS_OK: "+joins+" reciprocal surface/height/facing/offset cases");
+    }
+    private static void supportFixture(String path,Block block) {
+        net.minecraft.registry.Registry.register(Registries.BLOCK,
+                new Identifier("erydon_coping_placement_probe",path),block);
     }
     private static void fixture(String path,Block block) {
         Identifier id=new Identifier("erydon",path);

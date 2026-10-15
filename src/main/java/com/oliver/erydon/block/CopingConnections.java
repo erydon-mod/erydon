@@ -71,27 +71,27 @@ public final class CopingConnections {
     /** Flat caps are symmetric; orient their joins along a neighbouring ramp's run. */
     public static Direction facing(BlockView world,BlockState state,BlockPos pos) {
         Direction facing=state.get(CopingBlock.FACING);
-        if(state.get(CopingBlock.SURFACE).aligned()) return facing;
-        if (state.get(CopingBlock.SURFACE)!=CopingBlock.Surface.FLAT) return facing;
+        CopingBlock.Surface surface=state.get(CopingBlock.SURFACE);
+        if(!surface.flat()) return facing;
         for(Direction direction:Direction.Type.HORIZONTAL) for(int distance=1;distance<=2;distance++) for(int y=-1;y<=1;y++) {
-            Direction axis=joiningFacing(world,pos,pos.offset(direction,distance).up(y));
+            Direction axis=joiningFacing(world,surface,pos,pos.offset(direction,distance).up(y));
             if (axis!=null) return axis;
         }
         for(int y=-1;y<=1;y+=2) {
-            Direction axis=joiningFacing(world,pos,pos.up(y));
+            Direction axis=joiningFacing(world,surface,pos,pos.up(y));
             if (axis!=null) return axis;
         }
         return facing;
     }
 
-    private static Direction joiningFacing(BlockView world,BlockPos pos,BlockPos owner) {
+    private static Direction joiningFacing(BlockView world,CopingBlock.Surface surface,BlockPos pos,BlockPos owner) {
         BlockState other=world.getBlockState(owner);
-        if (!(other.getBlock() instanceof CopingBlock) || other.get(CopingBlock.SURFACE)==CopingBlock.Surface.FLAT) return null;
+        if (!(other.getBlock() instanceof CopingBlock) || other.get(CopingBlock.SURFACE).flat()) return null;
         if(other.get(CopingBlock.SURFACE).aligned()) return null;
         Direction axis=other.get(CopingBlock.FACING);
         int dx=owner.getX()-pos.getX()-(other.get(CopingBlock.OFFSET) ? axis.getOffsetX() : 0);
         int dz=owner.getZ()-pos.getZ()-(other.get(CopingBlock.OFFSET) ? axis.getOffsetZ() : 0);
-        return joins(CopingBlock.Surface.FLAT,axis,other.get(CopingBlock.SURFACE),axis,dx,owner.getY()-pos.getY(),dz)!=0 ? axis : null;
+        return joins(surface,axis,other.get(CopingBlock.SURFACE),axis,dx,owner.getY()-pos.getY(),dz)!=0 ? axis : null;
     }
 
     public static int mask(BlockView world,BlockState state,BlockPos pos) { return resolve(world,state,pos).mask(); }
@@ -119,6 +119,8 @@ public final class CopingConnections {
             key=add(world,surface,facing,anchor,pos.offset(direction,distance).up(y),key);
         for(int y=-1;y<=1;y+=2) key=add(world,surface,facing,anchor,pos.up(y),key);
         Joins legacy=new Joins(key);
+        // Horizontal fits use the full-height plane at this owner Y. Lower flat
+        // caps keep height-aware legacy joins and cannot mitre with that plane.
         return surface==CopingBlock.Surface.FLAT ? horizontal(world,state,pos,facing,legacy) : legacy;
     }
 
@@ -256,11 +258,11 @@ public final class CopingConnections {
 
     public static int joins(CopingBlock.Surface a,Direction facing,CopingBlock.Surface b,Direction otherFacing,int dx,int dy,int dz) {
         if(a.aligned() || b.aligned()) return 0;
-        if (b!=CopingBlock.Surface.FLAT && facing.getAxis()!=otherFacing.getAxis()) return 0;
+        if (!b.flat() && facing.getAxis()!=otherFacing.getAxis()) return 0;
         Direction cross=facing.rotateYClockwise();
         int x=dx*facing.getOffsetX()+dz*facing.getOffsetZ();
         int z=dx*cross.getOffsetX()+dz*cross.getOffsetZ();
-        boolean reverse=b!=CopingBlock.Surface.FLAT && facing==otherFacing.getOpposite();
+        boolean reverse=!b.flat() && facing==otherFacing.getOpposite();
         double start=reverse ? 1-b.end : b.start,end=reverse ? 1-b.start : b.end;
         double high=reverse ? b.low : b.high,low=reverse ? b.high : b.low;
         if (z==0) {

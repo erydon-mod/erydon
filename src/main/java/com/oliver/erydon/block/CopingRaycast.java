@@ -16,10 +16,18 @@ public final class CopingRaycast {
         BlockHitResult neighbourHit=original;
         // All finite touching fit pairs stay within two owner cells, including
         // sharp mixed-width corners. Skip this lookup above the thin cap slab.
-        if(touchesCapSlab(start,end,cell)) for(int x=-2;x<=2;x++) for(int z=-2;z<=2;z++) if(x!=0 || z!=0) {
+        if(touchesCapSlab(start,end,cell,0)) for(int x=-2;x<=2;x++) for(int z=-2;z<=2;z++) if(x!=0 || z!=0) {
             BlockPos owner=cell.add(x,0,z); BlockState state=world.getBlockState(owner);
             if(state.getBlock() instanceof CopingBlock && (state.get(CopingBlock.SURFACE).aligned()
                     || state.get(CopingBlock.SURFACE)==CopingBlock.Surface.FLAT))
+                neighbourHit=candidate(world,start,end,cell,owner,state,neighbourHit);
+        }
+        // A lower slab cap is owned one cell above its visible half-height band.
+        // Include neighbouring owners so its overhang is targetable through air.
+        if (touchesCapSlab(start,end,cell,.5)) for (int x=-1;x<=1;x++) for (int z=-1;z<=1;z++) {
+            BlockPos owner=cell.add(x,1,z);
+            BlockState state=world.getBlockState(owner);
+            if (state.getBlock() instanceof CopingBlock && state.get(CopingBlock.SURFACE)==CopingBlock.Surface.FLAT_HALF)
                 neighbourHit=candidate(world,start,end,cell,owner,state,neighbourHit);
         }
         if (!(support.getBlock() instanceof SlopeBlock || support.getBlock() instanceof ShallowSlopeBlock
@@ -46,13 +54,23 @@ public final class CopingRaycast {
         BlockPos source=CopingBlock.supportPos(state,owner);
         if (!source.equals(cell) && !(state.get(CopingBlock.OFFSET) && source.up().equals(cell))
                 && !state.get(CopingBlock.SURFACE).aligned()) {
-            if(state.get(CopingBlock.SURFACE)!=CopingBlock.Surface.FLAT) return best;
+            if(!state.get(CopingBlock.SURFACE).flat()) return best;
         }
         var hit=state.getOutlineShape(world,owner,ShapeContext.absent()).raycast(start,end,owner);
+        // Only return the lowered cap when this DDA cell contains its hit;
+        // otherwise a nearby air cell could skip an opaque cell farther ahead.
+        if (hit!=null && state.get(CopingBlock.SURFACE)==CopingBlock.Surface.FLAT_HALF
+                && !contains(cell,hit.getPos())) return best;
         if (hit!=null && (best==null || hit.getPos().squaredDistanceTo(start)<best.getPos().squaredDistanceTo(start))) return hit;
         return best;
     }
-    private static boolean touchesCapSlab(Vec3d start,Vec3d end,BlockPos cell) {
+    private static boolean contains(BlockPos cell,Vec3d point) {
+        double epsilon=.0000001;
+        return point.x>=cell.getX()-epsilon && point.x<=cell.getX()+1+epsilon
+                && point.y>=cell.getY()-epsilon && point.y<=cell.getY()+1+epsilon
+                && point.z>=cell.getZ()-epsilon && point.z<=cell.getZ()+1+epsilon;
+    }
+    private static boolean touchesCapSlab(Vec3d start,Vec3d end,BlockPos cell,double baseY) {
         double entry=0,exit=1;
         for(int axis=0;axis<3;axis++) {
             double a=axis==0 ? start.x : axis==1 ? start.y : start.z;
@@ -64,6 +82,7 @@ public final class CopingRaycast {
         }
         if(entry>exit) return false;
         double y1=start.y+(end.y-start.y)*entry,y2=start.y+(end.y-start.y)*exit;
-        return Math.min(y1,y2)<=cell.getY()+CopingBlock.THICKNESS+.00001 && Math.max(y1,y2)>=cell.getY()-.00001;
+        return Math.min(y1,y2)<=cell.getY()+baseY+CopingBlock.THICKNESS+.00001
+                && Math.max(y1,y2)>=cell.getY()+baseY-.00001;
     }
 }

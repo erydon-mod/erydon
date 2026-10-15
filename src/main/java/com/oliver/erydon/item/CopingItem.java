@@ -1,11 +1,14 @@
 package com.oliver.erydon.item;
 
+import com.oliver.erydon.block.CopingBlock;
 import com.oliver.erydon.block.ShallowSlopeBlock;
 import com.oliver.erydon.block.SlopeBlock;
 import com.oliver.erydon.block.SlopeSteepBlock;
 import com.oliver.erydon.block.SlopeVerticalBlock;
 import com.oliver.erydon.block.SlopeVerticalShallowBroadBlock;
 import com.oliver.erydon.block.SlopeVerticalShallowNarrowBlock;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.SlabBlock;
 import net.minecraft.block.Block;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemUsageContext;
@@ -48,8 +51,7 @@ public final class CopingItem extends ErydonBlockItem {
     @Override public ActionResult useOnBlock(ItemUsageContext original) {
         BlockPos clicked=original.getBlockPos();
         var state=original.getWorld().getBlockState(clicked);
-        if (!(state.getBlock() instanceof SlopeBlock || state.getBlock() instanceof ShallowSlopeBlock
-                || state.getBlock() instanceof SlopeSteepBlock || vertical(state.getBlock()))) return super.useOnBlock(original);
+        if (!fittedSupport(state)) return super.useOnBlock(original);
         Target target=target(original.getWorld(),clicked);
         return target==null ? ActionResult.FAIL : place(new Placement(original,clicked,target.pos(),target.offset()));
     }
@@ -58,11 +60,16 @@ public final class CopingItem extends ErydonBlockItem {
         if (context instanceof Placement) return context;
         BlockPos clicked = context.canReplaceExisting() ? context.getBlockPos()
                 : context.getBlockPos().offset(context.getSide().getOpposite());
-        Block block = context.getWorld().getBlockState(clicked).getBlock();
-        if (block instanceof SlopeBlock || block instanceof ShallowSlopeBlock || block instanceof SlopeSteepBlock || vertical(block)) {
+        BlockState state = context.getWorld().getBlockState(clicked);
+        if (fittedSupport(state)) {
             return ItemPlacementContext.offset(context, clicked.up(), Direction.UP);
         }
         return context;
+    }
+    private static boolean fittedSupport(BlockState state) {
+        Block block = state.getBlock();
+        return block instanceof SlopeBlock || block instanceof ShallowSlopeBlock || block instanceof SlopeSteepBlock
+                || vertical(block) || block instanceof SlabBlock || CopingBlock.hasHalfHeightTop(state);
     }
     private static boolean vertical(Block block) {
         return block instanceof SlopeVerticalBlock || block instanceof SlopeVerticalShallowBroadBlock
