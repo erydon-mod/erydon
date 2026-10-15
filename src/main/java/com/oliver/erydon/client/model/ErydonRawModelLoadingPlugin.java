@@ -1021,12 +1021,15 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
 
             Map<String, ModelOverrideDecision> decisions = new LinkedHashMap<>();
             Map<Identifier, Resource> activeModels = new LinkedHashMap<>();
-            for (String root : List.of(
-                    "models/block/column/gothic",
-                    "models/block/alcove/georgian",
-                    "models/block/alcove/gothic",
-                    "models/block/alcove/modern",
-                    "models/block/arch/gothic")) {
+            // Every raw family needs an override decision before resolution.
+            // Keep this coupled to the authoring index: an omitted family would
+            // otherwise fall back to its deliberately empty vanilla anchors.
+            for (String root : AUTHORING_MODELS.keySet().stream()
+                    .filter(ErydonRawModelLoadingPlugin::isSharedRawFamilyKey)
+                    .map(ModelOverrideIndex::representative)
+                    .map(component -> component.parentResourceId().getPath())
+                    .map(path -> path.substring(0, path.lastIndexOf('/')))
+                    .distinct().toList()) {
                 activeModels.putAll(resourceManager.findResources(
                         root, id -> id.getPath().endsWith(".json")));
             }

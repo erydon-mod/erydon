@@ -96,6 +96,7 @@ public final class WideArchMeshLaunchChecks {
         }
         cases += completeComponentSources(families, sprite, layout);
         ArchRepeatSourceLaunchChecks.run(families, sprite);
+        RawArchModelLoadingLaunchChecks.run(sprite);
         System.out.println("ERYDON_WIDE_ARCH_MESH_OK cases=" + cases);
     }
 
