@@ -1,5 +1,16 @@
 # Shared geometry prototype architecture
 
+## Current status (2026-10-15)
+
+The 1.5.44 development update defaults production and development launches to
+`shared_geometry`. Explicit `-Derydon.shared_geometry.mode=baseline` remains the
+rollback; blank or invalid values still select `baseline`. The performance
+foundation's baseline preset intentionally forces sharing off for comparisons.
+The existing compatibility gates and per-model fallback rules are unchanged.
+
+The sections below preserve the original architecture and mode behavior from
+the 2026-08-17 source snapshot; their opt-in/default statements are historical.
+
 > This document records the original Gothic-column pilot. The later compatible
 > family batch is documented in `SHARED_GEOMETRY_BATCH_RESULTS.md`; it keeps the
 > same opt-in switch and conservative fallback rules.

@@ -1,6 +1,17 @@
 # Shared geometry family batch results
 
-## Outcome
+## Current status (2026-10-15)
+
+The 1.5.44 development update defaults production and development launches to
+`shared_geometry`. Explicit `-Derydon.shared_geometry.mode=baseline` restores
+the previous path; blank or invalid values also fall back to `baseline`.
+The performance foundation's baseline preset intentionally keeps sharing off
+for comparisons. Compatibility gates and per-model fallback behavior remain.
+
+The results and decision below are retained from the 2026-08-17 source snapshot.
+Its opt-in/default statements and measurements describe that historical batch.
+
+## Historical outcome (2026-08-17 snapshot)
 
 The opt-in `shared_geometry` path now covers ERYDON's compatible architectural
 component families in one batch. It reduced 21,674 accepted material-specific

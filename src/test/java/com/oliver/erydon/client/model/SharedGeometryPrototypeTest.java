@@ -36,15 +36,22 @@ class SharedGeometryPrototypeTest {
     }
 
     @Test
-    void productionDefaultAndInvalidValuesRemainBaseline() {
+    void sharedGeometryIsDefaultWithBaselineRollbackAndInvalidValueFallback() {
         System.clearProperty(ErydonRawModelLoadingPlugin.SHARED_GEOMETRY_MODE_PROPERTY);
+        assertEquals("shared_geometry", ErydonRawModelLoadingPlugin.configuredModeForTest());
+        assertTrue(ErydonRawModelLoadingPlugin.sharedGeometryEnabled());
+
+        System.setProperty(ErydonRawModelLoadingPlugin.SHARED_GEOMETRY_MODE_PROPERTY, "baseline");
         assertEquals("baseline", ErydonRawModelLoadingPlugin.configuredModeForTest());
+        assertFalse(ErydonRawModelLoadingPlugin.sharedGeometryEnabled());
 
         System.setProperty(ErydonRawModelLoadingPlugin.SHARED_GEOMETRY_MODE_PROPERTY, "unexpected");
         assertEquals("baseline", ErydonRawModelLoadingPlugin.configuredModeForTest());
+        assertFalse(ErydonRawModelLoadingPlugin.sharedGeometryEnabled());
 
         System.setProperty(ErydonRawModelLoadingPlugin.SHARED_GEOMETRY_MODE_PROPERTY, "shared_geometry");
         assertEquals("shared_geometry", ErydonRawModelLoadingPlugin.configuredModeForTest());
+        assertTrue(ErydonRawModelLoadingPlugin.sharedGeometryEnabled());
     }
 
     @Test

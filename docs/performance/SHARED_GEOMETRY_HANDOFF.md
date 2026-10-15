@@ -1,3 +1,17 @@
+# Shared geometry current status (2026-10-15)
+
+The 1.5.44 development update enables `shared_geometry` by default in production
+and development launches. Set `-Derydon.shared_geometry.mode=baseline` to roll
+back; blank or invalid values still fall back to `baseline`. The performance
+foundation's baseline preset intentionally forces sharing off for comparisons.
+Compatibility gates and per-model fallback behavior are unchanged.
+
+The report below preserves the historical pilot and batch handoff from the
+2026-08-17 source snapshot. Its opt-in/default decisions describe that snapshot,
+not the current default.
+
+## Historical pilot checks (2026-08-17 snapshot)
+
 | Check | Status | Evidence |
 | --- | --- | --- |
 | Verified Daedalon reference architecture | PASS | Live OBJ loader, immutable mesh, material transform, reload and item paths traced read-only |
@@ -17,7 +31,7 @@
 | Stationary FPS | PASS | Neutral: 119.412 vs 119.543 mean FPS |
 | Rollback switch | PASS | Default and invalid values select `baseline`; opt-in uses `shared_geometry` |
 
-> Current update: the compatible family batch requested after this pilot is now
+> Historical batch update (2026-08-17): the compatible family batch requested after this pilot is now
 > implemented and measured. See `SHARED_GEOMETRY_BATCH_RESULTS.md`. The default
 > remains `baseline`; the pilot-era candidate list below is historical.
 

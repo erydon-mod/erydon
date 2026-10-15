@@ -976,7 +976,7 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
 
         private static SharedGeometryMode configured() {
             String configured = System.getProperty(
-                    SHARED_GEOMETRY_MODE_PROPERTY, BASELINE.configValue).trim();
+                    SHARED_GEOMETRY_MODE_PROPERTY, SHARED_GEOMETRY.configValue).trim();
             for (SharedGeometryMode candidate : values()) {
                 if (candidate.configValue.equalsIgnoreCase(configured)) {
                     return candidate;
