@@ -134,9 +134,15 @@ final class AxiomFallbackQuads {
                                        boolean lockHorizontalUv,
                                        Random random) {
         for (BakedQuad quad : model.getQuads(null, sourceFace, random)) {
-            quads.add(rotation == ModelRotation.X0_Y0
+            BakedQuad transformed = rotation == ModelRotation.X0_Y0
                     ? quad
-                    : rotate(quad, rotation, yTurns, lockHorizontalUv));
+                    : rotate(quad, rotation, yTurns, lockHorizontalUv);
+            if (quads instanceof ArchQuadSources.Sources sources) {
+                sources.add(transformed, sourceFace == null ? null
+                        : rotation.getDirectionTransformation().map(sourceFace));
+            } else {
+                quads.add(transformed);
+            }
         }
     }
 

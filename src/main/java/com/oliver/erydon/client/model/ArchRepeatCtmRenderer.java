@@ -38,8 +38,9 @@ public final class ArchRepeatCtmRenderer extends ForwardingBakedModel {
     private static final int MAX_POM_BAND_SUBDIVISIONS = 1024;
     private static final Object MATERIAL_LOCK = new Object();
     private static final Object GEOMETRY_LOCK = new Object();
-    private static final Map<StateKey, List<QuadTemplate>> GEOMETRY_BY_STATE =
+    private static final Map<StateKey, Geometry> GEOMETRY_BY_STATE =
             new ConcurrentHashMap<>();
+    private static final boolean BOUNDARY_CULLING = !Boolean.getBoolean("erydon.perf.disableArchBoundaryCulling");
 
     private static volatile RenderMaterial standardMaterial;
     private static volatile RenderMaterial noAmbientOcclusionMaterial;
@@ -47,12 +48,14 @@ public final class ArchRepeatCtmRenderer extends ForwardingBakedModel {
     private final String ctmSet;
     private final Family family;
     private final int firstSourceFace;
+    private final ArchQuadSources.CullMetadata sourceMetadata;
 
     public ArchRepeatCtmRenderer(BakedModel wrapped, String ctmSet, Family family) {
         this.wrapped = wrapped;
         this.ctmSet = ctmSet;
         this.family = family;
         this.firstSourceFace = ArchQuadSources.hasCompleteNullBucket(wrapped) ? ModelHelper.NULL_FACE_ID : 0;
+        this.sourceMetadata = ArchQuadSources.cullMetadata(wrapped);
     }
 
     @Override
@@ -67,6 +70,13 @@ public final class ArchRepeatCtmRenderer extends ForwardingBakedModel {
                                BlockPos pos,
                                Supplier<Random> randomSupplier,
                                RenderContext context) {
+        emitBlockQuads(view, state, pos, randomSupplier, context, !context.hasTransform());
+    }
+
+    /** Called directly by Synapheia only when its own UV pass is the sole transform. */
+    @SuppressWarnings("removal")
+    void emitBlockQuads(BlockRenderView view, BlockState state, BlockPos pos,
+                        Supplier<Random> randomSupplier, RenderContext context, boolean knownGeometry) {
         if (!family.matches(state)
                 || !state.contains(ArchRomanesqueBlock.ARRANGEMENT)
                 || !state.contains(ArchRomanesqueBlock.FACING)
@@ -83,14 +93,19 @@ public final class ArchRepeatCtmRenderer extends ForwardingBakedModel {
                 state.get(ArchRomanesqueBlock.WIDTH),
                 state.get(ArchRomanesqueBlock.FACING),
                 state.get(ArchRomanesqueBlock.REFLECTED),
-                firstSourceFace
+                firstSourceFace,
+                sourceMetadata != null
         );
-        List<QuadTemplate> templates = geometryForState(
+        Geometry geometry = geometryForState(
                 key, state, randomSupplier, context.getEmitter());
+        int hiddenFaces = BOUNDARY_CULLING && knownGeometry
+                ? ArchBoundaryVisibility.opaqueNeighbourMask(view, pos, geometry.eligibleFaces) : 0;
         Sprite[] repeatSprites = ctmService.repeatSprites(ctmSet);
         QuadEmitter emitter = context.getEmitter();
 
-        for (QuadTemplate template : templates) {
+        for (QuadTemplate template : geometry.templates) {
+            if (template.hiddenBoundaryFace != null
+                    && (hiddenFaces & (1 << template.hiddenBoundaryFace.ordinal())) != 0) continue;
             if (!context.hasTransform()
                     && template.cullFace != null
                     && context.isFaceCulled(template.cullFace)) {
@@ -111,11 +126,11 @@ public final class ArchRepeatCtmRenderer extends ForwardingBakedModel {
         GEOMETRY_BY_STATE.clear();
     }
 
-    private List<QuadTemplate> geometryForState(StateKey key,
+    private Geometry geometryForState(StateKey key,
                                                 BlockState state,
                                                 Supplier<Random> randomSupplier,
                                                 QuadEmitter decoder) {
-        List<QuadTemplate> cached = GEOMETRY_BY_STATE.get(key);
+        Geometry cached = GEOMETRY_BY_STATE.get(key);
         if (cached != null) {
             return cached;
         }
@@ -123,7 +138,12 @@ public final class ArchRepeatCtmRenderer extends ForwardingBakedModel {
         synchronized (GEOMETRY_LOCK) {
             cached = GEOMETRY_BY_STATE.get(key);
             if (cached == null) {
-                cached = buildGeometry(state, randomSupplier, decoder);
+                List<QuadTemplate> templates = buildGeometry(state, randomSupplier, decoder);
+                int eligibleFaces = 0;
+                for (QuadTemplate template : templates) {
+                    if (template.hiddenBoundaryFace != null) eligibleFaces |= 1 << template.hiddenBoundaryFace.ordinal();
+                }
+                cached = new Geometry(templates, eligibleFaces);
                 GEOMETRY_BY_STATE.put(key, cached);
             }
             return cached;
@@ -137,14 +157,19 @@ public final class ArchRepeatCtmRenderer extends ForwardingBakedModel {
                 ? standardMaterial
                 : noAmbientOcclusionMaterial;
         List<QuadTemplate> result = new ArrayList<>();
+        ArchQuadSources.Sources authored = sourceMetadata == null
+                || state.get(ArchRomanesqueBlock.ARRANGEMENT).isWide() ? null
+                : sourceMetadata.sourceQuads(state, randomSupplier.get());
 
         // The assembled family's null bucket already includes its directional
         // sources. Keep that exact stream, including legitimate coincident layers;
         // querying the other buckets again duplicates their geometry.
         for (int faceIndex = firstSourceFace; faceIndex <= ModelHelper.NULL_FACE_ID; faceIndex++) {
             Direction sourceCullFace = ModelHelper.faceFromIndex(faceIndex);
-            List<BakedQuad> quads = wrapped.getQuads(state, sourceCullFace, randomSupplier.get());
-            for (BakedQuad quad : quads) {
+            List<BakedQuad> quads = authored != null ? authored
+                    : wrapped.getQuads(state, sourceCullFace, randomSupplier.get());
+            for (int quadIndex = 0; quadIndex < quads.size(); quadIndex++) {
+                BakedQuad quad = quads.get(quadIndex);
                 decoder.fromVanilla(quad, defaultMaterial, sourceCullFace);
                 Direction lightFace = decoder.lightFace();
                 if (lightFace == null) {
@@ -171,6 +196,7 @@ public final class ArchRepeatCtmRenderer extends ForwardingBakedModel {
                         lightFace,
                         decoder.nominalFace(),
                         sourceCullFace,
+                        authored == null ? null : ArchBoundaryVisibility.eligibleFace(decoder, authored.cullFace(quadIndex)),
                         decoder.material(),
                         decoder.colorIndex(),
                         decoder.tag()
@@ -590,17 +616,19 @@ public final class ArchRepeatCtmRenderer extends ForwardingBakedModel {
                                          SpiralStairCtmGeometry.CellVertex second,
                                          SpiralStairCtmGeometry.CellVertex third,
                                          SpiralStairCtmGeometry.CellVertex fourth) {
+        SpiralStairCtmGeometry.CellVertex[] vertices = {first, second, third, fourth};
         return new QuadTemplate(
                 properties.lightFace,
                 properties.nominalFace,
                 cullFace,
+                ArchBoundaryVisibility.finalFace(properties.hiddenBoundaryFace, vertices),
                 properties.material,
                 properties.colorIndex,
                 properties.tag,
                 offsetX,
                 offsetY,
                 offsetZ,
-                new SpiralStairCtmGeometry.CellVertex[]{first, second, third, fourth}
+                vertices
         );
     }
 
@@ -728,12 +756,16 @@ public final class ArchRepeatCtmRenderer extends ForwardingBakedModel {
                             int width,
                             Direction facing,
                             boolean reflected,
-                            int firstSourceFace) {
+                            int firstSourceFace,
+                            boolean sourceMetadata) {
     }
+
+    private record Geometry(List<QuadTemplate> templates, int eligibleFaces) {}
 
     private record SourceProperties(Direction lightFace,
                                     Direction nominalFace,
                                     Direction cullFace,
+                                    Direction hiddenBoundaryFace,
                                     RenderMaterial material,
                                     int colorIndex,
                                     int tag) {
@@ -742,6 +774,7 @@ public final class ArchRepeatCtmRenderer extends ForwardingBakedModel {
     private record QuadTemplate(Direction lightFace,
                                 Direction nominalFace,
                                 Direction cullFace,
+                                Direction hiddenBoundaryFace,
                                 RenderMaterial material,
                                 int colorIndex,
                                 int tag,

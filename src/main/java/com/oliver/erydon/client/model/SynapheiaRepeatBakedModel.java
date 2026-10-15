@@ -101,6 +101,7 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
                 && ErydonCuPomRuntimeState.requiresGeometryFallback();
         boolean transportSubstrate = plan.hasSourceShapedOverlay() && InlaySubstrateTransport.supportsContext(context);
         RenderCallState renderCall = new RenderCallState(plan.hasOverlay(), metricsEnabled);
+        boolean noExternalTransforms = !context.hasTransform();
         context.pushTransform(quad -> {
             renderCall.recordInputSurface();
             Sprite capturedSprite = spriteFinder().find(quad);
@@ -134,7 +135,11 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
             return disposition.streamsOriginal();
         });
         try {
-            wrapped.emitBlockQuads(view, state, pos, randomSupplier, context);
+            if (ArchQuadSources.canCullThroughSynapheia(wrapped, !noExternalTransforms)) {
+                ((ArchRepeatCtmRenderer) wrapped).emitBlockQuads(view, state, pos, randomSupplier, context, true);
+            } else {
+                wrapped.emitBlockQuads(view, state, pos, randomSupplier, context);
+            }
         } finally {
             context.popTransform();
         }
@@ -608,7 +613,7 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
         // coincident surfaces even when the player disables the stone finish controls.
         offsetSourceOverlay(emitter, face, highPolish, sourceOverlay.substrateRecord());
         InlaySubstrateTransport.emit(emitter, sourceOverlay.substrateRecord());
-        var whole=physicalTrimSurface(neighbourCache,state,face,sourceOverlay.rule(),slopeSurface);
+        var whole=overlay.trimSurface();
         if(whole!=null) {
             var diagonalKey=new OverlayKey(sourceOverlay.rule().id()+"|diagonal_trim",face,whole);
             if(selectedOverlays.putIfAbsent(diagonalKey,overlay)==null) {
@@ -682,15 +687,17 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
         if (neighbourCache == null) {
             throw new IllegalStateException("Synapheia overlay neighbour cache is unavailable.");
         }
-        int mask = connectionSurface == null ? connectionMask(neighbourCache, state, face, rule)
-                : surfaceConnectionMask(neighbourCache, state, face, rule, connectionSurface);
         // A rectangular CTM corner cannot describe a triangular outer boundary. Keep
         // this source's world-phased substrate and draw its physical perimeter separately.
-        if(physicalTrimSurface(neighbourCache,state,face,rule,slopeSurface)!=null) mask=255;
+        // The physical perimeter owns these borders, so its ordinary mask would be discarded.
+        var trimSurface = physicalTrimSurface(neighbourCache, state, face, rule, slopeSurface);
+        int mask = trimSurface != null ? 255
+                : connectionSurface == null ? connectionMask(neighbourCache, state, face, rule)
+                : surfaceConnectionMask(neighbourCache, state, face, rule, connectionSurface);
         int tileIndex = connectedTileIndex(mask);
         RenderMaterial material = overlayMaterial(
                 state.getLuminance() == 0, rule.overlayLayer());
-        selected = new OverlayTile(sprites.get(tileIndex), material, tileIndex, mask);
+        selected = new OverlayTile(sprites.get(tileIndex), material, tileIndex, mask, trimSurface);
         selectedOverlays.put(key, selected);
         return selected;
     }
@@ -1170,7 +1177,8 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
     private record OverlayTile(Sprite sprite,
                                RenderMaterial material,
                                int tileIndex,
-                               int connectionMask) {
+                               int connectionMask,
+                               SynapheiaSlopeConnections.Surface trimSurface) {
     }
 
     record Offset(int x, int y, int z) {

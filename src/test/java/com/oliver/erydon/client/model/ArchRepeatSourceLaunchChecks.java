@@ -74,6 +74,7 @@ final class ArchRepeatSourceLaunchChecks {
         }
         System.out.println("ERYDON_ARCH_REPEAT_SOURCES_OK cases=" + cases
                 + " retainedStream=exact coincidentLayers=preserved genericFallback=seven-buckets");
+        ArchBoundaryVisibilityLaunchChecks.run(families, sprite);
     }
 
     private static void classifier(ArchRomanesqueBlock modern, Sprite sprite) throws Exception {

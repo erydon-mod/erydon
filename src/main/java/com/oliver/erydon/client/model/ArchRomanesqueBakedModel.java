@@ -31,7 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 import java.util.function.Function;
 
-public final class ArchRomanesqueBakedModel implements BakedModel, FabricBakedModel, ArchQuadSources.Complete {
+public final class ArchRomanesqueBakedModel implements BakedModel, FabricBakedModel, ArchQuadSources.CullMetadata {
     private static final String ROMANESQUE_MODEL_PATH = "block/arch/romanesque/";
     private static final String MODERN_MODEL_PATH = "block/arch/modern/";
     private static final String GOTHIC_MODEL_PATH = "block/arch/gothic/";
@@ -391,11 +391,24 @@ public final class ArchRomanesqueBakedModel implements BakedModel, FabricBakedMo
 
         ArchRomanesqueBlock.Arrangement arrangement = state.get(ArchRomanesqueBlock.ARRANGEMENT);
         if (arrangement.isWide()) return face == null ? wideQuads(state) : List.of();
+        return collectQuads(state, face, random, new ArrayList<>());
+    }
+
+    @Override
+    public ArchQuadSources.Sources sourceQuads(BlockState state, Random random) {
+        if (state == null || !(state.getBlock() instanceof ArchRomanesqueBlock)
+                || state.get(ArchRomanesqueBlock.ARRANGEMENT).isWide()) return null;
+        ArchQuadSources.Sources sources = new ArchQuadSources.Sources();
+        collectQuads(state, null, random, sources);
+        return sources;
+    }
+
+    private List<BakedQuad> collectQuads(BlockState state, Direction face, Random random, List<BakedQuad> quads) {
+        ArchRomanesqueBlock.Arrangement arrangement = state.get(ArchRomanesqueBlock.ARRANGEMENT);
         Direction facing = state.get(ArchRomanesqueBlock.FACING);
         ArchHorizontalReflection reflection = state.get(ArchRomanesqueBlock.REFLECTED)
                 && !childrenFor(state.getBlock()).romanesque ? ArchHorizontalReflection.forState(facing, arrangement.hasTopLarge()) : null;
         Direction sourceFace = reflection == null ? face : reflection.face(face);
-        List<BakedQuad> quads = new ArrayList<>();
 
         addCornerQuads(quads, state, arrangement.corner(), arrangement.cornerFlip(), facing, sourceFace, random);
         addSideQuads(quads, state, arrangement.sideL(), false, facing, sourceFace, random);
@@ -408,7 +421,7 @@ public final class ArchRomanesqueBakedModel implements BakedModel, FabricBakedMo
         addIfQuads(quads, state, arrangement.plinthR(), "plinth", rightRotation(facing), sourceFace, random, true);
         addIfQuads(quads, state, arrangement.hasTopLarge(), "top_large", rightRotation(facing), sourceFace, random);
         if (reflection != null) {
-            quads.replaceAll(reflection::reflect);
+            reflectQuads(quads, 0, reflection);
         }
         return quads;
     }
@@ -486,9 +499,14 @@ public final class ArchRomanesqueBakedModel implements BakedModel, FabricBakedMo
         AxiomFallbackQuads.add(quads, getModel(state, suffix), degrees,
                 mirror ? reflection.face(face) : face, random, true);
         if (mirror) {
-            for (int index = start; index < quads.size(); index++) {
-                quads.set(index, reflection.reflect(quads.get(index)));
-            }
+            reflectQuads(quads, start, reflection);
+        }
+    }
+
+    private static void reflectQuads(List<BakedQuad> quads, int start, ArchHorizontalReflection reflection) {
+        for (int index = start; index < quads.size(); index++) {
+            quads.set(index, reflection.reflect(quads.get(index)));
+            if (quads instanceof ArchQuadSources.Sources sources) sources.reflectCullFace(index, reflection);
         }
     }
 

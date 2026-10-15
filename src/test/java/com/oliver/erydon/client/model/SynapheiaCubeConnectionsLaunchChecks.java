@@ -76,6 +76,7 @@ public final class SynapheiaCubeConnectionsLaunchChecks {
         System.out.println("ERYDON_CUBE_CTM_PARITY_OK: " + checked
                 + " production masks, all six faces, independent seam patterns; cached replays read each of at most 27 cells once");
         foldedMasks(tiles, stoneId);
+        SynapheiaOverlaySelectionLaunchChecks.run();
     }
 
     /** Actual registry/state/material/visibility branches, with model geometry injected before client startup. */
