@@ -12,6 +12,7 @@ tasks.register('verifyErydonModelGeometryTooling', Exec) {
             file('tools/model_raw_uv_safety.py'),
             file('tools/model_z_fighting_safety.py'),
             file('tools/generate_georgian_alcove.py'),
+            file('tools/generate_georgian_window_corners.py'),
             file('tools/generate_romanesque_arch.py'),
             file('tools/derive_romanesque_non_column.py'),
             file('tools/export_romanesque_non_column_authoring.py'),

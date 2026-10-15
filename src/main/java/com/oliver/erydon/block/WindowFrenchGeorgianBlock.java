@@ -104,10 +104,15 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
         OPEN_UPPER_MULTI_MID,
         OPEN_UPPER_MULTI_RH,
 
-        SILL
+        SILL,
+        CORNER_POST,
+        CORNER_FANLIGHT,
+        CORNER_FANLIGHT_SINGLE_LH,
+        CORNER_FANLIGHT_SINGLE_RH
     }
 
     private static final EnumMap<ShapeKey, VoxelShape[]> SHAPES = new EnumMap<>(ShapeKey.class);
+    private static final VoxelShape[] OPEN_CORNER_SHAPES = new VoxelShape[64];
 
     static {
         register(ShapeKey.CLOSED_LOWER_SINGLE, makeClosedLowerSingleShape());
@@ -135,6 +140,23 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
         register(ShapeKey.OPEN_UPPER_MULTI_RH, makeOpenUpperMultiRhShape());
 
         register(ShapeKey.SILL, makeSillShape());
+        register(ShapeKey.CORNER_POST, VoxelShapes.cuboid(0, 0, 0, 3 / 16.0, 1, 3 / 16.0));
+        VoxelShape fanlight = VoxelShapes.cuboid(0, 4.846 / 16, 0, 1, 1, 3 / 16.0);
+        register(ShapeKey.CORNER_FANLIGHT, fanlight);
+        register(ShapeKey.CORNER_FANLIGHT_SINGLE_LH, VoxelShapes.combine(fanlight,
+                VoxelShapes.cuboid(0, 0, 0, 1.5 / 16, 14.5 / 16, 3 / 16.0), BooleanBiFunction.OR));
+        register(ShapeKey.CORNER_FANLIGHT_SINGLE_RH, VoxelShapes.combine(fanlight,
+                VoxelShapes.cuboid(14.5 / 16, 0, 0, 1, 14.5 / 16, 3 / 16.0), BooleanBiFunction.OR));
+        for (int kind = 0; kind < 4; kind++) {
+            for (Direction facing : Direction.Type.HORIZONTAL) {
+                for (Corner corner : new Corner[]{Corner.LEFT, Corner.RIGHT}) {
+                    for (boolean sill : new boolean[]{false, true}) {
+                        OPEN_CORNER_SHAPES[openCornerShapeIndex(kind, facing, corner, sill)] =
+                                makeOpenCornerShape(kind, facing, corner, sill);
+                    }
+                }
+            }
+        }
     }
 
     private static void register(ShapeKey key, VoxelShape northShape) {
@@ -194,9 +216,16 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
 
     private static Corner placementCorner(BlockState state, ItemPlacementContext ctx) {
         if (state.get(CORNER) != Corner.NONE) return Corner.NONE;
-        return Corner.forPlacement(state.get(FACING), state.get(PIECE),
+        Corner corner = Corner.forPlacement(state.get(FACING), primaryPiece(state),
                 ctx.getHorizontalPlayerFacing().getOpposite(), ctx.getSide(),
                 ctx.canReplaceExisting(), ctx.shouldCancelInteraction());
+        if (corner == Corner.NONE) return corner;
+        // Every column now uses a single-width piece, so the actual run end
+        // replaces the old wide-piece name as the corner attachment boundary.
+        BlockState neighbour = ctx.getWorld().getBlockState(ctx.getBlockPos()
+                .offset(corner.secondaryFacing(state.get(FACING))));
+        return neighbour.isOf(state.getBlock()) && occupiesFacing(neighbour, state.get(FACING))
+                ? Corner.NONE : corner;
     }
 
     @Override
@@ -438,13 +467,42 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
     }
 
     private VoxelShape getWindowShape(BlockState state) {
-        VoxelShape shape = getWindowFaceShape(state, state.get(FACING), state.get(PIECE),
+        if (state.get(OPEN) && state.get(CORNER) != Corner.NONE) {
+            Piece piece = state.get(PIECE);
+            int kind = piece.single() == Piece.LOWER_SINGLE ? 0
+                    : piece != Piece.UPPER_SINGLE ? 1 : state.get(HINGE) == DoorHinge.LEFT ? 2 : 3;
+            return OPEN_CORNER_SHAPES[openCornerShapeIndex(kind, state.get(FACING), state.get(CORNER), state.get(SILL))];
+        }
+        VoxelShape shape = getWindowFaceShape(state, state.get(FACING), primaryPiece(state),
                 state.get(HINGE), state.get(SILL));
         Direction secondary = secondaryFacing(state);
         if (secondary != null) {
             shape = VoxelShapes.combine(shape, getWindowFaceShape(state, secondary,
                     cornerPiece(state), state.get(HINGE), state.get(SILL)),
                     BooleanBiFunction.OR);
+        }
+        return shape;
+    }
+
+    private static int openCornerShapeIndex(int kind, Direction facing, Corner corner, boolean sill) {
+        return (((kind * 4 + facingIndex(facing)) * 2 + (corner == Corner.RIGHT ? 1 : 0)) * 2)
+                + (sill ? 1 : 0);
+    }
+
+    private static VoxelShape makeOpenCornerShape(int kind, Direction facing, Corner corner, boolean sill) {
+        Direction secondary = corner.secondaryFacing(facing);
+        Direction postFacing = corner == Corner.RIGHT ? facing.rotateYClockwise() : facing;
+        VoxelShape shape = SHAPES.get(ShapeKey.CORNER_POST)[facingIndex(postFacing)];
+        if (kind != 0) {
+            ShapeKey first = kind == 2 ? ShapeKey.CORNER_FANLIGHT_SINGLE_LH
+                    : kind == 3 ? ShapeKey.CORNER_FANLIGHT_SINGLE_RH : ShapeKey.CORNER_FANLIGHT;
+            shape = VoxelShapes.combine(shape, SHAPES.get(first)[facingIndex(facing)], BooleanBiFunction.OR);
+            shape = VoxelShapes.combine(shape, SHAPES.get(ShapeKey.CORNER_FANLIGHT)[facingIndex(secondary)],
+                    BooleanBiFunction.OR);
+        }
+        if (sill) {
+            shape = VoxelShapes.combine(shape, SHAPES.get(ShapeKey.SILL)[facingIndex(facing)], BooleanBiFunction.OR);
+            shape = VoxelShapes.combine(shape, SHAPES.get(ShapeKey.SILL)[facingIndex(secondary)], BooleanBiFunction.OR);
         }
         return shape;
     }
@@ -519,8 +577,34 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
 }
 
     private void reflowPlane(World world, BlockPos seed, Direction facing, Set<BlockPos> component) {
-        ClusterPartition partition = partitionComponent(world, seed, facing, component);
-        for (Rect rect : partition.rects) applyRectLayout(world, rect);
+        if (component == null) component = collectPlaneComponent(world, seed, facing);
+        if (component.isEmpty() || ClusterRecalcSafety.unsafeResult(component) != null) return;
+
+        // Corners retain their authored end pieces and the existing rectangle layout.
+        // Preflight that path before changing any straight columns.
+        List<Rect> cornerRects = List.of();
+        for (BlockPos pos : component) {
+            if (world.getBlockState(pos).get(CORNER) != Corner.NONE) {
+                cornerRects = partitionComponent(world, seed, facing, component).rects;
+                break;
+            }
+        }
+        if (ClusterRecalcSafety.unsafeResult(component) != null) return;
+
+        for (Rect column : partitionColumns(component, facing)) applyRectLayout(world, column, false);
+        for (Rect rect : cornerRects) applyRectLayout(world, rect, true);
+    }
+
+    /** Independent vertical runs avoid wide fanlights and artificial tops in ragged clusters. */
+    static List<Rect> partitionColumns(Set<BlockPos> component, Direction facing) {
+        List<Rect> columns = new ArrayList<>();
+        for (BlockPos bottom : component) {
+            if (component.contains(bottom.down())) continue;
+            int height = 1;
+            while (component.contains(bottom.up(height))) height++;
+            columns.add(new Rect(bottom, 1, height, facing));
+        }
+        return columns;
     }
 
     @Override
@@ -591,7 +675,7 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
                 .with(CORNER, corner);
     }
 
-    private void applyRectLayout(World world, Rect rect) {
+    private void applyRectLayout(World world, Rect rect, boolean cornersOnly) {
         BlockState seedState = world.getBlockState(rect.bottomLeft);
         if (!seedState.isOf(this)) return;
 
@@ -612,6 +696,7 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
 
                 BlockState s = world.getBlockState(p);
                 if (!s.isOf(this) || !occupiesFacing(s, rect.facing)) continue;
+                if ((s.get(CORNER) != Corner.NONE) != cornersOnly) continue;
                 Piece piece = computePiece(w, isTop, dx);
 
                 BlockState ns = s
@@ -975,6 +1060,12 @@ private ClusterPartition partitionComponent(World world, BlockPos seed, Directio
         return state.get(CORNER).pieceFor(state.get(PIECE), state.get(OPEN));
     }
 
+    /** Keep every published piece value readable, but render old straight runs as individual windows. */
+    public static Piece primaryPiece(BlockState state) {
+        Piece saved = state.get(PIECE);
+        return state.get(CORNER) == Corner.NONE ? saved.single() : saved;
+    }
+
     private static List<Direction> facings(BlockState state) {
         Direction secondary = secondaryFacing(state);
         return secondary == null ? List.of(state.get(FACING)) : List.of(state.get(FACING), secondary);
@@ -1080,7 +1171,7 @@ private ClusterPartition partitionComponent(World world, BlockPos seed, Directio
         }
     }
 
-    private static final class Rect {
+    static final class Rect {
         final BlockPos bottomLeft;
         final int width;
         final int height;
@@ -1177,6 +1268,13 @@ private ClusterPartition partitionComponent(World world, BlockPos seed, Directio
         private final String id;
         Piece(String id) { this.id = id; }
         @Override public String asString() { return id; }
+
+        public Piece single() {
+            return switch (this) {
+                case UPPER_SINGLE, UPPER_MULTI_LH, UPPER_MULTI_MID, UPPER_MULTI_RH -> UPPER_SINGLE;
+                case LOWER_SINGLE, LOWER_MULTI_LH, LOWER_MULTI_MID, LOWER_MULTI_RH -> LOWER_SINGLE;
+            };
+        }
     }
 
     public enum Corner implements StringIdentifiable {

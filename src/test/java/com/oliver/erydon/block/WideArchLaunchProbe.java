@@ -120,6 +120,7 @@ public final class WideArchLaunchProbe implements PreLaunchEntrypoint {
                     + " toggles=" + styleToggleCases);
             com.oliver.erydon.client.model.WideArchMeshLaunchChecks.run(java.util.Arrays.copyOf(families, 3));
             com.oliver.erydon.client.model.ArchContinuityLaunchChecks.run();
+            WindowFrenchGeorgianLaunchProbe.run();
             System.out.println("ERYDON_WIDE_ARCHES_OK cases=" + cases);
             System.exit(0);
         } catch (Throwable failure) { failure.printStackTrace(); System.exit(1); }
