@@ -352,6 +352,18 @@
     "erydon:selenephos_trim_silver_stairs",
     "erydon:selenephos_trim_silver_stairs_shallow_bottom",
     "erydon:selenephos_trim_silver_stairs_shallow_top",
-    "erydon:selenephos_wall_georgian"
+    "erydon:selenephos_wall_georgian",
+    "erydon:selenephos_aged_alcove_modern",
+    "erydon:selenephos_alcove_modern",
+    "erydon:selenephos_ashlar_alcove_modern",
+    "erydon:selenephos_hewn_alcove_modern",
+    "erydon:selenephos_rock_alcove_modern",
+    "erydon:selenephos_rusticated_alcove_modern",
+    "erydon:selenephos_aged_arch_georgian",
+    "erydon:selenephos_arch_georgian",
+    "erydon:selenephos_ashlar_arch_georgian",
+    "erydon:selenephos_hewn_arch_georgian",
+    "erydon:selenephos_rock_arch_georgian",
+    "erydon:selenephos_rusticated_arch_georgian"
   ]
 }

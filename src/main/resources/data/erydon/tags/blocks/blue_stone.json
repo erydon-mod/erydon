@@ -386,6 +386,18 @@
     "erydon:hesperion_trim_silver_stairs",
     "erydon:hesperion_trim_silver_stairs_shallow_bottom",
     "erydon:hesperion_trim_silver_stairs_shallow_top",
-    "erydon:hesperion_wall_georgian"
+    "erydon:hesperion_wall_georgian",
+    "erydon:hesperion_aged_alcove_modern",
+    "erydon:hesperion_alcove_modern",
+    "erydon:hesperion_ashlar_alcove_modern",
+    "erydon:hesperion_hewn_alcove_modern",
+    "erydon:hesperion_rock_alcove_modern",
+    "erydon:hesperion_rusticated_alcove_modern",
+    "erydon:hesperion_aged_arch_georgian",
+    "erydon:hesperion_arch_georgian",
+    "erydon:hesperion_ashlar_arch_georgian",
+    "erydon:hesperion_hewn_arch_georgian",
+    "erydon:hesperion_rock_arch_georgian",
+    "erydon:hesperion_rusticated_arch_georgian"
   ]
 }

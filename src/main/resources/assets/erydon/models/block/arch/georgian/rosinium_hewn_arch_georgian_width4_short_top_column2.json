@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/arch/georgian/arch_georgian_width4_short_top_column2",
+  "textures": {
+    "stone": "erydon:block/rosinium_hewn_block"
+  }
+}

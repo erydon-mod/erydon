@@ -386,6 +386,18 @@
     "erydon:chrysonyx_wall",
     "erydon:chrysonyx_wall_georgian",
     "erydon:chrysonyx_window_arch",
-    "erydon:chrysonyx_window_french_georgian"
+    "erydon:chrysonyx_window_french_georgian",
+    "erydon:chrysonyx_aged_alcove_modern",
+    "erydon:chrysonyx_alcove_modern",
+    "erydon:chrysonyx_ashlar_alcove_modern",
+    "erydon:chrysonyx_hewn_alcove_modern",
+    "erydon:chrysonyx_rock_alcove_modern",
+    "erydon:chrysonyx_rusticated_alcove_modern",
+    "erydon:chrysonyx_aged_arch_georgian",
+    "erydon:chrysonyx_arch_georgian",
+    "erydon:chrysonyx_ashlar_arch_georgian",
+    "erydon:chrysonyx_hewn_arch_georgian",
+    "erydon:chrysonyx_rock_arch_georgian",
+    "erydon:chrysonyx_rusticated_arch_georgian"
   ]
 }

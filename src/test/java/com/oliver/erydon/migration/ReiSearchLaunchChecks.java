@@ -34,7 +34,7 @@ public final class ReiSearchLaunchChecks {
         var language=JsonParser.parseReader(new InputStreamReader(
                 ReiSearchLaunchChecks.class.getResourceAsStream("/assets/erydon/lang/en_us.json"),
                 StandardCharsets.UTF_8)).getAsJsonObject();
-        int full=0,copings=0,standard=0,checked=0;
+        int full=0,copings=0,standard=0,checked=0,georgianArches=0;
         for(var name:language.entrySet()) {
             if(!name.getKey().startsWith("block.erydon.")) continue;
             String path=name.getKey().substring("block.erydon.".length());
@@ -64,9 +64,11 @@ public final class ReiSearchLaunchChecks {
                 if(indexed.contains(term)!=standardFinish) throw new AssertionError("Wrong REI standard-finish search: "+path+" / "+term);
             }
             if(standardFinish) standard++;
+            if(path.endsWith("_arch_georgian")) georgianArches++;
             checked++;
         }
-        if(full!=440 || copings!=135 || standard!=1413 || checked!=9536) throw new AssertionError("Incomplete REI catalogue check");
+        if(full!=440 || copings!=135 || standard!=1440+27 || checked!=9698+162 || georgianArches!=162)
+            throw new AssertionError("Incomplete REI catalogue check");
         System.out.println("ERYDON_REI_SEARCH_OK: "+checked+" catalogue items, "+full+" full blocks, "+copings
                 +" copings, "+standard+" standard-finish items through actual REI cacheData");
     }

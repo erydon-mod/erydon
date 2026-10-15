@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/alcove/modern/alcove_modern_sides",
+  "textures": {
+    "stone": "erydon:block/chrysonyx_block",
+    "particle": "erydon:block/chrysonyx_block"
+  }
+}

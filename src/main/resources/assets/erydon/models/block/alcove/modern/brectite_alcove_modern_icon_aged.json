@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/alcove/modern/alcove_modern_icon",
+  "textures": {
+    "stone": "erydon:block/brectite_block_aged",
+    "particle": "erydon:block/brectite_block_aged"
+  }
+}

@@ -234,6 +234,18 @@
     "erydon:latmion_wall",
     "erydon:latmion_wall_georgian",
     "erydon:latmion_window_arch",
-    "erydon:latmion_window_french_georgian"
+    "erydon:latmion_window_french_georgian",
+    "erydon:latmion_aged_alcove_modern",
+    "erydon:latmion_alcove_modern",
+    "erydon:latmion_ashlar_alcove_modern",
+    "erydon:latmion_hewn_alcove_modern",
+    "erydon:latmion_rock_alcove_modern",
+    "erydon:latmion_rusticated_alcove_modern",
+    "erydon:latmion_aged_arch_georgian",
+    "erydon:latmion_arch_georgian",
+    "erydon:latmion_ashlar_arch_georgian",
+    "erydon:latmion_hewn_arch_georgian",
+    "erydon:latmion_rock_arch_georgian",
+    "erydon:latmion_rusticated_arch_georgian"
   ]
 }

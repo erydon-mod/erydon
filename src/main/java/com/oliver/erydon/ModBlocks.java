@@ -26350,6 +26350,21 @@ public final class ModBlocks {
         registerBlock(name, new ArchGothicBlock(AbstractBlock.Settings.copy(sourceBlock(sourceBlockName)).nonOpaque()));
     }
 
+    private static void registerGeorgianArches() {
+        for (String material : ARCH_MODERN_MATERIALS) {
+            registerGeorgianArch(material + "_arch_georgian", material + "_block");
+            registerGeorgianArch(material + "_aged_arch_georgian", material + "_block");
+            registerGeorgianArch(material + "_ashlar_arch_georgian", material + "_ashlar_block");
+            registerGeorgianArch(material + "_rusticated_arch_georgian", material + "_block");
+            registerGeorgianArch(material + "_hewn_arch_georgian", material + "_block");
+            registerGeorgianArch(material + "_rock_arch_georgian", material + "_rock_block");
+        }
+    }
+
+    private static void registerGeorgianArch(String name, String sourceBlockName) {
+        registerBlock(name, new ArchGeorgianBlock(AbstractBlock.Settings.copy(sourceBlock(sourceBlockName)).nonOpaque()));
+    }
+
     private static void registerAlcoves(String style) {
         int maxClusterWidth = 3;
         for (String material : ARCH_MODERN_MATERIALS) {
@@ -26365,7 +26380,9 @@ public final class ModBlocks {
     private static void registerAlcove(String name, String sourceBlockName, int maxClusterWidth) {
         registerBlock(name, new AlcoveBlock(
                 AbstractBlock.Settings.copy(sourceBlock(sourceBlockName)).nonOpaque(),
-                maxClusterWidth, name.endsWith("_alcove_gothic")));
+                maxClusterWidth, name.endsWith("_alcove_gothic") ? AlcoveBlock.GeometryProfile.GOTHIC
+                        : name.endsWith("_alcove_georgian") ? AlcoveBlock.GeometryProfile.GEORGIAN
+                        : AlcoveBlock.GeometryProfile.MODERN));
     }
 
     private static void registerGothicCornices() {
@@ -26501,8 +26518,10 @@ private static Block registerBlock(String name, Block block) {
         initStriatus();
         registerModernArches();
         registerGothicArches();
+        registerGeorgianArches();
         registerAlcoves("georgian");
         registerAlcoves("gothic");
+        registerAlcoves("modern");
         registerGothicCornices();
         registerGothicColumns();
         registerGeorgianWalls();

@@ -59,7 +59,7 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
     // Keep its parity in the state so Axiom can preview and paste the same geometry.
     public static final BooleanProperty REFLECTED = BooleanProperty.of("reflected");
     private static final String WIDTH_OVERRIDE_SCOPE = ClusterManualLockState.ROMANESQUE_ARCH_SCOPE + "_width";
-    private static final int DEFAULT_WIDTH = 3;
+    private static final int DEFAULT_WIDTH = 6;
 
     private static final ThreadLocal<Boolean> SYNCING_CLUSTER_STATE = ThreadLocal.withInitial(() -> false);
 
@@ -166,6 +166,8 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
         // 1-wide cluster
         SMALL_TOP("small_top", Corner.SMALL, false, Side.SMALL, Side.SMALL, Upper.NONE, Upper.NONE, false, false, false, false, false, false),
         SMALL_BODY("small_body", Corner.NONE, false, Side.SMALL, Side.SMALL, Upper.NONE, Upper.NONE, false, false, false, false, false, false),
+        SMALL_BASE("small_base", Corner.NONE, false, Side.SMALL, Side.SMALL, Upper.NONE, Upper.NONE, false, false, true, true, false, false),
+        SMALL_BODY_BASE("small_body_base", Corner.NONE, false, Side.SMALL, Side.SMALL, Upper.NONE, Upper.NONE, false, false, false, false, false, false),
 
         // 2-wide cluster (base)
         DOUBLE_TOP_L("double_top_l", Corner.MEDIUM, false, Side.MEDIUM, Side.NONE, Upper.NONE, Upper.NONE, false, false, false, false, false, false),
@@ -175,6 +177,8 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
         DOUBLE_TOP_R_COLUMN("double_top_r_column", Corner.MEDIUM, true,  Side.NONE, Side.MEDIUM, Upper.NONE, Upper.NONE, false, false, false, false, false, false),
         DOUBLE_BODY_L("double_body_l", Corner.NONE, false, Side.MEDIUM, Side.NONE, Upper.NONE, Upper.NONE, false, false, false, false, false, false),
         DOUBLE_BODY_R("double_body_r", Corner.NONE, false, Side.NONE, Side.MEDIUM, Upper.NONE, Upper.NONE, false, false, false, false, false, false),
+        DOUBLE_BASE_L("double_base_l", Corner.NONE, false, Side.MEDIUM, Side.NONE, Upper.NONE, Upper.NONE, false, false, false, false, false, false),
+        DOUBLE_BASE_R("double_base_r", Corner.NONE, false, Side.NONE, Side.MEDIUM, Upper.NONE, Upper.NONE, false, false, false, false, false, false),
 
         // 2-wide cluster (column set)
         DOUBLE_COLUMN_UPPER_L("double_column_upper_l", Corner.NONE, false, Side.NONE, Side.NONE, Upper.MEDIUM, Upper.NONE, true, false, false, false, false, false),
@@ -211,6 +215,11 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
         // 3-wide cluster body (base set)
         TRIPLE_BODY_L("triple_body_l", Corner.NONE, false, Side.LARGE, Side.NONE, Upper.NONE, Upper.NONE, false, false, false, false, false, false),
         TRIPLE_BODY_R("triple_body_r", Corner.NONE, false, Side.NONE, Side.LARGE, Upper.NONE, Upper.NONE, false, false, false, false, false, false),
+        TRIPLE_BASE_L("triple_base_l", Corner.NONE, false, Side.LARGE, Side.NONE, Upper.NONE, Upper.NONE, false, false, false, false, false, false),
+        TRIPLE_BASE_R("triple_base_r", Corner.NONE, false, Side.NONE, Side.LARGE, Upper.NONE, Upper.NONE, false, false, false, false, false, false),
+        // Wide column crowns retain the original plain wall continuation.
+        TRIPLE_COLUMN_CROWN_CONTINUATION_L("triple_column_crown_continuation_l", Corner.NONE, false, Side.LARGE, Side.NONE, Upper.NONE, Upper.NONE, false, false, false, false, false, false),
+        TRIPLE_COLUMN_CROWN_CONTINUATION_R("triple_column_crown_continuation_r", Corner.NONE, false, Side.NONE, Side.LARGE, Upper.NONE, Upper.NONE, false, false, false, false, false, false),
 
         // 3-wide cluster body (column set; begins from row3 (y==2))
         TRIPLE_COLUMN_UPPER_L("triple_column_upper_l", Corner.NONE, false, Side.NONE, Side.NONE, Upper.LARGE, Upper.NONE, true, false, false, false, false, false),
@@ -301,8 +310,73 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
         WIDE_H4_Y3_C("wide_h4_y3_c", 4, 3, -1, false, false),
         WIDE_H4_Y0_L0_COLUMN("wide_h4_y0_l0_column", 4, 0, 0, false, true),
         WIDE_H4_Y0_R0_COLUMN("wide_h4_y0_r0_column", 4, 0, 0, true, true),
+        // Every crown owner retains its style when projected across wide cells.
+        WIDE_H1_Y0_L1_COLUMN("wide_h1_y0_l1_column", 1, 0, 1, false, true),
+        WIDE_H1_Y0_R1_COLUMN("wide_h1_y0_r1_column", 1, 0, 1, true, true),
+        WIDE_H1_Y0_L2_COLUMN("wide_h1_y0_l2_column", 1, 0, 2, false, true),
+        WIDE_H1_Y0_R2_COLUMN("wide_h1_y0_r2_column", 1, 0, 2, true, true),
+        WIDE_H1_Y0_C_COLUMN("wide_h1_y0_c_column", 1, 0, -1, false, true),
+        WIDE_H2_Y0_L1_COLUMN("wide_h2_y0_l1_column", 2, 0, 1, false, true),
+        WIDE_H2_Y0_R1_COLUMN("wide_h2_y0_r1_column", 2, 0, 1, true, true),
+        WIDE_H2_Y0_L2_COLUMN("wide_h2_y0_l2_column", 2, 0, 2, false, true),
+        WIDE_H2_Y0_R2_COLUMN("wide_h2_y0_r2_column", 2, 0, 2, true, true),
+        WIDE_H2_Y0_C_COLUMN("wide_h2_y0_c_column", 2, 0, -1, false, true),
+        WIDE_H2_Y1_L0_COLUMN("wide_h2_y1_l0_column", 2, 1, 0, false, true),
+        WIDE_H2_Y1_R0_COLUMN("wide_h2_y1_r0_column", 2, 1, 0, true, true),
+        WIDE_H2_Y1_L1_COLUMN("wide_h2_y1_l1_column", 2, 1, 1, false, true),
+        WIDE_H2_Y1_R1_COLUMN("wide_h2_y1_r1_column", 2, 1, 1, true, true),
+        WIDE_H2_Y1_L2_COLUMN("wide_h2_y1_l2_column", 2, 1, 2, false, true),
+        WIDE_H2_Y1_R2_COLUMN("wide_h2_y1_r2_column", 2, 1, 2, true, true),
+        WIDE_H2_Y1_C_COLUMN("wide_h2_y1_c_column", 2, 1, -1, false, true),
+        WIDE_H3_Y0_L1_COLUMN("wide_h3_y0_l1_column", 3, 0, 1, false, true),
+        WIDE_H3_Y0_R1_COLUMN("wide_h3_y0_r1_column", 3, 0, 1, true, true),
+        WIDE_H3_Y0_L2_COLUMN("wide_h3_y0_l2_column", 3, 0, 2, false, true),
+        WIDE_H3_Y0_R2_COLUMN("wide_h3_y0_r2_column", 3, 0, 2, true, true),
+        WIDE_H3_Y0_C_COLUMN("wide_h3_y0_c_column", 3, 0, -1, false, true),
+        WIDE_H3_Y1_L0_COLUMN("wide_h3_y1_l0_column", 3, 1, 0, false, true),
+        WIDE_H3_Y1_R0_COLUMN("wide_h3_y1_r0_column", 3, 1, 0, true, true),
+        WIDE_H3_Y1_L1_COLUMN("wide_h3_y1_l1_column", 3, 1, 1, false, true),
+        WIDE_H3_Y1_R1_COLUMN("wide_h3_y1_r1_column", 3, 1, 1, true, true),
+        WIDE_H3_Y1_L2_COLUMN("wide_h3_y1_l2_column", 3, 1, 2, false, true),
+        WIDE_H3_Y1_R2_COLUMN("wide_h3_y1_r2_column", 3, 1, 2, true, true),
+        WIDE_H3_Y1_C_COLUMN("wide_h3_y1_c_column", 3, 1, -1, false, true),
+        WIDE_H3_Y2_L0_COLUMN("wide_h3_y2_l0_column", 3, 2, 0, false, true),
+        WIDE_H3_Y2_R0_COLUMN("wide_h3_y2_r0_column", 3, 2, 0, true, true),
+        WIDE_H3_Y2_L1_COLUMN("wide_h3_y2_l1_column", 3, 2, 1, false, true),
+        WIDE_H3_Y2_R1_COLUMN("wide_h3_y2_r1_column", 3, 2, 1, true, true),
+        WIDE_H3_Y2_L2_COLUMN("wide_h3_y2_l2_column", 3, 2, 2, false, true),
+        WIDE_H3_Y2_R2_COLUMN("wide_h3_y2_r2_column", 3, 2, 2, true, true),
+        WIDE_H3_Y2_C_COLUMN("wide_h3_y2_c_column", 3, 2, -1, false, true),
+        WIDE_H4_Y0_L1_COLUMN("wide_h4_y0_l1_column", 4, 0, 1, false, true),
+        WIDE_H4_Y0_R1_COLUMN("wide_h4_y0_r1_column", 4, 0, 1, true, true),
+        WIDE_H4_Y0_L2_COLUMN("wide_h4_y0_l2_column", 4, 0, 2, false, true),
+        WIDE_H4_Y0_R2_COLUMN("wide_h4_y0_r2_column", 4, 0, 2, true, true),
+        WIDE_H4_Y0_C_COLUMN("wide_h4_y0_c_column", 4, 0, -1, false, true),
+        WIDE_H4_Y1_L0_COLUMN("wide_h4_y1_l0_column", 4, 1, 0, false, true),
+        WIDE_H4_Y1_R0_COLUMN("wide_h4_y1_r0_column", 4, 1, 0, true, true),
+        WIDE_H4_Y1_L1_COLUMN("wide_h4_y1_l1_column", 4, 1, 1, false, true),
+        WIDE_H4_Y1_R1_COLUMN("wide_h4_y1_r1_column", 4, 1, 1, true, true),
+        WIDE_H4_Y1_L2_COLUMN("wide_h4_y1_l2_column", 4, 1, 2, false, true),
+        WIDE_H4_Y1_R2_COLUMN("wide_h4_y1_r2_column", 4, 1, 2, true, true),
+        WIDE_H4_Y1_C_COLUMN("wide_h4_y1_c_column", 4, 1, -1, false, true),
+        WIDE_H4_Y2_L0_COLUMN("wide_h4_y2_l0_column", 4, 2, 0, false, true),
+        WIDE_H4_Y2_R0_COLUMN("wide_h4_y2_r0_column", 4, 2, 0, true, true),
+        WIDE_H4_Y2_L1_COLUMN("wide_h4_y2_l1_column", 4, 2, 1, false, true),
+        WIDE_H4_Y2_R1_COLUMN("wide_h4_y2_r1_column", 4, 2, 1, true, true),
+        WIDE_H4_Y2_L2_COLUMN("wide_h4_y2_l2_column", 4, 2, 2, false, true),
+        WIDE_H4_Y2_R2_COLUMN("wide_h4_y2_r2_column", 4, 2, 2, true, true),
+        WIDE_H4_Y2_C_COLUMN("wide_h4_y2_c_column", 4, 2, -1, false, true),
+        WIDE_H4_Y3_L0_COLUMN("wide_h4_y3_l0_column", 4, 3, 0, false, true),
+        WIDE_H4_Y3_R0_COLUMN("wide_h4_y3_r0_column", 4, 3, 0, true, true),
+        WIDE_H4_Y3_L1_COLUMN("wide_h4_y3_l1_column", 4, 3, 1, false, true),
+        WIDE_H4_Y3_R1_COLUMN("wide_h4_y3_r1_column", 4, 3, 1, true, true),
+        WIDE_H4_Y3_L2_COLUMN("wide_h4_y3_l2_column", 4, 3, 2, false, true),
+        WIDE_H4_Y3_R2_COLUMN("wide_h4_y3_r2_column", 4, 3, 2, true, true),
+        WIDE_H4_Y3_C_COLUMN("wide_h4_y3_c_column", 4, 3, -1, false, true),
         WIDE_BODY_L("wide_body_l", TRIPLE_BODY_L),
         WIDE_BODY_R("wide_body_r", TRIPLE_BODY_R),
+        WIDE_BASE_L("wide_base_l", TRIPLE_BASE_L),
+        WIDE_BASE_R("wide_base_r", TRIPLE_BASE_R),
         WIDE_COLUMN_UPPER_L("wide_column_upper_l", TRIPLE_COLUMN_UPPER_L),
         WIDE_COLUMN_UPPER_R("wide_column_upper_r", TRIPLE_COLUMN_UPPER_R),
         WIDE_COLUMN_SHAFT_L("wide_column_shaft_l", TRIPLE_COLUMN_SHAFT_L),
@@ -313,6 +387,8 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
         WIDE_COLUMN_UPPER_BASE_R("wide_column_upper_base_r", TRIPLE_COLUMN_UPPER_BASE_R),
         WIDE_BODY_INNER_L("wide_body_inner_l", TRIPLE_BODY_L, 1),
         WIDE_BODY_INNER_R("wide_body_inner_r", TRIPLE_BODY_R, 1),
+        WIDE_BASE_INNER_L("wide_base_inner_l", TRIPLE_BASE_L, 1),
+        WIDE_BASE_INNER_R("wide_base_inner_r", TRIPLE_BASE_R, 1),
         WIDE_COLUMN_UPPER_INNER_L("wide_column_upper_inner_l", TRIPLE_COLUMN_UPPER_L, 1),
         WIDE_COLUMN_UPPER_INNER_R("wide_column_upper_inner_r", TRIPLE_COLUMN_UPPER_R, 1),
         WIDE_COLUMN_SHAFT_INNER_L("wide_column_shaft_inner_l", TRIPLE_COLUMN_SHAFT_L, 1),
@@ -415,6 +491,70 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
         public boolean plinthR() { return plinthR; }
         public boolean hasTopLarge() { return topLarge; }
         public boolean isVoid() { return isVoid; }
+        public boolean isColumnStyle() {
+            if (wideColumn) return true;
+            if (wideBody != null) return wideBody.isColumnStyle();
+            return switch (this) {
+                case DOUBLE_TOP_L_COLUMN, DOUBLE_TOP_R_COLUMN,
+                     TRIPLE_SINGLE_L_COLUMN, TOP_LARGE_COLUMN, TRIPLE_SINGLE_R_COLUMN,
+                     TRIPLE_TOP_L_COLUMN, TRIPLE_TOP_R_COLUMN,
+                     TRIPLE_ROW2_L_COLUMN, TRIPLE_VOID_COLUMN, TRIPLE_ROW2_R_COLUMN,
+                     TRIPLE_COLUMN_CROWN_CONTINUATION_L, TRIPLE_COLUMN_CROWN_CONTINUATION_R,
+                     DOUBLE_COLUMN_UPPER_L, DOUBLE_COLUMN_UPPER_R,
+                     DOUBLE_COLUMN_SHAFT_L, DOUBLE_COLUMN_SHAFT_R,
+                     DOUBLE_COLUMN_BASE_L, DOUBLE_COLUMN_BASE_R,
+                     DOUBLE_COLUMN_UPPER_BASE_L, DOUBLE_COLUMN_UPPER_BASE_R,
+                     TRIPLE_COLUMN_UPPER_L, TRIPLE_COLUMN_UPPER_R,
+                     TRIPLE_COLUMN_SHAFT_L, TRIPLE_COLUMN_SHAFT_R,
+                     TRIPLE_COLUMN_BASE_L, TRIPLE_COLUMN_BASE_R,
+                     TRIPLE_COLUMN_UPPER_BASE_L, TRIPLE_COLUMN_UPPER_BASE_R -> true;
+                default -> false;
+            };
+        }
+        public boolean isNonColumnBase() {
+            if (wideBody != null) return wideBody.isNonColumnBase();
+            return switch (this) {
+                case SMALL_BODY_BASE, DOUBLE_BASE_L, DOUBLE_BASE_R, TRIPLE_BASE_L, TRIPLE_BASE_R -> true;
+                default -> false;
+            };
+        }
+
+        /** Pure component selection shared by rendering and interaction geometry. */
+        public String authoredCornerSuffix() {
+            boolean column = isColumnStyle();
+            return switch (corner) {
+                case SMALL -> column ? "corner_small" : "non_column_corner_small";
+                case MEDIUM -> column ? "corner_medium" : "non_column_corner_medium";
+                case LARGE_UPPER -> column ? "corner_large_upper" : "non_column_corner_large_upper";
+                case LARGE_LOWER -> column ? "corner_large_lower" : "non_column_corner_large_lower";
+                case NONE -> null;
+            };
+        }
+
+        public String authoredSideSuffix(Side side) {
+            if (side == Side.NONE) return null;
+            if (isColumnStyle()) {
+                return switch (side) {
+                    case SMALL -> "side_small";
+                    case MEDIUM -> "side_medium";
+                    case LARGE -> corner == Corner.LARGE_LOWER ? "side_large_lower" : "side_large";
+                    case NONE -> null;
+                };
+            }
+            boolean base = isNonColumnBase();
+            return switch (side) {
+                case SMALL -> corner == Corner.SMALL ? "non_column_side_small_crown"
+                        : base ? "non_column_side_small_base" : "non_column_side_small";
+                case MEDIUM -> corner == Corner.MEDIUM ? "non_column_side_medium_crown"
+                        : base ? "non_column_side_medium_base" : "non_column_side_medium";
+                case LARGE -> switch (corner) {
+                    case LARGE_LOWER -> "non_column_side_large_lower";
+                    case NONE -> base ? "non_column_side_large_base" : "non_column_side_large";
+                    default -> "non_column_side_large_crown";
+                };
+                case NONE -> null;
+            };
+        }
 
         public Arrangement mirrored() {
             if (wideRows > 0 && wideEdge >= 0) {
@@ -475,6 +615,10 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
 
     protected boolean supportsColumnStyle() {
         return true;
+    }
+
+    protected Direction getClusterRightDirection(Direction facing) {
+        return facing.rotateYClockwise();
     }
 
     @Override
@@ -623,6 +767,11 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
             return ActionResult.PASS;
         }
 
+        // Keep the outer sides and horizontal faces available for block placement.
+        if (hit.getSide().getAxis() != state.get(FACING).getAxis()) {
+            return ActionResult.PASS;
+        }
+
         // Normal right click: toggle the circular column set on the whole connected component.
         if (hand == Hand.MAIN_HAND) {
             if (world.isClient) {
@@ -666,12 +815,27 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
 
         for (BlockPos clusterPos : cluster.blocks) {
             BlockState clusterState = world.getBlockState(clusterPos);
+            // A rendered segment's width may grow; an explicit debug cap does not.
+            if (clusterWidth == DEFAULT_WIDTH) clearWidthOverride(world, clusterPos);
+            else ClusterManualLockState.setInt(world, WIDTH_OVERRIDE_SCOPE, clusterPos, clusterWidth);
             if (isArchBlock(clusterState) && clusterState.get(WIDTH) != clusterWidth) {
                 world.setBlockState(clusterPos, clusterState.with(WIDTH, clusterWidth), Block.NOTIFY_LISTENERS);
             }
         }
 
         reflowCluster(world, cluster, null, clusterWidth);
+    }
+
+    /** Cycle the explicit cap rather than the current rendered segment width. */
+    public int cycleDebugWidth(World world, BlockPos pos, boolean backwards) {
+        ClusterInfo cluster = discoverCluster(world, pos);
+        if (cluster == null || cluster.blocks.isEmpty()) return DEFAULT_WIDTH;
+        int current = inferClusterWidth(world, cluster);
+        int next = Math.floorMod(current - 1 + (backwards ? -1 : 1), DEFAULT_WIDTH) + 1;
+        boolean started = beginClusterStateSync();
+        try { applyWidthToCluster(world, pos, next); }
+        finally { endClusterStateSync(started); }
+        return next;
     }
 
     private void applyWaterloggedToSubmergedCluster(World world, BlockPos pos) {
@@ -798,7 +962,7 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
         }
 
         // +X in grid space is "to the right" as defined by our plane convention.
-        Direction rightDir = cluster.facing.rotateYClockwise();
+        Direction rightDir = getClusterRightDirection(cluster.facing);
         int dx = rightDir.getOffsetX();
         int dz = rightDir.getOffsetZ();
 
@@ -874,8 +1038,8 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
      * Applies the layout to every AUTO block in the component.
      *
      * Segmentation rule:
-     *  - widths are partitioned into balanced segments of width <= 3
-     *  - examples: 4 -> 2 + 2, 5 -> 1 + 3 + 1, 7 -> 2 + 3 + 2
+     *  - automatic widths grow to six, then start another arch
+     *  - examples: 5 -> 5, 7 -> 6 + 1, 11 -> 6 + 5
      */
     private void reflowCluster(World world, ClusterInfo cluster) {
         reflowCluster(world, cluster, null, 0);
@@ -918,7 +1082,12 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
             if (segmentSpans.isEmpty()) {
                 return;
             }
-            clearWidthOverride(cluster.blocks, world);
+
+            if (clusterWidth != DEFAULT_WIDTH) for (BlockPos member : cluster.blocks) {
+                if (!ClusterManualLockState.isPreservedForSwap(member)) {
+                    ClusterManualLockState.setInt(world, WIDTH_OVERRIDE_SCOPE, member, clusterWidth);
+                }
+            }
 
             // Group positions by balanced segment.
             Map<Integer, List<BlockPos>> segments = new LinkedHashMap<>();
@@ -981,7 +1150,7 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
 
                     BlockState newState = st
                             .with(ARRANGEMENT, arrangement)
-                            .with(WIDTH, clusterWidth);
+                            .with(WIDTH, width);
 
                     if (newState != st) {
                         world.setBlockState(p, newState, ClusterRecalcSafety.updateFlags(Block.NOTIFY_LISTENERS));
@@ -1008,8 +1177,11 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
             widths.add(width);
             totalWidth -= width;
         }
-        // Incomplete runs retain the established balanced 1-3-wide layout
-        // until enough cells exist for the selected larger arch.
+        // The next arch grows independently after each completed run.
+        if (totalWidth > 3) {
+            widths.add(totalWidth);
+            return segmentsFromWidths(widths);
+        }
         for (SegmentSpan span : buildBalancedSegments(totalWidth)) {
             widths.add(span.maxX() - span.minX() + 1);
         }
@@ -1134,46 +1306,15 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
 
     private static int inferClusterWidth(WorldAccess world, ClusterInfo cluster) {
         int[] counts = new int[7];
-
         for (BlockPos pos : cluster.blocks) {
-            BlockState state = world.getBlockState(pos);
-            if (!state.contains(WIDTH)) {
-                continue;
-            }
-
-            int width = state.get(WIDTH);
-            if (width != DEFAULT_WIDTH) counts[clampClusterWidth(width)]++;
+            int width = ClusterManualLockState.getInt(world, WIDTH_OVERRIDE_SCOPE, pos);
+            if (width > 0 && width < DEFAULT_WIDTH) counts[width]++;
         }
-
         int chosen = DEFAULT_WIDTH;
-        for (int width = 1; width <= 6; width++) {
-            // Retain the old width-2 tie preference; wider debug settings also
-            // survive attaching new default-width pieces and rebuilding.
+        for (int width = 1; width < DEFAULT_WIDTH; width++) {
             if (counts[width] > 0 && counts[width] >= counts[chosen]) chosen = width;
         }
-        if (chosen != DEFAULT_WIDTH) return chosen;
-
-        int legacyWidth = inferLegacyWidthOverride(world, cluster);
-        return legacyWidth == 0 ? DEFAULT_WIDTH : legacyWidth;
-    }
-
-    private static int inferLegacyWidthOverride(WorldAccess world, ClusterInfo cluster) {
-        int widthOneCount = 0;
-        int widthTwoCount = 0;
-
-        for (BlockPos pos : cluster.blocks) {
-            int widthOverride = ClusterManualLockState.getInt(world, WIDTH_OVERRIDE_SCOPE, pos);
-            if (widthOverride == 1) {
-                widthOneCount++;
-            } else if (widthOverride == 2) {
-                widthTwoCount++;
-            }
-        }
-
-        if (widthOneCount == 0 && widthTwoCount == 0) {
-            return 0;
-        }
-        return widthOneCount > widthTwoCount ? 1 : 2;
+        return chosen;
     }
 
     private static int clampClusterWidth(int width) {
@@ -1205,51 +1346,22 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
     }
 
     private static boolean isColumnStyleArrangement(Arrangement arrangement) {
-        if (arrangement.wideColumn) return true;
-        if (arrangement.wideBody != null) return isColumnStyleArrangement(arrangement.wideBody);
-        return switch (arrangement) {
-            case DOUBLE_TOP_L_COLUMN,
-                 DOUBLE_TOP_R_COLUMN,
-                 TRIPLE_SINGLE_L_COLUMN,
-                 TOP_LARGE_COLUMN,
-                 TRIPLE_SINGLE_R_COLUMN,
-                 TRIPLE_TOP_L_COLUMN,
-                 TRIPLE_TOP_R_COLUMN,
-                 TRIPLE_ROW2_L_COLUMN,
-                 TRIPLE_VOID_COLUMN,
-                 TRIPLE_ROW2_R_COLUMN,
-                 DOUBLE_COLUMN_UPPER_L,
-                 DOUBLE_COLUMN_UPPER_R,
-                 DOUBLE_COLUMN_SHAFT_L,
-                 DOUBLE_COLUMN_SHAFT_R,
-                 DOUBLE_COLUMN_BASE_L,
-                 DOUBLE_COLUMN_BASE_R,
-                 DOUBLE_COLUMN_UPPER_BASE_L,
-                 DOUBLE_COLUMN_UPPER_BASE_R,
-                 TRIPLE_COLUMN_UPPER_L,
-                 TRIPLE_COLUMN_UPPER_R,
-                 TRIPLE_COLUMN_SHAFT_L,
-                 TRIPLE_COLUMN_SHAFT_R,
-                 TRIPLE_COLUMN_BASE_L,
-                 TRIPLE_COLUMN_BASE_R,
-                 TRIPLE_COLUMN_UPPER_BASE_L,
-                 TRIPLE_COLUMN_UPPER_BASE_R -> true;
-            default -> false;
-        };
+        return arrangement.isColumnStyle();
     }
 
-    private Arrangement computeArrangement(int width, int height, int x, int y, StyleSet style) {
+    protected Arrangement computeArrangement(int width, int height, int x, int y, StyleSet style) {
         if (width <= 0 || height <= 0) {
             return Arrangement.SMALL_TOP;
         }
 
+        boolean authoredRomanesque = getClass() == ArchRomanesqueBlock.class;
         if (width > 3) {
             int rows = Math.min(height, (2 * width + 2) / 3);
             if (y < rows) {
                 int edge = Math.min(x, width - 1 - x);
                 String role = x == width / 2 && width % 2 == 1 ? "C"
                         : (x < width / 2 ? "L" : "R") + edge;
-                String marker = style == StyleSet.COLUMN && y == 0 && edge == 0 ? "_COLUMN" : "";
+                String marker = style == StyleSet.COLUMN && (authoredRomanesque || y == 0 && edge == 0) ? "_COLUMN" : "";
                 return Arrangement.valueOf("WIDE_H" + rows + "_Y" + y + "_" + role + marker);
             }
             int edge = Math.min(x, width - 1 - x);
@@ -1264,13 +1376,14 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
 
         // Width 1: single column has BOTH sides; top row has the small arch crown.
         if (width == 1) {
+            if (authoredRomanesque && y > 0 && y == height - 1) return Arrangement.SMALL_BODY_BASE;
             return (y == 0) ? Arrangement.SMALL_TOP : Arrangement.SMALL_BODY;
         }
 
         // Width 2: left column = non-#, right column = #.
         if (width == 2) {
             if (y == 0) {
-                if (style == StyleSet.COLUMN && height == 1) {
+                if (style == StyleSet.COLUMN && (authoredRomanesque || height == 1)) {
                     return (x == 0) ? Arrangement.DOUBLE_TOP_L_COLUMN : Arrangement.DOUBLE_TOP_R_COLUMN;
                 }
                 return (x == 0) ? Arrangement.DOUBLE_TOP_L : Arrangement.DOUBLE_TOP_R;
@@ -1299,18 +1412,21 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
             }
 
             // Base set: plain medium sides
+            if (authoredRomanesque && y == height - 1) {
+                return (x == 0) ? Arrangement.DOUBLE_BASE_L : Arrangement.DOUBLE_BASE_R;
+            }
             return (x == 0) ? Arrangement.DOUBLE_BODY_L : Arrangement.DOUBLE_BODY_R;
         }
 
         // Width 3: through-arch with a top keystone and a void below.
         if (x == 1) {
             if (y == 0) {
-                if (style == StyleSet.COLUMN && height == 1) {
+                if (style == StyleSet.COLUMN && (authoredRomanesque || height == 1)) {
                     return Arrangement.TOP_LARGE_COLUMN;
                 }
                 return Arrangement.TOP_LARGE;
             }
-            if (style == StyleSet.COLUMN && height == 2) {
+            if (style == StyleSet.COLUMN && (authoredRomanesque || height == 2)) {
                 return Arrangement.TRIPLE_VOID_COLUMN;
             }
             return Arrangement.TRIPLE_VOID;
@@ -1327,7 +1443,7 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
         }
 
         if (y == 0) {
-            if (style == StyleSet.COLUMN && height == 2) {
+            if (style == StyleSet.COLUMN && (authoredRomanesque || height == 2)) {
                 return right ? Arrangement.TRIPLE_TOP_R_COLUMN : Arrangement.TRIPLE_TOP_L_COLUMN;
             }
             return right ? Arrangement.TRIPLE_TOP_R : Arrangement.TRIPLE_TOP_L;
@@ -1335,7 +1451,7 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
 
         // Second row: large_lower corners + side_large on edges; void in middle.
         if (y == 1) {
-            if (style == StyleSet.COLUMN && height == 2) {
+            if (style == StyleSet.COLUMN && (authoredRomanesque || height == 2)) {
                 return right ? Arrangement.TRIPLE_ROW2_R_COLUMN : Arrangement.TRIPLE_ROW2_L_COLUMN;
             }
             return right ? Arrangement.TRIPLE_ROW2_R : Arrangement.TRIPLE_ROW2_L;
@@ -1362,6 +1478,9 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
             return right ? Arrangement.TRIPLE_COLUMN_SHAFT_R : Arrangement.TRIPLE_COLUMN_SHAFT_L;
         }
 
+        if (authoredRomanesque && y == height - 1) {
+            return right ? Arrangement.TRIPLE_BASE_R : Arrangement.TRIPLE_BASE_L;
+        }
         return right ? Arrangement.TRIPLE_BODY_R : Arrangement.TRIPLE_BODY_L;
     }
 
@@ -1390,7 +1509,7 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
         return getWorldSpaceShape(state);
     }
 
-    private static boolean isVoidState(BlockState state) {
+    protected boolean isVoidState(BlockState state) {
         return state.get(ARRANGEMENT).isVoid()
                 || state.get(ARRANGEMENT).isWide() && WideArchShapes.shape(state).isEmpty();
     }
@@ -1399,11 +1518,20 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
         Direction facing = state.get(FACING);
         Arrangement arrangement = state.get(ARRANGEMENT);
 
-        boolean reflected = state.get(REFLECTED);
+        boolean authoredRomanesque = getClass() == ArchRomanesqueBlock.class;
+        boolean reflected = state.get(REFLECTED) && !authoredRomanesque;
         int idx = shapeCacheIndex(arrangement, facing, reflected);
         VoxelShape cached = SHAPE_CACHE[idx];
         if (cached != null) {
             return cached;
+        }
+
+        if (authoredRomanesque) {
+            // The authored family already pairs the left profile with its X
+            // mirror. The legacy front/back compensation is unnecessary.
+            VoxelShape shape = rotateAuthoredShape(RomanesqueArchInteractionShapes.north(arrangement), facing);
+            SHAPE_CACHE[idx] = shape;
+            return shape;
         }
 
         // Build shape in NORTH-authored space first
@@ -1535,6 +1663,20 @@ public class ArchRomanesqueBlock extends HorizontalFacingBlock implements Waterl
      * Rotates a shape 90 degrees clockwise around Y in block-local coords.
      * (x, z) -> (1 - z, x)
      */
+    private static VoxelShape rotateAuthoredShape(VoxelShape shape, Direction facing) {
+        int turns = switch (facing) { case EAST -> 1; case SOUTH -> 2; case WEST -> 3; default -> 0; };
+        if (turns == 0 || shape.isEmpty()) return shape;
+        var boxes = new ArrayList<double[]>();
+        shape.forEachBox((x0, y0, z0, x1, y1, z1) -> {
+            double[] box = {x0, y0, z0, x1, y1, z1};
+            for (int turn = 0; turn < turns; turn++) {
+                box = new double[]{1-box[5], box[1], box[0], 1-box[2], box[4], box[3]};
+            }
+            boxes.add(box);
+        });
+        return AlcoveVoxelShapes.fromBoxes(boxes);
+    }
+
     private static VoxelShape rotateShape90Y(VoxelShape shape) {
         if (shape.isEmpty()) {
             return shape;

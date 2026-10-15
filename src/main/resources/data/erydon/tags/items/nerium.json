@@ -428,6 +428,18 @@
     "erydon:striatus_nerium_weave_grout_stairs_shallow_bottom",
     "erydon:striatus_nerium_weave_grout_stairs_shallow_top",
     "erydon:striatus_nerium_weave_grout_wall",
-    "erydon:striatus_nerium_weave_grout_wall_georgian"
+    "erydon:striatus_nerium_weave_grout_wall_georgian",
+    "erydon:nerium_aged_alcove_modern",
+    "erydon:nerium_alcove_modern",
+    "erydon:nerium_ashlar_alcove_modern",
+    "erydon:nerium_hewn_alcove_modern",
+    "erydon:nerium_rock_alcove_modern",
+    "erydon:nerium_rusticated_alcove_modern",
+    "erydon:nerium_aged_arch_georgian",
+    "erydon:nerium_arch_georgian",
+    "erydon:nerium_ashlar_arch_georgian",
+    "erydon:nerium_hewn_arch_georgian",
+    "erydon:nerium_rock_arch_georgian",
+    "erydon:nerium_rusticated_arch_georgian"
   ]
 }

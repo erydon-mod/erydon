@@ -66,6 +66,9 @@ public final class ErydonFamilyModelLoadingPlugin implements ModelLoadingPlugin 
             if (ErydonModelFamilyIndex.isArchGothicBlock(path)) {
                 return wrap(cache, mid, model, ArchRomanesqueBakedModel::new, "gothic_arches", itemModel);
             }
+            if (ErydonModelFamilyIndex.isArchGeorgianBlock(path)) {
+                return wrap(cache, mid, model, ArchGeorgianBakedModel::new, "georgian_arches", itemModel);
+            }
             if (ErydonModelFamilyIndex.isAlcoveBlock(path)) {
                 return wrap(cache, mid, model, AlcoveBakedModel::new, "alcoves", itemModel);
             }
@@ -129,6 +132,11 @@ public final class ErydonFamilyModelLoadingPlugin implements ModelLoadingPlugin 
         for (String blockPath : index.gothicArches()) {
             for (String suffix : ArchRomanesqueBakedModel.modelSuffixes(blockPath)) {
                 models.add(ArchRomanesqueBakedModel.modelId(blockPath, suffix));
+            }
+        }
+        for (String blockPath : index.georgianArches()) {
+            for (String suffix : ArchGeorgianBakedModel.modelSuffixes(blockPath)) {
+                models.add(ArchGeorgianBakedModel.modelId(blockPath, suffix));
             }
         }
         for (String blockPath : index.alcoves()) {

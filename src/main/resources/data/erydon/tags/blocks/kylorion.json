@@ -386,6 +386,18 @@
     "erydon:kylorion_coping_georgian",
     "erydon:kylorion_hewn_coping_georgian",
     "erydon:kylorion_oil_burner",
-    "erydon:kylorion_rusticated_coping_georgian"
+    "erydon:kylorion_rusticated_coping_georgian",
+    "erydon:kylorion_aged_alcove_modern",
+    "erydon:kylorion_alcove_modern",
+    "erydon:kylorion_ashlar_alcove_modern",
+    "erydon:kylorion_hewn_alcove_modern",
+    "erydon:kylorion_rock_alcove_modern",
+    "erydon:kylorion_rusticated_alcove_modern",
+    "erydon:kylorion_aged_arch_georgian",
+    "erydon:kylorion_arch_georgian",
+    "erydon:kylorion_ashlar_arch_georgian",
+    "erydon:kylorion_hewn_arch_georgian",
+    "erydon:kylorion_rock_arch_georgian",
+    "erydon:kylorion_rusticated_arch_georgian"
   ]
 }

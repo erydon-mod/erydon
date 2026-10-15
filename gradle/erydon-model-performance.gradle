@@ -122,6 +122,9 @@ tasks.register('auditErydonModelPerformance') {
             if (base.contains('_arch_gothic')) {
                 return 'gothic_arches'
             }
+            if (base.contains('_arch_georgian')) {
+                return 'georgian_arches'
+            }
             if (isSlope(blockId)) {
                 return 'slopes'
             }
@@ -141,6 +144,7 @@ tasks.register('auditErydonModelPerformance') {
                 'romanesque_arches',
                 'modern_arches',
                 'gothic_arches',
+                'georgian_arches',
                 'slopes',
                 'covers',
                 'other'
@@ -187,6 +191,7 @@ tasks.register('auditErydonModelPerformance') {
                 romanesque_arches: 'ErydonFamilyModelLoadingPlugin',
                 modern_arches: 'ErydonFamilyModelLoadingPlugin',
                 gothic_arches: 'ErydonFamilyModelLoadingPlugin',
+                georgian_arches: 'ErydonFamilyModelLoadingPlugin',
                 slopes: 'ErydonSlopeModelLoadingPlugin',
                 covers: 'CoverModelLoadingPlugin'
         ]

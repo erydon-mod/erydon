@@ -386,6 +386,18 @@
     "erydon:striatus_trim_silver_stairs",
     "erydon:striatus_trim_silver_stairs_shallow_bottom",
     "erydon:striatus_trim_silver_stairs_shallow_top",
-    "erydon:striatus_wall_georgian"
+    "erydon:striatus_wall_georgian",
+    "erydon:striatus_aged_alcove_modern",
+    "erydon:striatus_alcove_modern",
+    "erydon:striatus_ashlar_alcove_modern",
+    "erydon:striatus_hewn_alcove_modern",
+    "erydon:striatus_rock_alcove_modern",
+    "erydon:striatus_rusticated_alcove_modern",
+    "erydon:striatus_aged_arch_georgian",
+    "erydon:striatus_arch_georgian",
+    "erydon:striatus_ashlar_arch_georgian",
+    "erydon:striatus_hewn_arch_georgian",
+    "erydon:striatus_rock_arch_georgian",
+    "erydon:striatus_rusticated_arch_georgian"
   ]
 }

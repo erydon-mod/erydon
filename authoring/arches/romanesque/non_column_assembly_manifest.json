@@ -1,0 +1,1546 @@
+{
+  "schema": 1,
+  "purpose": "Editable Romanesque arch base setting; runtime sources unchanged",
+  "master": "arch_romanesque_non_column_3wide.bbmodel",
+  "json": "arch_romanesque_non_column_3wide.json",
+  "width_blocks": 3,
+  "height_blocks": 4,
+  "editable_master_sha256": "16a2dd38002a585ac8004abcfe94d8838cee67d2bc36ea8000162eb2394c37ab",
+  "style_set": "base",
+  "validation": {
+    "elements": 90,
+    "editable_cubes": 70,
+    "editable_center_meshes": 20,
+    "enabled_faces": 398,
+    "runtime_faces_compared": 398,
+    "max_native_vertex_error_model_units": 0.0,
+    "max_runtime_vertex_error_model_units": 0.0003750000000053433,
+    "max_runtime_safety_bias_model_units": 0.000375,
+    "enabled_face_parity": true,
+    "unique_uuids": true
+  },
+  "components": [
+    {
+      "group": "WALL__base_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_side_large.json",
+      "suffix": "side_large",
+      "source_master": "authoring/arches/romanesque/arch_romanesque_3wide.bbmodel",
+      "source_master_group": "WALL__crown_left",
+      "cell": [
+        0,
+        0,
+        0
+      ],
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "runtime_y_rotation": 180,
+      "right_reflect_z": false,
+      "editable_representation": "cube",
+      "shared_with_column_setting": false,
+      "element_start": 0,
+      "element_count": 3
+    },
+    {
+      "group": "WALL__base_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_side_large.json",
+      "suffix": "side_large",
+      "source_master": "authoring/arches/romanesque/arch_romanesque_3wide.bbmodel",
+      "source_master_group": "WALL__crown_left",
+      "cell": [
+        2,
+        0,
+        0
+      ],
+      "translation": [
+        32,
+        0,
+        0
+      ],
+      "runtime_y_rotation": 0,
+      "right_reflect_z": true,
+      "editable_representation": "cube",
+      "shared_with_column_setting": false,
+      "element_start": 3,
+      "element_count": 3
+    },
+    {
+      "group": "WALL__body_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_side_large.json",
+      "suffix": "side_large",
+      "source_master": "authoring/arches/romanesque/arch_romanesque_3wide.bbmodel",
+      "source_master_group": "WALL__crown_left",
+      "cell": [
+        0,
+        1,
+        0
+      ],
+      "translation": [
+        0,
+        16,
+        0
+      ],
+      "runtime_y_rotation": 180,
+      "right_reflect_z": false,
+      "editable_representation": "cube",
+      "shared_with_column_setting": false,
+      "element_start": 6,
+      "element_count": 3
+    },
+    {
+      "group": "WALL__body_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_side_large.json",
+      "suffix": "side_large",
+      "source_master": "authoring/arches/romanesque/arch_romanesque_3wide.bbmodel",
+      "source_master_group": "WALL__crown_left",
+      "cell": [
+        2,
+        1,
+        0
+      ],
+      "translation": [
+        32,
+        16,
+        0
+      ],
+      "runtime_y_rotation": 0,
+      "right_reflect_z": true,
+      "editable_representation": "cube",
+      "shared_with_column_setting": false,
+      "element_start": 9,
+      "element_count": 3
+    },
+    {
+      "group": "CURVE__curve_lower_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_lower.json",
+      "suffix": "corner_large_lower",
+      "source_master": "authoring/arches/romanesque/arch_romanesque_3wide.bbmodel",
+      "source_master_group": "CURVE__curve_lower_left",
+      "cell": [
+        0,
+        2,
+        0
+      ],
+      "translation": [
+        0,
+        32,
+        0
+      ],
+      "runtime_y_rotation": 180,
+      "right_reflect_z": false,
+      "editable_representation": "cube",
+      "shared_with_column_setting": true,
+      "element_start": 12,
+      "element_count": 11
+    },
+    {
+      "group": "WALL__curve_lower_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_side_large_lower.json",
+      "suffix": "side_large_lower",
+      "source_master": "authoring/arches/romanesque/arch_romanesque_3wide.bbmodel",
+      "source_master_group": "WALL__curve_lower_left",
+      "cell": [
+        0,
+        2,
+        0
+      ],
+      "translation": [
+        0,
+        32,
+        0
+      ],
+      "runtime_y_rotation": 180,
+      "right_reflect_z": false,
+      "editable_representation": "cube",
+      "shared_with_column_setting": true,
+      "element_start": 23,
+      "element_count": 3
+    },
+    {
+      "group": "CURVE__curve_lower_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_lower.json",
+      "suffix": "corner_large_lower",
+      "source_master": "authoring/arches/romanesque/arch_romanesque_3wide.bbmodel",
+      "source_master_group": "CURVE__curve_lower_left",
+      "cell": [
+        2,
+        2,
+        0
+      ],
+      "translation": [
+        32,
+        32,
+        0
+      ],
+      "runtime_y_rotation": 0,
+      "right_reflect_z": true,
+      "editable_representation": "cube",
+      "shared_with_column_setting": true,
+      "element_start": 26,
+      "element_count": 11
+    },
+    {
+      "group": "WALL__curve_lower_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_side_large_lower.json",
+      "suffix": "side_large_lower",
+      "source_master": "authoring/arches/romanesque/arch_romanesque_3wide.bbmodel",
+      "source_master_group": "WALL__curve_lower_left",
+      "cell": [
+        2,
+        2,
+        0
+      ],
+      "translation": [
+        32,
+        32,
+        0
+      ],
+      "runtime_y_rotation": 0,
+      "right_reflect_z": true,
+      "editable_representation": "cube",
+      "shared_with_column_setting": true,
+      "element_start": 37,
+      "element_count": 3
+    },
+    {
+      "group": "CURVE__crown_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_upper.json",
+      "suffix": "corner_large_upper",
+      "source_master": "authoring/arches/romanesque/arch_romanesque_3wide.bbmodel",
+      "source_master_group": "CURVE__crown_left",
+      "cell": [
+        0,
+        3,
+        0
+      ],
+      "translation": [
+        0,
+        48,
+        0
+      ],
+      "runtime_y_rotation": 180,
+      "right_reflect_z": false,
+      "editable_representation": "cube",
+      "shared_with_column_setting": true,
+      "element_start": 40,
+      "element_count": 12
+    },
+    {
+      "group": "WALL__crown_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_side_large.json",
+      "suffix": "side_large",
+      "source_master": "authoring/arches/romanesque/arch_romanesque_3wide.bbmodel",
+      "source_master_group": "WALL__crown_left",
+      "cell": [
+        0,
+        3,
+        0
+      ],
+      "translation": [
+        0,
+        48,
+        0
+      ],
+      "runtime_y_rotation": 180,
+      "right_reflect_z": false,
+      "editable_representation": "cube",
+      "shared_with_column_setting": true,
+      "element_start": 52,
+      "element_count": 3
+    },
+    {
+      "group": "KEYSTONE__crown_center",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_top_large.json",
+      "suffix": "top_large",
+      "source_master": "authoring/arches/romanesque/arch_romanesque_3wide.bbmodel",
+      "source_master_group": "KEYSTONE__crown_center",
+      "cell": [
+        1,
+        3,
+        0
+      ],
+      "translation": [
+        16,
+        48,
+        0
+      ],
+      "runtime_y_rotation": 0,
+      "right_reflect_z": false,
+      "editable_representation": "mesh",
+      "shared_with_column_setting": true,
+      "element_start": 55,
+      "element_count": 20
+    },
+    {
+      "group": "CURVE__crown_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_upper.json",
+      "suffix": "corner_large_upper",
+      "source_master": "authoring/arches/romanesque/arch_romanesque_3wide.bbmodel",
+      "source_master_group": "CURVE__crown_left",
+      "cell": [
+        2,
+        3,
+        0
+      ],
+      "translation": [
+        32,
+        48,
+        0
+      ],
+      "runtime_y_rotation": 0,
+      "right_reflect_z": true,
+      "editable_representation": "cube",
+      "shared_with_column_setting": true,
+      "element_start": 75,
+      "element_count": 12
+    },
+    {
+      "group": "WALL__crown_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_side_large.json",
+      "suffix": "side_large",
+      "source_master": "authoring/arches/romanesque/arch_romanesque_3wide.bbmodel",
+      "source_master_group": "WALL__crown_left",
+      "cell": [
+        2,
+        3,
+        0
+      ],
+      "translation": [
+        32,
+        48,
+        0
+      ],
+      "runtime_y_rotation": 0,
+      "right_reflect_z": true,
+      "editable_representation": "cube",
+      "shared_with_column_setting": true,
+      "element_start": 87,
+      "element_count": 3
+    }
+  ],
+  "element_provenance": {
+    "fc5a0b3c-ae6d-5c64-8e02-9a0309398108": {
+      "component_group": "WALL__base_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_side_large.json",
+      "source_element": 0,
+      "source_master_group": "WALL__crown_left",
+      "source_master_element_uuid": "58216732-4696-5c49-96d7-a32396301fee",
+      "source_faces": {
+        "north": "south",
+        "east": "west",
+        "south": "north",
+        "west": "east",
+        "up": "up",
+        "down": "down"
+      }
+    },
+    "f460202d-6f5c-5b50-ab35-be241816dd18": {
+      "component_group": "WALL__base_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_side_large.json",
+      "source_element": 1,
+      "source_master_group": "WALL__crown_left",
+      "source_master_element_uuid": "0984ad17-4e51-51a2-9373-fc063959df9d",
+      "source_faces": {
+        "north": "south",
+        "south": "north"
+      }
+    },
+    "bda6935e-33c9-5799-8c13-9a5af0c66657": {
+      "component_group": "WALL__base_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_side_large.json",
+      "source_element": 2,
+      "source_master_group": "WALL__crown_left",
+      "source_master_element_uuid": "82a4e953-a3de-5046-8434-df4967efdc48",
+      "source_faces": {
+        "north": "south",
+        "south": "north"
+      }
+    },
+    "af03fc98-5e91-5d37-bed7-fcbb9f33cc99": {
+      "component_group": "WALL__base_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_side_large.json",
+      "source_element": 0,
+      "source_master_group": "WALL__crown_left",
+      "source_master_element_uuid": "58216732-4696-5c49-96d7-a32396301fee",
+      "source_faces": {
+        "north": "south",
+        "west": "west",
+        "south": "north",
+        "east": "east",
+        "up": "up",
+        "down": "down"
+      }
+    },
+    "70eeb095-f3f5-50fc-9bc4-cd64b7905f71": {
+      "component_group": "WALL__base_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_side_large.json",
+      "source_element": 1,
+      "source_master_group": "WALL__crown_left",
+      "source_master_element_uuid": "0984ad17-4e51-51a2-9373-fc063959df9d",
+      "source_faces": {
+        "north": "south",
+        "south": "north"
+      }
+    },
+    "83388616-bb1b-5d6b-8cf9-c721a5d86a68": {
+      "component_group": "WALL__base_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_side_large.json",
+      "source_element": 2,
+      "source_master_group": "WALL__crown_left",
+      "source_master_element_uuid": "82a4e953-a3de-5046-8434-df4967efdc48",
+      "source_faces": {
+        "north": "south",
+        "south": "north"
+      }
+    },
+    "6e20c3b7-7c7c-5a56-ab17-418f109729e9": {
+      "component_group": "WALL__body_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_side_large.json",
+      "source_element": 0,
+      "source_master_group": "WALL__crown_left",
+      "source_master_element_uuid": "58216732-4696-5c49-96d7-a32396301fee",
+      "source_faces": {
+        "north": "south",
+        "east": "west",
+        "south": "north",
+        "west": "east",
+        "up": "up",
+        "down": "down"
+      }
+    },
+    "07f220de-2ddb-5955-9fef-836121305e4d": {
+      "component_group": "WALL__body_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_side_large.json",
+      "source_element": 1,
+      "source_master_group": "WALL__crown_left",
+      "source_master_element_uuid": "0984ad17-4e51-51a2-9373-fc063959df9d",
+      "source_faces": {
+        "north": "south",
+        "south": "north"
+      }
+    },
+    "3e8e6aaf-2347-5a20-9ad2-e270b3e22b01": {
+      "component_group": "WALL__body_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_side_large.json",
+      "source_element": 2,
+      "source_master_group": "WALL__crown_left",
+      "source_master_element_uuid": "82a4e953-a3de-5046-8434-df4967efdc48",
+      "source_faces": {
+        "north": "south",
+        "south": "north"
+      }
+    },
+    "5d021c4f-596a-5f53-9698-5970c929276f": {
+      "component_group": "WALL__body_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_side_large.json",
+      "source_element": 0,
+      "source_master_group": "WALL__crown_left",
+      "source_master_element_uuid": "58216732-4696-5c49-96d7-a32396301fee",
+      "source_faces": {
+        "north": "south",
+        "west": "west",
+        "south": "north",
+        "east": "east",
+        "up": "up",
+        "down": "down"
+      }
+    },
+    "62b2bb17-8241-5bf6-a9e2-061928f4d8de": {
+      "component_group": "WALL__body_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_side_large.json",
+      "source_element": 1,
+      "source_master_group": "WALL__crown_left",
+      "source_master_element_uuid": "0984ad17-4e51-51a2-9373-fc063959df9d",
+      "source_faces": {
+        "north": "south",
+        "south": "north"
+      }
+    },
+    "59936c42-31d2-5762-b47e-d1bbb894494f": {
+      "component_group": "WALL__body_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_side_large.json",
+      "source_element": 2,
+      "source_master_group": "WALL__crown_left",
+      "source_master_element_uuid": "82a4e953-a3de-5046-8434-df4967efdc48",
+      "source_faces": {
+        "north": "south",
+        "south": "north"
+      }
+    },
+    "d14d384d-67a4-5450-8abb-1285956111e5": {
+      "component_group": "CURVE__curve_lower_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_lower.json",
+      "source_element": 0,
+      "source_master_group": "CURVE__curve_lower_left",
+      "source_master_element_uuid": "bf99c554-0f88-5b00-b18d-856a2e587af5",
+      "source_faces": {
+        "north": "south",
+        "east": "west",
+        "south": "north",
+        "west": "east"
+      }
+    },
+    "00550b00-0e69-5ccf-a2a9-8fdce813cfe1": {
+      "component_group": "CURVE__curve_lower_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_lower.json",
+      "source_element": 1,
+      "source_master_group": "CURVE__curve_lower_left",
+      "source_master_element_uuid": "223bdfca-117e-5c75-ab76-7538d791f2f1",
+      "source_faces": {
+        "north": "south",
+        "east": "west",
+        "south": "north",
+        "west": "east",
+        "up": "up",
+        "down": "down"
+      }
+    },
+    "ffb03354-859b-59a1-bcf9-74333a7579c1": {
+      "component_group": "CURVE__curve_lower_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_lower.json",
+      "source_element": 2,
+      "source_master_group": "CURVE__curve_lower_left",
+      "source_master_element_uuid": "7d92761b-9b50-5683-8542-e46f1f2c75a4",
+      "source_faces": {
+        "north": "south",
+        "east": "west",
+        "south": "north",
+        "west": "east",
+        "up": "up",
+        "down": "down"
+      }
+    },
+    "493f55ad-4c79-545d-b551-fa54ec6ccde8": {
+      "component_group": "CURVE__curve_lower_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_lower.json",
+      "source_element": 3,
+      "source_master_group": "CURVE__curve_lower_left",
+      "source_master_element_uuid": "7303b4c0-9c99-5a03-9b94-dd5159f0fc0a",
+      "source_faces": {
+        "north": "south",
+        "east": "west",
+        "south": "north",
+        "west": "east",
+        "up": "up",
+        "down": "down"
+      }
+    },
+    "e389cdaf-daab-5be2-b673-5e0e0f39ea39": {
+      "component_group": "CURVE__curve_lower_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_lower.json",
+      "source_element": 4,
+      "source_master_group": "CURVE__curve_lower_left",
+      "source_master_element_uuid": "e2975dd8-8072-e950-e597-ef6befa5e46f",
+      "source_faces": {
+        "north": "south",
+        "east": "west",
+        "south": "north",
+        "west": "east",
+        "up": "up",
+        "down": "down"
+      }
+    },
+    "88e5ef93-6e88-565c-9c3d-5c35bc732acd": {
+      "component_group": "CURVE__curve_lower_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_lower.json",
+      "source_element": 5,
+      "source_master_group": "CURVE__curve_lower_left",
+      "source_master_element_uuid": "def99b1f-db6f-715c-5c9f-c449ff9a41fc",
+      "source_faces": {
+        "north": "south",
+        "east": "west",
+        "south": "north",
+        "west": "east",
+        "up": "up",
+        "down": "down"
+      }
+    },
+    "9b8dbeae-91ac-5278-acaa-4868f6bed226": {
+      "component_group": "CURVE__curve_lower_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_lower.json",
+      "source_element": 6,
+      "source_master_group": "CURVE__curve_lower_left",
+      "source_master_element_uuid": "fc839a81-ed51-c36f-48c1-698371c7a54c",
+      "source_faces": {
+        "north": "south",
+        "east": "west",
+        "south": "north",
+        "west": "east",
+        "up": "up",
+        "down": "down"
+      }
+    },
+    "11d2d1c2-4212-5850-80c3-eb3a5dacaf39": {
+      "component_group": "CURVE__curve_lower_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_lower.json",
+      "source_element": 7,
+      "source_master_group": "CURVE__curve_lower_left",
+      "source_master_element_uuid": "27e8d6c2-69d8-05bf-31d4-627f0f560ae3",
+      "source_faces": {
+        "north": "south",
+        "east": "west",
+        "south": "north",
+        "west": "east",
+        "up": "up",
+        "down": "down"
+      }
+    },
+    "411e3d28-abc7-53d6-acd2-f43dc39fc308": {
+      "component_group": "CURVE__curve_lower_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_lower.json",
+      "source_element": 8,
+      "source_master_group": "CURVE__curve_lower_left",
+      "source_master_element_uuid": "06e57175-736c-b789-668c-6ac0c73512d1",
+      "source_faces": {
+        "north": "south",
+        "east": "west",
+        "south": "north",
+        "west": "east",
+        "up": "up",
+        "down": "down"
+      }
+    },
+    "e60a0edc-b36d-5048-89a4-8580533b2299": {
+      "component_group": "CURVE__curve_lower_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_lower.json",
+      "source_element": 9,
+      "source_master_group": "CURVE__curve_lower_left",
+      "source_master_element_uuid": "45bcdc76-061f-39b7-661e-d88eeb1550d1",
+      "source_faces": {
+        "north": "south",
+        "east": "west",
+        "south": "north",
+        "west": "east",
+        "up": "up"
+      }
+    },
+    "5070d5de-3ed7-55e9-a9e6-db1b43cc9b58": {
+      "component_group": "CURVE__curve_lower_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_lower.json",
+      "source_element": 10,
+      "source_master_group": "CURVE__curve_lower_left",
+      "source_master_element_uuid": "cc89f65e-e74b-8f29-d8ce-2e0fcf2bb012",
+      "source_faces": {
+        "north": "south",
+        "east": "west",
+        "south": "north",
+        "west": "east",
+        "up": "up"
+      }
+    },
+    "f68bdd14-6c3c-5c04-8491-16c14a52f1d7": {
+      "component_group": "WALL__curve_lower_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_side_large_lower.json",
+      "source_element": 0,
+      "source_master_group": "WALL__curve_lower_left",
+      "source_master_element_uuid": "52988f00-55cb-52fe-8c96-0ab8077ce938",
+      "source_faces": {
+        "north": "south",
+        "east": "west",
+        "south": "north",
+        "west": "east",
+        "up": "up"
+      }
+    },
+    "53523ebb-8640-551c-b323-389c5c7aa3ce": {
+      "component_group": "WALL__curve_lower_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_side_large_lower.json",
+      "source_element": 1,
+      "source_master_group": "WALL__curve_lower_left",
+      "source_master_element_uuid": "ec39a306-fe7b-5ec3-87af-9c74b0aa98fa",
+      "source_faces": {
+        "north": "south",
+        "east": "west",
+        "south": "north",
+        "west": "east"
+      }
+    },
+    "c6722490-e5eb-57ed-a3ad-616bc8f366c9": {
+      "component_group": "WALL__curve_lower_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_side_large_lower.json",
+      "source_element": 2,
+      "source_master_group": "WALL__curve_lower_left",
+      "source_master_element_uuid": "c87484bd-9f26-5791-bc38-5633f9dc0187",
+      "source_faces": {
+        "north": "south",
+        "east": "west",
+        "south": "north"
+      }
+    },
+    "7c2b0fe9-6bf1-5c1e-8e45-49b8481acf4e": {
+      "component_group": "CURVE__curve_lower_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_lower.json",
+      "source_element": 0,
+      "source_master_group": "CURVE__curve_lower_left",
+      "source_master_element_uuid": "bf99c554-0f88-5b00-b18d-856a2e587af5",
+      "source_faces": {
+        "north": "south",
+        "west": "west",
+        "south": "north",
+        "east": "east"
+      }
+    },
+    "88ce0bae-c546-59a1-8815-09f30d963642": {
+      "component_group": "CURVE__curve_lower_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_lower.json",
+      "source_element": 1,
+      "source_master_group": "CURVE__curve_lower_left",
+      "source_master_element_uuid": "223bdfca-117e-5c75-ab76-7538d791f2f1",
+      "source_faces": {
+        "north": "south",
+        "west": "west",
+        "south": "north",
+        "east": "east",
+        "up": "up",
+        "down": "down"
+      }
+    },
+    "0daf6d2f-9285-5875-9fa2-1935c6fd6007": {
+      "component_group": "CURVE__curve_lower_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_lower.json",
+      "source_element": 2,
+      "source_master_group": "CURVE__curve_lower_left",
+      "source_master_element_uuid": "7d92761b-9b50-5683-8542-e46f1f2c75a4",
+      "source_faces": {
+        "north": "south",
+        "west": "west",
+        "south": "north",
+        "east": "east",
+        "up": "up",
+        "down": "down"
+      }
+    },
+    "5f0d1405-b3a3-51df-aabc-367ce0ead635": {
+      "component_group": "CURVE__curve_lower_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_lower.json",
+      "source_element": 3,
+      "source_master_group": "CURVE__curve_lower_left",
+      "source_master_element_uuid": "7303b4c0-9c99-5a03-9b94-dd5159f0fc0a",
+      "source_faces": {
+        "north": "south",
+        "west": "west",
+        "south": "north",
+        "east": "east",
+        "up": "up",
+        "down": "down"
+      }
+    },
+    "47bfc672-4ed9-53da-8748-e890cd542c75": {
+      "component_group": "CURVE__curve_lower_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_lower.json",
+      "source_element": 4,
+      "source_master_group": "CURVE__curve_lower_left",
+      "source_master_element_uuid": "e2975dd8-8072-e950-e597-ef6befa5e46f",
+      "source_faces": {
+        "north": "south",
+        "west": "west",
+        "south": "north",
+        "east": "east",
+        "up": "up",
+        "down": "down"
+      }
+    },
+    "b7872487-992f-5be0-9128-a728b0fbbba8": {
+      "component_group": "CURVE__curve_lower_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_lower.json",
+      "source_element": 5,
+      "source_master_group": "CURVE__curve_lower_left",
+      "source_master_element_uuid": "def99b1f-db6f-715c-5c9f-c449ff9a41fc",
+      "source_faces": {
+        "north": "south",
+        "west": "west",
+        "south": "north",
+        "east": "east",
+        "up": "up",
+        "down": "down"
+      }
+    },
+    "93bf4e5b-56ca-581e-9821-f472b9d65c25": {
+      "component_group": "CURVE__curve_lower_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_lower.json",
+      "source_element": 6,
+      "source_master_group": "CURVE__curve_lower_left",
+      "source_master_element_uuid": "fc839a81-ed51-c36f-48c1-698371c7a54c",
+      "source_faces": {
+        "north": "south",
+        "west": "west",
+        "south": "north",
+        "east": "east",
+        "up": "up",
+        "down": "down"
+      }
+    },
+    "4ddfddde-e951-57df-820a-e88069c845a1": {
+      "component_group": "CURVE__curve_lower_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_lower.json",
+      "source_element": 7,
+      "source_master_group": "CURVE__curve_lower_left",
+      "source_master_element_uuid": "27e8d6c2-69d8-05bf-31d4-627f0f560ae3",
+      "source_faces": {
+        "north": "south",
+        "west": "west",
+        "south": "north",
+        "east": "east",
+        "up": "up",
+        "down": "down"
+      }
+    },
+    "283a26ce-1f8a-54f5-94f1-78a2795477dc": {
+      "component_group": "CURVE__curve_lower_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_lower.json",
+      "source_element": 8,
+      "source_master_group": "CURVE__curve_lower_left",
+      "source_master_element_uuid": "06e57175-736c-b789-668c-6ac0c73512d1",
+      "source_faces": {
+        "north": "south",
+        "west": "west",
+        "south": "north",
+        "east": "east",
+        "up": "up",
+        "down": "down"
+      }
+    },
+    "14a48c54-f783-5314-b332-00a598b7eb97": {
+      "component_group": "CURVE__curve_lower_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_lower.json",
+      "source_element": 9,
+      "source_master_group": "CURVE__curve_lower_left",
+      "source_master_element_uuid": "45bcdc76-061f-39b7-661e-d88eeb1550d1",
+      "source_faces": {
+        "north": "south",
+        "west": "west",
+        "south": "north",
+        "east": "east",
+        "up": "up"
+      }
+    },
+    "d0909715-46dd-5c4b-ad8a-cd864a572fb0": {
+      "component_group": "CURVE__curve_lower_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_lower.json",
+      "source_element": 10,
+      "source_master_group": "CURVE__curve_lower_left",
+      "source_master_element_uuid": "cc89f65e-e74b-8f29-d8ce-2e0fcf2bb012",
+      "source_faces": {
+        "north": "south",
+        "west": "west",
+        "south": "north",
+        "east": "east",
+        "up": "up"
+      }
+    },
+    "f6a24b2d-9126-5864-a6dd-48499e1ba732": {
+      "component_group": "WALL__curve_lower_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_side_large_lower.json",
+      "source_element": 0,
+      "source_master_group": "WALL__curve_lower_left",
+      "source_master_element_uuid": "52988f00-55cb-52fe-8c96-0ab8077ce938",
+      "source_faces": {
+        "north": "south",
+        "west": "west",
+        "south": "north",
+        "east": "east",
+        "up": "up"
+      }
+    },
+    "b2d1e8f7-b149-521c-97e9-9947465c2fe4": {
+      "component_group": "WALL__curve_lower_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_side_large_lower.json",
+      "source_element": 1,
+      "source_master_group": "WALL__curve_lower_left",
+      "source_master_element_uuid": "ec39a306-fe7b-5ec3-87af-9c74b0aa98fa",
+      "source_faces": {
+        "north": "south",
+        "west": "west",
+        "south": "north",
+        "east": "east"
+      }
+    },
+    "966e8115-9ead-5828-8612-9f6f792cb84a": {
+      "component_group": "WALL__curve_lower_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_side_large_lower.json",
+      "source_element": 2,
+      "source_master_group": "WALL__curve_lower_left",
+      "source_master_element_uuid": "c87484bd-9f26-5791-bc38-5633f9dc0187",
+      "source_faces": {
+        "north": "south",
+        "west": "west",
+        "south": "north"
+      }
+    },
+    "303be73a-30b9-5a68-b00a-17662c5942ee": {
+      "component_group": "CURVE__crown_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_upper.json",
+      "source_element": 0,
+      "source_master_group": "CURVE__crown_left",
+      "source_master_element_uuid": "d7db687d-ad7a-5001-932e-d27278710244",
+      "source_faces": {
+        "north": "south",
+        "east": "west",
+        "south": "north",
+        "west": "east",
+        "up": "up",
+        "down": "down"
+      }
+    },
+    "2d17edc6-30cd-5db7-b99c-55a608eb98f6": {
+      "component_group": "CURVE__crown_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_upper.json",
+      "source_element": 1,
+      "source_master_group": "CURVE__crown_left",
+      "source_master_element_uuid": "c6d52525-d110-5c21-843b-a921c4976772",
+      "source_faces": {
+        "north": "south",
+        "east": "west",
+        "south": "north",
+        "west": "east",
+        "up": "up",
+        "down": "down"
+      }
+    },
+    "a0d2ceaf-0cd6-5569-821e-8814185c16c7": {
+      "component_group": "CURVE__crown_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_upper.json",
+      "source_element": 2,
+      "source_master_group": "CURVE__crown_left",
+      "source_master_element_uuid": "4eb0ddac-6bb2-5df4-b180-62b49a0fc842",
+      "source_faces": {
+        "north": "south",
+        "east": "west",
+        "south": "north",
+        "up": "up",
+        "down": "down"
+      }
+    },
+    "ef9963c0-b371-53ff-9dbc-1fca5a125680": {
+      "component_group": "CURVE__crown_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_upper.json",
+      "source_element": 3,
+      "source_master_group": "CURVE__crown_left",
+      "source_master_element_uuid": "b85454bf-84c5-5890-bd0d-a181d3ec411e",
+      "source_faces": {
+        "north": "south",
+        "east": "west",
+        "south": "north",
+        "down": "down"
+      }
+    },
+    "71ab9067-e76c-5db8-985c-47f578b2c03c": {
+      "component_group": "CURVE__crown_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_upper.json",
+      "source_element": 4,
+      "source_master_group": "CURVE__crown_left",
+      "source_master_element_uuid": "d89d47f9-e984-57c1-91bd-8b5b84d2326b",
+      "source_faces": {
+        "north": "south",
+        "south": "north",
+        "west": "east",
+        "up": "up",
+        "down": "down"
+      }
+    },
+    "e5d0130f-a292-54e6-b8ee-d368ad47c2b2": {
+      "component_group": "CURVE__crown_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_upper.json",
+      "source_element": 5,
+      "source_master_group": "CURVE__crown_left",
+      "source_master_element_uuid": "d38c326c-b5cc-5b58-9a33-cc0019b4035f",
+      "source_faces": {
+        "north": "south",
+        "east": "west",
+        "south": "north",
+        "up": "up"
+      }
+    },
+    "13514d0c-ebcb-56bd-ae00-cf44175750e9": {
+      "component_group": "CURVE__crown_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_upper.json",
+      "source_element": 6,
+      "source_master_group": "CURVE__crown_left",
+      "source_master_element_uuid": "c20b5b17-48eb-564f-a0db-bf7b1a82c5d0",
+      "source_faces": {
+        "north": "south",
+        "south": "north"
+      }
+    },
+    "55fbe966-a291-589e-9431-af9930b7c429": {
+      "component_group": "CURVE__crown_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_upper.json",
+      "source_element": 7,
+      "source_master_group": "CURVE__crown_left",
+      "source_master_element_uuid": "15b55d5d-8d0f-544b-b30e-8bc2f170935e",
+      "source_faces": {
+        "north": "south",
+        "east": "west",
+        "south": "north",
+        "west": "east",
+        "up": "up",
+        "down": "down"
+      }
+    },
+    "0d011738-dd2c-5f29-b93f-bc45fbc7f3c1": {
+      "component_group": "CURVE__crown_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_upper.json",
+      "source_element": 8,
+      "source_master_group": "CURVE__crown_left",
+      "source_master_element_uuid": "a5959d44-612f-58dd-93ef-a318b87b859e",
+      "source_faces": {
+        "north": "south",
+        "east": "west",
+        "south": "north",
+        "up": "up",
+        "down": "down"
+      }
+    },
+    "b25d9d32-5344-546e-a50f-10fcfa321f84": {
+      "component_group": "CURVE__crown_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_upper.json",
+      "source_element": 9,
+      "source_master_group": "CURVE__crown_left",
+      "source_master_element_uuid": "01116019-6a2a-5518-a057-3863956bd736",
+      "source_faces": {
+        "north": "south",
+        "south": "north"
+      }
+    },
+    "e2939bd3-8f81-586c-bc34-0a8320a60d61": {
+      "component_group": "CURVE__crown_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_upper.json",
+      "source_element": 10,
+      "source_master_group": "CURVE__crown_left",
+      "source_master_element_uuid": "25a90322-a0c0-55fa-bdce-d064c9a3e971",
+      "source_faces": {
+        "north": "south",
+        "south": "north",
+        "down": "down"
+      }
+    },
+    "edce025f-ebe4-554d-be70-99f41a6c5460": {
+      "component_group": "CURVE__crown_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_upper.json",
+      "source_element": 11,
+      "source_master_group": "CURVE__crown_left",
+      "source_master_element_uuid": "4f72f3ff-53a0-5149-94ff-7436772844f3",
+      "source_faces": {
+        "north": "south",
+        "south": "north",
+        "down": "down"
+      }
+    },
+    "b036db13-8af3-5a99-87d5-99577f708444": {
+      "component_group": "WALL__crown_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_side_large.json",
+      "source_element": 0,
+      "source_master_group": "WALL__crown_left",
+      "source_master_element_uuid": "58216732-4696-5c49-96d7-a32396301fee",
+      "source_faces": {
+        "north": "south",
+        "east": "west",
+        "south": "north",
+        "west": "east",
+        "up": "up",
+        "down": "down"
+      }
+    },
+    "f87996cc-3701-5674-8d9b-5811bb551cc4": {
+      "component_group": "WALL__crown_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_side_large.json",
+      "source_element": 1,
+      "source_master_group": "WALL__crown_left",
+      "source_master_element_uuid": "0984ad17-4e51-51a2-9373-fc063959df9d",
+      "source_faces": {
+        "north": "south",
+        "south": "north"
+      }
+    },
+    "0a625e38-866d-515d-b3da-d93c5ac9e315": {
+      "component_group": "WALL__crown_left",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_side_large.json",
+      "source_element": 2,
+      "source_master_group": "WALL__crown_left",
+      "source_master_element_uuid": "82a4e953-a3de-5046-8434-df4967efdc48",
+      "source_faces": {
+        "north": "south",
+        "south": "north"
+      }
+    },
+    "f24e8ede-83fe-5c41-bf22-512995015bb1": {
+      "component_group": "KEYSTONE__crown_center",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_top_large.json",
+      "source_element": 0,
+      "source_master_group": "KEYSTONE__crown_center",
+      "source_master_element_uuid": "e91f48aa-530f-5103-999d-d468af46c065",
+      "source_faces": {
+        "north": "north",
+        "south": "south",
+        "down": "down",
+        "up": "up"
+      }
+    },
+    "3b2d81fe-3ddd-5f51-b053-e9cbb9573402": {
+      "component_group": "KEYSTONE__crown_center",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_top_large.json",
+      "source_element": 1,
+      "source_master_group": "KEYSTONE__crown_center",
+      "source_master_element_uuid": "e91f48aa-530f-5103-999d-d468af46c065",
+      "source_faces": {
+        "north": "north",
+        "south": "south",
+        "down": "down",
+        "up": "up"
+      }
+    },
+    "1fa09620-5642-5127-93b3-c7d0cf8bba62": {
+      "component_group": "KEYSTONE__crown_center",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_top_large.json",
+      "source_element": 2,
+      "source_master_group": "KEYSTONE__crown_center",
+      "source_master_element_uuid": "dae2af16-7dad-5189-86d2-50b18ef8a16e",
+      "source_faces": {
+        "north": "north",
+        "south": "south",
+        "down": "down"
+      }
+    },
+    "0fa4febd-a254-5a93-8a6e-62867614a4b8": {
+      "component_group": "KEYSTONE__crown_center",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_top_large.json",
+      "source_element": 3,
+      "source_master_group": "KEYSTONE__crown_center",
+      "source_master_element_uuid": "dae2af16-7dad-5189-86d2-50b18ef8a16e",
+      "source_faces": {
+        "north": "north",
+        "south": "south",
+        "down": "down"
+      }
+    },
+    "98d6cef1-e46f-562a-b95e-cb5cdc3b5a0e": {
+      "component_group": "KEYSTONE__crown_center",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_top_large.json",
+      "source_element": 4,
+      "source_master_group": "KEYSTONE__crown_center",
+      "source_master_element_uuid": "64130692-e810-5430-a65e-668e2deef20a",
+      "source_faces": {
+        "north": "north",
+        "south": "south",
+        "west": "west",
+        "down": "down",
+        "up": "up"
+      }
+    },
+    "cbdba5ed-f5f7-5d62-a1d4-e6ed348d953a": {
+      "component_group": "KEYSTONE__crown_center",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_top_large.json",
+      "source_element": 5,
+      "source_master_group": "KEYSTONE__crown_center",
+      "source_master_element_uuid": "64130692-e810-5430-a65e-668e2deef20a",
+      "source_faces": {
+        "north": "north",
+        "south": "south",
+        "east": "east",
+        "down": "down",
+        "up": "up"
+      }
+    },
+    "69bc9e6a-ec7e-5953-a507-ba060d18cecf": {
+      "component_group": "KEYSTONE__crown_center",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_top_large.json",
+      "source_element": 6,
+      "source_master_group": "KEYSTONE__crown_center",
+      "source_master_element_uuid": "c5cb3546-2d08-547e-895c-47008b839d2a",
+      "source_faces": {
+        "north": "north",
+        "south": "south",
+        "west": "west",
+        "down": "down"
+      }
+    },
+    "906af9d3-42b9-5d31-b780-a262ca6d9c60": {
+      "component_group": "KEYSTONE__crown_center",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_top_large.json",
+      "source_element": 7,
+      "source_master_group": "KEYSTONE__crown_center",
+      "source_master_element_uuid": "c5cb3546-2d08-547e-895c-47008b839d2a",
+      "source_faces": {
+        "north": "north",
+        "south": "south",
+        "east": "east",
+        "down": "down"
+      }
+    },
+    "b431dc37-30a1-5462-8e60-23703bc617b2": {
+      "component_group": "KEYSTONE__crown_center",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_top_large.json",
+      "source_element": 8,
+      "source_master_group": "KEYSTONE__crown_center",
+      "source_master_element_uuid": "e8781a4b-bfa9-515a-bfb7-54196dbe7a2a",
+      "source_faces": {
+        "north": "north",
+        "south": "south",
+        "west": "west",
+        "down": "down"
+      }
+    },
+    "a1feadf9-7fa7-541e-8bf6-47765c98a72b": {
+      "component_group": "KEYSTONE__crown_center",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_top_large.json",
+      "source_element": 9,
+      "source_master_group": "KEYSTONE__crown_center",
+      "source_master_element_uuid": "e8781a4b-bfa9-515a-bfb7-54196dbe7a2a",
+      "source_faces": {
+        "north": "north",
+        "south": "south",
+        "east": "east",
+        "down": "down"
+      }
+    },
+    "015413cd-8a0c-5ca9-ac04-ebc83e5bc093": {
+      "component_group": "KEYSTONE__crown_center",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_top_large.json",
+      "source_element": 10,
+      "source_master_group": "KEYSTONE__crown_center",
+      "source_master_element_uuid": "16296662-53b2-505f-9158-308a91a50d4d",
+      "source_faces": {
+        "north": "north",
+        "south": "south",
+        "west": "west",
+        "down": "down",
+        "up": "up"
+      }
+    },
+    "ec673a03-242a-5be9-adb6-0e9f5a13fbfb": {
+      "component_group": "KEYSTONE__crown_center",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_top_large.json",
+      "source_element": 11,
+      "source_master_group": "KEYSTONE__crown_center",
+      "source_master_element_uuid": "16296662-53b2-505f-9158-308a91a50d4d",
+      "source_faces": {
+        "north": "north",
+        "south": "south",
+        "east": "east",
+        "down": "down",
+        "up": "up"
+      }
+    },
+    "3f6fb694-4aa4-5058-a889-725ee6aaaf8c": {
+      "component_group": "KEYSTONE__crown_center",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_top_large.json",
+      "source_element": 12,
+      "source_master_group": "KEYSTONE__crown_center",
+      "source_master_element_uuid": "90829d3e-fdbb-5302-b1fc-545404cc9bff",
+      "source_faces": {
+        "north": "north",
+        "south": "south",
+        "west": "west",
+        "east": "east",
+        "down": "down"
+      }
+    },
+    "8f1d17fd-45c2-5e0e-a5c3-91ccde414091": {
+      "component_group": "KEYSTONE__crown_center",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_top_large.json",
+      "source_element": 13,
+      "source_master_group": "KEYSTONE__crown_center",
+      "source_master_element_uuid": "90829d3e-fdbb-5302-b1fc-545404cc9bff",
+      "source_faces": {
+        "north": "north",
+        "south": "south",
+        "west": "west",
+        "east": "east",
+        "down": "down"
+      }
+    },
+    "df96992c-2dea-5510-8b50-236e87e818a9": {
+      "component_group": "KEYSTONE__crown_center",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_top_large.json",
+      "source_element": 14,
+      "source_master_group": "KEYSTONE__crown_center",
+      "source_master_element_uuid": "ffbab6d5-7946-5231-b599-50a60c97d6a7",
+      "source_faces": {
+        "north": "north",
+        "south": "south",
+        "west": "west",
+        "east": "east",
+        "down": "down"
+      }
+    },
+    "1c0033e2-39dc-5ec6-ae45-74b359872932": {
+      "component_group": "KEYSTONE__crown_center",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_top_large.json",
+      "source_element": 15,
+      "source_master_group": "KEYSTONE__crown_center",
+      "source_master_element_uuid": "ffbab6d5-7946-5231-b599-50a60c97d6a7",
+      "source_faces": {
+        "north": "north",
+        "south": "south",
+        "west": "west",
+        "east": "east",
+        "down": "down"
+      }
+    },
+    "dbe72605-1a15-59f6-a453-a27b6228d9cf": {
+      "component_group": "KEYSTONE__crown_center",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_top_large.json",
+      "source_element": 16,
+      "source_master_group": "KEYSTONE__crown_center",
+      "source_master_element_uuid": "f85da2de-fe22-5e7e-9ff9-472c35ebc1dc",
+      "source_faces": {
+        "north": "north",
+        "south": "south",
+        "west": "west",
+        "east": "east",
+        "down": "down",
+        "up": "up"
+      }
+    },
+    "dc1bdbdc-5bac-534b-8ba4-704b8d7e03fe": {
+      "component_group": "KEYSTONE__crown_center",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_top_large.json",
+      "source_element": 17,
+      "source_master_group": "KEYSTONE__crown_center",
+      "source_master_element_uuid": "f85da2de-fe22-5e7e-9ff9-472c35ebc1dc",
+      "source_faces": {
+        "north": "north",
+        "south": "south",
+        "west": "west",
+        "east": "east",
+        "down": "down",
+        "up": "up"
+      }
+    },
+    "7902133c-6bea-5421-89bd-b1017201e817": {
+      "component_group": "KEYSTONE__crown_center",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_top_large.json",
+      "source_element": 18,
+      "source_master_group": "KEYSTONE__crown_center",
+      "source_master_element_uuid": "1a807223-d4c1-5a3b-aa9c-466b3631721a",
+      "source_faces": {
+        "north": "north",
+        "south": "south",
+        "down": "down"
+      }
+    },
+    "06dc78ce-84ac-5695-80ac-9ce57abbaa94": {
+      "component_group": "KEYSTONE__crown_center",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_top_large.json",
+      "source_element": 19,
+      "source_master_group": "KEYSTONE__crown_center",
+      "source_master_element_uuid": "1a807223-d4c1-5a3b-aa9c-466b3631721a",
+      "source_faces": {
+        "north": "north",
+        "south": "south",
+        "down": "down"
+      }
+    },
+    "2bfa2ba6-39ed-5296-95a4-84f495166eba": {
+      "component_group": "CURVE__crown_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_upper.json",
+      "source_element": 0,
+      "source_master_group": "CURVE__crown_left",
+      "source_master_element_uuid": "d7db687d-ad7a-5001-932e-d27278710244",
+      "source_faces": {
+        "north": "south",
+        "west": "west",
+        "south": "north",
+        "east": "east",
+        "up": "up",
+        "down": "down"
+      }
+    },
+    "887779dc-6b84-5793-a82d-202ebe84d174": {
+      "component_group": "CURVE__crown_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_upper.json",
+      "source_element": 1,
+      "source_master_group": "CURVE__crown_left",
+      "source_master_element_uuid": "c6d52525-d110-5c21-843b-a921c4976772",
+      "source_faces": {
+        "north": "south",
+        "west": "west",
+        "south": "north",
+        "east": "east",
+        "up": "up",
+        "down": "down"
+      }
+    },
+    "b1a8adf3-97a3-5489-814c-9eddcb761f83": {
+      "component_group": "CURVE__crown_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_upper.json",
+      "source_element": 2,
+      "source_master_group": "CURVE__crown_left",
+      "source_master_element_uuid": "4eb0ddac-6bb2-5df4-b180-62b49a0fc842",
+      "source_faces": {
+        "north": "south",
+        "west": "west",
+        "south": "north",
+        "up": "up",
+        "down": "down"
+      }
+    },
+    "22b18637-0844-5ff6-a9a1-70112e120126": {
+      "component_group": "CURVE__crown_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_upper.json",
+      "source_element": 3,
+      "source_master_group": "CURVE__crown_left",
+      "source_master_element_uuid": "b85454bf-84c5-5890-bd0d-a181d3ec411e",
+      "source_faces": {
+        "north": "south",
+        "west": "west",
+        "south": "north",
+        "down": "down"
+      }
+    },
+    "8f7d225b-e5a0-54bf-b73e-4965d52ff4f8": {
+      "component_group": "CURVE__crown_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_upper.json",
+      "source_element": 4,
+      "source_master_group": "CURVE__crown_left",
+      "source_master_element_uuid": "d89d47f9-e984-57c1-91bd-8b5b84d2326b",
+      "source_faces": {
+        "north": "south",
+        "south": "north",
+        "east": "east",
+        "up": "up",
+        "down": "down"
+      }
+    },
+    "ae2fd707-ba44-535a-80c7-3c5d14ac433b": {
+      "component_group": "CURVE__crown_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_upper.json",
+      "source_element": 5,
+      "source_master_group": "CURVE__crown_left",
+      "source_master_element_uuid": "d38c326c-b5cc-5b58-9a33-cc0019b4035f",
+      "source_faces": {
+        "north": "south",
+        "west": "west",
+        "south": "north",
+        "up": "up"
+      }
+    },
+    "4ecbd814-a028-53ae-9e02-dd01363f10d8": {
+      "component_group": "CURVE__crown_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_upper.json",
+      "source_element": 6,
+      "source_master_group": "CURVE__crown_left",
+      "source_master_element_uuid": "c20b5b17-48eb-564f-a0db-bf7b1a82c5d0",
+      "source_faces": {
+        "north": "south",
+        "south": "north"
+      }
+    },
+    "711f5eb4-09ba-578b-aff0-0659ce54e6d1": {
+      "component_group": "CURVE__crown_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_upper.json",
+      "source_element": 7,
+      "source_master_group": "CURVE__crown_left",
+      "source_master_element_uuid": "15b55d5d-8d0f-544b-b30e-8bc2f170935e",
+      "source_faces": {
+        "north": "south",
+        "west": "west",
+        "south": "north",
+        "east": "east",
+        "up": "up",
+        "down": "down"
+      }
+    },
+    "fb025857-d6f5-56fd-aca6-5107d04029d3": {
+      "component_group": "CURVE__crown_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_upper.json",
+      "source_element": 8,
+      "source_master_group": "CURVE__crown_left",
+      "source_master_element_uuid": "a5959d44-612f-58dd-93ef-a318b87b859e",
+      "source_faces": {
+        "north": "south",
+        "west": "west",
+        "south": "north",
+        "up": "up",
+        "down": "down"
+      }
+    },
+    "49000ed5-56d2-5c44-892c-22314a2bad3f": {
+      "component_group": "CURVE__crown_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_upper.json",
+      "source_element": 9,
+      "source_master_group": "CURVE__crown_left",
+      "source_master_element_uuid": "01116019-6a2a-5518-a057-3863956bd736",
+      "source_faces": {
+        "north": "south",
+        "south": "north"
+      }
+    },
+    "3737fddf-b5a1-551f-afdf-e67e4de411ac": {
+      "component_group": "CURVE__crown_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_upper.json",
+      "source_element": 10,
+      "source_master_group": "CURVE__crown_left",
+      "source_master_element_uuid": "25a90322-a0c0-55fa-bdce-d064c9a3e971",
+      "source_faces": {
+        "north": "south",
+        "south": "north",
+        "down": "down"
+      }
+    },
+    "e84832e4-d058-58ad-9077-3d681ed468b6": {
+      "component_group": "CURVE__crown_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_upper.json",
+      "source_element": 11,
+      "source_master_group": "CURVE__crown_left",
+      "source_master_element_uuid": "4f72f3ff-53a0-5149-94ff-7436772844f3",
+      "source_faces": {
+        "north": "south",
+        "south": "north",
+        "down": "down"
+      }
+    },
+    "147e8510-a3fe-5d51-bab9-5c3b747f4a58": {
+      "component_group": "WALL__crown_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_side_large.json",
+      "source_element": 0,
+      "source_master_group": "WALL__crown_left",
+      "source_master_element_uuid": "58216732-4696-5c49-96d7-a32396301fee",
+      "source_faces": {
+        "north": "south",
+        "west": "west",
+        "south": "north",
+        "east": "east",
+        "up": "up",
+        "down": "down"
+      }
+    },
+    "81cd4ddb-cf2f-5b17-8fda-972104661f8a": {
+      "component_group": "WALL__crown_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_side_large.json",
+      "source_element": 1,
+      "source_master_group": "WALL__crown_left",
+      "source_master_element_uuid": "0984ad17-4e51-51a2-9373-fc063959df9d",
+      "source_faces": {
+        "north": "south",
+        "south": "north"
+      }
+    },
+    "bfd4cc7b-899a-5a69-bb3e-e1d0f9b82b01": {
+      "component_group": "WALL__crown_right",
+      "source": "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_side_large.json",
+      "source_element": 2,
+      "source_master_group": "WALL__crown_left",
+      "source_master_element_uuid": "82a4e953-a3de-5046-8434-df4967efdc48",
+      "source_faces": {
+        "north": "south",
+        "south": "north"
+      }
+    }
+  },
+  "source_hashes": {
+    "authoring/arches/romanesque/arch_romanesque_3wide.bbmodel": "8c51171cedc03cb2f98c970cb97a380ae280863f0fb232a5d38f245dda357d74",
+    "src/main/java/com/oliver/erydon/block/ArchRomanesqueBlock.java": "2c4b56a157085e2ca71836b301cef52951cfc7f0d23f34ba8e60e075394dfd05",
+    "src/main/java/com/oliver/erydon/client/model/ArchRomanesqueBakedModel.java": "80b6b34b3e937070316d5f500f282edf01c49fcd201f8c072381499c89f7ac95",
+    "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_lower.json": "dd3c3133c0026d3af7c0a0596065eadb799df7be278b90e38309242584719644",
+    "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_corner_large_upper.json": "af4851db918c2075f401182acd3953c4aa9e759d8750b2259ea7edb3723e53ab",
+    "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_side_large.json": "ae5d32199b9b9aa86dd6de804a93b88a54c6ef3e2518f9781eb222a9e1d8b8a2",
+    "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_side_large_lower.json": "572c97ab0c48186d934cd4ff05029fc3c2e2c1f78cca8e6eed985c19eabbdb81",
+    "src/main/resources/assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_top_large.json": "55823820b93ad2bcb41e33ec82a258d16be962bad743b1635cba4d05c229fe32",
+    "src/main/resources/assets/erydon/textures/block/aganite_block.png": "bf0c15c85bbd81be82cd4d7ceed2339101b763501be4de375be0104582d282e2",
+    "tools/export_romanesque_non_column_authoring.py": "6b980266229e5582ff0752d35e04ff2a6316089bb7905486d8811285d2b6a25b",
+    "tools/generate_romanesque_arch.py": "8c8b6bf9289223cd5b5fa109e1e720da32437cb15d22b43613f849bd40a246d8"
+  }
+}

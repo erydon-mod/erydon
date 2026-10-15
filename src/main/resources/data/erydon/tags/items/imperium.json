@@ -386,6 +386,18 @@
     "erydon:mielonyx_imperium_weave_grout_stairs_shallow_bottom",
     "erydon:mielonyx_imperium_weave_grout_stairs_shallow_top",
     "erydon:mielonyx_imperium_weave_grout_wall",
-    "erydon:mielonyx_imperium_weave_grout_wall_georgian"
+    "erydon:mielonyx_imperium_weave_grout_wall_georgian",
+    "erydon:imperium_aged_alcove_modern",
+    "erydon:imperium_alcove_modern",
+    "erydon:imperium_ashlar_alcove_modern",
+    "erydon:imperium_hewn_alcove_modern",
+    "erydon:imperium_rock_alcove_modern",
+    "erydon:imperium_rusticated_alcove_modern",
+    "erydon:imperium_aged_arch_georgian",
+    "erydon:imperium_arch_georgian",
+    "erydon:imperium_ashlar_arch_georgian",
+    "erydon:imperium_hewn_arch_georgian",
+    "erydon:imperium_rock_arch_georgian",
+    "erydon:imperium_rusticated_arch_georgian"
   ]
 }

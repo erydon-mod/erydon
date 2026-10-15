@@ -344,6 +344,18 @@
     "erydon:aganite_trim_silver_stairs",
     "erydon:aganite_trim_silver_stairs_shallow_bottom",
     "erydon:aganite_trim_silver_stairs_shallow_top",
-    "erydon:aganite_wall_georgian"
+    "erydon:aganite_wall_georgian",
+    "erydon:aganite_aged_alcove_modern",
+    "erydon:aganite_alcove_modern",
+    "erydon:aganite_ashlar_alcove_modern",
+    "erydon:aganite_hewn_alcove_modern",
+    "erydon:aganite_rock_alcove_modern",
+    "erydon:aganite_rusticated_alcove_modern",
+    "erydon:aganite_aged_arch_georgian",
+    "erydon:aganite_arch_georgian",
+    "erydon:aganite_ashlar_arch_georgian",
+    "erydon:aganite_hewn_arch_georgian",
+    "erydon:aganite_rock_arch_georgian",
+    "erydon:aganite_rusticated_arch_georgian"
   ]
 }

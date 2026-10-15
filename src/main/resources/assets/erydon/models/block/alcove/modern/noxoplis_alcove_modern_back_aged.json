@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/alcove/modern/alcove_modern_back",
+    "textures":  {
+                     "stone":  "erydon:block/noxoplis_block_aged",
+                     "particle":  "erydon:block/noxoplis_block_aged"
+                 }
+}

@@ -18,10 +18,13 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.DebugStickItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.Registries;
+import net.minecraft.text.Text;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldAccess;
+import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -39,6 +42,16 @@ public abstract class DebugStickItemMixin {
             BlockPos pos,boolean update,ItemStack stack,CallbackInfoReturnable<Boolean> callback) {
         if(CapitalDebugControls.handles(state)) callback.setReturnValue(
                 CapitalDebugControls.use(player,state,world,pos,update,stack));
+        else if (update && player.isCreativeLevelTwoOp() && state.getBlock() instanceof ArchRomanesqueBlock arch
+                && world instanceof World mutableWorld) {
+            var selected = stack.getSubNbt("DebugProperty");
+            String blockId = Registries.BLOCK.getId(arch).toString();
+            if (selected != null && ArchRomanesqueBlock.WIDTH.getName().equals(selected.getString(blockId))) {
+                int width = arch.cycleDebugWidth(mutableWorld, pos, player.shouldCancelInteraction());
+                player.sendMessage(Text.translatable("item.minecraft.debug_stick.update", "width", Integer.toString(width)), true);
+                callback.setReturnValue(true);
+            }
+        }
     }
 
     @Redirect(method = "use", at = @At(value = "INVOKE",

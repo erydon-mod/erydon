@@ -3,6 +3,7 @@ package com.oliver.erydon.state;
 import com.oliver.erydon.block.ArchRomanesqueBlock;
 import com.oliver.erydon.block.ArchModernBlock;
 import com.oliver.erydon.block.ArchGothicBlock;
+import com.oliver.erydon.block.ArchGeorgianBlock;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -32,7 +33,8 @@ public final class ArchShapeCaches {
     public static Object create(BlockState state) {
         Block block = state.getBlock();
         Class<?> family = block.getClass();
-        if (family != ArchRomanesqueBlock.class && family != ArchModernBlock.class && family != ArchGothicBlock.class)
+        if (family != ArchRomanesqueBlock.class && family != ArchModernBlock.class
+                && family != ArchGothicBlock.class && family != ArchGeorgianBlock.class)
             return construct(state);
         var view = EmptyBlockView.INSTANCE;
         var pos = BlockPos.ORIGIN;

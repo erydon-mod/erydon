@@ -472,6 +472,18 @@
     "erydon:psamatheon_herringbone_grout_stairs",
     "erydon:psamatheon_herringbone_grout_stairs_shallow_bottom",
     "erydon:psamatheon_herringbone_grout_stairs_shallow_top",
-    "erydon:psamatheon_herringbone_grout_wall"
+    "erydon:psamatheon_herringbone_grout_wall",
+    "erydon:borealis_aged_alcove_modern",
+    "erydon:borealis_alcove_modern",
+    "erydon:borealis_ashlar_alcove_modern",
+    "erydon:borealis_hewn_alcove_modern",
+    "erydon:borealis_rock_alcove_modern",
+    "erydon:borealis_rusticated_alcove_modern",
+    "erydon:borealis_aged_arch_georgian",
+    "erydon:borealis_arch_georgian",
+    "erydon:borealis_ashlar_arch_georgian",
+    "erydon:borealis_hewn_arch_georgian",
+    "erydon:borealis_rock_arch_georgian",
+    "erydon:borealis_rusticated_arch_georgian"
   ]
 }

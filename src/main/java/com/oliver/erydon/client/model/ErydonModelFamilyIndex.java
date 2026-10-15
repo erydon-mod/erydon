@@ -21,6 +21,7 @@ final class ErydonModelFamilyIndex {
     private final List<String> romanesqueArches;
     private final List<String> modernArches;
     private final List<String> gothicArches;
+    private final List<String> georgianArches;
     private final List<String> alcoves;
 
     private ErydonModelFamilyIndex(List<String> columns,
@@ -33,6 +34,7 @@ final class ErydonModelFamilyIndex {
                                    List<String> romanesqueArches,
                                    List<String> modernArches,
                                    List<String> gothicArches,
+                                   List<String> georgianArches,
                                    List<String> alcoves) {
         this.columns = List.copyOf(columns);
         this.cornices = List.copyOf(cornices);
@@ -44,6 +46,7 @@ final class ErydonModelFamilyIndex {
         this.romanesqueArches = List.copyOf(romanesqueArches);
         this.modernArches = List.copyOf(modernArches);
         this.gothicArches = List.copyOf(gothicArches);
+        this.georgianArches = List.copyOf(georgianArches);
         this.alcoves = List.copyOf(alcoves);
     }
 
@@ -99,6 +102,10 @@ final class ErydonModelFamilyIndex {
 
     List<String> gothicArches() {
         return gothicArches;
+    }
+
+    List<String> georgianArches() {
+        return georgianArches;
     }
 
     List<String> alcoves() {
@@ -159,6 +166,10 @@ final class ErydonModelFamilyIndex {
         return ErydonIdMigration.legacyResourcePath(path).contains("_arch_gothic");
     }
 
+    static boolean isArchGeorgianBlock(String path) {
+        return path.contains("_arch_georgian");
+    }
+
     static boolean isGeorgianAlcoveBlock(String path) {
         return ErydonIdMigration.legacyResourcePath(path).contains("_alcove_georgian");
     }
@@ -168,7 +179,11 @@ final class ErydonModelFamilyIndex {
     }
 
     static boolean isAlcoveBlock(String path) {
-        return isGeorgianAlcoveBlock(path) || isGothicAlcoveBlock(path);
+        return isGeorgianAlcoveBlock(path) || isGothicAlcoveBlock(path) || isModernAlcoveBlock(path);
+    }
+
+    static boolean isModernAlcoveBlock(String path) {
+        return ErydonIdMigration.legacyResourcePath(path).contains("_alcove_modern");
     }
 
     private static ErydonModelFamilyIndex build() {
@@ -182,6 +197,7 @@ final class ErydonModelFamilyIndex {
         List<String> romanesqueArches = new ArrayList<>();
         List<String> modernArches = new ArrayList<>();
         List<String> gothicArches = new ArrayList<>();
+        List<String> georgianArches = new ArrayList<>();
         List<String> alcoves = new ArrayList<>();
 
         for (Identifier id : Registries.BLOCK.getIds()) {
@@ -220,6 +236,9 @@ final class ErydonModelFamilyIndex {
             if (isArchGothicBlock(path)) {
                 gothicArches.add(path);
             }
+            if (isArchGeorgianBlock(path)) {
+                georgianArches.add(path);
+            }
             if (isAlcoveBlock(path)) {
                 alcoves.add(path);
             }
@@ -236,6 +255,7 @@ final class ErydonModelFamilyIndex {
                 romanesqueArches,
                 modernArches,
                 gothicArches,
+                georgianArches,
                 alcoves
         );
     }

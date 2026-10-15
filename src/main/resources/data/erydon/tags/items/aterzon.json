@@ -344,6 +344,18 @@
     "erydon:aterzon_wall",
     "erydon:aterzon_wall_georgian",
     "erydon:aterzon_window_arch",
-    "erydon:aterzon_window_french_georgian"
+    "erydon:aterzon_window_french_georgian",
+    "erydon:aterzon_aged_alcove_modern",
+    "erydon:aterzon_alcove_modern",
+    "erydon:aterzon_ashlar_alcove_modern",
+    "erydon:aterzon_hewn_alcove_modern",
+    "erydon:aterzon_rock_alcove_modern",
+    "erydon:aterzon_rusticated_alcove_modern",
+    "erydon:aterzon_aged_arch_georgian",
+    "erydon:aterzon_arch_georgian",
+    "erydon:aterzon_ashlar_arch_georgian",
+    "erydon:aterzon_hewn_arch_georgian",
+    "erydon:aterzon_rock_arch_georgian",
+    "erydon:aterzon_rusticated_arch_georgian"
   ]
 }

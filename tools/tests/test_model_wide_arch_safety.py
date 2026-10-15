@@ -26,7 +26,7 @@ class WideArchResourcesTest(unittest.TestCase):
                 continue
             self.assertFalse(content.startswith(b"\xef\xbb\xbf"), str(path))
             covered.update(aliases.get(block, block) for block in arches)
-        for style in ("romanesque", "modern", "gothic"):
+        for style in ("romanesque", "modern", "gothic", "georgian"):
             blockstates = sorted((RESOURCES / "assets/erydon/blockstates").glob(f"*_arch_{style}.json"))
             self.assertEqual(162, len(blockstates), style)
             for path in blockstates:
@@ -42,9 +42,9 @@ class WideArchResourcesTest(unittest.TestCase):
     def test_all_languages_explain_the_default_and_debug_widths(self) -> None:
         for language in ("en_us", "de_de", "es_es"):
             document = json.loads((RESOURCES / f"assets/erydon/lang/{language}.json").read_text(encoding="utf-8-sig"))
-            for style in ("romanesque", "modern", "gothic"):
+            for style in ("romanesque", "modern", "gothic", "georgian"):
                 tooltip = document[f"tooltip.erydon.family.arch_{style}.1"]
-                self.assertIn("3", tooltip)
+                self.assertNotIn("3", tooltip)
                 self.assertIn("6", tooltip)
 
 

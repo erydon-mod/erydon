@@ -40,13 +40,15 @@ public final class WideArchMeshLaunchChecks {
         int cases = 0;
         for (var family : families) for (int width = 4; width <= 6; width++) {
             int rows = (2 * width + 2) / 3;
+            for (StyleSet style : family.getClass() == ArchRomanesqueBlock.class
+                    ? StyleSet.values() : new StyleSet[]{StyleSet.BASE})
             for (Direction facing : Direction.Type.HORIZONTAL) {
                 double area = 0;
                 for (int row = 0; row < rows; row++) for (int x = 0; x < width; x++) {
-                    Arrangement target = (Arrangement) layout.invoke(family, width, rows, x, row, StyleSet.BASE);
+                    Arrangement target = (Arrangement) layout.invoke(family, width, rows, x, row, style);
                     var state = family.getDefaultState().with(WIDTH, width).with(FACING, facing).with(ARRANGEMENT, target);
                     List<BakedQuad> clipped = WideArchQuads.create(state, child ->
-                            child.get(ARRANGEMENT) == Arrangement.TOP_LARGE ? List.of(front(sprite, 1)) : List.of());
+                            child.get(ARRANGEMENT).hasTopLarge() ? List.of(front(sprite, 1)) : List.of());
                     for (BakedQuad quad : clipped) {
                         area += area(quad);
                         for (int vertex = 0; vertex < 4; vertex++) for (int axis = 0; axis < 3; axis++) {
@@ -105,10 +107,12 @@ public final class WideArchMeshLaunchChecks {
         int cases = 0;
         for (var family : families) for (int width = 4; width <= 6; width++) {
             int rows = (2 * width + 2) / 3;
+            for (StyleSet style : family.getClass() == ArchRomanesqueBlock.class
+                    ? StyleSet.values() : new StyleSet[]{StyleSet.BASE})
             for (Direction facing : Direction.Type.HORIZONTAL) for (boolean reflected : new boolean[]{false, true}) {
                 int overlaySurvivors = 0;
                 for (int row = 0; row < rows; row++) for (int x = 0; x < width; x++) {
-                    Arrangement target = (Arrangement) layout.invoke(family, width, rows, x, row, StyleSet.BASE);
+                    Arrangement target = (Arrangement) layout.invoke(family, width, rows, x, row, style);
                     BlockState state = family.getDefaultState().with(WIDTH, width).with(FACING, facing)
                             .with(REFLECTED, reflected).with(ARRANGEMENT, target);
                     List<BlockState> queried = new ArrayList<>();
@@ -125,6 +129,8 @@ public final class WideArchMeshLaunchChecks {
                         queried.add(child);
                         require(child.get(WIDTH) == 3 && child.get(FACING) == Direction.NORTH
                                 && child.get(REFLECTED) == reflected, "Wrong source component state");
+                        require(child.get(ARRANGEMENT).isColumnStyle() == target.isColumnStyle(),
+                                "Projected crown mixed column and plain sources");
                         List<BakedQuad> assembled = new ArrayList<>();
                         // Match the production arch's complete null-face assembly.
                         AxiomFallbackQuads.add(assembled, mixed, 0, null, Random.create(0), true);

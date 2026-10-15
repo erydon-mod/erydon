@@ -18,12 +18,12 @@ AUTHORING = ERYDON_ASSETS / "authoring_models" / "block" / "alcove"
 AUTHORITATIVE_GEOMETRY_SIGNATURES = {
     "alcove_gothic_double_side_right.json": "badeee420105ac434544fce556a744baf9809cfc0752f1448aa38b81feb66c35",
     "alcove_gothic_double_side_left.json": "a57f7f1fe17730d91c21b2dbc791086e99be5701d05d4fbb81cdc80104392b7e",
-    "alcove_georgian_triple_side_left.json": "61c14ada2f78425dc95e38a2aeae9930b9c46e76843c011fe9f99ffc91f5727f",
-    "alcove_georgian_triple_side_center.json": "14c92e48b9fc6a65526d806f2919c9089293841218a98c8fe31f7a5c4e386d9c",
-    "alcove_georgian_triple_side_right.json": "bcada60bd27fbe5e09dd09f5a716293195b130c1ef3c9d8b2a73138b4a045037",
-    "alcove_georgian_triple_top_left.json": "94f640b09e1407e02c005475adcc15a561d202f697c7b63e14737c583b7bb8fd",
-    "alcove_georgian_triple_top_center.json": "c1a3137b6fdf6c0274fda2d4cc8b4fdfad2fbbe4b004f45b000f1770b1007a09",
-    "alcove_georgian_triple_top_right.json": "5d677ef709930d0370527fe9e4bdef11ddde8355ed0412692285427c0e663fe8",
+    "alcove_modern_triple_side_left.json": "61c14ada2f78425dc95e38a2aeae9930b9c46e76843c011fe9f99ffc91f5727f",
+    "alcove_modern_triple_side_center.json": "14c92e48b9fc6a65526d806f2919c9089293841218a98c8fe31f7a5c4e386d9c",
+    "alcove_modern_triple_side_right.json": "bcada60bd27fbe5e09dd09f5a716293195b130c1ef3c9d8b2a73138b4a045037",
+    "alcove_modern_triple_top_left.json": "94f640b09e1407e02c005475adcc15a561d202f697c7b63e14737c583b7bb8fd",
+    "alcove_modern_triple_top_center.json": "c1a3137b6fdf6c0274fda2d4cc8b4fdfad2fbbe4b004f45b000f1770b1007a09",
+    "alcove_modern_triple_top_right.json": "5d677ef709930d0370527fe9e4bdef11ddde8355ed0412692285427c0e663fe8",
     "alcove_gothic_single_top.json": "fbd06def03a9aecd4f6bebc65f57dd032b592c97ad814567822febd06bf538f6",
     "alcove_gothic_double_top_left.json": "21553a4f811f1c059ad6e7ce2e164e0cf6e3c57a4bcf041f4ca5555e66663c89",
     "alcove_gothic_double_top_right.json": "53a74dcf7727789c88751fdcaa986fbc168855a7139e072ac8a9b06e4d5d2f26",
@@ -68,11 +68,11 @@ class AlcoveSafetyTests(unittest.TestCase):
         cls.georgian_ids = GENERATOR._registered_georgian_ids(RESOURCES)
         cls.gothic_ids = [GENERATOR._gothic_id(value) for value in cls.georgian_ids]
 
-    def test_copied_authoring_models_preserve_the_georgian_topology(self) -> None:
-        for gothic_name, georgian_name in GENERATOR.COPIED_AUTHORING_MODELS.items():
+    def test_copied_authoring_models_preserve_the_legacy_topology(self) -> None:
+        for gothic_name, source_name in GENERATOR.COPIED_AUTHORING_MODELS.items():
             self.assertEqual(
                 (AUTHORING / gothic_name).read_bytes(),
-                (AUTHORING / georgian_name).read_bytes(),
+                (AUTHORING / source_name).read_bytes(),
             )
 
     def test_manual_authoring_models_preserve_restored_geometry_and_contract(self) -> None:
@@ -107,8 +107,8 @@ class AlcoveSafetyTests(unittest.TestCase):
             self.assertEqual(geometry_signature(model), expected_signature, filename)
         self.assertEqual(339, total_offsets)
 
-    def test_gothic_double_side_walls_are_wider_than_georgian(self) -> None:
-        for style in ("georgian", "gothic"):
+    def test_gothic_double_side_walls_are_wider_than_modern(self) -> None:
+        for style in ("modern", "gothic"):
             for side in ("left", "right"):
                 model = load_json(AUTHORING / f"alcove_{style}_double_side_{side}.json")
                 straight = next(e for e in model["elements"] if e.get("name") == "straight")
@@ -267,6 +267,15 @@ class AlcoveSafetyTests(unittest.TestCase):
 
     def test_generator_is_idempotent(self) -> None:
         self.assertEqual(GENERATOR.generate(REPO_ROOT, check=True), [])
+
+    def test_gothic_generator_never_rewrites_other_alcove_designs(self) -> None:
+        expected = GENERATOR._expected_new_files(REPO_ROOT, self.georgian_ids)
+        self.assertTrue(expected)
+        for path in expected:
+            self.assertNotIn("alcove_georgian", path.name, str(path))
+            self.assertNotIn("alcove_modern", path.name, str(path))
+            self.assertNotIn("/alcove/georgian/", path.as_posix(), str(path))
+            self.assertNotIn("/alcove/modern/", path.as_posix(), str(path))
 
     def test_tag_updates_preserve_georgian_searches_and_extend_shared_searches(self) -> None:
         source = "erydon:aganite_alcove_georgian"

@@ -35,6 +35,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Queue;
 import java.util.Set;
@@ -48,18 +49,22 @@ public class AlcoveBlock extends HorizontalFacingBlock implements Waterloggable,
     public static final EnumProperty<AlcoveSpan> SPAN = EnumProperty.of("span", AlcoveSpan.class);
     public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
 
-    private static final VoxelShape[] SHAPES = new VoxelShape[2 * AlcovePart.values().length * AlcoveSpan.values().length * 4];
+    private static final VoxelShape[] SHAPES = new VoxelShape[GeometryProfile.values().length * AlcovePart.values().length * AlcoveSpan.values().length * 4];
     private static final ThreadLocal<Boolean> SYNCING = ThreadLocal.withInitial(() -> false);
     private final int maxClusterWidth;
-    private final boolean gothic;
+    private final GeometryProfile geometryProfile;
 
     public AlcoveBlock(Settings settings, int maxClusterWidth, boolean gothic) {
+        this(settings, maxClusterWidth, gothic ? GeometryProfile.GOTHIC : GeometryProfile.MODERN);
+    }
+
+    public AlcoveBlock(Settings settings, int maxClusterWidth, GeometryProfile geometryProfile) {
         super(settings);
         if (maxClusterWidth != 2 && maxClusterWidth != 3) {
             throw new IllegalArgumentException("Alcove maxClusterWidth must be 2 or 3");
         }
         this.maxClusterWidth = maxClusterWidth;
-        this.gothic = gothic;
+        this.geometryProfile = java.util.Objects.requireNonNull(geometryProfile, "geometryProfile");
         this.setDefaultState(this.stateManager.getDefaultState()
                 .with(FACING, Direction.SOUTH)
                 .with(PART, AlcovePart.SINGLE)
@@ -484,14 +489,37 @@ public class AlcoveBlock extends HorizontalFacingBlock implements Waterloggable,
         AlcovePart part = state.get(PART);
         AlcoveSpan span = state.get(SPAN);
         int turns = turnsFromSouth(state.get(FACING));
-        int index = ((gothic ? 1 : 0) * AlcovePart.values().length * AlcoveSpan.values().length
+        int index = (geometryProfile.ordinal() * AlcovePart.values().length * AlcoveSpan.values().length
                 + part.ordinal() * AlcoveSpan.values().length + span.ordinal()) * 4 + turns;
         VoxelShape shape = SHAPES[index];
         if (shape == null) {
-            shape = rotateShapeY(makeSouthShape(part, span, gothic), turns).simplify();
+            if (geometryProfile == GeometryProfile.GEORGIAN) {
+                return georgianShape(part, span, index - turns, turns);
+            }
+            VoxelShape south = makeSouthShape(part, span, geometryProfile == GeometryProfile.GOTHIC);
+            shape = rotateShapeY(south, turns).simplify();
             SHAPES[index] = shape;
         }
         return shape;
+    }
+
+    private static VoxelShape georgianShape(AlcovePart part, AlcoveSpan span, int southIndex, int turns) {
+        if (SHAPES[southIndex] == null) {
+            var boxes = new ArrayList<double[]>();
+            for (var box : makeSouthShape(part, span, false).getBoundingBoxes()) {
+                boxes.add(new double[]{box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ});
+            }
+            for (var box : GeorgianAlcoveInteractionShapes.details(part, span).getBoundingBoxes()) {
+                boxes.add(new double[]{box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ});
+            }
+            SHAPES[southIndex] = AlcoveVoxelShapes.fromBoxes(boxes);
+        }
+        for (int turn = 1; turn <= turns; turn++) {
+            if (SHAPES[southIndex + turn] == null) {
+                SHAPES[southIndex + turn] = rotateShape90Y(SHAPES[southIndex + turn - 1]);
+            }
+        }
+        return SHAPES[southIndex + turns];
     }
 
     private static VoxelShape makeSouthShape(AlcovePart part, AlcoveSpan span, boolean gothic) {
@@ -543,11 +571,18 @@ public class AlcoveBlock extends HorizontalFacingBlock implements Waterloggable,
     }
 
     private static VoxelShape rotateShape90Y(VoxelShape shape) {
-        final VoxelShape[] rotated = {VoxelShapes.empty()};
-        shape.forEachBox((minX, minY, minZ, maxX, maxY, maxZ) ->
-                rotated[0] = VoxelShapes.union(rotated[0],
-                        VoxelShapes.cuboid(1.0 - maxZ, minY, minX, 1.0 - minZ, maxY, maxX)));
-        return rotated[0];
+        var boxes = new ArrayList<double[]>();
+        for (var box : shape.getBoundingBoxes()) {
+            boxes.add(new double[]{1.0 - box.maxZ, box.minY, box.minX,
+                    1.0 - box.minZ, box.maxY, box.maxX});
+        }
+        return AlcoveVoxelShapes.fromBoxes(boxes);
+    }
+
+    public enum GeometryProfile {
+        MODERN,
+        GOTHIC,
+        GEORGIAN
     }
 
     public enum AlcovePart implements StringIdentifiable {

@@ -470,6 +470,18 @@
     "erydon:laurentium_calacattum_weave_grout_stairs_shallow_bottom",
     "erydon:laurentium_calacattum_weave_grout_stairs_shallow_top",
     "erydon:laurentium_calacattum_weave_grout_wall",
-    "erydon:laurentium_calacattum_weave_grout_wall_georgian"
+    "erydon:laurentium_calacattum_weave_grout_wall_georgian",
+    "erydon:calacattum_aged_alcove_modern",
+    "erydon:calacattum_alcove_modern",
+    "erydon:calacattum_ashlar_alcove_modern",
+    "erydon:calacattum_hewn_alcove_modern",
+    "erydon:calacattum_rock_alcove_modern",
+    "erydon:calacattum_rusticated_alcove_modern",
+    "erydon:calacattum_aged_arch_georgian",
+    "erydon:calacattum_arch_georgian",
+    "erydon:calacattum_ashlar_arch_georgian",
+    "erydon:calacattum_hewn_arch_georgian",
+    "erydon:calacattum_rock_arch_georgian",
+    "erydon:calacattum_rusticated_arch_georgian"
   ]
 }

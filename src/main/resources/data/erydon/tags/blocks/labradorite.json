@@ -472,6 +472,18 @@
     "erydon:borealis_trim_silver_stairs",
     "erydon:borealis_trim_silver_stairs_shallow_bottom",
     "erydon:borealis_trim_silver_stairs_shallow_top",
-    "erydon:borealis_wall_georgian"
+    "erydon:borealis_wall_georgian",
+    "erydon:borealis_aged_alcove_modern",
+    "erydon:borealis_alcove_modern",
+    "erydon:borealis_ashlar_alcove_modern",
+    "erydon:borealis_hewn_alcove_modern",
+    "erydon:borealis_rock_alcove_modern",
+    "erydon:borealis_rusticated_alcove_modern",
+    "erydon:borealis_aged_arch_georgian",
+    "erydon:borealis_arch_georgian",
+    "erydon:borealis_ashlar_arch_georgian",
+    "erydon:borealis_hewn_arch_georgian",
+    "erydon:borealis_rock_arch_georgian",
+    "erydon:borealis_rusticated_arch_georgian"
   ]
 }

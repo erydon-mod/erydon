@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/alcove/modern/alcove_modern_triple_top_center",
+    "textures":  {
+                     "stone":  "erydon:block/laurentium_block_aged",
+                     "particle":  "erydon:block/laurentium_block_aged"
+                 }
+}

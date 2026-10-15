@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Normalize and integrate ERYDON's Georgian and Gothic alcove authoring assets.
+"""Normalize and integrate ERYDON's Gothic alcove authoring assets.
 
-The Blockbench-authored Georgian/Gothic top and triple-width components, plus
+The Blockbench-authored Gothic top and triple-width components, plus
 the Gothic inventory icon, are the source of truth for their geometry. The
 generator removes explicit face UVs, applies the neutral stone texture binding,
 and otherwise preserves those models. Gothic single/double side, back, and base
-geometry is reused from the Georgian alcove. The script also
+geometry is reused from the unchanged Modern alcove. The script also
 creates the matching model anchors, blockstates, item models, language entries,
 tags, and CTM matchBlocks entries for every registered Georgian material peer.
 
@@ -55,9 +55,9 @@ TRIPLE_MODEL_SUFFIXES = (
 MODEL_SUFFIXES = BASE_MODEL_SUFFIXES + TRIPLE_MODEL_SUFFIXES
 
 COPIED_AUTHORING_MODELS = {
-    "alcove_gothic_single_back.json": "alcove_georgian_single_back.json",
-    "alcove_gothic_single_sides.json": "alcove_georgian_single_sides.json",
-    "alcove_gothic_single_base.json": "alcove_georgian_single_base.json",
+    "alcove_gothic_single_back.json": "alcove_modern_single_back.json",
+    "alcove_gothic_single_sides.json": "alcove_modern_single_sides.json",
+    "alcove_gothic_single_base.json": "alcove_modern_single_base.json",
 }
 
 GOTHIC_MANUAL_AUTHORING_MODELS = (
@@ -75,12 +75,12 @@ GOTHIC_MANUAL_AUTHORING_MODELS = (
     "alcove_gothic_icon.json",
 )
 
-GEORGIAN_TRIPLE_AUTHORING_MODELS = tuple(
-    f"alcove_georgian_{suffix}.json" for suffix in TRIPLE_MODEL_SUFFIXES
+LEGACY_TRIPLE_AUTHORING_MODELS = tuple(
+    f"alcove_modern_{suffix}.json" for suffix in TRIPLE_MODEL_SUFFIXES
 )
 
 MANUAL_AUTHORING_MODELS = (
-    GOTHIC_MANUAL_AUTHORING_MODELS + GEORGIAN_TRIPLE_AUTHORING_MODELS
+    GOTHIC_MANUAL_AUTHORING_MODELS + LEGACY_TRIPLE_AUTHORING_MODELS
 )
 
 STONE_TEXTURE = "erydon:block/aganite_block"
@@ -143,9 +143,11 @@ def _load_json(path: Path) -> object:
 
 
 def _family_text(text: str) -> str:
-    return text.replace("/georgian/", "/gothic/").replace(
-        "alcove_georgian", "alcove_gothic"
-    )
+    for source_style in ("georgian", "modern"):
+        text = text.replace(f"/{source_style}/", "/gothic/").replace(
+            f"alcove_{source_style}", "alcove_gothic"
+        )
+    return text
 
 
 def _gothic_id(georgian_id: str) -> str:
@@ -186,13 +188,13 @@ def _expected_new_files(repo_root: Path, georgian_ids: list[str]) -> dict[Path, 
     authoring = assets / "authoring_models" / "block" / "alcove"
     expected: dict[Path, bytes] = {}
 
-    for gothic_name, georgian_name in COPIED_AUTHORING_MODELS.items():
-        expected[authoring / gothic_name] = (authoring / georgian_name).read_bytes()
+    for gothic_name, source_name in COPIED_AUTHORING_MODELS.items():
+        expected[authoring / gothic_name] = (authoring / source_name).read_bytes()
 
     # These restored Blockbench models are authoritative. Normalization is
     # deliberately face-only so generator runs cannot rebuild their geometry
     # from the older Georgian-derived quadratic formula.
-    for filename in MANUAL_AUTHORING_MODELS:
+    for filename in GOTHIC_MANUAL_AUTHORING_MODELS:
         target = authoring / filename
         if not target.is_file():
             raise ValueError(f"Missing manual alcove authoring model: {target}")
@@ -200,21 +202,15 @@ def _expected_new_files(repo_root: Path, georgian_ids: list[str]) -> dict[Path, 
             _normalize_manual_authoring_model(_load_json(target))
         )
 
-    component_source = assets / "models" / "block" / "alcove" / "georgian"
+    component_source = assets / "models" / "block" / "alcove" / "modern"
     component_target = assets / "models" / "block" / "alcove" / "gothic"
     for suffix in BASE_MODEL_SUFFIXES:
-        source = component_source / f"alcove_georgian_{suffix}.json"
+        source = component_source / f"alcove_modern_{suffix}.json"
         target = component_target / f"alcove_gothic_{suffix}.json"
         expected[target] = _family_text(source.read_text(encoding="utf-8")).encode("utf-8")
 
-    generic_triple_source = component_source / "alcove_georgian_double_top_left.json"
+    generic_triple_source = component_source / "alcove_modern_double_top_left.json"
     generic_georgian_triple_text = generic_triple_source.read_text(encoding="utf-8")
-    for suffix in TRIPLE_MODEL_SUFFIXES:
-        target = component_source / f"alcove_georgian_{suffix}.json"
-        expected[target] = generic_georgian_triple_text.replace(
-            "_double_top_left", f"_{suffix}"
-        ).encode("utf-8")
-
     generic_triple_text = _family_text(generic_georgian_triple_text)
     for suffix in TRIPLE_MODEL_SUFFIXES:
         target = component_target / f"alcove_gothic_{suffix}.json"
@@ -227,30 +223,25 @@ def _expected_new_files(repo_root: Path, georgian_ids: list[str]) -> dict[Path, 
     item_models = assets / "models" / "item"
     for georgian_id in georgian_ids:
         gothic_id = _gothic_id(georgian_id)
+        source_id = georgian_id.replace("_alcove_georgian", "_alcove_modern")
         for source_root, target_root in (
             (blockstates, blockstates),
             (wrapped, wrapped),
             (item_models, item_models),
         ):
-            source = source_root / f"{georgian_id}.json"
+            source = source_root / f"{source_id}.json"
             target = target_root / f"{gothic_id}.json"
             expected[target] = _family_text(source.read_text(encoding="utf-8")).encode("utf-8")
 
         for suffix in BASE_MODEL_SUFFIXES:
-            source = component_source / _component_filename(georgian_id, suffix)
+            source = component_source / _component_filename(source_id, suffix)
             target = component_target / _component_filename(gothic_id, suffix)
             expected[target] = _family_text(source.read_text(encoding="utf-8")).encode("utf-8")
 
         triple_source = component_source / _component_filename(
-            georgian_id, "double_top_left"
+            source_id, "double_top_left"
         )
         georgian_triple_text = triple_source.read_text(encoding="utf-8")
-        for suffix in TRIPLE_MODEL_SUFFIXES:
-            target = component_source / _component_filename(georgian_id, suffix)
-            expected[target] = georgian_triple_text.replace(
-                "_double_top_left", f"_{suffix}"
-            ).encode("utf-8")
-
         triple_text = _family_text(georgian_triple_text)
         for suffix in TRIPLE_MODEL_SUFFIXES:
             target = component_target / _component_filename(gothic_id, suffix)

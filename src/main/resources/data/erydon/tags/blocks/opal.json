@@ -344,6 +344,18 @@
     "erydon:noxoplis_trim_silver_stairs",
     "erydon:noxoplis_trim_silver_stairs_shallow_bottom",
     "erydon:noxoplis_trim_silver_stairs_shallow_top",
-    "erydon:noxoplis_wall_georgian"
+    "erydon:noxoplis_wall_georgian",
+    "erydon:noxoplis_aged_alcove_modern",
+    "erydon:noxoplis_alcove_modern",
+    "erydon:noxoplis_ashlar_alcove_modern",
+    "erydon:noxoplis_hewn_alcove_modern",
+    "erydon:noxoplis_rock_alcove_modern",
+    "erydon:noxoplis_rusticated_alcove_modern",
+    "erydon:noxoplis_aged_arch_georgian",
+    "erydon:noxoplis_arch_georgian",
+    "erydon:noxoplis_ashlar_arch_georgian",
+    "erydon:noxoplis_hewn_arch_georgian",
+    "erydon:noxoplis_rock_arch_georgian",
+    "erydon:noxoplis_rusticated_arch_georgian"
   ]
 }

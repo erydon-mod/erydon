@@ -1,0 +1,10409 @@
+{
+  "format_version": "1.21.11",
+  "credit": "ERYDON Georgian alcove design",
+  "textures": {
+    "stone": "erydon:block/aganite_block"
+  },
+  "elements": [
+    {
+      "name": "back",
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        2
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_00",
+      "from": [
+        0.59285,
+        0,
+        13.89065
+      ],
+      "to": [
+        3.47623,
+        16,
+        13.97065
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 82.52363,
+        "z": 0,
+        "origin": [
+          2.03454,
+          8,
+          13.93065
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_01",
+      "from": [
+        1.20819,
+        0,
+        11.36727
+      ],
+      "to": [
+        4.19571,
+        16,
+        11.44727
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 68.10363,
+        "z": 0,
+        "origin": [
+          2.70195,
+          8,
+          11.40727
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_02",
+      "from": [
+        2.42949,
+        0,
+        8.95949
+      ],
+      "to": [
+        5.60349,
+        16,
+        9.03949
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 55.02869,
+        "z": 0,
+        "origin": [
+          4.01649,
+          8,
+          8.99949
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_03",
+      "from": [
+        4.23363,
+        0,
+        6.74047
+      ],
+      "to": [
+        7.6428,
+        16,
+        6.82047
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 43.59434,
+        "z": 0,
+        "origin": [
+          5.93822,
+          8,
+          6.78047
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_04",
+      "from": [
+        6.57961,
+        0,
+        4.77763
+      ],
+      "to": [
+        10.23788,
+        16,
+        4.85763
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 33.69007,
+        "z": 0,
+        "origin": [
+          8.40875,
+          8,
+          4.81763
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_05",
+      "from": [
+        9.40728,
+        0,
+        3.13061
+      ],
+      "to": [
+        13.29873,
+        16,
+        3.21061
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 25.0234,
+        "z": 0,
+        "origin": [
+          11.353,
+          8,
+          3.17061
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_06",
+      "from": [
+        12.63877,
+        0,
+        1.84946
+      ],
+      "to": [
+        16.7243,
+        16,
+        1.92946
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 17.26899,
+        "z": 0,
+        "origin": [
+          14.68154,
+          8,
+          1.88946
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "back",
+      "from": [
+        16,
+        0,
+        0
+      ],
+      "to": [
+        32,
+        16,
+        2
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_07",
+      "from": [
+        16.1813,
+        0.001,
+        0.9731
+      ],
+      "to": [
+        20.40511,
+        16.001,
+        1.0531
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 10.12808,
+        "z": 0,
+        "origin": [
+          18.2932,
+          8,
+          1.0131
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_08",
+      "from": [
+        19.93048,
+        0.001,
+        0.52816
+      ],
+      "to": [
+        24.22606,
+        16.001,
+        0.60816
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 3.33804,
+        "z": 0,
+        "origin": [
+          22.07827,
+          8,
+          0.56816
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_09",
+      "from": [
+        23.77394,
+        0.001,
+        0.52816
+      ],
+      "to": [
+        28.06952,
+        16.001,
+        0.60816
+      ],
+      "rotation": {
+        "x": 0,
+        "y": -3.33804,
+        "z": 0,
+        "origin": [
+          25.92173,
+          8,
+          0.56816
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_10",
+      "from": [
+        27.59489,
+        0.001,
+        0.9731
+      ],
+      "to": [
+        31.8187,
+        16.001,
+        1.0531
+      ],
+      "rotation": {
+        "x": 0,
+        "y": -10.12808,
+        "z": 0,
+        "origin": [
+          29.7068,
+          8,
+          1.0131
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "back",
+      "from": [
+        32,
+        0,
+        0
+      ],
+      "to": [
+        48,
+        16,
+        2
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_11",
+      "from": [
+        31.2757,
+        0,
+        1.84946
+      ],
+      "to": [
+        35.36123,
+        16,
+        1.92946
+      ],
+      "rotation": {
+        "x": 0,
+        "y": -17.26899,
+        "z": 0,
+        "origin": [
+          33.31846,
+          8,
+          1.88946
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_12",
+      "from": [
+        34.70127,
+        0,
+        3.13061
+      ],
+      "to": [
+        38.59272,
+        16,
+        3.21061
+      ],
+      "rotation": {
+        "x": 0,
+        "y": -25.0234,
+        "z": 0,
+        "origin": [
+          36.647,
+          8,
+          3.17061
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_13",
+      "from": [
+        37.76212,
+        0,
+        4.77763
+      ],
+      "to": [
+        41.42039,
+        16,
+        4.85763
+      ],
+      "rotation": {
+        "x": 0,
+        "y": -33.69007,
+        "z": 0,
+        "origin": [
+          39.59125,
+          8,
+          4.81763
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_14",
+      "from": [
+        40.3572,
+        0,
+        6.74047
+      ],
+      "to": [
+        43.76637,
+        16,
+        6.82047
+      ],
+      "rotation": {
+        "x": 0,
+        "y": -43.59434,
+        "z": 0,
+        "origin": [
+          42.06178,
+          8,
+          6.78047
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_15",
+      "from": [
+        42.39651,
+        0,
+        8.95949
+      ],
+      "to": [
+        45.57051,
+        16,
+        9.03949
+      ],
+      "rotation": {
+        "x": 0,
+        "y": -55.02869,
+        "z": 0,
+        "origin": [
+          43.98351,
+          8,
+          8.99949
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_16",
+      "from": [
+        43.80429,
+        0,
+        11.36727
+      ],
+      "to": [
+        46.79181,
+        16,
+        11.44727
+      ],
+      "rotation": {
+        "x": 0,
+        "y": -68.10363,
+        "z": 0,
+        "origin": [
+          45.29805,
+          8,
+          11.40727
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_17",
+      "from": [
+        44.52377,
+        0,
+        13.89065
+      ],
+      "to": [
+        47.40715,
+        16,
+        13.97065
+      ],
+      "rotation": {
+        "x": 0,
+        "y": -82.52363,
+        "z": 0,
+        "origin": [
+          45.96546,
+          8,
+          13.93065
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "outer_jamb_right",
+      "from": [
+        47.6,
+        0,
+        0
+      ],
+      "to": [
+        48,
+        16,
+        16.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "back",
+      "from": [
+        0,
+        16,
+        0
+      ],
+      "to": [
+        16,
+        32,
+        2
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_00",
+      "from": [
+        0.59285,
+        16,
+        13.89065
+      ],
+      "to": [
+        3.47623,
+        32,
+        13.97065
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 82.52363,
+        "z": 0,
+        "origin": [
+          2.03454,
+          24,
+          13.93065
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_01",
+      "from": [
+        1.20819,
+        16,
+        11.36727
+      ],
+      "to": [
+        4.19571,
+        32,
+        11.44727
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 68.10363,
+        "z": 0,
+        "origin": [
+          2.70195,
+          24,
+          11.40727
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_02",
+      "from": [
+        2.42949,
+        16,
+        8.95949
+      ],
+      "to": [
+        5.60349,
+        32,
+        9.03949
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 55.02869,
+        "z": 0,
+        "origin": [
+          4.01649,
+          24,
+          8.99949
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_03",
+      "from": [
+        4.23363,
+        16,
+        6.74047
+      ],
+      "to": [
+        7.6428,
+        32,
+        6.82047
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 43.59434,
+        "z": 0,
+        "origin": [
+          5.93822,
+          24,
+          6.78047
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_04",
+      "from": [
+        6.57961,
+        16,
+        4.77763
+      ],
+      "to": [
+        10.23788,
+        32,
+        4.85763
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 33.69007,
+        "z": 0,
+        "origin": [
+          8.40875,
+          24,
+          4.81763
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_05",
+      "from": [
+        9.40728,
+        16,
+        3.13061
+      ],
+      "to": [
+        13.29873,
+        32,
+        3.21061
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 25.0234,
+        "z": 0,
+        "origin": [
+          11.353,
+          24,
+          3.17061
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_06",
+      "from": [
+        12.63877,
+        16,
+        1.84946
+      ],
+      "to": [
+        16.7243,
+        32,
+        1.92946
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 17.26899,
+        "z": 0,
+        "origin": [
+          14.68154,
+          24,
+          1.88946
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "back",
+      "from": [
+        16,
+        16,
+        0
+      ],
+      "to": [
+        32,
+        32,
+        2
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_07",
+      "from": [
+        16.1813,
+        16.001,
+        0.9731
+      ],
+      "to": [
+        20.40511,
+        32.001,
+        1.0531
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 10.12808,
+        "z": 0,
+        "origin": [
+          18.2932,
+          24,
+          1.0131
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_08",
+      "from": [
+        19.93048,
+        16.001,
+        0.52816
+      ],
+      "to": [
+        24.22606,
+        32.001,
+        0.60816
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 3.33804,
+        "z": 0,
+        "origin": [
+          22.07827,
+          24,
+          0.56816
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_09",
+      "from": [
+        23.77394,
+        16.001,
+        0.52816
+      ],
+      "to": [
+        28.06952,
+        32.001,
+        0.60816
+      ],
+      "rotation": {
+        "x": 0,
+        "y": -3.33804,
+        "z": 0,
+        "origin": [
+          25.92173,
+          24,
+          0.56816
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_10",
+      "from": [
+        27.59489,
+        16.001,
+        0.9731
+      ],
+      "to": [
+        31.8187,
+        32.001,
+        1.0531
+      ],
+      "rotation": {
+        "x": 0,
+        "y": -10.12808,
+        "z": 0,
+        "origin": [
+          29.7068,
+          24,
+          1.0131
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "back",
+      "from": [
+        32,
+        16,
+        0
+      ],
+      "to": [
+        48,
+        32,
+        2
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_11",
+      "from": [
+        31.2757,
+        16,
+        1.84946
+      ],
+      "to": [
+        35.36123,
+        32,
+        1.92946
+      ],
+      "rotation": {
+        "x": 0,
+        "y": -17.26899,
+        "z": 0,
+        "origin": [
+          33.31846,
+          24,
+          1.88946
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_12",
+      "from": [
+        34.70127,
+        16,
+        3.13061
+      ],
+      "to": [
+        38.59272,
+        32,
+        3.21061
+      ],
+      "rotation": {
+        "x": 0,
+        "y": -25.0234,
+        "z": 0,
+        "origin": [
+          36.647,
+          24,
+          3.17061
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_13",
+      "from": [
+        37.76212,
+        16,
+        4.77763
+      ],
+      "to": [
+        41.42039,
+        32,
+        4.85763
+      ],
+      "rotation": {
+        "x": 0,
+        "y": -33.69007,
+        "z": 0,
+        "origin": [
+          39.59125,
+          24,
+          4.81763
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_14",
+      "from": [
+        40.3572,
+        16,
+        6.74047
+      ],
+      "to": [
+        43.76637,
+        32,
+        6.82047
+      ],
+      "rotation": {
+        "x": 0,
+        "y": -43.59434,
+        "z": 0,
+        "origin": [
+          42.06178,
+          24,
+          6.78047
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_15",
+      "from": [
+        42.39651,
+        16,
+        8.95949
+      ],
+      "to": [
+        45.57051,
+        32,
+        9.03949
+      ],
+      "rotation": {
+        "x": 0,
+        "y": -55.02869,
+        "z": 0,
+        "origin": [
+          43.98351,
+          24,
+          8.99949
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_16",
+      "from": [
+        43.80429,
+        16,
+        11.36727
+      ],
+      "to": [
+        46.79181,
+        32,
+        11.44727
+      ],
+      "rotation": {
+        "x": 0,
+        "y": -68.10363,
+        "z": 0,
+        "origin": [
+          45.29805,
+          24,
+          11.40727
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_17",
+      "from": [
+        44.52377,
+        16,
+        13.89065
+      ],
+      "to": [
+        47.40715,
+        32,
+        13.97065
+      ],
+      "rotation": {
+        "x": 0,
+        "y": -82.52363,
+        "z": 0,
+        "origin": [
+          45.96546,
+          24,
+          13.93065
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "back",
+      "from": [
+        0,
+        32,
+        0
+      ],
+      "to": [
+        16,
+        48,
+        2
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_00",
+      "from": [
+        0.59285,
+        32,
+        13.89065
+      ],
+      "to": [
+        3.47623,
+        47.5,
+        13.97065
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 82.52363,
+        "z": 0,
+        "origin": [
+          2.03454,
+          40,
+          13.93065
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_01",
+      "from": [
+        1.20819,
+        32,
+        11.36727
+      ],
+      "to": [
+        4.19571,
+        47.5,
+        11.44727
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 68.10363,
+        "z": 0,
+        "origin": [
+          2.70195,
+          40,
+          11.40727
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_02",
+      "from": [
+        2.42949,
+        32,
+        8.95949
+      ],
+      "to": [
+        5.60349,
+        47.5,
+        9.03949
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 55.02869,
+        "z": 0,
+        "origin": [
+          4.01649,
+          40,
+          8.99949
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_03",
+      "from": [
+        4.23363,
+        32,
+        6.74047
+      ],
+      "to": [
+        7.6428,
+        47.5,
+        6.82047
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 43.59434,
+        "z": 0,
+        "origin": [
+          5.93822,
+          40,
+          6.78047
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_04",
+      "from": [
+        6.57961,
+        32,
+        4.77763
+      ],
+      "to": [
+        10.23788,
+        47.5,
+        4.85763
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 33.69007,
+        "z": 0,
+        "origin": [
+          8.40875,
+          40,
+          4.81763
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_05",
+      "from": [
+        9.40728,
+        32,
+        3.13061
+      ],
+      "to": [
+        13.29873,
+        47.5,
+        3.21061
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 25.0234,
+        "z": 0,
+        "origin": [
+          11.353,
+          40,
+          3.17061
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_06",
+      "from": [
+        12.63877,
+        32,
+        1.84946
+      ],
+      "to": [
+        16.7243,
+        47.5,
+        1.92946
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 17.26899,
+        "z": 0,
+        "origin": [
+          14.68154,
+          40,
+          1.88946
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r00_c00",
+      "from": [
+        0.35609,
+        33.72997,
+        8.842
+      ],
+      "to": [
+        6.27073,
+        33.78997,
+        12.38778
+      ],
+      "rotation": {
+        "x": -82.0407,
+        "y": 63.43548,
+        "z": 0,
+        "origin": [
+          3.31341,
+          33.75997,
+          10.61489
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r00_c01",
+      "from": [
+        2.86257,
+        33.72973,
+        5.56524
+      ],
+      "to": [
+        8.48093,
+        33.78973,
+        9.10716
+      ],
+      "rotation": {
+        "x": -82.5019,
+        "y": 45.96651,
+        "z": 0,
+        "origin": [
+          5.67175,
+          33.75973,
+          7.3362
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r00_c02",
+      "from": [
+        6.06955,
+        33.7294,
+        2.78174
+      ],
+      "to": [
+        12.28407,
+        33.7894,
+        6.31876
+      ],
+      "rotation": {
+        "x": -83.13061,
+        "y": 31.71315,
+        "z": 0,
+        "origin": [
+          9.17681,
+          33.7594,
+          4.55025
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r00_c03",
+      "from": [
+        10.24012,
+        33.72905,
+        0.6652
+      ],
+      "to": [
+        16.97846,
+        33.78905,
+        4.1975
+      ],
+      "rotation": {
+        "x": -83.79766,
+        "y": 19.86684,
+        "z": 0,
+        "origin": [
+          13.60929,
+          33.75905,
+          2.43135
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r01_c00",
+      "from": [
+        1.26471,
+        36.32427,
+        8.95332
+      ],
+      "to": [
+        6.95206,
+        36.38427,
+        12.62977
+      ],
+      "rotation": {
+        "x": -66.70206,
+        "y": 63.43548,
+        "z": 0,
+        "origin": [
+          4.10838,
+          36.35427,
+          10.79155
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r01_c01",
+      "from": [
+        3.67487,
+        36.32427,
+        5.81707
+      ],
+      "to": [
+        9.07732,
+        36.38427,
+        9.46064
+      ],
+      "rotation": {
+        "x": -67.93353,
+        "y": 45.96651,
+        "z": 0,
+        "origin": [
+          6.37609,
+          36.35427,
+          7.63885
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r01_c02",
+      "from": [
+        6.75861,
+        36.32427,
+        3.15916
+      ],
+      "to": [
+        12.73431,
+        36.38427,
+        6.76078
+      ],
+      "rotation": {
+        "x": -69.64298,
+        "y": 31.71315,
+        "z": 0,
+        "origin": [
+          9.74646,
+          36.35427,
+          4.95997
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r01_c03",
+      "from": [
+        10.7689,
+        36.32427,
+        1.14209
+      ],
+      "to": [
+        17.2483,
+        36.38427,
+        4.7029
+      ],
+      "rotation": {
+        "x": -71.49386,
+        "y": 19.86684,
+        "z": 0,
+        "origin": [
+          14.0086,
+          36.35427,
+          2.9225
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r02_c00",
+      "from": [
+        3.04704,
+        39.04095,
+        9.18487
+      ],
+      "to": [
+        8.28853,
+        39.10095,
+        13.09128
+      ],
+      "rotation": {
+        "x": -52.80942,
+        "y": 63.43548,
+        "z": 0,
+        "origin": [
+          5.66778,
+          39.07095,
+          11.13807
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r02_c01",
+      "from": [
+        5.26825,
+        39.04095,
+        6.32038
+      ],
+      "to": [
+        10.24718,
+        39.10095,
+        10.14469
+      ],
+      "rotation": {
+        "x": -54.46207,
+        "y": 45.96651,
+        "z": 0,
+        "origin": [
+          7.75772,
+          39.07095,
+          8.23253
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r02_c02",
+      "from": [
+        8.11024,
+        39.04095,
+        3.90463
+      ],
+      "to": [
+        13.61748,
+        39.10095,
+        7.62268
+      ],
+      "rotation": {
+        "x": -56.82353,
+        "y": 31.71315,
+        "z": 0,
+        "origin": [
+          10.86386,
+          39.07095,
+          5.76366
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r02_c03",
+      "from": [
+        11.80615,
+        39.04095,
+        2.07947
+      ],
+      "to": [
+        17.77759,
+        39.10095,
+        5.69235
+      ],
+      "rotation": {
+        "x": -59.46863,
+        "y": 19.86684,
+        "z": 0,
+        "origin": [
+          14.79187,
+          39.07095,
+          3.88591
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r03_c00",
+      "from": [
+        5.63458,
+        41.4859,
+        9.5472
+      ],
+      "to": [
+        10.22878,
+        41.5459,
+        13.73509
+      ],
+      "rotation": {
+        "x": -40.64127,
+        "y": 63.43548,
+        "z": 0,
+        "origin": [
+          7.93168,
+          41.5159,
+          11.64115
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r03_c01",
+      "from": [
+        7.58149,
+        41.4859,
+        7.07026
+      ],
+      "to": [
+        11.94555,
+        41.5459,
+        11.11858
+      ],
+      "rotation": {
+        "x": -42.35908,
+        "y": 45.96651,
+        "z": 0,
+        "origin": [
+          9.76352,
+          41.5159,
+          9.09442
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r03_c02",
+      "from": [
+        10.07251,
+        41.4859,
+        4.998
+      ],
+      "to": [
+        14.89964,
+        41.5459,
+        8.86287
+      ],
+      "rotation": {
+        "x": -44.89062,
+        "y": 31.71315,
+        "z": 0,
+        "origin": [
+          12.48608,
+          41.5159,
+          6.93043
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r03_c03",
+      "from": [
+        13.312,
+        41.4859,
+        3.44467
+      ],
+      "to": [
+        18.54602,
+        41.5459,
+        7.12449
+      ],
+      "rotation": {
+        "x": -47.83784,
+        "y": 19.86684,
+        "z": 0,
+        "origin": [
+          15.92901,
+          41.5159,
+          5.28458
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r04_c00",
+      "from": [
+        8.92789,
+        43.56516,
+        10.04512
+      ],
+      "to": [
+        12.69825,
+        43.62516,
+        14.51776
+      ],
+      "rotation": {
+        "x": -30.03277,
+        "y": 63.43548,
+        "z": 0,
+        "origin": [
+          10.81307,
+          43.59516,
+          12.28144
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r04_c01",
+      "from": [
+        10.52567,
+        43.56516,
+        8.0526
+      ],
+      "to": [
+        14.10717,
+        43.62516,
+        12.33019
+      ],
+      "rotation": {
+        "x": -31.55496,
+        "y": 45.96651,
+        "z": 0,
+        "origin": [
+          12.31642,
+          43.59516,
+          10.1914
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r04_c02",
+      "from": [
+        12.57,
+        43.56516,
+        6.40658
+      ],
+      "to": [
+        16.53153,
+        43.62516,
+        10.42434
+      ],
+      "rotation": {
+        "x": -33.85952,
+        "y": 31.71315,
+        "z": 0,
+        "origin": [
+          14.55077,
+          43.59516,
+          8.41546
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r04_c03",
+      "from": [
+        15.22859,
+        43.56516,
+        5.18928
+      ],
+      "to": [
+        19.52403,
+        43.62516,
+        8.9402
+      ],
+      "rotation": {
+        "x": -36.64071,
+        "y": 19.86684,
+        "z": 0,
+        "origin": [
+          17.37631,
+          43.59516,
+          7.06474
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r05_c00",
+      "from": [
+        12.80041,
+        45.19882,
+        10.67412
+      ],
+      "to": [
+        15.60204,
+        45.25882,
+        15.39458
+      ],
+      "rotation": {
+        "x": -20.63272,
+        "y": 63.43548,
+        "z": 0,
+        "origin": [
+          14.20123,
+          45.22882,
+          13.03435
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r05_c01",
+      "from": [
+        13.98767,
+        45.19882,
+        9.24181
+      ],
+      "to": [
+        16.64896,
+        45.25882,
+        13.7208
+      ],
+      "rotation": {
+        "x": -21.80039,
+        "y": 45.96651,
+        "z": 0,
+        "origin": [
+          15.31832,
+          45.22882,
+          11.4813
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r05_c02",
+      "from": [
+        15.50675,
+        45.19882,
+        8.08466
+      ],
+      "to": [
+        18.45043,
+        45.25882,
+        12.23867
+      ],
+      "rotation": {
+        "x": -23.60486,
+        "y": 31.71315,
+        "z": 0,
+        "origin": [
+          16.97859,
+          45.22882,
+          10.16166
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r05_c03",
+      "from": [
+        17.48225,
+        45.19882,
+        7.25027
+      ],
+      "to": [
+        20.67405,
+        45.25882,
+        11.0657
+      ],
+      "rotation": {
+        "x": -25.84644,
+        "y": 19.86684,
+        "z": 0,
+        "origin": [
+          19.07815,
+          45.22882,
+          9.15799
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r06_c00",
+      "from": [
+        17.10333,
+        46.32411,
+        11.42009
+      ],
+      "to": [
+        18.82856,
+        46.38411,
+        16.32177
+      ],
+      "rotation": {
+        "x": -12.06198,
+        "y": 63.43548,
+        "z": 0,
+        "origin": [
+          17.96594,
+          46.35411,
+          13.87093
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r06_c01",
+      "from": [
+        17.83444,
+        46.32411,
+        10.60097
+      ],
+      "to": [
+        19.47325,
+        46.38411,
+        15.22818
+      ],
+      "rotation": {
+        "x": -12.78924,
+        "y": 45.96651,
+        "z": 0,
+        "origin": [
+          18.65385,
+          46.35411,
+          12.91457
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r06_c02",
+      "from": [
+        18.76988,
+        46.32411,
+        9.97427
+      ],
+      "to": [
+        20.58259,
+        46.38411,
+        14.22962
+      ],
+      "rotation": {
+        "x": -13.92842,
+        "y": 31.71315,
+        "z": 0,
+        "origin": [
+          19.67623,
+          46.35411,
+          12.10194
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r06_c03",
+      "from": [
+        19.98639,
+        46.32411,
+        9.55184
+      ],
+      "to": [
+        21.95189,
+        46.38411,
+        13.41592
+      ],
+      "rotation": {
+        "x": -15.37191,
+        "y": 19.86684,
+        "z": 0,
+        "origin": [
+          20.96914,
+          46.35411,
+          11.48388
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r07_c00",
+      "from": [
+        21.48755,
+        46.89777,
+        11.96103
+      ],
+      "to": [
+        22.43755,
+        46.95777,
+        16.95806
+      ],
+      "rotation": {
+        "x": -3.96885,
+        "y": 63.43548,
+        "z": 0,
+        "origin": [
+          21.96255,
+          46.92777,
+          14.45954
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r07_c01",
+      "from": [
+        21.71982,
+        46.89777,
+        11.67332
+      ],
+      "to": [
+        22.66982,
+        46.95777,
+        16.3788
+      ],
+      "rotation": {
+        "x": -4.21519,
+        "y": 45.96651,
+        "z": 0,
+        "origin": [
+          22.19482,
+          46.92777,
+          14.02606
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r07_c02",
+      "from": [
+        22.06504,
+        46.89777,
+        11.76668
+      ],
+      "to": [
+        23.01504,
+        46.95777,
+        16.07588
+      ],
+      "rotation": {
+        "x": -4.60363,
+        "y": 31.71315,
+        "z": 0,
+        "origin": [
+          22.54004,
+          46.92777,
+          13.92128
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r07_c03",
+      "from": [
+        22.5016,
+        46.89777,
+        12.00796
+      ],
+      "to": [
+        23.4516,
+        46.95777,
+        15.89811
+      ],
+      "rotation": {
+        "x": -5.10077,
+        "y": 19.86684,
+        "z": 0,
+        "origin": [
+          22.9766,
+          46.92777,
+          13.95304
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_front_left_00",
+      "from": [
+        0.16178,
+        33.37491,
+        11.97
+      ],
+      "to": [
+        3.6504,
+        34.19491,
+        15.95
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": 81.81734,
+        "origin": [
+          1.90609,
+          33.78491,
+          15.2118
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_front_left_07",
+      "from": [
+        19.32707,
+        46.51777,
+        13.35
+      ],
+      "to": [
+        24.37991,
+        47.33777,
+        15.95
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": 3.85943,
+        "origin": [
+          21.85349,
+          46.92777,
+          15.2118
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "top",
+      "from": [
+        0,
+        46.5,
+        0
+      ],
+      "to": [
+        16,
+        48.5,
+        16.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "back",
+      "from": [
+        16,
+        32,
+        0
+      ],
+      "to": [
+        32,
+        48,
+        2
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_07",
+      "from": [
+        16.1813,
+        32.001,
+        0.9731
+      ],
+      "to": [
+        20.40511,
+        48.001,
+        1.0531
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 10.12808,
+        "z": 0,
+        "origin": [
+          18.2932,
+          40,
+          1.0131
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_08",
+      "from": [
+        19.93048,
+        32.001,
+        0.52816
+      ],
+      "to": [
+        24.22606,
+        48.001,
+        0.60816
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 3.33804,
+        "z": 0,
+        "origin": [
+          22.07827,
+          40,
+          0.56816
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_09",
+      "from": [
+        23.77394,
+        32.001,
+        0.52816
+      ],
+      "to": [
+        28.06952,
+        48.001,
+        0.60816
+      ],
+      "rotation": {
+        "x": 0,
+        "y": -3.33804,
+        "z": 0,
+        "origin": [
+          25.92173,
+          40,
+          0.56816
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_10",
+      "from": [
+        27.59489,
+        32.001,
+        0.9731
+      ],
+      "to": [
+        31.8187,
+        48.001,
+        1.0531
+      ],
+      "rotation": {
+        "x": 0,
+        "y": -10.12808,
+        "z": 0,
+        "origin": [
+          29.7068,
+          40,
+          1.0131
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r00_c00",
+      "from": [
+        15.14507,
+        33.72881,
+        -0.52984
+      ],
+      "to": [
+        20.86687,
+        33.78881,
+        2.99942
+      ],
+      "rotation": {
+        "x": -84.27008,
+        "y": 10.79113,
+        "z": 0,
+        "origin": [
+          18.00597,
+          33.75881,
+          1.23479
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r00_c01",
+      "from": [
+        19.31405,
+        33.7287,
+        -1.0266
+      ],
+      "to": [
+        24.64363,
+        33.7887,
+        2.50132
+      ],
+      "rotation": {
+        "x": -84.49217,
+        "y": 3.55127,
+        "z": 0,
+        "origin": [
+          21.97884,
+          33.7587,
+          0.73736
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r00_c02",
+      "from": [
+        23.35637,
+        33.7287,
+        -1.0266
+      ],
+      "to": [
+        28.68595,
+        33.7887,
+        2.50132
+      ],
+      "rotation": {
+        "x": -84.49217,
+        "y": -3.55127,
+        "z": 0,
+        "origin": [
+          26.02116,
+          33.7587,
+          0.73736
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r00_c03",
+      "from": [
+        27.13313,
+        33.72881,
+        -0.52984
+      ],
+      "to": [
+        32.85493,
+        33.78881,
+        2.99942
+      ],
+      "rotation": {
+        "x": -84.27008,
+        "y": -10.79113,
+        "z": 0,
+        "origin": [
+          29.99403,
+          33.75881,
+          1.23479
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r01_c00",
+      "from": [
+        15.48536,
+        36.32427,
+        0.00479
+      ],
+      "to": [
+        20.98727,
+        36.38427,
+        3.53904
+      ],
+      "rotation": {
+        "x": -72.82663,
+        "y": 10.79113,
+        "z": 0,
+        "origin": [
+          18.23632,
+          36.35427,
+          1.77192
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r01_c01",
+      "from": [
+        19.49413,
+        36.32427,
+        -0.46762
+      ],
+      "to": [
+        24.61889,
+        36.38427,
+        3.05483
+      ],
+      "rotation": {
+        "x": -73.4592,
+        "y": 3.55127,
+        "z": 0,
+        "origin": [
+          22.05651,
+          36.35427,
+          1.2936
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r01_c02",
+      "from": [
+        23.38111,
+        36.32427,
+        -0.46762
+      ],
+      "to": [
+        28.50587,
+        36.38427,
+        3.05483
+      ],
+      "rotation": {
+        "x": -73.4592,
+        "y": -3.55127,
+        "z": 0,
+        "origin": [
+          25.94349,
+          36.35427,
+          1.2936
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r01_c03",
+      "from": [
+        27.01273,
+        36.32427,
+        0.00479
+      ],
+      "to": [
+        32.51464,
+        36.38427,
+        3.53904
+      ],
+      "rotation": {
+        "x": -72.82663,
+        "y": -10.79113,
+        "z": 0,
+        "origin": [
+          29.76368,
+          36.35427,
+          1.77192
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r02_c00",
+      "from": [
+        16.15286,
+        39.04095,
+        1.05381
+      ],
+      "to": [
+        21.22346,
+        39.10095,
+        4.59726
+      ],
+      "rotation": {
+        "x": -61.42961,
+        "y": 10.79113,
+        "z": 0,
+        "origin": [
+          18.68816,
+          39.07095,
+          2.82553
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r02_c01",
+      "from": [
+        19.84737,
+        39.04095,
+        0.62856
+      ],
+      "to": [
+        24.57038,
+        39.10095,
+        4.14088
+      ],
+      "rotation": {
+        "x": -62.37661,
+        "y": 3.55127,
+        "z": 0,
+        "origin": [
+          22.20887,
+          39.07095,
+          2.38472
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r02_c02",
+      "from": [
+        23.42962,
+        39.04095,
+        0.62856
+      ],
+      "to": [
+        28.15263,
+        39.10095,
+        4.14088
+      ],
+      "rotation": {
+        "x": -62.37661,
+        "y": -3.55127,
+        "z": 0,
+        "origin": [
+          25.79113,
+          39.07095,
+          2.38472
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r02_c03",
+      "from": [
+        26.77654,
+        39.04095,
+        1.05381
+      ],
+      "to": [
+        31.84714,
+        39.10095,
+        4.59726
+      ],
+      "rotation": {
+        "x": -61.42961,
+        "y": -10.79113,
+        "z": 0,
+        "origin": [
+          29.31184,
+          39.07095,
+          2.82553
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r03_c00",
+      "from": [
+        17.12193,
+        41.4859,
+        2.57743
+      ],
+      "to": [
+        21.56634,
+        41.5459,
+        6.13286
+      ],
+      "rotation": {
+        "x": -50.1014,
+        "y": 10.79113,
+        "z": 0,
+        "origin": [
+          19.34413,
+          41.5159,
+          4.35515
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r03_c01",
+      "from": [
+        20.36019,
+        41.4859,
+        2.21925
+      ],
+      "to": [
+        24.49994,
+        41.5459,
+        5.71829
+      ],
+      "rotation": {
+        "x": -51.21893,
+        "y": 3.55127,
+        "z": 0,
+        "origin": [
+          22.43006,
+          41.5159,
+          3.96877
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r03_c02",
+      "from": [
+        23.50006,
+        41.4859,
+        2.21925
+      ],
+      "to": [
+        27.63981,
+        41.5459,
+        5.71829
+      ],
+      "rotation": {
+        "x": -51.21893,
+        "y": -3.55127,
+        "z": 0,
+        "origin": [
+          25.56994,
+          41.5159,
+          3.96877
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r03_c03",
+      "from": [
+        26.43366,
+        41.4859,
+        2.57743
+      ],
+      "to": [
+        30.87807,
+        41.5459,
+        6.13286
+      ],
+      "rotation": {
+        "x": -50.1014,
+        "y": -10.79113,
+        "z": 0,
+        "origin": [
+          28.65587,
+          41.5159,
+          4.35515
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r04_c00",
+      "from": [
+        18.35531,
+        43.56516,
+        4.5178
+      ],
+      "to": [
+        22.00275,
+        43.62516,
+        8.08615
+      ],
+      "rotation": {
+        "x": -38.85329,
+        "y": 10.79113,
+        "z": 0,
+        "origin": [
+          20.17903,
+          43.59516,
+          6.30198
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r04_c01",
+      "from": [
+        21.01288,
+        43.56516,
+        4.24258
+      ],
+      "to": [
+        24.41029,
+        43.62516,
+        7.72719
+      ],
+      "rotation": {
+        "x": -39.97139,
+        "y": 3.55127,
+        "z": 0,
+        "origin": [
+          22.71159,
+          43.59516,
+          5.98488
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r04_c02",
+      "from": [
+        23.58971,
+        43.56516,
+        4.24258
+      ],
+      "to": [
+        26.98712,
+        43.62516,
+        7.72719
+      ],
+      "rotation": {
+        "x": -39.97139,
+        "y": -3.55127,
+        "z": 0,
+        "origin": [
+          25.28841,
+          43.59516,
+          5.98488
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r04_c03",
+      "from": [
+        25.99725,
+        43.56516,
+        4.5178
+      ],
+      "to": [
+        29.64469,
+        43.62516,
+        8.08615
+      ],
+      "rotation": {
+        "x": -38.85329,
+        "y": -10.79113,
+        "z": 0,
+        "origin": [
+          27.82097,
+          43.59516,
+          6.30198
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r05_c00",
+      "from": [
+        19.80562,
+        45.19882,
+        6.80108
+      ],
+      "to": [
+        22.51591,
+        45.25882,
+        10.38133
+      ],
+      "rotation": {
+        "x": -27.68419,
+        "y": 10.79113,
+        "z": 0,
+        "origin": [
+          21.16076,
+          45.22882,
+          8.5912
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r05_c01",
+      "from": [
+        21.78037,
+        45.19882,
+        6.61997
+      ],
+      "to": [
+        24.30487,
+        45.25882,
+        10.09119
+      ],
+      "rotation": {
+        "x": -28.63255,
+        "y": 3.55127,
+        "z": 0,
+        "origin": [
+          23.04262,
+          45.22882,
+          8.35558
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r05_c02",
+      "from": [
+        23.69513,
+        45.19882,
+        6.61997
+      ],
+      "to": [
+        26.21963,
+        45.25882,
+        10.09119
+      ],
+      "rotation": {
+        "x": -28.63255,
+        "y": -3.55127,
+        "z": 0,
+        "origin": [
+          24.95738,
+          45.22882,
+          8.35558
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r05_c03",
+      "from": [
+        25.48409,
+        45.19882,
+        6.80108
+      ],
+      "to": [
+        28.19438,
+        45.25882,
+        10.38133
+      ],
+      "rotation": {
+        "x": -27.68419,
+        "y": -10.79113,
+        "z": 0,
+        "origin": [
+          26.83924,
+          45.22882,
+          8.5912
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r06_c00",
+      "from": [
+        21.41711,
+        46.32411,
+        9.34019
+      ],
+      "to": [
+        23.0861,
+        46.38411,
+        12.92952
+      ],
+      "rotation": {
+        "x": -16.58121,
+        "y": 10.79113,
+        "z": 0,
+        "origin": [
+          22.25161,
+          46.35411,
+          11.13486
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r06_c01",
+      "from": [
+        22.63316,
+        46.32411,
+        9.25929
+      ],
+      "to": [
+        24.18774,
+        46.38411,
+        12.72024
+      ],
+      "rotation": {
+        "x": -17.21514,
+        "y": 3.55127,
+        "z": 0,
+        "origin": [
+          23.41045,
+          46.35411,
+          10.98976
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r06_c02",
+      "from": [
+        23.81226,
+        46.32411,
+        9.25929
+      ],
+      "to": [
+        25.36684,
+        46.38411,
+        12.72024
+      ],
+      "rotation": {
+        "x": -17.21514,
+        "y": -3.55127,
+        "z": 0,
+        "origin": [
+          24.58955,
+          46.35411,
+          10.98976
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r06_c03",
+      "from": [
+        24.9139,
+        46.32411,
+        9.34019
+      ],
+      "to": [
+        26.58289,
+        46.38411,
+        12.92952
+      ],
+      "rotation": {
+        "x": -16.58121,
+        "y": -10.79113,
+        "z": 0,
+        "origin": [
+          25.74839,
+          46.35411,
+          11.13486
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r07_c00",
+      "from": [
+        22.93464,
+        46.89777,
+        12.03806
+      ],
+      "to": [
+        23.88464,
+        46.95777,
+        15.63231
+      ],
+      "rotation": {
+        "x": -5.52197,
+        "y": 10.79113,
+        "z": 0,
+        "origin": [
+          23.40964,
+          46.92777,
+          13.83518
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r07_c01",
+      "from": [
+        23.32593,
+        46.89777,
+        12.05851
+      ],
+      "to": [
+        24.27593,
+        46.95777,
+        15.51388
+      ],
+      "rotation": {
+        "x": -5.74463,
+        "y": 3.55127,
+        "z": 0,
+        "origin": [
+          23.80093,
+          46.92777,
+          13.78619
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r07_c02",
+      "from": [
+        23.72407,
+        46.89777,
+        12.05851
+      ],
+      "to": [
+        24.67407,
+        46.95777,
+        15.51388
+      ],
+      "rotation": {
+        "x": -5.74463,
+        "y": -3.55127,
+        "z": 0,
+        "origin": [
+          24.19907,
+          46.92777,
+          13.78619
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r07_c03",
+      "from": [
+        24.11536,
+        46.89777,
+        12.03806
+      ],
+      "to": [
+        25.06536,
+        46.95777,
+        15.63231
+      ],
+      "rotation": {
+        "x": -5.52197,
+        "y": -10.79113,
+        "z": 0,
+        "origin": [
+          24.59036,
+          46.92777,
+          13.83518
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_apex_cap",
+      "from": [
+        22.45,
+        46.86,
+        13.45
+      ],
+      "to": [
+        25.55,
+        46.94,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "top",
+      "from": [
+        16,
+        46.5,
+        0
+      ],
+      "to": [
+        32,
+        48.5,
+        16.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "roof_inner_lining",
+      "from": [
+        16,
+        47.94,
+        0
+      ],
+      "to": [
+        32,
+        47.96,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "back",
+      "from": [
+        32,
+        32,
+        0
+      ],
+      "to": [
+        48,
+        48,
+        2
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_11",
+      "from": [
+        31.2757,
+        32,
+        1.84946
+      ],
+      "to": [
+        35.36123,
+        47.5,
+        1.92946
+      ],
+      "rotation": {
+        "x": 0,
+        "y": -17.26899,
+        "z": 0,
+        "origin": [
+          33.31846,
+          40,
+          1.88946
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_12",
+      "from": [
+        34.70127,
+        32,
+        3.13061
+      ],
+      "to": [
+        38.59272,
+        47.5,
+        3.21061
+      ],
+      "rotation": {
+        "x": 0,
+        "y": -25.0234,
+        "z": 0,
+        "origin": [
+          36.647,
+          40,
+          3.17061
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_13",
+      "from": [
+        37.76212,
+        32,
+        4.77763
+      ],
+      "to": [
+        41.42039,
+        47.5,
+        4.85763
+      ],
+      "rotation": {
+        "x": 0,
+        "y": -33.69007,
+        "z": 0,
+        "origin": [
+          39.59125,
+          40,
+          4.81763
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_14",
+      "from": [
+        40.3572,
+        32,
+        6.74047
+      ],
+      "to": [
+        43.76637,
+        47.5,
+        6.82047
+      ],
+      "rotation": {
+        "x": 0,
+        "y": -43.59434,
+        "z": 0,
+        "origin": [
+          42.06178,
+          40,
+          6.78047
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_15",
+      "from": [
+        42.39651,
+        32,
+        8.95949
+      ],
+      "to": [
+        45.57051,
+        47.5,
+        9.03949
+      ],
+      "rotation": {
+        "x": 0,
+        "y": -55.02869,
+        "z": 0,
+        "origin": [
+          43.98351,
+          40,
+          8.99949
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_16",
+      "from": [
+        43.80429,
+        32,
+        11.36727
+      ],
+      "to": [
+        46.79181,
+        47.5,
+        11.44727
+      ],
+      "rotation": {
+        "x": 0,
+        "y": -68.10363,
+        "z": 0,
+        "origin": [
+          45.29805,
+          40,
+          11.40727
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_17",
+      "from": [
+        44.52377,
+        32,
+        13.89065
+      ],
+      "to": [
+        47.40715,
+        47.5,
+        13.97065
+      ],
+      "rotation": {
+        "x": 0,
+        "y": -82.52363,
+        "z": 0,
+        "origin": [
+          45.96546,
+          40,
+          13.93065
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "outer_jamb_right",
+      "from": [
+        45.89936,
+        32,
+        0
+      ],
+      "to": [
+        48,
+        48,
+        16.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r00_c00",
+      "from": [
+        41.72927,
+        33.72997,
+        8.842
+      ],
+      "to": [
+        47.64391,
+        33.78997,
+        12.38778
+      ],
+      "rotation": {
+        "x": -82.0407,
+        "y": -63.43548,
+        "z": 0,
+        "origin": [
+          44.68659,
+          33.75997,
+          10.61489
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r00_c01",
+      "from": [
+        39.51907,
+        33.72973,
+        5.56524
+      ],
+      "to": [
+        45.13743,
+        33.78973,
+        9.10716
+      ],
+      "rotation": {
+        "x": -82.5019,
+        "y": -45.96651,
+        "z": 0,
+        "origin": [
+          42.32825,
+          33.75973,
+          7.3362
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r00_c02",
+      "from": [
+        35.71593,
+        33.7294,
+        2.78174
+      ],
+      "to": [
+        41.93045,
+        33.7894,
+        6.31876
+      ],
+      "rotation": {
+        "x": -83.13061,
+        "y": -31.71315,
+        "z": 0,
+        "origin": [
+          38.82319,
+          33.7594,
+          4.55025
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r00_c03",
+      "from": [
+        31.02154,
+        33.72905,
+        0.6652
+      ],
+      "to": [
+        37.75988,
+        33.78905,
+        4.1975
+      ],
+      "rotation": {
+        "x": -83.79766,
+        "y": -19.86684,
+        "z": 0,
+        "origin": [
+          34.39071,
+          33.75905,
+          2.43135
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r01_c00",
+      "from": [
+        41.04794,
+        36.32427,
+        8.95332
+      ],
+      "to": [
+        46.73529,
+        36.38427,
+        12.62977
+      ],
+      "rotation": {
+        "x": -66.70206,
+        "y": -63.43548,
+        "z": 0,
+        "origin": [
+          43.89162,
+          36.35427,
+          10.79155
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r01_c01",
+      "from": [
+        38.92268,
+        36.32427,
+        5.81707
+      ],
+      "to": [
+        44.32513,
+        36.38427,
+        9.46064
+      ],
+      "rotation": {
+        "x": -67.93353,
+        "y": -45.96651,
+        "z": 0,
+        "origin": [
+          41.62391,
+          36.35427,
+          7.63885
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r01_c02",
+      "from": [
+        35.26569,
+        36.32427,
+        3.15916
+      ],
+      "to": [
+        41.24139,
+        36.38427,
+        6.76078
+      ],
+      "rotation": {
+        "x": -69.64298,
+        "y": -31.71315,
+        "z": 0,
+        "origin": [
+          38.25354,
+          36.35427,
+          4.95997
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r01_c03",
+      "from": [
+        30.7517,
+        36.32427,
+        1.14209
+      ],
+      "to": [
+        37.2311,
+        36.38427,
+        4.7029
+      ],
+      "rotation": {
+        "x": -71.49386,
+        "y": -19.86684,
+        "z": 0,
+        "origin": [
+          33.9914,
+          36.35427,
+          2.9225
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r02_c00",
+      "from": [
+        39.71147,
+        39.04095,
+        9.18487
+      ],
+      "to": [
+        44.95296,
+        39.10095,
+        13.09128
+      ],
+      "rotation": {
+        "x": -52.80942,
+        "y": -63.43548,
+        "z": 0,
+        "origin": [
+          42.33222,
+          39.07095,
+          11.13807
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r02_c01",
+      "from": [
+        37.75282,
+        39.04095,
+        6.32038
+      ],
+      "to": [
+        42.73175,
+        39.10095,
+        10.14469
+      ],
+      "rotation": {
+        "x": -54.46207,
+        "y": -45.96651,
+        "z": 0,
+        "origin": [
+          40.24228,
+          39.07095,
+          8.23253
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r02_c02",
+      "from": [
+        34.38252,
+        39.04095,
+        3.90463
+      ],
+      "to": [
+        39.88976,
+        39.10095,
+        7.62268
+      ],
+      "rotation": {
+        "x": -56.82353,
+        "y": -31.71315,
+        "z": 0,
+        "origin": [
+          37.13614,
+          39.07095,
+          5.76366
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r02_c03",
+      "from": [
+        30.22241,
+        39.04095,
+        2.07947
+      ],
+      "to": [
+        36.19385,
+        39.10095,
+        5.69235
+      ],
+      "rotation": {
+        "x": -59.46863,
+        "y": -19.86684,
+        "z": 0,
+        "origin": [
+          33.20813,
+          39.07095,
+          3.88591
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r03_c00",
+      "from": [
+        37.77122,
+        41.4859,
+        9.5472
+      ],
+      "to": [
+        42.36542,
+        41.5459,
+        13.73509
+      ],
+      "rotation": {
+        "x": -40.64127,
+        "y": -63.43548,
+        "z": 0,
+        "origin": [
+          40.06832,
+          41.5159,
+          11.64115
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r03_c01",
+      "from": [
+        36.05445,
+        41.4859,
+        7.07026
+      ],
+      "to": [
+        40.41851,
+        41.5459,
+        11.11858
+      ],
+      "rotation": {
+        "x": -42.35908,
+        "y": -45.96651,
+        "z": 0,
+        "origin": [
+          38.23648,
+          41.5159,
+          9.09442
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r03_c02",
+      "from": [
+        33.10036,
+        41.4859,
+        4.998
+      ],
+      "to": [
+        37.92749,
+        41.5459,
+        8.86287
+      ],
+      "rotation": {
+        "x": -44.89062,
+        "y": -31.71315,
+        "z": 0,
+        "origin": [
+          35.51392,
+          41.5159,
+          6.93043
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r03_c03",
+      "from": [
+        29.45398,
+        41.4859,
+        3.44467
+      ],
+      "to": [
+        34.688,
+        41.5459,
+        7.12449
+      ],
+      "rotation": {
+        "x": -47.83784,
+        "y": -19.86684,
+        "z": 0,
+        "origin": [
+          32.07099,
+          41.5159,
+          5.28458
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r04_c00",
+      "from": [
+        35.30175,
+        43.56516,
+        10.04512
+      ],
+      "to": [
+        39.07211,
+        43.62516,
+        14.51776
+      ],
+      "rotation": {
+        "x": -30.03277,
+        "y": -63.43548,
+        "z": 0,
+        "origin": [
+          37.18693,
+          43.59516,
+          12.28144
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r04_c01",
+      "from": [
+        33.89283,
+        43.56516,
+        8.0526
+      ],
+      "to": [
+        37.47433,
+        43.62516,
+        12.33019
+      ],
+      "rotation": {
+        "x": -31.55496,
+        "y": -45.96651,
+        "z": 0,
+        "origin": [
+          35.68358,
+          43.59516,
+          10.1914
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r04_c02",
+      "from": [
+        31.46847,
+        43.56516,
+        6.40658
+      ],
+      "to": [
+        35.43,
+        43.62516,
+        10.42434
+      ],
+      "rotation": {
+        "x": -33.85952,
+        "y": -31.71315,
+        "z": 0,
+        "origin": [
+          33.44923,
+          43.59516,
+          8.41546
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r04_c03",
+      "from": [
+        28.47597,
+        43.56516,
+        5.18928
+      ],
+      "to": [
+        32.77141,
+        43.62516,
+        8.9402
+      ],
+      "rotation": {
+        "x": -36.64071,
+        "y": -19.86684,
+        "z": 0,
+        "origin": [
+          30.62369,
+          43.59516,
+          7.06474
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r05_c00",
+      "from": [
+        32.39796,
+        45.19882,
+        10.67412
+      ],
+      "to": [
+        35.19959,
+        45.25882,
+        15.39458
+      ],
+      "rotation": {
+        "x": -20.63272,
+        "y": -63.43548,
+        "z": 0,
+        "origin": [
+          33.79877,
+          45.22882,
+          13.03435
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r05_c01",
+      "from": [
+        31.35104,
+        45.19882,
+        9.24181
+      ],
+      "to": [
+        34.01233,
+        45.25882,
+        13.7208
+      ],
+      "rotation": {
+        "x": -21.80039,
+        "y": -45.96651,
+        "z": 0,
+        "origin": [
+          32.68168,
+          45.22882,
+          11.4813
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r05_c02",
+      "from": [
+        29.54957,
+        45.19882,
+        8.08466
+      ],
+      "to": [
+        32.49325,
+        45.25882,
+        12.23867
+      ],
+      "rotation": {
+        "x": -23.60486,
+        "y": -31.71315,
+        "z": 0,
+        "origin": [
+          31.02141,
+          45.22882,
+          10.16166
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r05_c03",
+      "from": [
+        27.32595,
+        45.19882,
+        7.25027
+      ],
+      "to": [
+        30.51775,
+        45.25882,
+        11.0657
+      ],
+      "rotation": {
+        "x": -25.84644,
+        "y": -19.86684,
+        "z": 0,
+        "origin": [
+          28.92185,
+          45.22882,
+          9.15799
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r06_c00",
+      "from": [
+        29.17144,
+        46.32411,
+        11.42009
+      ],
+      "to": [
+        30.89667,
+        46.38411,
+        16.32177
+      ],
+      "rotation": {
+        "x": -12.06198,
+        "y": -63.43548,
+        "z": 0,
+        "origin": [
+          30.03406,
+          46.35411,
+          13.87093
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r06_c01",
+      "from": [
+        28.52675,
+        46.32411,
+        10.60097
+      ],
+      "to": [
+        30.16556,
+        46.38411,
+        15.22818
+      ],
+      "rotation": {
+        "x": -12.78924,
+        "y": -45.96651,
+        "z": 0,
+        "origin": [
+          29.34615,
+          46.35411,
+          12.91457
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r06_c02",
+      "from": [
+        27.41741,
+        46.32411,
+        9.97427
+      ],
+      "to": [
+        29.23012,
+        46.38411,
+        14.22962
+      ],
+      "rotation": {
+        "x": -13.92842,
+        "y": -31.71315,
+        "z": 0,
+        "origin": [
+          28.32377,
+          46.35411,
+          12.10194
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r06_c03",
+      "from": [
+        26.04811,
+        46.32411,
+        9.55184
+      ],
+      "to": [
+        28.01361,
+        46.38411,
+        13.41592
+      ],
+      "rotation": {
+        "x": -15.37191,
+        "y": -19.86684,
+        "z": 0,
+        "origin": [
+          27.03086,
+          46.35411,
+          11.48388
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r07_c00",
+      "from": [
+        25.56245,
+        46.89777,
+        11.96103
+      ],
+      "to": [
+        26.51245,
+        46.95777,
+        16.95806
+      ],
+      "rotation": {
+        "x": -3.96885,
+        "y": -63.43548,
+        "z": 0,
+        "origin": [
+          26.03745,
+          46.92777,
+          14.45954
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r07_c01",
+      "from": [
+        25.33018,
+        46.89777,
+        11.67332
+      ],
+      "to": [
+        26.28018,
+        46.95777,
+        16.3788
+      ],
+      "rotation": {
+        "x": -4.21519,
+        "y": -45.96651,
+        "z": 0,
+        "origin": [
+          25.80518,
+          46.92777,
+          14.02606
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r07_c02",
+      "from": [
+        24.98496,
+        46.89777,
+        11.76668
+      ],
+      "to": [
+        25.93496,
+        46.95777,
+        16.07588
+      ],
+      "rotation": {
+        "x": -4.60363,
+        "y": -31.71315,
+        "z": 0,
+        "origin": [
+          25.45996,
+          46.92777,
+          13.92128
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_surface_r07_c03",
+      "from": [
+        24.5484,
+        46.89777,
+        12.00796
+      ],
+      "to": [
+        25.4984,
+        46.95777,
+        15.89811
+      ],
+      "rotation": {
+        "x": -5.10077,
+        "y": -19.86684,
+        "z": 0,
+        "origin": [
+          25.0234,
+          46.92777,
+          13.95304
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_front_right_00",
+      "from": [
+        44.3496,
+        33.37491,
+        11.97
+      ],
+      "to": [
+        47.83822,
+        34.19491,
+        15.95
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": -81.81734,
+        "origin": [
+          46.09391,
+          33.78491,
+          15.2118
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_front_right_01",
+      "from": [
+        43.14065,
+        35.94427,
+        11.17
+      ],
+      "to": [
+        47.99211,
+        38.30427,
+        15.95
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": -66.11273,
+        "origin": [
+          44.95638,
+          36.35427,
+          15.2118
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_front_right_0",
+      "from": [
+        40.43272,
+        38.66095,
+        11.08
+      ],
+      "to": [
+        45.2543,
+        43.43095,
+        15.95
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": -52.03282,
+        "origin": [
+          43.31351,
+          39.07095,
+          15.2118
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_front_right_03",
+      "from": [
+        38.78547,
+        41.1059,
+        11.08
+      ],
+      "to": [
+        44.0114,
+        48.6359,
+        15.95
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": -39.84891,
+        "origin": [
+          40.92843,
+          41.5159,
+          15.2118
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_front_right_04",
+      "from": [
+        36.64672,
+        43.18516,
+        11.08
+      ],
+      "to": [
+        40.38889,
+        48.32516,
+        15.95
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": -29.34144,
+        "origin": [
+          37.89281,
+          43.59516,
+          15.2118
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_front_right_05",
+      "from": [
+        31.94448,
+        44.81882,
+        11.08
+      ],
+      "to": [
+        36.70209,
+        46.60882,
+        15.95
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": -20.1084,
+        "origin": [
+          34.32329,
+          45.22882,
+          15.2118
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_front_right_06",
+      "from": [
+        27.88146,
+        45.94411,
+        11.08
+      ],
+      "to": [
+        32.83264,
+        47.08411,
+        15.95
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": -11.73778,
+        "origin": [
+          30.35705,
+          46.35411,
+          15.2118
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_front_right_07",
+      "from": [
+        23.62009,
+        46.51777,
+        13.35
+      ],
+      "to": [
+        28.67293,
+        47.33777,
+        15.95
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": -3.85943,
+        "origin": [
+          26.14651,
+          46.92777,
+          15.2118
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "top",
+      "from": [
+        32,
+        46.5,
+        0
+      ],
+      "to": [
+        48,
+        48.5,
+        16.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "top",
+      "from": [
+        22.93021,
+        45.49407,
+        0
+      ],
+      "to": [
+        25.06021,
+        45.99407,
+        17
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "top",
+      "from": [
+        22.07321,
+        45.52251,
+        0
+      ],
+      "to": [
+        22.57321,
+        49.30251,
+        17
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": 22.5,
+        "origin": [
+          22.57321,
+          47.66251,
+          12.25
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "top",
+      "from": [
+        25.42413,
+        45.52251,
+        0
+      ],
+      "to": [
+        25.92413,
+        49.30251,
+        17
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": -22.5,
+        "origin": [
+          25.42413,
+          47.66251,
+          12.25
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_front_right_08",
+      "from": [
+        23.55194,
+        46.52728,
+        0
+      ],
+      "to": [
+        28.40478,
+        48.52728,
+        16.5
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": -3.85943,
+        "origin": [
+          26.07836,
+          46.93728,
+          15.7618
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_front_right_07",
+      "from": [
+        28.13146,
+        45.94411,
+        0.01
+      ],
+      "to": [
+        32.60264,
+        47.94411,
+        16.5
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": -11.73778,
+        "origin": [
+          30.35705,
+          46.35411,
+          15.8518
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_front_right_06",
+      "from": [
+        32.20448,
+        44.81882,
+        11.72
+      ],
+      "to": [
+        36.51209,
+        46.81882,
+        16.5
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": -20.1084,
+        "origin": [
+          34.32329,
+          45.22882,
+          15.8518
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_front_right_05",
+      "from": [
+        35.89672,
+        43.18516,
+        11.72
+      ],
+      "to": [
+        39.93889,
+        45.18516,
+        16.5
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": -29.34144,
+        "origin": [
+          37.89281,
+          43.59516,
+          15.8518
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_front_right_04",
+      "from": [
+        38.98547,
+        41.1059,
+        11.72
+      ],
+      "to": [
+        42.8714,
+        43.1059,
+        16.5
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": -39.84891,
+        "origin": [
+          40.92843,
+          41.5159,
+          15.8518
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_front_right_1",
+      "from": [
+        41.47272,
+        38.66095,
+        11.72
+      ],
+      "to": [
+        44.7143,
+        40.66095,
+        16.5
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": -52.03282,
+        "origin": [
+          43.31351,
+          39.07095,
+          15.8518
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_front_right_02",
+      "from": [
+        43.17387,
+        36.65348,
+        11.72
+      ],
+      "to": [
+        48.48533,
+        38.65348,
+        16.5
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": -66.11273,
+        "origin": [
+          44.5196,
+          37.06348,
+          15.7618
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "top",
+      "from": [
+        24.37367,
+        45.59633,
+        0
+      ],
+      "to": [
+        24.87367,
+        50.62633,
+        17
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": -90,
+        "origin": [
+          24.87367,
+          48.98633,
+          12.25
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "outer_jamb_right",
+      "from": [
+        45.64936,
+        33,
+        0
+      ],
+      "to": [
+        48.25,
+        33.5,
+        16.75
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "outer_jamb_right",
+      "from": [
+        45.39936,
+        32.5,
+        0
+      ],
+      "to": [
+        48.5,
+        33,
+        17
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "outer_jamb_right",
+      "from": [
+        45.64936,
+        32,
+        0
+      ],
+      "to": [
+        48.25,
+        32.5,
+        16.75
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "outer_jamb_right",
+      "from": [
+        45.64936,
+        0.5,
+        0
+      ],
+      "to": [
+        48.25,
+        1,
+        16.75
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "outer_jamb_right",
+      "from": [
+        45.39936,
+        0,
+        0
+      ],
+      "to": [
+        48.5,
+        0.5,
+        17
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "outer_jamb_right",
+      "from": [
+        45.91,
+        0,
+        0
+      ],
+      "to": [
+        46.31,
+        16,
+        16.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "outer_jamb_right",
+      "from": [
+        46.31,
+        0,
+        0
+      ],
+      "to": [
+        46.74,
+        16,
+        16.25
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "outer_jamb_right",
+      "from": [
+        47.17,
+        0,
+        0
+      ],
+      "to": [
+        47.6,
+        16,
+        16.25
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "outer_jamb_right",
+      "from": [
+        46.74,
+        0,
+        0
+      ],
+      "to": [
+        47.17,
+        16,
+        16.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "outer_jamb_right",
+      "from": [
+        46.74,
+        16,
+        0
+      ],
+      "to": [
+        47.17,
+        32,
+        16.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "outer_jamb_right",
+      "from": [
+        47.17,
+        16,
+        0
+      ],
+      "to": [
+        47.6,
+        32,
+        16.25
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "outer_jamb_right",
+      "from": [
+        46.31,
+        16,
+        0
+      ],
+      "to": [
+        46.74,
+        32,
+        16.25
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "outer_jamb_right",
+      "from": [
+        45.91,
+        16,
+        0
+      ],
+      "to": [
+        46.31,
+        32,
+        16.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "outer_jamb_right",
+      "from": [
+        47.6,
+        16,
+        0
+      ],
+      "to": [
+        48,
+        32,
+        16.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "top",
+      "from": [
+        24.96219,
+        45.71385,
+        0
+      ],
+      "to": [
+        25.46219,
+        49.49385,
+        16.75
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": -22.5,
+        "origin": [
+          24.96219,
+          47.85385,
+          12.25
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "top",
+      "from": [
+        22.53515,
+        45.71385,
+        0
+      ],
+      "to": [
+        23.03515,
+        49.49385,
+        16.75
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": 22.5,
+        "origin": [
+          23.03515,
+          47.85385,
+          12.25
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "top",
+      "from": [
+        24.37367,
+        45.34633,
+        0
+      ],
+      "to": [
+        24.87367,
+        49.87633,
+        16.75
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": -90,
+        "origin": [
+          24.87367,
+          48.48633,
+          12.25
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "top",
+      "from": [
+        24.37367,
+        45.84633,
+        0
+      ],
+      "to": [
+        26.37367,
+        48.37633,
+        16.5
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": -90,
+        "origin": [
+          24.87367,
+          47.98633,
+          12.25
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "top",
+      "from": [
+        22.93021,
+        45.99407,
+        0
+      ],
+      "to": [
+        25.06021,
+        46.49407,
+        16.75
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_front_left_05",
+      "from": [
+        11.29791,
+        44.81882,
+        11.08
+      ],
+      "to": [
+        16.05552,
+        46.60882,
+        15.95
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": 20.1084,
+        "origin": [
+          13.67671,
+          45.22882,
+          15.2118
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_front_left_06",
+      "from": [
+        15.16736,
+        45.94411,
+        11.08
+      ],
+      "to": [
+        20.11854,
+        47.08411,
+        15.95
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": 11.73778,
+        "origin": [
+          17.64295,
+          46.35411,
+          15.2118
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_front_right_05",
+      "from": [
+        34.88461,
+        45.01887,
+        11.08
+      ],
+      "to": [
+        37.12678,
+        48.15887,
+        15.95
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": -29.34144,
+        "origin": [
+          34.6307,
+          45.42887,
+          15.2118
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_front_left_03",
+      "from": [
+        -0.48533,
+        36.65348,
+        11.72
+      ],
+      "to": [
+        4.82613,
+        38.65348,
+        16.5
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": 66.11273,
+        "origin": [
+          3.4804,
+          37.06348,
+          15.7618
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_front_left_",
+      "from": [
+        3.2857,
+        38.66095,
+        11.72
+      ],
+      "to": [
+        6.52728,
+        40.66095,
+        16.5
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": 52.03282,
+        "origin": [
+          4.68649,
+          39.07095,
+          15.8518
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_front_left_05",
+      "from": [
+        5.1286,
+        41.1059,
+        11.72
+      ],
+      "to": [
+        9.01453,
+        43.1059,
+        16.5
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": 39.84891,
+        "origin": [
+          7.07157,
+          41.5159,
+          15.8518
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_front_left_06",
+      "from": [
+        8.06111,
+        43.18516,
+        11.72
+      ],
+      "to": [
+        12.10328,
+        45.18516,
+        16.5
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": 29.34144,
+        "origin": [
+          10.10719,
+          43.59516,
+          15.8518
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_front_left_07",
+      "from": [
+        11.48791,
+        44.81882,
+        11.72
+      ],
+      "to": [
+        15.79552,
+        46.81882,
+        16.5
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": 20.1084,
+        "origin": [
+          13.67671,
+          45.22882,
+          15.8518
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_front_left_08",
+      "from": [
+        15.39736,
+        45.94411,
+        0.01
+      ],
+      "to": [
+        19.86854,
+        47.94411,
+        16.5
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": 11.73778,
+        "origin": [
+          17.64295,
+          46.35411,
+          15.8518
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_front_left_09",
+      "from": [
+        19.59522,
+        46.52728,
+        0
+      ],
+      "to": [
+        24.44806,
+        48.52728,
+        16.5
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": 3.85943,
+        "origin": [
+          21.92164,
+          46.93728,
+          15.7618
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "outer_jamb_left",
+      "from": [
+        0,
+        32,
+        0
+      ],
+      "to": [
+        2.10064,
+        48,
+        16.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "outer_jamb_left",
+      "from": [
+        -0.25,
+        33,
+        0
+      ],
+      "to": [
+        2.35064,
+        33.5,
+        16.75
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "outer_jamb_left",
+      "from": [
+        -0.5,
+        32.5,
+        0
+      ],
+      "to": [
+        2.60064,
+        33,
+        17
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "outer_jamb_left",
+      "from": [
+        -0.25,
+        32,
+        0
+      ],
+      "to": [
+        2.35064,
+        32.5,
+        16.75
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "outer_jamb_left",
+      "from": [
+        0,
+        16,
+        0
+      ],
+      "to": [
+        0.4,
+        32,
+        16.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "outer_jamb_left",
+      "from": [
+        1.69,
+        16,
+        0
+      ],
+      "to": [
+        2.09,
+        32,
+        16.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "outer_jamb_left",
+      "from": [
+        1.26,
+        16,
+        0
+      ],
+      "to": [
+        1.69,
+        32,
+        16.25
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "outer_jamb_left",
+      "from": [
+        0.4,
+        16,
+        0
+      ],
+      "to": [
+        0.83,
+        32,
+        16.25
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "outer_jamb_left",
+      "from": [
+        0.83,
+        16,
+        0
+      ],
+      "to": [
+        1.26,
+        32,
+        16.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "outer_jamb_left",
+      "from": [
+        0.83,
+        0,
+        0
+      ],
+      "to": [
+        1.26,
+        16,
+        16.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "outer_jamb_left",
+      "from": [
+        0.4,
+        0,
+        0
+      ],
+      "to": [
+        0.83,
+        16,
+        16.25
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "outer_jamb_left",
+      "from": [
+        1.26,
+        0,
+        0
+      ],
+      "to": [
+        1.69,
+        16,
+        16.25
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "outer_jamb_left",
+      "from": [
+        1.69,
+        0,
+        0
+      ],
+      "to": [
+        2.09,
+        16,
+        16.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "outer_jamb_left",
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        0.4,
+        16,
+        16.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "outer_jamb_left",
+      "from": [
+        -0.25,
+        0.5,
+        0
+      ],
+      "to": [
+        2.35064,
+        1,
+        16.75
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "outer_jamb_left",
+      "from": [
+        -0.5,
+        0,
+        0
+      ],
+      "to": [
+        2.60064,
+        0.5,
+        17
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_front_left_0",
+      "from": [
+        0.00789,
+        35.94427,
+        11.17
+      ],
+      "to": [
+        4.85935,
+        38.30427,
+        15.95
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": 66.11273,
+        "origin": [
+          3.04362,
+          36.35427,
+          15.2118
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_front_left_1",
+      "from": [
+        2.7457,
+        38.66095,
+        11.08
+      ],
+      "to": [
+        7.56728,
+        43.43095,
+        15.95
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": 52.03282,
+        "origin": [
+          4.68649,
+          39.07095,
+          15.2118
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_front_left_04",
+      "from": [
+        3.9886,
+        41.1059,
+        11.08
+      ],
+      "to": [
+        9.21453,
+        48.6359,
+        15.95
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": 39.84891,
+        "origin": [
+          7.07157,
+          41.5159,
+          15.2118
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_front_left_05",
+      "from": [
+        7.61111,
+        43.18516,
+        11.08
+      ],
+      "to": [
+        11.35328,
+        48.32516,
+        15.95
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": 29.34144,
+        "origin": [
+          10.10719,
+          43.59516,
+          15.2118
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_front_left_06",
+      "from": [
+        10.87322,
+        45.01887,
+        11.08
+      ],
+      "to": [
+        13.11539,
+        48.15887,
+        15.95
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": 29.34144,
+        "origin": [
+          13.3693,
+          45.42887,
+          15.2118
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    }
+  ],
+  "groups": [
+    {
+      "name": "BASE",
+      "origin": [
+        24,
+        8,
+        8
+      ],
+      "children": [
+        {
+          "name": "LEFT",
+          "origin": [
+            8,
+            8,
+            8
+          ],
+          "children": [
+            {
+              "name": "BACK__base_left",
+              "origin": [
+                8,
+                8,
+                8
+              ],
+              "children": [
+                0
+              ]
+            },
+            {
+              "name": "SIDES__base_left",
+              "origin": [
+                8,
+                8,
+                8
+              ],
+              "children": [
+                {
+                  "name": "georgian_triple_side_left",
+                  "origin": [
+                    8,
+                    8,
+                    8
+                  ],
+                  "children": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7
+                  ]
+                },
+                225,
+                226,
+                227,
+                228,
+                230,
+                231,
+                229
+              ]
+            }
+          ]
+        },
+        {
+          "name": "CENTER",
+          "origin": [
+            24,
+            8,
+            8
+          ],
+          "children": [
+            {
+              "name": "BACK__base_center",
+              "origin": [
+                24,
+                8,
+                8
+              ],
+              "children": [
+                8
+              ]
+            },
+            {
+              "name": "SIDES__base_center",
+              "origin": [
+                24,
+                8,
+                8
+              ],
+              "children": [
+                {
+                  "name": "georgian_triple_side_center",
+                  "origin": [
+                    24,
+                    8,
+                    8
+                  ],
+                  "children": [
+                    9,
+                    10,
+                    11,
+                    12
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "RIGHT",
+          "origin": [
+            40,
+            8,
+            8
+          ],
+          "children": [
+            {
+              "name": "BACK__base_right",
+              "origin": [
+                40,
+                8,
+                8
+              ],
+              "children": [
+                13
+              ]
+            },
+            {
+              "name": "SIDES__base_right",
+              "origin": [
+                40,
+                8,
+                8
+              ],
+              "children": [
+                {
+                  "name": "georgian_triple_side_right",
+                  "origin": [
+                    40,
+                    8,
+                    8
+                  ],
+                  "children": [
+                    14,
+                    15,
+                    16,
+                    17,
+                    18,
+                    19,
+                    20
+                  ]
+                },
+                190,
+                191,
+                21,
+                192,
+                193,
+                194,
+                195
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "MIDDLE",
+      "origin": [
+        24,
+        24,
+        8
+      ],
+      "children": [
+        {
+          "name": "LEFT",
+          "origin": [
+            8,
+            24,
+            8
+          ],
+          "children": [
+            {
+              "name": "BACK__middle_left",
+              "origin": [
+                8,
+                24,
+                8
+              ],
+              "children": [
+                22
+              ]
+            },
+            {
+              "name": "SIDES__middle_left",
+              "origin": [
+                8,
+                24,
+                8
+              ],
+              "children": [
+                {
+                  "name": "georgian_triple_side_left",
+                  "origin": [
+                    8,
+                    24,
+                    8
+                  ],
+                  "children": [
+                    23,
+                    24,
+                    25,
+                    26,
+                    27,
+                    28,
+                    29
+                  ]
+                },
+                220,
+                221,
+                222,
+                223,
+                224
+              ]
+            }
+          ]
+        },
+        {
+          "name": "CENTER",
+          "origin": [
+            24,
+            24,
+            8
+          ],
+          "children": [
+            {
+              "name": "BACK__middle_center",
+              "origin": [
+                24,
+                24,
+                8
+              ],
+              "children": [
+                30
+              ]
+            },
+            {
+              "name": "SIDES__middle_center",
+              "origin": [
+                24,
+                24,
+                8
+              ],
+              "children": [
+                {
+                  "name": "georgian_triple_side_center",
+                  "origin": [
+                    24,
+                    24,
+                    8
+                  ],
+                  "children": [
+                    31,
+                    32,
+                    33,
+                    34
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "RIGHT",
+          "origin": [
+            40,
+            24,
+            8
+          ],
+          "children": [
+            {
+              "name": "BACK__middle_right",
+              "origin": [
+                40,
+                24,
+                8
+              ],
+              "children": [
+                35
+              ]
+            },
+            {
+              "name": "SIDES__middle_right",
+              "origin": [
+                40,
+                24,
+                8
+              ],
+              "children": [
+                {
+                  "name": "georgian_triple_side_right",
+                  "origin": [
+                    40,
+                    24,
+                    8
+                  ],
+                  "children": [
+                    36,
+                    37,
+                    38,
+                    39,
+                    40,
+                    41,
+                    42
+                  ]
+                },
+                196,
+                197,
+                198,
+                199,
+                200,
+                187,
+                188,
+                189
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "TOP",
+      "origin": [
+        24,
+        40,
+        8
+      ],
+      "children": [
+        {
+          "name": "LEFT",
+          "origin": [
+            8,
+            40,
+            8
+          ],
+          "children": [
+            {
+              "name": "BACK__top_left",
+              "origin": [
+                8,
+                40,
+                8
+              ],
+              "children": [
+                43
+              ]
+            },
+            {
+              "name": "SIDES__top_left",
+              "origin": [
+                8,
+                40,
+                8
+              ],
+              "children": [
+                {
+                  "name": "georgian_triple_side_left",
+                  "origin": [
+                    8,
+                    40,
+                    8
+                  ],
+                  "children": [
+                    44,
+                    45,
+                    46,
+                    47,
+                    48,
+                    49,
+                    50
+                  ]
+                },
+                216
+              ]
+            },
+            {
+              "name": "ROOF__top_left",
+              "origin": [
+                8,
+                40,
+                8
+              ],
+              "children": [
+                {
+                  "name": "georgian_triple_top_left",
+                  "origin": [
+                    8,
+                    40,
+                    8
+                  ],
+                  "children": [
+                    217,
+                    218,
+                    219,
+                    51,
+                    52,
+                    53,
+                    54,
+                    55,
+                    56,
+                    57,
+                    58,
+                    59,
+                    60,
+                    61,
+                    62,
+                    63,
+                    64,
+                    65,
+                    66,
+                    67,
+                    68,
+                    69,
+                    70,
+                    71,
+                    72,
+                    73,
+                    74,
+                    75,
+                    76,
+                    77,
+                    78,
+                    79,
+                    80,
+                    81,
+                    82,
+                    83,
+                    206,
+                    207,
+                    84,
+                    236,
+                    235,
+                    234,
+                    233,
+                    232,
+                    85,
+                    215,
+                    214,
+                    213,
+                    212,
+                    211,
+                    210,
+                    209
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "CENTER",
+          "origin": [
+            24,
+            40,
+            8
+          ],
+          "children": [
+            {
+              "name": "BACK__top_center",
+              "origin": [
+                24,
+                40,
+                8
+              ],
+              "children": [
+                86
+              ]
+            },
+            {
+              "name": "SIDES__top_center",
+              "origin": [
+                24,
+                40,
+                8
+              ],
+              "children": [
+                {
+                  "name": "georgian_triple_side_center",
+                  "origin": [
+                    24,
+                    40,
+                    8
+                  ],
+                  "children": [
+                    87,
+                    88,
+                    89,
+                    90
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "ROOF__top_center",
+              "origin": [
+                24,
+                40,
+                8
+              ],
+              "children": [
+                {
+                  "name": "georgian_triple_top_center",
+                  "origin": [
+                    24,
+                    40,
+                    8
+                  ],
+                  "children": [
+                    91,
+                    92,
+                    93,
+                    94,
+                    95,
+                    96,
+                    97,
+                    98,
+                    99,
+                    100,
+                    101,
+                    102,
+                    103,
+                    104,
+                    105,
+                    106,
+                    107,
+                    108,
+                    109,
+                    110,
+                    111,
+                    112,
+                    113,
+                    114,
+                    115,
+                    116,
+                    117,
+                    118,
+                    119,
+                    120,
+                    121,
+                    122,
+                    123,
+                    124,
+                    176,
+                    205,
+                    177,
+                    202,
+                    178,
+                    201,
+                    186,
+                    203,
+                    204,
+                    125
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "RIGHT",
+          "origin": [
+            40,
+            40,
+            8
+          ],
+          "children": [
+            {
+              "name": "BACK__top_right",
+              "origin": [
+                40,
+                40,
+                8
+              ],
+              "children": [
+                126
+              ]
+            },
+            {
+              "name": "SIDES__top_right",
+              "origin": [
+                40,
+                40,
+                8
+              ],
+              "children": [
+                {
+                  "name": "georgian_triple_side_right",
+                  "origin": [
+                    40,
+                    40,
+                    8
+                  ],
+                  "children": [
+                    127,
+                    128,
+                    129,
+                    130,
+                    131,
+                    132,
+                    133
+                  ]
+                },
+                134
+              ]
+            },
+            {
+              "name": "ROOF__top_right",
+              "origin": [
+                40,
+                40,
+                8
+              ],
+              "children": [
+                {
+                  "name": "georgian_triple_top_left",
+                  "origin": [
+                    40,
+                    40,
+                    8
+                  ],
+                  "children": [
+                    135,
+                    136,
+                    137,
+                    138,
+                    139,
+                    140,
+                    141,
+                    142,
+                    143,
+                    144,
+                    145,
+                    146,
+                    147,
+                    148,
+                    149,
+                    150,
+                    151,
+                    152,
+                    153,
+                    154,
+                    155,
+                    156,
+                    157,
+                    158,
+                    159,
+                    160,
+                    161,
+                    162,
+                    163,
+                    164,
+                    165,
+                    166,
+                    167,
+                    168,
+                    185,
+                    169,
+                    184,
+                    170,
+                    183,
+                    171,
+                    208,
+                    182,
+                    172,
+                    181,
+                    173,
+                    180,
+                    174,
+                    179,
+                    175
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

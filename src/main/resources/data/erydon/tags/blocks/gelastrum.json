@@ -394,6 +394,18 @@
     "erydon:gelastrum_diaphanes_light_pendant",
     "erydon:gelastrum_hewn_coping_georgian",
     "erydon:gelastrum_oil_burner",
-    "erydon:gelastrum_rusticated_coping_georgian"
+    "erydon:gelastrum_rusticated_coping_georgian",
+    "erydon:gelastrum_aged_alcove_modern",
+    "erydon:gelastrum_alcove_modern",
+    "erydon:gelastrum_ashlar_alcove_modern",
+    "erydon:gelastrum_hewn_alcove_modern",
+    "erydon:gelastrum_rock_alcove_modern",
+    "erydon:gelastrum_rusticated_alcove_modern",
+    "erydon:gelastrum_aged_arch_georgian",
+    "erydon:gelastrum_arch_georgian",
+    "erydon:gelastrum_ashlar_arch_georgian",
+    "erydon:gelastrum_hewn_arch_georgian",
+    "erydon:gelastrum_rock_arch_georgian",
+    "erydon:gelastrum_rusticated_arch_georgian"
   ]
 }

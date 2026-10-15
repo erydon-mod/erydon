@@ -722,6 +722,9 @@ public final class ErydonLoadProfiler {
         if (path.contains("_arch_gothic")) {
             return "gothic_arches";
         }
+        if (path.contains("_arch_georgian")) {
+            return "georgian_arches";
+        }
         return null;
     }
 

@@ -428,6 +428,18 @@
     "erydon:solistra_etruscus_weave_grout_stairs_shallow_bottom",
     "erydon:solistra_etruscus_weave_grout_stairs_shallow_top",
     "erydon:solistra_etruscus_weave_grout_wall",
-    "erydon:solistra_etruscus_weave_grout_wall_georgian"
+    "erydon:solistra_etruscus_weave_grout_wall_georgian",
+    "erydon:etruscus_aged_alcove_modern",
+    "erydon:etruscus_alcove_modern",
+    "erydon:etruscus_ashlar_alcove_modern",
+    "erydon:etruscus_hewn_alcove_modern",
+    "erydon:etruscus_rock_alcove_modern",
+    "erydon:etruscus_rusticated_alcove_modern",
+    "erydon:etruscus_aged_arch_georgian",
+    "erydon:etruscus_arch_georgian",
+    "erydon:etruscus_ashlar_arch_georgian",
+    "erydon:etruscus_hewn_arch_georgian",
+    "erydon:etruscus_rock_arch_georgian",
+    "erydon:etruscus_rusticated_arch_georgian"
   ]
 }

@@ -91,13 +91,14 @@ class SharedGeometryPrototypeTest {
                         return relative.startsWith("column/gothic/")
                                 || relative.startsWith("arch/gothic/")
                                 || relative.startsWith("alcove/alcove_georgian_")
-                                || relative.startsWith("alcove/alcove_gothic_");
+                                || relative.startsWith("alcove/alcove_gothic_")
+                                || relative.startsWith("alcove/alcove_modern_");
                     })
                     .filter(path -> path.getFileName().toString().endsWith(".json"))
                     .sorted()
                     .forEach(modelFiles::add);
         }
-        assertEquals(43, modelFiles.size());
+        assertEquals(70, modelFiles.size());
 
         for (Path modelFile : modelFiles) {
             String relative = root.relativize(modelFile).toString().replace('\\', '/');

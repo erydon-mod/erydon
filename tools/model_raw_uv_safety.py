@@ -13,6 +13,10 @@ Apply is deliberately separate and opt-in.  It accepts only an externally
 SHA-verified plan that exactly regenerates from the locked source inventory,
 changes selected numeric tokens or inserts the one offset member, validates an
 in-memory full-root postcondition, and uses atomic writes with rollback.
+
+Models opting into ``erydon_split_world_uv`` retain these authored/default UVs;
+their runtime baker splits implicit faces into atlas-safe texture cells. The
+audit reports their source ranges and marks those runtime-split faces.
 """
 
 from __future__ import annotations
@@ -317,7 +321,19 @@ def _collect_group_rotations(model: dict[str, Any]) -> dict[int, list[RawRotatio
     return output
 
 
-def _face_vertices(from_vector: Sequence[float], to_vector: Sequence[float], face: str) -> list[tuple[float, float, float]]:
+def _face_vertices(from_vector: Sequence[float], to_vector: Sequence[float], face: str,
+                   face_data: dict[str, Any] | None = None) -> list[tuple[float, float, float]]:
+    if face_data is not None and "erydon_vertices" in face_data:
+        positions = face_data["erydon_vertices"]
+        if not isinstance(positions, list) or len(positions) != 4:
+            raise ModelAuditError("erydon_vertices must contain exactly 4 finite XYZ arrays")
+        vertices = []
+        for point in positions:
+            if (not isinstance(point, list) or len(point) != 3
+                    or any(isinstance(value, bool) or not isinstance(value, (int, float)) for value in point)):
+                raise ModelAuditError("erydon_vertices must contain exactly 4 finite XYZ arrays")
+            vertices.append(_vector(point, 3, "erydon_vertices"))
+        return vertices
     x1, y1, z1 = from_vector
     x2, y2, z2 = to_vector
     return {
@@ -431,6 +447,8 @@ def _new_summary() -> dict[str, int]:
         "facesScanned": 0,
         "explicitFaces": 0,
         "implicitFaces": 0,
+        "runtimeCellSplitImplicitFaces": 0,
+        "runtimeCellSplitOutOfRangeFaces": 0,
         "offsetFaces": 0,
         "outOfRangeFaces": 0,
         "rotatedFaces": 0,
@@ -528,6 +546,9 @@ def _audit_document(document: Any, canonical_path: str, source_sha: str) -> tupl
     if not isinstance(elements, list):
         raise ModelAuditError(f"Raw model elements must be an array: {canonical_path}")
     group_rotations = _collect_group_rotations(document)
+    runtime_cell_split = document.get("erydon_split_world_uv", False)
+    if not isinstance(runtime_cell_split, bool):
+        raise ModelAuditError(f"erydon_split_world_uv must be boolean: {canonical_path}")
     findings: list[dict[str, Any]] = []
     counts = Counter()
 
@@ -560,7 +581,7 @@ def _audit_document(document: Any, canonical_path: str, source_sha: str) -> tupl
             offset = _parse_offset(face_data, label)
             if OFFSET_KEY in face_data:
                 counts["offsetFaces"] += 1
-            vertices = _face_vertices(from_vector, to_vector, face)
+            vertices = _face_vertices(from_vector, to_vector, face, face_data)
             for rotation in rotations:
                 vertices = [rotation.transform(vertex) for vertex in vertices]
             nominal_face = _closest_direction(vertices)
@@ -575,6 +596,8 @@ def _audit_document(document: Any, canonical_path: str, source_sha: str) -> tupl
                 base_uv = _rect_uv(authored)
             else:
                 counts["implicitFaces"] += 1
+                if runtime_cell_split:
+                    counts["runtimeCellSplitImplicitFaces"] += 1
                 authored = None
                 base_uv = _default_uv(vertices, nominal_face)
             effective = _effective_uv(base_uv, offset)
@@ -630,6 +653,9 @@ def _audit_document(document: Any, canonical_path: str, source_sha: str) -> tupl
                 "uniformShift": {"u": clean_number(shifts[0]), "v": clean_number(shifts[1])} if shifts else None,
             }
             findings.append(finding)
+            if runtime_cell_split and not explicit:
+                finding["runtimeCellSplit"] = True
+                counts["runtimeCellSplitOutOfRangeFaces"] += 1
     return findings, dict(counts)
 
 

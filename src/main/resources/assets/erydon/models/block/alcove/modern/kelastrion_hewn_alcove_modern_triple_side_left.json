@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/alcove/modern/alcove_modern_triple_side_left",
+    "textures":  {
+                     "stone":  "erydon:block/kelastrion_hewn_block",
+                     "particle":  "erydon:block/kelastrion_hewn_block"
+                 }
+}

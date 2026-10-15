@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/arch/georgian/arch_georgian_base_right",
+  "textures": {
+    "stone": "erydon:block/imperium_rock_block"
+  }
+}

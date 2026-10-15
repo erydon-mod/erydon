@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/arch/georgian/arch_georgian_width3_top_row0_column0",
+  "textures": {
+    "stone": "erydon:block/aganite_ashlar_block"
+  }
+}

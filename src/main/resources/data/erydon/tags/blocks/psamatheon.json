@@ -234,6 +234,18 @@
     "erydon:psamatheon_coping_georgian",
     "erydon:psamatheon_hewn_coping_georgian",
     "erydon:psamatheon_oil_burner",
-    "erydon:psamatheon_rusticated_coping_georgian"
+    "erydon:psamatheon_rusticated_coping_georgian",
+    "erydon:psamatheon_aged_alcove_modern",
+    "erydon:psamatheon_alcove_modern",
+    "erydon:psamatheon_ashlar_alcove_modern",
+    "erydon:psamatheon_hewn_alcove_modern",
+    "erydon:psamatheon_rock_alcove_modern",
+    "erydon:psamatheon_rusticated_alcove_modern",
+    "erydon:psamatheon_aged_arch_georgian",
+    "erydon:psamatheon_arch_georgian",
+    "erydon:psamatheon_ashlar_arch_georgian",
+    "erydon:psamatheon_hewn_arch_georgian",
+    "erydon:psamatheon_rock_arch_georgian",
+    "erydon:psamatheon_rusticated_arch_georgian"
   ]
 }

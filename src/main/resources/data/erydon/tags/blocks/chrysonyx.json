@@ -386,6 +386,18 @@
     "erydon:chrysonyx_coping_georgian",
     "erydon:chrysonyx_hewn_coping_georgian",
     "erydon:chrysonyx_oil_burner",
-    "erydon:chrysonyx_rusticated_coping_georgian"
+    "erydon:chrysonyx_rusticated_coping_georgian",
+    "erydon:chrysonyx_aged_alcove_modern",
+    "erydon:chrysonyx_alcove_modern",
+    "erydon:chrysonyx_ashlar_alcove_modern",
+    "erydon:chrysonyx_hewn_alcove_modern",
+    "erydon:chrysonyx_rock_alcove_modern",
+    "erydon:chrysonyx_rusticated_alcove_modern",
+    "erydon:chrysonyx_aged_arch_georgian",
+    "erydon:chrysonyx_arch_georgian",
+    "erydon:chrysonyx_ashlar_arch_georgian",
+    "erydon:chrysonyx_hewn_arch_georgian",
+    "erydon:chrysonyx_rock_arch_georgian",
+    "erydon:chrysonyx_rusticated_arch_georgian"
   ]
 }

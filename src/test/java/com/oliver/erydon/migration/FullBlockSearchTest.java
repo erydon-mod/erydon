@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class FullBlockSearchTest {
     @Test
     void standardFinishTermsCoverPlainFormsAndExcludeAlternateFinishes() {
-        for (String path : List.of("glacium_block", "glacium_slab", "glacium_arch_gothic",
+        for (String path : List.of("glacium_block", "glacium_slab", "glacium_arch_gothic", "glacium_arch_georgian",
                 "glacium_slope_steep_upper", "glacium_coping_georgian", "glacium_column_circular_double",
                 "glacium_cornice_byzantine", "glacium_cornice_guilloche", "latmion_block",
                 "psamatheon_window_arch", "kelastrion_light_wall")) {
@@ -49,7 +49,9 @@ class FullBlockSearchTest {
                 assertEquals(standard, ErydonBlockCategories.searchTerms(path).contains(term), path + ": " + term);
             }
         }
-        assertEquals(1413, expected.size());
+        assertEquals(27, expected.stream().filter(path -> path.endsWith("_arch_georgian")).count(),
+                "Every Georgian material has exactly one standard-finish arch");
+        assertEquals(1440 + 27, expected.size());
         for (String kind : List.of("blocks", "items")) {
             for (String finish : List.of("polished", "honed", "mirror")) {
                 assertEquals(expected, tagMembers(kind, finish), kind + ": " + finish);

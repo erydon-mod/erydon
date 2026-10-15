@@ -26,6 +26,7 @@ if str(TOOLS_ROOT) not in sys.path:
     sys.path.insert(0, str(TOOLS_ROOT))
 
 import model_raw_uv_safety as raw_uv
+from generate_georgian_arch_catalogue import ARCH_TOOLTIPS
 
 
 RENDER_SUFFIXES = (
@@ -49,17 +50,17 @@ LANGUAGE_PROFILE_NAMES = {
 
 TOOLTIPS = {
     "de_de.json": (
-        "Baut automatisch gotische Bögen mit bis zu 3 Metern Breite. Mit dem Debug-Stab sind Breiten von 1-6 Metern wählbar; breitere Bögen werden auch höher.",
+        ARCH_TOOLTIPS["de_de.json"]["gothic"],
         "Verwendet einen einfachen Rahmen ohne den romanischen Säulenstil.",
         "Nutze /recalc, um Gruppen neu aufzubauen.",
     ),
     "en_us.json": (
-        "Auto-assembles Gothic arches up to 3 metres wide by default. Use the debug stick to select widths 1-6; wider curves also grow taller.",
+        ARCH_TOOLTIPS["en_us.json"]["gothic"],
         "Uses a simple frame without the Romanesque column style.",
         "Use /recalc to rebuild clusters.",
     ),
     "es_es.json": (
-        "Ensambla arcos góticos de hasta 3 metros de ancho de forma predeterminada. Usa el palo de depuración para elegir anchos de 1 a 6 metros; las curvas más anchas también son más altas.",
+        ARCH_TOOLTIPS["es_es.json"]["gothic"],
         "Utiliza un marco sencillo sin el estilo de columnas románico.",
         "Usa /recalc para reconstruir los grupos.",
     ),

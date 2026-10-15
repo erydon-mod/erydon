@@ -92,6 +92,32 @@ def _complete_fixture() -> dict[str, object]:
 
 
 class RawUvSafetyTests(unittest.TestCase):
+    def test_runtime_split_models_keep_source_uv_ranges_and_disclose_runtime_handling(self) -> None:
+        document = {
+            "erydon_split_world_uv": True,
+            "elements": [{"from": [-2, -1, 0], "to": [18, 17, 16.75],
+                          "faces": {"south": {"texture": "#stone"}}}],
+        }
+        original = copy.deepcopy(document)
+        findings, counts = raw_uv._audit_document(document, "runtime_split.json", "test")
+        self.assertEqual(document, original)
+        self.assertEqual(len(findings), 1)
+        self.assertEqual(findings[0]["uRange"], [-2, 18])
+        self.assertEqual(findings[0]["vRange"], [-1, 17])
+        self.assertTrue(findings[0]["runtimeCellSplit"])
+        self.assertEqual(counts["runtimeCellSplitImplicitFaces"], 1)
+        self.assertEqual(counts["runtimeCellSplitOutOfRangeFaces"], 1)
+        summary = raw_uv._new_summary()
+        for key, value in counts.items():
+            summary[key] += value
+        self.assertEqual(summary["runtimeCellSplitOutOfRangeFaces"], 1)
+
+    def test_runtime_split_flag_is_strictly_boolean(self) -> None:
+        for invalid in (None, 1, "true", [], {}):
+            with self.subTest(invalid=invalid):
+                with self.assertRaisesRegex(ModelAuditError, "erydon_split_world_uv"):
+                    raw_uv._audit_document({"erydon_split_world_uv": invalid, "elements": []}, "flag.json", "test")
+
     def test_gothic_column_components_use_safe_implicit_world_uvs(self) -> None:
         component_root = (
             PROJECT

@@ -1,0 +1,131 @@
+{
+  "format_version": "1.21.11",
+  "credit": "Derived from the edited Romanesque arch BB project",
+  "textures": {
+    "stone": "erydon:block/aganite_block",
+    "particle": "#stone"
+  },
+  "erydon_split_world_uv": true,
+  "elements": [
+    {
+      "from": [
+        8.60404,
+        0,
+        3.125
+      ],
+      "to": [
+        10.76126,
+        16,
+        12.875
+      ],
+      "rotation": {
+        "angle": 0,
+        "axis": "y",
+        "origin": [
+          0,
+          10.11064,
+          8.125
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone",
+          "erydon_normal_offset": 0.000375
+        },
+        "south": {
+          "texture": "#stone",
+          "erydon_normal_offset": 0.000375
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone",
+          "cullface": "down"
+        }
+      }
+    },
+    {
+      "from": [
+        10.75603,
+        0.001,
+        1.85
+      ],
+      "to": [
+        13.44,
+        16,
+        14.15
+      ],
+      "rotation": {
+        "angle": 0,
+        "axis": "y",
+        "origin": [
+          0,
+          10.11064,
+          7.85
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone",
+          "cullface": "down"
+        }
+      }
+    },
+    {
+      "from": [
+        13.45184,
+        0,
+        0.0
+      ],
+      "to": [
+        16.0,
+        16,
+        16.0
+      ],
+      "rotation": {
+        "angle": 0,
+        "axis": "y",
+        "origin": [
+          2.08992,
+          10.36736,
+          8.0
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#stone",
+          "erydon_normal_offset": 0.000375
+        },
+        "east": {
+          "texture": "#stone",
+          "cullface": "east"
+        },
+        "south": {
+          "texture": "#stone",
+          "erydon_normal_offset": 0.000375
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone",
+          "cullface": "up"
+        },
+        "down": {
+          "texture": "#stone",
+          "cullface": "down"
+        }
+      }
+    }
+  ]
+}

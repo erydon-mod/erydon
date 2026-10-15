@@ -1,8 +1,7 @@
 {
   "format_version": "1.21.11",
-  "credit": "Made with Blockbench; ERYDON Georgian alcove 3-wide elliptical side wall",
+  "credit": "Derived from the Georgian three-wide design",
   "textures": {
-    "particle": "erydon:block/aganite_block",
     "stone": "erydon:block/aganite_block"
   },
   "elements": [
@@ -19,8 +18,9 @@
         1.92946
       ],
       "rotation": {
-        "angle": -17.26899,
-        "axis": "y",
+        "x": 0,
+        "y": -17.26899,
+        "z": 0,
         "origin": [
           1.31846,
           8,
@@ -28,12 +28,25 @@
         ]
       },
       "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
         "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
           "texture": "#stone",
-          "erydon_uv_offset": [
-            0.644089937210083,
-            0
-          ]
+          "erydon_normal_offset": 0.00025
+        },
+        "down": {
+          "texture": "#stone",
+          "erydon_normal_offset": 0.00025
         }
       }
     },
@@ -50,8 +63,9 @@
         3.21061
       ],
       "rotation": {
-        "angle": -25.0234,
-        "axis": "y",
+        "x": 0,
+        "y": -25.0234,
+        "z": 0,
         "origin": [
           4.647,
           8,
@@ -59,7 +73,22 @@
         ]
       },
       "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
         "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
           "texture": "#stone"
         }
       }
@@ -77,8 +106,9 @@
         4.85763
       ],
       "rotation": {
-        "angle": -33.69007,
-        "axis": "y",
+        "x": 0,
+        "y": -33.69007,
+        "z": 0,
         "origin": [
           7.59125,
           8,
@@ -86,8 +116,25 @@
         ]
       },
       "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
         "south": {
           "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone",
+          "erydon_normal_offset": 0.00025
+        },
+        "down": {
+          "texture": "#stone",
+          "erydon_normal_offset": 0.00025
         }
       }
     },
@@ -104,8 +151,9 @@
         6.82047
       ],
       "rotation": {
-        "angle": -43.59434,
-        "axis": "y",
+        "x": 0,
+        "y": -43.59434,
+        "z": 0,
         "origin": [
           10.06178,
           8,
@@ -113,7 +161,22 @@
         ]
       },
       "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
         "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
           "texture": "#stone"
         }
       }
@@ -141,8 +204,25 @@
         ]
       },
       "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
         "south": {
           "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone",
+          "erydon_normal_offset": 0.00025
+        },
+        "down": {
+          "texture": "#stone",
+          "erydon_normal_offset": 0.00025
         }
       }
     },
@@ -169,8 +249,25 @@
         ]
       },
       "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
         "south": {
           "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone",
+          "erydon_normal_offset": 0.0005
+        },
+        "down": {
+          "texture": "#stone",
+          "erydon_normal_offset": 0.0005
         }
       }
     },
@@ -197,34 +294,9 @@
         ]
       },
       "faces": {
-        "south": {
+        "north": {
           "texture": "#stone"
-        }
-      }
-    },
-    {
-      "name": "outer_jamb_right",
-      "from": [
-        13.89936,
-        0,
-        0
-      ],
-      "to": [
-        16,
-        16,
-        16
-      ],
-      "rotation": {
-        "angle": 0,
-        "axis": "y",
-        "origin": [
-          16,
-          0,
-          0
-        ]
-      },
-      "color": 9,
-      "faces": {
+        },
         "east": {
           "texture": "#stone"
         },
@@ -233,30 +305,15 @@
         },
         "west": {
           "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
         }
       }
     }
   ],
-  "groups": [
-    {
-      "name": "georgian_triple_side_right",
-      "origin": [
-        8,
-        8,
-        8
-      ],
-      "scope": 0,
-      "color": 0,
-      "children": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6
-      ]
-    },
-    7
-  ]
+  "erydon_split_world_uv": true
 }

@@ -1,8 +1,12 @@
 package com.oliver.erydon.client.model;
 
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
+import net.fabricmc.fabric.api.renderer.v1.model.SpriteFinder;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.model.BakedQuad;
+import net.minecraft.client.texture.Sprite;
+import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.util.math.Direction;
 
 /** Reflects an assembled arch quad, including winding, normals, and face metadata. */
@@ -12,14 +16,26 @@ final class ArchHorizontalReflection implements RenderContext.QuadTransform {
     private static final ThreadLocal<Scratch> SCRATCH = ThreadLocal.withInitial(Scratch::new);
 
     private final Direction.Axis axis;
+    private final boolean worldUv;
+    private SpriteFinder spriteFinder;
 
     private ArchHorizontalReflection(Direction.Axis axis) {
+        this(axis, false);
+    }
+
+    private ArchHorizontalReflection(Direction.Axis axis, boolean worldUv) {
         this.axis = axis;
+        this.worldUv = worldUv;
     }
 
     static ArchHorizontalReflection forState(Direction facing, boolean centre) {
         boolean reflectX = (facing.getAxis() == Direction.Axis.X) != centre;
         return reflectX ? X : Z;
+    }
+
+    /** A wrapper-local depth mirror keeps an authored left profile's front/back placement. */
+    static ArchHorizontalReflection forDepthMirror(Direction facing) {
+        return new ArchHorizontalReflection(facing.getAxis(), true);
     }
 
     Direction face(Direction source) {
@@ -34,6 +50,8 @@ final class ArchHorizontalReflection implements RenderContext.QuadTransform {
         Scratch scratch = SCRATCH.get();
         Direction cullFace = quad.cullFace();
         Direction nominalFace = quad.nominalFace();
+        Direction lightFace = quad.lightFace();
+        Sprite sprite = worldUv ? findSprite(quad) : null;
 
         for (int i = 0; i < 4; i++) {
             scratch.x[i] = quad.x(i);
@@ -55,7 +73,13 @@ final class ArchHorizontalReflection implements RenderContext.QuadTransform {
             int source = (4 - i) & 3;
             quad.pos(i, axis == Direction.Axis.X ? 1.0F - scratch.x[source] : scratch.x[source],
                     scratch.y[source], axis == Direction.Axis.Z ? 1.0F - scratch.z[source] : scratch.z[source]);
-            quad.uv(i, scratch.u[source], scratch.v[source]);
+            float u = scratch.u[source];
+            float v = scratch.v[source];
+            if (sprite != null) {
+                if (flipU(lightFace)) u = reflectedU(sprite, u);
+                else v = reflectedV(sprite, v);
+            }
+            quad.uv(i, u, v);
             quad.color(i, scratch.colors[source]);
             quad.lightmap(i, scratch.lightmaps[source]);
             if (scratch.normals[source]) {
@@ -84,9 +108,35 @@ final class ArchHorizontalReflection implements RenderContext.QuadTransform {
             int component = (byte) (normal >> normalShift);
             data[to + 7] = (normal & ~(0xFF << normalShift))
                     | ((-component & 0xFF) << normalShift);
+            if (worldUv && quad.getSprite() != null) {
+                int uvIndex = to + (flipU(quad.getFace()) ? 4 : 5);
+                float value = Float.intBitsToFloat(data[uvIndex]);
+                data[uvIndex] = Float.floatToRawIntBits(flipU(quad.getFace())
+                        ? reflectedU(quad.getSprite(), value) : reflectedV(quad.getSprite(), value));
+            }
         }
         return new BakedQuad(data, quad.getColorIndex(), face(quad.getFace()),
                 quad.getSprite(), quad.hasShade());
+    }
+
+    private boolean flipU(Direction face) {
+        return face == null || face.getAxis() != Direction.Axis.Y || axis == Direction.Axis.X;
+    }
+
+    private Sprite findSprite(MutableQuadView quad) {
+        if (spriteFinder == null) {
+            spriteFinder = SpriteFinder.get(MinecraftClient.getInstance().getBakedModelManager()
+                    .getAtlas(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE));
+        }
+        return spriteFinder.find(quad);
+    }
+
+    private static float reflectedU(Sprite sprite, float value) {
+        return sprite.getMinU() + sprite.getMaxU() - value;
+    }
+
+    private static float reflectedV(Sprite sprite, float value) {
+        return sprite.getMinV() + sprite.getMaxV() - value;
     }
 
     private static final class Scratch {

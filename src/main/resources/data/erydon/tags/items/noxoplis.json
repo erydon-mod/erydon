@@ -344,6 +344,18 @@
     "erydon:noxoplis_wall",
     "erydon:noxoplis_wall_georgian",
     "erydon:noxoplis_window_arch",
-    "erydon:noxoplis_window_french_georgian"
+    "erydon:noxoplis_window_french_georgian",
+    "erydon:noxoplis_aged_alcove_modern",
+    "erydon:noxoplis_alcove_modern",
+    "erydon:noxoplis_ashlar_alcove_modern",
+    "erydon:noxoplis_hewn_alcove_modern",
+    "erydon:noxoplis_rock_alcove_modern",
+    "erydon:noxoplis_rusticated_alcove_modern",
+    "erydon:noxoplis_aged_arch_georgian",
+    "erydon:noxoplis_arch_georgian",
+    "erydon:noxoplis_ashlar_arch_georgian",
+    "erydon:noxoplis_hewn_arch_georgian",
+    "erydon:noxoplis_rock_arch_georgian",
+    "erydon:noxoplis_rusticated_arch_georgian"
   ]
 }

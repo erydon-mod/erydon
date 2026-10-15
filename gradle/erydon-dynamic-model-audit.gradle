@@ -149,6 +149,10 @@ tasks.register('auditErydonDynamicModels') {
         def archSuffixes = stringArray(sourceText('ArchRomanesqueBakedModel.java'), 'MODEL_SUFFIXES')
         def modernArchSuffixes = stringArray(sourceText('ArchRomanesqueBakedModel.java'), 'MODERN_MODEL_SUFFIXES')
         def gothicArchSuffixes = stringArray(sourceText('ArchRomanesqueBakedModel.java'), 'GOTHIC_MODEL_SUFFIXES')
+        def georgianArchSuffixes = []
+        (sourceText('ErydonRawModelLoadingPlugin.java') =~ /Map\.entry\("arch_georgian\/([^"]+)"/).each { match ->
+            georgianArchSuffixes << match[1]
+        }
         def windowFrenchSuffixes = stringArray(sourceText('WindowFrenchGeorgianBakedModel.java'), 'MODEL_SUFFIXES')
         def windowArchSuffixes = stringArray(sourceText('WindowArchBakedModel.java'), 'MODEL_SUFFIXES')
         def columnSuffixes = stringArray(sourceText('ColumnBakedModel.java'), 'MODEL_SUFFIXES')
@@ -157,6 +161,7 @@ tasks.register('auditErydonDynamicModels') {
         def surroundHandedSuffixes = stringArray(sourceText('SurroundBakedModel.java'), 'HANDED_MODEL_SUFFIXES')
         def alcoveSuffixes = stringArray(sourceText('AlcoveBakedModel.java'), 'BASE_MODEL_SUFFIXES')
         alcoveSuffixes.addAll(stringArray(sourceText('AlcoveBakedModel.java'), 'TRIPLE_MODEL_SUFFIXES'))
+        def georgianAlcoveBodySuffixes = stringArray(sourceText('AlcoveBakedModel.java'), 'GEORGIAN_BODY_MODEL_SUFFIXES')
 
         def slopeFamily = { String path ->
             if (path == null || path.startsWith('block/slope/')) {
@@ -338,6 +343,19 @@ tasks.register('auditErydonDynamicModels') {
                         note: 'Placed blockstates are wrapped anchors; components and item icons are supplied through the raw 1.21-style authoring loader.'
                 ],
                 [
+                        key: 'arch_georgian',
+                        label: 'Georgian arches',
+                        plugin: 'ErydonFamilyModelLoadingPlugin',
+                        bakedSources: ['ArchGeorgianBakedModel.java'],
+                        matches: { String blockId -> blockId.contains('_arch_georgian') },
+                        folderMatches: { String path -> path.startsWith('block/arch/georgian/') },
+                        familyParent: { String parent -> parent != null && parent.startsWith('erydon:block/arch/georgian/') },
+                        expectedModels: { String blockId ->
+                            georgianArchSuffixes.collect { suffix -> 'block/arch/georgian/' + blockId + '_' + suffix }
+                        },
+                        note: 'Fixed authored component profiles are prederived for widths 1-6; unpublished child resources use canonical block IDs directly.'
+                ],
+                [
                         key: 'window_french_georgian',
                         label: 'French Georgian windows',
                         plugin: 'ErydonFamilyModelLoadingPlugin',
@@ -372,14 +390,15 @@ tasks.register('auditErydonDynamicModels') {
                         label: 'Alcoves',
                         plugin: 'ErydonFamilyModelLoadingPlugin',
                         bakedSources: ['AlcoveBakedModel.java'],
-                        matches: { String blockId -> blockId.contains('_alcove_georgian') || blockId.contains('_alcove_gothic') },
-                        folderMatches: { String path -> path.startsWith('block/alcove/georgian/') || path.startsWith('block/alcove/gothic/') },
-                        familyParent: { String parent -> parent != null && (parent.startsWith('erydon:block/alcove/georgian/') || parent.startsWith('erydon:block/alcove/gothic/')) },
+                        matches: { String blockId -> blockId.contains('_alcove_georgian') || blockId.contains('_alcove_gothic') || blockId.contains('_alcove_modern') },
+                        folderMatches: { String path -> path.startsWith('block/alcove/georgian/') || path.startsWith('block/alcove/gothic/') || path.startsWith('block/alcove/modern/') },
+                        familyParent: { String parent -> parent != null && (parent.startsWith('erydon:block/alcove/georgian/') || parent.startsWith('erydon:block/alcove/gothic/') || parent.startsWith('erydon:block/alcove/modern/')) },
                         expectedModels: { String blockId ->
                             def aged = isAged(blockId)
                             def base = stripAged(blockId)
-                            def style = base.contains('_alcove_gothic') ? 'gothic' : 'georgian'
-                            alcoveSuffixes.collect { suffix -> "block/alcove/${style}/" + withAged(base, suffix, aged) }
+                            def style = base.contains('_alcove_gothic') ? 'gothic' : (base.contains('_alcove_modern') ? 'modern' : 'georgian')
+                            def suffixes = style == 'georgian' ? alcoveSuffixes + georgianAlcoveBodySuffixes : alcoveSuffixes
+                            suffixes.collect { suffix -> "block/alcove/${style}/" + withAged(base, suffix, aged) }
                         },
                         note: 'Placed blockstates are wrapped anchors; component and icon models are supplied through the raw 1.21-style authoring loader.'
                 ],
@@ -668,7 +687,7 @@ tasks.register('auditErydonDynamicModels') {
         }
         lines << ''
         lines << 'Spot checks'
-        ['aganite_slope', 'aganite_arch_romanesque', 'aganite_arch_modern', 'aganite_arch_gothic', 'aganite_window_french_georgian', 'aganite_column_square', 'aganite_cornice_georgian'].each { blockId ->
+        ['aganite_slope', 'aganite_arch_romanesque', 'aganite_arch_modern', 'aganite_arch_gothic', 'aganite_arch_georgian', 'aganite_window_french_georgian', 'aganite_column_square', 'aganite_cornice_georgian'].each { blockId ->
             def family = familyRows.find { row -> row.blocks.contains(blockId) }
             if (family == null) {
                 lines << "${blockId}: not found"

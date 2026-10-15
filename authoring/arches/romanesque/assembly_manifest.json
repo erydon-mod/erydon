@@ -1,0 +1,356 @@
+{
+  "schema": 1,
+  "purpose": "Editable Romanesque arch; runtime sources are unchanged",
+  "master": "arch_romanesque_3wide.bbmodel",
+  "json": "arch_romanesque_3wide.json",
+  "width_blocks": 3,
+  "height_blocks": 4,
+  "units_per_block": 16,
+  "facing": "north (-Z)",
+  "style_set": "column",
+  "validation": {
+    "elements": 398,
+    "faces": 1061,
+    "component_instances": 17,
+    "max_source_vertex_error_model_units": 7.003140908467413e-11,
+    "native_cube_face_parity": true
+  },
+  "components": [
+    {
+      "group": "COLUMN__base_left",
+      "source": "src/main/resources/assets/erydon/models/block/arch/romanesque/arch_romanesque_side_column.json",
+      "suffix": "side_column",
+      "arrangement": "triple_column_base_l",
+      "cell": [
+        0,
+        0,
+        0
+      ],
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "runtime_y_rotation": 180,
+      "element_start": 0,
+      "element_count": 72
+    },
+    {
+      "group": "PLINTH__base_left",
+      "source": "src/main/resources/assets/erydon/models/block/arch/romanesque/arch_romanesque_plinth.json",
+      "suffix": "plinth",
+      "arrangement": "triple_column_base_l",
+      "cell": [
+        0,
+        0,
+        0
+      ],
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "runtime_y_rotation": 180,
+      "element_start": 72,
+      "element_count": 8
+    },
+    {
+      "group": "COLUMN__base_right",
+      "source": "src/main/resources/assets/erydon/models/block/arch/romanesque/arch_romanesque_side_column.json",
+      "suffix": "side_column",
+      "arrangement": "triple_column_base_r",
+      "cell": [
+        2,
+        0,
+        0
+      ],
+      "translation": [
+        32,
+        0,
+        0
+      ],
+      "runtime_y_rotation": 0,
+      "element_start": 80,
+      "element_count": 72
+    },
+    {
+      "group": "PLINTH__base_right",
+      "source": "src/main/resources/assets/erydon/models/block/arch/romanesque/arch_romanesque_plinth.json",
+      "suffix": "plinth",
+      "arrangement": "triple_column_base_r",
+      "cell": [
+        2,
+        0,
+        0
+      ],
+      "translation": [
+        32,
+        0,
+        0
+      ],
+      "runtime_y_rotation": 0,
+      "element_start": 152,
+      "element_count": 8
+    },
+    {
+      "group": "CAPITAL__capitals_left",
+      "source": "src/main/resources/assets/erydon/models/block/arch/romanesque/arch_romanesque_side_large_upper.json",
+      "suffix": "side_large_upper",
+      "arrangement": "triple_column_upper_l",
+      "cell": [
+        0,
+        1,
+        0
+      ],
+      "translation": [
+        0,
+        16,
+        0
+      ],
+      "runtime_y_rotation": 180,
+      "element_start": 160,
+      "element_count": 18
+    },
+    {
+      "group": "COLUMN__capitals_left",
+      "source": "src/main/resources/assets/erydon/models/block/arch/romanesque/arch_romanesque_side_column.json",
+      "suffix": "side_column",
+      "arrangement": "triple_column_upper_l",
+      "cell": [
+        0,
+        1,
+        0
+      ],
+      "translation": [
+        0,
+        16,
+        0
+      ],
+      "runtime_y_rotation": 180,
+      "element_start": 178,
+      "element_count": 72
+    },
+    {
+      "group": "CAPITAL__capitals_right",
+      "source": "src/main/resources/assets/erydon/models/block/arch/romanesque/arch_romanesque_side_large_upper.json",
+      "suffix": "side_large_upper",
+      "arrangement": "triple_column_upper_r",
+      "cell": [
+        2,
+        1,
+        0
+      ],
+      "translation": [
+        32,
+        16,
+        0
+      ],
+      "runtime_y_rotation": 0,
+      "element_start": 250,
+      "element_count": 18
+    },
+    {
+      "group": "COLUMN__capitals_right",
+      "source": "src/main/resources/assets/erydon/models/block/arch/romanesque/arch_romanesque_side_column.json",
+      "suffix": "side_column",
+      "arrangement": "triple_column_upper_r",
+      "cell": [
+        2,
+        1,
+        0
+      ],
+      "translation": [
+        32,
+        16,
+        0
+      ],
+      "runtime_y_rotation": 0,
+      "element_start": 268,
+      "element_count": 72
+    },
+    {
+      "group": "CURVE__curve_lower_left",
+      "source": "src/main/resources/assets/erydon/models/block/arch/romanesque/arch_romanesque_corner_large_lower.json",
+      "suffix": "corner_large_lower",
+      "arrangement": "triple_row2_l",
+      "cell": [
+        0,
+        2,
+        0
+      ],
+      "translation": [
+        0,
+        32,
+        0
+      ],
+      "runtime_y_rotation": 180,
+      "element_start": 340,
+      "element_count": 4
+    },
+    {
+      "group": "WALL__curve_lower_left",
+      "source": "src/main/resources/assets/erydon/models/block/arch/romanesque/arch_romanesque_side_large.json",
+      "suffix": "side_large",
+      "arrangement": "triple_row2_l",
+      "cell": [
+        0,
+        2,
+        0
+      ],
+      "translation": [
+        0,
+        32,
+        0
+      ],
+      "runtime_y_rotation": 180,
+      "element_start": 344,
+      "element_count": 3
+    },
+    {
+      "group": "CURVE__curve_lower_right",
+      "source": "src/main/resources/assets/erydon/models/block/arch/romanesque/arch_romanesque_corner_large_lower.json",
+      "suffix": "corner_large_lower",
+      "arrangement": "triple_row2_r",
+      "cell": [
+        2,
+        2,
+        0
+      ],
+      "translation": [
+        32,
+        32,
+        0
+      ],
+      "runtime_y_rotation": 0,
+      "element_start": 347,
+      "element_count": 4
+    },
+    {
+      "group": "WALL__curve_lower_right",
+      "source": "src/main/resources/assets/erydon/models/block/arch/romanesque/arch_romanesque_side_large.json",
+      "suffix": "side_large",
+      "arrangement": "triple_row2_r",
+      "cell": [
+        2,
+        2,
+        0
+      ],
+      "translation": [
+        32,
+        32,
+        0
+      ],
+      "runtime_y_rotation": 0,
+      "element_start": 351,
+      "element_count": 3
+    },
+    {
+      "group": "CURVE__crown_left",
+      "source": "src/main/resources/assets/erydon/models/block/arch/romanesque/arch_romanesque_corner_large_upper.json",
+      "suffix": "corner_large_upper",
+      "arrangement": "triple_top_l",
+      "cell": [
+        0,
+        3,
+        0
+      ],
+      "translation": [
+        0,
+        48,
+        0
+      ],
+      "runtime_y_rotation": 180,
+      "element_start": 354,
+      "element_count": 12
+    },
+    {
+      "group": "WALL__crown_left",
+      "source": "src/main/resources/assets/erydon/models/block/arch/romanesque/arch_romanesque_side_large.json",
+      "suffix": "side_large",
+      "arrangement": "triple_top_l",
+      "cell": [
+        0,
+        3,
+        0
+      ],
+      "translation": [
+        0,
+        48,
+        0
+      ],
+      "runtime_y_rotation": 180,
+      "element_start": 366,
+      "element_count": 3
+    },
+    {
+      "group": "KEYSTONE__crown_center",
+      "source": "src/main/resources/assets/erydon/models/block/arch/romanesque/arch_romanesque_top_large.json",
+      "suffix": "top_large",
+      "arrangement": "top_large",
+      "cell": [
+        1,
+        3,
+        0
+      ],
+      "translation": [
+        16,
+        48,
+        0
+      ],
+      "runtime_y_rotation": 0,
+      "element_start": 369,
+      "element_count": 14
+    },
+    {
+      "group": "CURVE__crown_right",
+      "source": "src/main/resources/assets/erydon/models/block/arch/romanesque/arch_romanesque_corner_large_upper.json",
+      "suffix": "corner_large_upper",
+      "arrangement": "triple_top_r",
+      "cell": [
+        2,
+        3,
+        0
+      ],
+      "translation": [
+        32,
+        48,
+        0
+      ],
+      "runtime_y_rotation": 0,
+      "element_start": 383,
+      "element_count": 12
+    },
+    {
+      "group": "WALL__crown_right",
+      "source": "src/main/resources/assets/erydon/models/block/arch/romanesque/arch_romanesque_side_large.json",
+      "suffix": "side_large",
+      "arrangement": "triple_top_r",
+      "cell": [
+        2,
+        3,
+        0
+      ],
+      "translation": [
+        32,
+        48,
+        0
+      ],
+      "runtime_y_rotation": 0,
+      "element_start": 395,
+      "element_count": 3
+    }
+  ],
+  "source_hashes": {
+    "src/main/java/com/oliver/erydon/block/ArchRomanesqueBlock.java": "3ad04ac650153429eb22102441d956e2b23ae02927ecf537efa2de9f31bde5c3",
+    "src/main/java/com/oliver/erydon/block/WideArchLayout.java": "eda0266c6d7ab7e5eb15f24427af5f17ad4fd64ac43730d6def6e3ff4e47c55a",
+    "src/main/java/com/oliver/erydon/client/model/ArchRomanesqueBakedModel.java": "256a42af4f8efb6359dbab52f555a45426b34982983ef598b5135d3b938a9ede",
+    "src/main/resources/assets/erydon/models/block/arch/romanesque/arch_romanesque_corner_large_lower.json": "3dd86d0c1609f063a83c34601ede92f40ef60fad49e7bd35b55f9d2f9e4dd80e",
+    "src/main/resources/assets/erydon/models/block/arch/romanesque/arch_romanesque_corner_large_upper.json": "c24017957c67c3643c3ba9418639e7b33dab3110f6cd13c64dceb4eb3168abaa",
+    "src/main/resources/assets/erydon/models/block/arch/romanesque/arch_romanesque_plinth.json": "f82749f05a1ca200bded0a9fed75df0e48861b3f59f6d38a742c51b801ee3e94",
+    "src/main/resources/assets/erydon/models/block/arch/romanesque/arch_romanesque_side_column.json": "3c1afeaf001f359b9671d5a3c0be6375614b729064c1eb23361ac746ec6f5bb7",
+    "src/main/resources/assets/erydon/models/block/arch/romanesque/arch_romanesque_side_large.json": "4eae070b92813b6dbb44671ce0cab1ea0ed460908c7afc84ede49030a2abe456",
+    "src/main/resources/assets/erydon/models/block/arch/romanesque/arch_romanesque_side_large_upper.json": "05c0e065a7950b9af5994f30f70022dad4a1c0ca6696c9493f993dd47c3a5e9c",
+    "src/main/resources/assets/erydon/models/block/arch/romanesque/arch_romanesque_top_large.json": "4e266cb345016a514dab303300fb56721da16fc3646fab9ba3d94e6909fa3035",
+    "src/main/resources/assets/erydon/textures/block/aganite_block.png": "bf0c15c85bbd81be82cd4d7ceed2339101b763501be4de375be0104582d282e2"
+  }
+}

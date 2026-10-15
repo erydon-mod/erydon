@@ -7,6 +7,7 @@ import com.oliver.erydon.util.ErydonIdNaming;
 import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Block;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
@@ -23,12 +24,16 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockRenderView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public final class AlcoveBakedModel implements BakedModel, FabricBakedModel {
     private static final String GEORGIAN_MODEL_ROOT = "block/alcove/georgian/";
     private static final String GOTHIC_MODEL_ROOT = "block/alcove/gothic/";
+    private static final String MODERN_MODEL_ROOT = "block/alcove/modern/";
     private static final List<String> BASE_MODEL_SUFFIXES = List.of(
             "back",
             "sides",
@@ -45,9 +50,27 @@ public final class AlcoveBakedModel implements BakedModel, FabricBakedModel {
             "triple_top_left",
             "triple_top_center",
             "triple_top_right");
+    private static final List<String> GEORGIAN_BODY_MODEL_SUFFIXES = List.of(
+            "base_detail_left",
+            "base_detail_right",
+            "middle_detail_left",
+            "middle_detail_right",
+            "double_base_detail_left",
+            "double_base_detail_right",
+            "double_middle_detail_left",
+            "double_middle_detail_right",
+            "triple_base_detail_left",
+            "triple_base_detail_right",
+            "triple_middle_detail_left",
+            "triple_middle_detail_right");
+    private static final int SPAN_COUNT = AlcoveBlock.AlcoveSpan.values().length;
+    private static final List<List<String>> GEORGIAN_BODY_SUFFIXES_BY_STATE = bodyDetailSuffixTable();
+    private static final List<List<String>> GEORGIAN_SUFFIXES_BY_STATE = componentSuffixTable(true);
+    private static final List<List<String>> OTHER_SUFFIXES_BY_STATE = componentSuffixTable(false);
 
     private final BakedModel wrapped;
     private final Sprite particle;
+    private volatile ResolvedComponents resolvedComponents;
 
     public AlcoveBakedModel(BakedModel wrapped) {
         this.wrapped = wrapped;
@@ -72,8 +95,12 @@ public final class AlcoveBakedModel implements BakedModel, FabricBakedModel {
         }
 
         int degrees = yRotation(state.get(AlcoveBlock.FACING));
-        for (String suffix : suffixesForState(state)) {
-            emit(context, getModel(state, suffix), degrees);
+        ComponentModels components = componentsFor(state.getBlock());
+        if (components == null) {
+            return;
+        }
+        for (BakedModel component : components.forState(state.get(AlcoveBlock.PART), state.get(AlcoveBlock.SPAN))) {
+            emit(context, component, degrees);
         }
     }
 
@@ -84,8 +111,8 @@ public final class AlcoveBakedModel implements BakedModel, FabricBakedModel {
             Identifier blockId = Registries.BLOCK.getId(blockItem.getBlock());
             if (blockId != null && Erydon.MOD_ID.equals(blockId.getNamespace())
                     && ErydonModelFamilyIndex.isAlcoveBlock(blockId.getPath())) {
-                BakedModel icon = MinecraftClient.getInstance().getBakedModelManager()
-                        .getModel(modelId(blockId.getPath(), "icon"));
+                ComponentModels components = componentsFor(blockItem.getBlock());
+                BakedModel icon = components == null ? null : components.icon;
                 if (icon != null) {
                     SharedGeometryChildModel.emit(context, icon);
                     return;
@@ -95,18 +122,58 @@ public final class AlcoveBakedModel implements BakedModel, FabricBakedModel {
         context.fallbackConsumer().accept(wrapped);
     }
 
-    private static List<String> suffixesForState(BlockState state) {
-        List<String> suffixes = new ArrayList<>(4);
-        suffixes.add("back");
+    static List<String> componentSuffixes(AlcoveBlock.AlcovePart part, AlcoveBlock.AlcoveSpan span,
+                                          boolean georgian) {
+        return (georgian ? GEORGIAN_SUFFIXES_BY_STATE : OTHER_SUFFIXES_BY_STATE)
+                .get(part.ordinal() * SPAN_COUNT + span.ordinal());
+    }
 
-        AlcoveBlock.AlcoveSpan span = state.get(AlcoveBlock.SPAN);
-        suffixes.add(sideSuffix(span));
-
-        AlcoveBlock.AlcovePart part = state.get(AlcoveBlock.PART);
-        if (part == AlcoveBlock.AlcovePart.SINGLE || part == AlcoveBlock.AlcovePart.TOP) {
-            suffixes.add(topSuffix(span));
+    private static List<List<String>> componentSuffixTable(boolean georgian) {
+        List<List<String>> table = new ArrayList<>(AlcoveBlock.AlcovePart.values().length * SPAN_COUNT);
+        for (var part : AlcoveBlock.AlcovePart.values()) {
+            boolean crown = part == AlcoveBlock.AlcovePart.SINGLE || part == AlcoveBlock.AlcovePart.TOP;
+            for (var span : AlcoveBlock.AlcoveSpan.values()) {
+                List<String> suffixes = new ArrayList<>(4);
+                suffixes.add("back");
+                if (!georgian || !crown) {
+                    suffixes.add(sideSuffix(span));
+                }
+                if (georgian) {
+                    suffixes.addAll(bodyDetailSuffixes(part, span));
+                }
+                if (crown) {
+                    suffixes.add(topSuffix(span));
+                }
+                table.add(List.copyOf(suffixes));
+            }
         }
-        return suffixes;
+        return List.copyOf(table);
+    }
+
+    static List<String> bodyDetailSuffixes(AlcoveBlock.AlcovePart part, AlcoveBlock.AlcoveSpan span) {
+        return GEORGIAN_BODY_SUFFIXES_BY_STATE.get(part.ordinal() * SPAN_COUNT + span.ordinal());
+    }
+
+    private static List<List<String>> bodyDetailSuffixTable() {
+        List<List<String>> table = new ArrayList<>(AlcoveBlock.AlcovePart.values().length * SPAN_COUNT);
+        for (var part : AlcoveBlock.AlcovePart.values()) {
+            for (var span : AlcoveBlock.AlcoveSpan.values()) {
+                if (part != AlcoveBlock.AlcovePart.BASE && part != AlcoveBlock.AlcovePart.MIDDLE) {
+                    table.add(List.of());
+                    continue;
+                }
+                String prefix = part == AlcoveBlock.AlcovePart.BASE ? "base_detail_" : "middle_detail_";
+                table.add(switch (span) {
+                    case SINGLE -> List.of(prefix + "left", prefix + "right");
+                    case LEFT -> List.of("double_" + prefix + "left");
+                    case RIGHT -> List.of("double_" + prefix + "right");
+                    case TRIPLE_LEFT -> List.of("triple_" + prefix + "left");
+                    case TRIPLE_RIGHT -> List.of("triple_" + prefix + "right");
+                    case TRIPLE_CENTER -> List.of();
+                });
+            }
+        }
+        return List.copyOf(table);
     }
 
     private static String sideSuffix(AlcoveBlock.AlcoveSpan span) {
@@ -143,12 +210,60 @@ public final class AlcoveBakedModel implements BakedModel, FabricBakedModel {
         WorldAlignedYRotation.emit(context, model, degrees);
     }
 
-    private static BakedModel getModel(BlockState state, String suffix) {
-        Identifier blockId = Registries.BLOCK.getId(state.getBlock());
-        if (blockId == null || !Erydon.MOD_ID.equals(blockId.getNamespace())) {
-            return null;
+    /** Family wrappers are recreated by the model-loading plugin on every resource reload. */
+    private ComponentModels componentsFor(Block block) {
+        ResolvedComponents cached = resolvedComponents;
+        if (cached != null && cached.block == block) {
+            return cached.models;
         }
-        return MinecraftClient.getInstance().getBakedModelManager().getModel(modelId(blockId.getPath(), suffix));
+        synchronized (this) {
+            cached = resolvedComponents;
+            if (cached != null && cached.block == block) {
+                return cached.models;
+            }
+            Identifier blockId = Registries.BLOCK.getId(block);
+            if (blockId == null || !Erydon.MOD_ID.equals(blockId.getNamespace())) {
+                return null;
+            }
+            var manager = MinecraftClient.getInstance().getBakedModelManager();
+            ComponentModels models = new ComponentModels(blockId.getPath(), manager::getModel);
+            resolvedComponents = new ResolvedComponents(block, models);
+            return models;
+        }
+    }
+
+    private record ResolvedComponents(Block block, ComponentModels models) { }
+
+    static final class ComponentModels {
+        private final List<List<BakedModel>> selections;
+        private final BakedModel icon;
+
+        ComponentModels(String blockPath, Function<Identifier, BakedModel> resolver) {
+            boolean georgian = ErydonModelFamilyIndex.isGeorgianAlcoveBlock(blockPath);
+            Map<String, BakedModel> children = new HashMap<>();
+            for (String suffix : modelSuffixes(blockPath)) {
+                children.put(suffix, resolver.apply(modelId(blockPath, suffix)));
+            }
+            icon = children.get("icon");
+            List<List<BakedModel>> states = new ArrayList<>(AlcoveBlock.AlcovePart.values().length * SPAN_COUNT);
+            for (var part : AlcoveBlock.AlcovePart.values()) {
+                for (var span : AlcoveBlock.AlcoveSpan.values()) {
+                    List<BakedModel> selected = new ArrayList<>(4);
+                    for (String suffix : componentSuffixes(part, span, georgian)) {
+                        BakedModel child = children.get(suffix);
+                        if (child != null) {
+                            selected.add(child);
+                        }
+                    }
+                    states.add(List.copyOf(selected));
+                }
+            }
+            selections = List.copyOf(states);
+        }
+
+        List<BakedModel> forState(AlcoveBlock.AlcovePart part, AlcoveBlock.AlcoveSpan span) {
+            return selections.get(part.ordinal() * SPAN_COUNT + span.ordinal());
+        }
     }
 
     public static Identifier modelId(String blockPath, String suffix) {
@@ -159,6 +274,9 @@ public final class AlcoveBakedModel implements BakedModel, FabricBakedModel {
     }
 
     private static String modelRoot(String blockPath) {
+        if (ErydonModelFamilyIndex.isModernAlcoveBlock(blockPath)) {
+            return MODERN_MODEL_ROOT;
+        }
         return ErydonModelFamilyIndex.isGothicAlcoveBlock(blockPath)
                 ? GOTHIC_MODEL_ROOT
                 : GEORGIAN_MODEL_ROOT;
@@ -168,6 +286,9 @@ public final class AlcoveBakedModel implements BakedModel, FabricBakedModel {
         List<String> suffixes = new ArrayList<>(BASE_MODEL_SUFFIXES.size() + TRIPLE_MODEL_SUFFIXES.size());
         suffixes.addAll(BASE_MODEL_SUFFIXES);
         suffixes.addAll(TRIPLE_MODEL_SUFFIXES);
+        if (ErydonModelFamilyIndex.isGeorgianAlcoveBlock(blockPath)) {
+            suffixes.addAll(GEORGIAN_BODY_MODEL_SUFFIXES);
+        }
         return List.copyOf(suffixes);
     }
 
@@ -188,8 +309,12 @@ public final class AlcoveBakedModel implements BakedModel, FabricBakedModel {
 
         List<BakedQuad> quads = new ArrayList<>();
         int degrees = yRotation(state.get(AlcoveBlock.FACING));
-        for (String suffix : suffixesForState(state)) {
-            AxiomFallbackQuads.add(quads, getModel(state, suffix), degrees, face, random, true);
+        ComponentModels components = componentsFor(state.getBlock());
+        if (components == null) {
+            return quads;
+        }
+        for (BakedModel component : components.forState(state.get(AlcoveBlock.PART), state.get(AlcoveBlock.SPAN))) {
+            AxiomFallbackQuads.add(quads, component, degrees, face, random, true);
         }
         return quads;
     }

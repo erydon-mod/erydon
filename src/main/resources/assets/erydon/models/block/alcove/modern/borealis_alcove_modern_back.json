@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/alcove/modern/alcove_modern_back",
+    "textures":  {
+                     "stone":  "erydon:block/borealis_block",
+                     "particle":  "erydon:block/borealis_block"
+                 }
+}

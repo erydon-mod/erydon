@@ -386,6 +386,18 @@
     "erydon:solistra_wall",
     "erydon:solistra_wall_georgian",
     "erydon:solistra_window_arch",
-    "erydon:solistra_window_french_georgian"
+    "erydon:solistra_window_french_georgian",
+    "erydon:solistra_aged_alcove_modern",
+    "erydon:solistra_alcove_modern",
+    "erydon:solistra_ashlar_alcove_modern",
+    "erydon:solistra_hewn_alcove_modern",
+    "erydon:solistra_rock_alcove_modern",
+    "erydon:solistra_rusticated_alcove_modern",
+    "erydon:solistra_aged_arch_georgian",
+    "erydon:solistra_arch_georgian",
+    "erydon:solistra_ashlar_arch_georgian",
+    "erydon:solistra_hewn_arch_georgian",
+    "erydon:solistra_rock_arch_georgian",
+    "erydon:solistra_rusticated_arch_georgian"
   ]
 }

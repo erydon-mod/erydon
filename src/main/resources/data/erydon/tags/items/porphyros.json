@@ -344,6 +344,18 @@
     "erydon:porphyros_wall",
     "erydon:porphyros_wall_georgian",
     "erydon:porphyros_window_arch",
-    "erydon:porphyros_window_french_georgian"
+    "erydon:porphyros_window_french_georgian",
+    "erydon:porphyros_aged_alcove_modern",
+    "erydon:porphyros_alcove_modern",
+    "erydon:porphyros_ashlar_alcove_modern",
+    "erydon:porphyros_hewn_alcove_modern",
+    "erydon:porphyros_rock_alcove_modern",
+    "erydon:porphyros_rusticated_alcove_modern",
+    "erydon:porphyros_aged_arch_georgian",
+    "erydon:porphyros_arch_georgian",
+    "erydon:porphyros_ashlar_arch_georgian",
+    "erydon:porphyros_hewn_arch_georgian",
+    "erydon:porphyros_rock_arch_georgian",
+    "erydon:porphyros_rusticated_arch_georgian"
   ]
 }

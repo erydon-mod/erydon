@@ -98,7 +98,7 @@ def synchronise(check=False):
                  "slope", "slope_shallow_lower", "slope_shallow_upper", "slope_steep_lower", "slope_steep_upper",
                  "slope_vertical", "slope_vertical_shallow_broad", "slope_vertical_shallow_narrow", "vertical_diagonal",
                  "stairs_shallow_bottom", "stairs_shallow_top", "stairs_spiral_large", "column_square", "column_gothic",
-                 "arch_modern", "arch_gothic", "arch_romanesque", "alcove_georgian", "alcove_gothic",
+                 "arch_modern", "arch_gothic", "arch_romanesque", "arch_georgian", "alcove_georgian", "alcove_gothic", "alcove_modern",
                  "chimney_circular", "window_arch", "window_french_georgian", "post"):
         extend(blocks, form, {path for path in ids if path.endswith("_" + form)})
     for colour in ("black", "white", "bronze", "silver", "crystal", "tinted"):

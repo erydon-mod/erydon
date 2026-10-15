@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "purpose": "Editable design assemblies outside runtime resources.",
+  "units_per_block": 16,
+  "height_blocks": 3,
+  "facing": "south (+Z)",
+  "source_hashes": {
+    "src/main/resources/assets/erydon/authoring_models/block/alcove/alcove_georgian_single_back.json": "7407b32b503034a7790ac98d500b6353ed065e6799e5a9115efb10af5eba3139",
+    "src/main/resources/assets/erydon/authoring_models/block/alcove/alcove_georgian_single_sides.json": "2f47f599ce7d89287bf66d72eeb11ac5dbea65437cca8e557ef9a36884b80732",
+    "src/main/resources/assets/erydon/authoring_models/block/alcove/alcove_georgian_single_top.json": "828fc53ea226c64d45d483a9db8f7c4a9b9c86891475179d664d374fdfe20601",
+    "src/main/resources/assets/erydon/authoring_models/block/alcove/alcove_georgian_double_side_left.json": "470ab3c46afbaf4dfc95f39ebdf3b311311001712f2a60f60ac9a2379f28035f",
+    "src/main/resources/assets/erydon/authoring_models/block/alcove/alcove_georgian_double_side_right.json": "2a5640b6a0574f784748401b362ef2262e00991f453e5ea99db34b403ace0bcf",
+    "src/main/resources/assets/erydon/authoring_models/block/alcove/alcove_georgian_double_top_left.json": "14da13a66c730971501a5daaaf3b07548a49712623d2147879576379d3465ae4",
+    "src/main/resources/assets/erydon/authoring_models/block/alcove/alcove_georgian_double_top_right.json": "df028bd597e2d62a2693d4c1b67dd3d7b5351471e95ba58456ceaf540b457445",
+    "src/main/resources/assets/erydon/authoring_models/block/alcove/alcove_georgian_triple_side_left.json": "a48919f6b416ba4e63c7b9a1281ab5a4d2776da20a3c4899b583871cce9070f4",
+    "src/main/resources/assets/erydon/authoring_models/block/alcove/alcove_georgian_triple_side_center.json": "851fb868a98742353068d306b44779baf3790bb4de938b6582b75b7e46c2f44a",
+    "src/main/resources/assets/erydon/authoring_models/block/alcove/alcove_georgian_triple_side_right.json": "0df366aaf9ceba2004c12707fbbc47d4a6a547cdad75b8ae411df15144caa77a",
+    "src/main/resources/assets/erydon/authoring_models/block/alcove/alcove_georgian_triple_top_left.json": "4fd60b291b518ec9cee6effe0ead5949ebe91cceb5dbe739e8c95933e3fd32bf",
+    "src/main/resources/assets/erydon/authoring_models/block/alcove/alcove_georgian_triple_top_center.json": "8dc838de3d8c4bf08b180f847b208455aef66d7057012c37f8a2d307671d0226",
+    "src/main/resources/assets/erydon/authoring_models/block/alcove/alcove_georgian_triple_top_right.json": "c885f53e12a2faab7bf2e8f6b43a4dfdc37f99cea46534a884a966d453aae120"
+  },
+  "assemblies": [
+    {
+      "width_blocks": 1,
+      "json": "alcove_georgian_1wide.json",
+      "blockbench": "alcove_georgian_1wide.bbmodel",
+      "elements": 105,
+      "rendered_faces": 324,
+      "component_instances": 7,
+      "max_vertex_translation_error": 7.105427357601002e-15,
+      "existing_degenerate_faces": 0
+    },
+    {
+      "width_blocks": 2,
+      "json": "alcove_georgian_2wide.json",
+      "blockbench": "alcove_georgian_2wide.bbmodel",
+      "elements": 126,
+      "rendered_faces": 266,
+      "component_instances": 14,
+      "max_vertex_translation_error": 7.105427357601002e-15,
+      "existing_degenerate_faces": 2
+    },
+    {
+      "width_blocks": 3,
+      "json": "alcove_georgian_3wide.json",
+      "blockbench": "alcove_georgian_3wide.bbmodel",
+      "elements": 190,
+      "rendered_faces": 330,
+      "component_instances": 21,
+      "max_vertex_translation_error": 7.105427357601002e-15,
+      "existing_degenerate_faces": 0
+    }
+  ]
+}

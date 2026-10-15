@@ -394,6 +394,18 @@
     "erydon:mielonyx_diaphanes_light_pendant",
     "erydon:mielonyx_hewn_coping_georgian",
     "erydon:mielonyx_oil_burner",
-    "erydon:mielonyx_rusticated_coping_georgian"
+    "erydon:mielonyx_rusticated_coping_georgian",
+    "erydon:mielonyx_aged_alcove_modern",
+    "erydon:mielonyx_alcove_modern",
+    "erydon:mielonyx_ashlar_alcove_modern",
+    "erydon:mielonyx_hewn_alcove_modern",
+    "erydon:mielonyx_rock_alcove_modern",
+    "erydon:mielonyx_rusticated_alcove_modern",
+    "erydon:mielonyx_aged_arch_georgian",
+    "erydon:mielonyx_arch_georgian",
+    "erydon:mielonyx_ashlar_arch_georgian",
+    "erydon:mielonyx_hewn_arch_georgian",
+    "erydon:mielonyx_rock_arch_georgian",
+    "erydon:mielonyx_rusticated_arch_georgian"
   ]
 }

@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/arch/georgian/arch_georgian_width5_top_row1_column4",
+  "textures": {
+    "stone": "erydon:block/nerium_rusticated_block"
+  }
+}

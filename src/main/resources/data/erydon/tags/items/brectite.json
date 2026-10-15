@@ -344,6 +344,18 @@
     "erydon:brectite_wall",
     "erydon:brectite_wall_georgian",
     "erydon:brectite_window_arch",
-    "erydon:brectite_window_french_georgian"
+    "erydon:brectite_window_french_georgian",
+    "erydon:brectite_aged_alcove_modern",
+    "erydon:brectite_alcove_modern",
+    "erydon:brectite_ashlar_alcove_modern",
+    "erydon:brectite_hewn_alcove_modern",
+    "erydon:brectite_rock_alcove_modern",
+    "erydon:brectite_rusticated_alcove_modern",
+    "erydon:brectite_aged_arch_georgian",
+    "erydon:brectite_arch_georgian",
+    "erydon:brectite_ashlar_arch_georgian",
+    "erydon:brectite_hewn_arch_georgian",
+    "erydon:brectite_rock_arch_georgian",
+    "erydon:brectite_rusticated_arch_georgian"
   ]
 }

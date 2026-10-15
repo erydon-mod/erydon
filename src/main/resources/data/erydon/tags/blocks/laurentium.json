@@ -386,6 +386,18 @@
     "erydon:laurentium_coping_georgian",
     "erydon:laurentium_hewn_coping_georgian",
     "erydon:laurentium_oil_burner",
-    "erydon:laurentium_rusticated_coping_georgian"
+    "erydon:laurentium_rusticated_coping_georgian",
+    "erydon:laurentium_aged_alcove_modern",
+    "erydon:laurentium_alcove_modern",
+    "erydon:laurentium_ashlar_alcove_modern",
+    "erydon:laurentium_hewn_alcove_modern",
+    "erydon:laurentium_rock_alcove_modern",
+    "erydon:laurentium_rusticated_alcove_modern",
+    "erydon:laurentium_aged_arch_georgian",
+    "erydon:laurentium_arch_georgian",
+    "erydon:laurentium_ashlar_arch_georgian",
+    "erydon:laurentium_hewn_arch_georgian",
+    "erydon:laurentium_rock_arch_georgian",
+    "erydon:laurentium_rusticated_arch_georgian"
   ]
 }

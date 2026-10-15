@@ -394,6 +394,18 @@
     "erydon:gelastrum_trim_silver_stairs",
     "erydon:gelastrum_trim_silver_stairs_shallow_bottom",
     "erydon:gelastrum_trim_silver_stairs_shallow_top",
-    "erydon:gelastrum_wall_georgian"
+    "erydon:gelastrum_wall_georgian",
+    "erydon:gelastrum_aged_alcove_modern",
+    "erydon:gelastrum_alcove_modern",
+    "erydon:gelastrum_ashlar_alcove_modern",
+    "erydon:gelastrum_hewn_alcove_modern",
+    "erydon:gelastrum_rock_alcove_modern",
+    "erydon:gelastrum_rusticated_alcove_modern",
+    "erydon:gelastrum_aged_arch_georgian",
+    "erydon:gelastrum_arch_georgian",
+    "erydon:gelastrum_ashlar_arch_georgian",
+    "erydon:gelastrum_hewn_arch_georgian",
+    "erydon:gelastrum_rock_arch_georgian",
+    "erydon:gelastrum_rusticated_arch_georgian"
   ]
 }

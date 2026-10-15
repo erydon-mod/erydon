@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/alcove/modern/alcove_modern_double_side_left",
+    "textures":  {
+                     "stone":  "erydon:block/chalstrom_block_aged",
+                     "particle":  "erydon:block/chalstrom_block_aged"
+                 }
+}

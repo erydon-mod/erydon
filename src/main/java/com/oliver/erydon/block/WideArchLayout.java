@@ -17,9 +17,22 @@ public final class WideArchLayout {
             return List.of(new Component(body, right ? 2 : 0, 0));
         }
         if (target.wideRows() == 1) {
-            return List.of(new Component(Arrangement.TRIPLE_SINGLE_L, 0, 0),
-                    new Component(Arrangement.TOP_LARGE, 1, 0),
-                    new Component(Arrangement.TRIPLE_SINGLE_R, 2, 0));
+            return target.isColumnStyle()
+                    ? List.of(new Component(Arrangement.TRIPLE_SINGLE_L_COLUMN, 0, 0),
+                        new Component(Arrangement.TOP_LARGE_COLUMN, 1, 0),
+                        new Component(Arrangement.TRIPLE_SINGLE_R_COLUMN, 2, 0))
+                    : List.of(new Component(Arrangement.TRIPLE_SINGLE_L, 0, 0),
+                        new Component(Arrangement.TOP_LARGE, 1, 0),
+                        new Component(Arrangement.TRIPLE_SINGLE_R, 2, 0));
+        }
+        if (target.isColumnStyle()) {
+            return List.of(new Component(Arrangement.TRIPLE_TOP_L_COLUMN, 0, 0),
+                    new Component(Arrangement.TOP_LARGE_COLUMN, 1, 0),
+                    new Component(Arrangement.TRIPLE_TOP_R_COLUMN, 2, 0),
+                    new Component(Arrangement.TRIPLE_ROW2_L_COLUMN, 0, 1),
+                    new Component(Arrangement.TRIPLE_ROW2_R_COLUMN, 2, 1),
+                    new Component(Arrangement.TRIPLE_COLUMN_CROWN_CONTINUATION_L, 0, 2),
+                    new Component(Arrangement.TRIPLE_COLUMN_CROWN_CONTINUATION_R, 2, 2));
         }
         return List.of(new Component(Arrangement.TRIPLE_TOP_L, 0, 0),
                 new Component(Arrangement.TOP_LARGE, 1, 0),

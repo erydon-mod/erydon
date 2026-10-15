@@ -1,0 +1,6 @@
+{
+  "parent": "erydon:block/arch/georgian/arch_georgian_width5_top_row1_column1",
+  "textures": {
+    "stone": "erydon:block/latmion_rock_block"
+  }
+}

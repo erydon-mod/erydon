@@ -38,8 +38,8 @@ public final class AlcoveTransformLaunchProbe implements PreLaunchEntrypoint {
                 axiomAdd = regionClass.getMethod("addBlock", int.class, int.class, int.class, BlockState.class);
                 axiomGet = regionClass.getMethod("getBlockStateOrNull", int.class, int.class, int.class);
             }
-            for (boolean gothic : new boolean[]{false, true}) {
-                AlcoveBlock block = new AlcoveBlock(AbstractBlock.Settings.create(), 3, gothic);
+            for (GeometryProfile profile : GeometryProfile.values()) {
+                AlcoveBlock block = new AlcoveBlock(AbstractBlock.Settings.create(), 3, profile);
                 for (Direction facing : Direction.Type.HORIZONTAL) {
                     for (int width = 1; width <= 3; width++) {
                         for (AlcovePart part : AlcovePart.values()) {
@@ -56,7 +56,7 @@ public final class AlcoveTransformLaunchProbe implements PreLaunchEntrypoint {
                 }
             }
             System.out.println("ERYDON_ALCOVE_TRANSFORMS_OK: " + cases
-                    + " clusters; both styles, widths 1/2/3, both operation orders, all facings, parts and water states; "
+                    + " clusters; all three styles, widths 1/2/3, both operation orders, all facings, parts and water states; "
                     + (regionClass == null ? "Minecraft state entry points" : "actual Axiom region transformations"));
             System.exit(0);
         } catch (Throwable failure) {

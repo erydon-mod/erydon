@@ -1,0 +1,7 @@
+{
+    "parent":  "erydon:block/alcove/modern/alcove_modern_double_side_right",
+    "textures":  {
+                     "stone":  "erydon:block/porphyros_rusticated_block",
+                     "particle":  "erydon:block/porphyros_rusticated_block"
+                 }
+}

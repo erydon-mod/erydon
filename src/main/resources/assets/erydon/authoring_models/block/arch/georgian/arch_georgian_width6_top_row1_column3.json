@@ -1,0 +1,10 @@
+{
+  "format_version": "1.21.11",
+  "credit": "Derived from the editable Georgian arch three-wide design",
+  "textures": {
+    "stone": "erydon:block/aganite_block",
+    "particle": "#stone"
+  },
+  "erydon_split_world_uv": true,
+  "elements": []
+}

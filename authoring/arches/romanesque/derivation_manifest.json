@@ -1,0 +1,925 @@
+{
+  "schema": 1,
+  "master": "authoring/arches/romanesque/arch_romanesque_3wide.bbmodel",
+  "master_sha256": "8c51171cedc03cb2f98c970cb97a380ae280863f0fb232a5d38f245dda357d74",
+  "master_cubes": 412,
+  "added_cubes": 14,
+  "meaningful_original_changes": 55,
+  "newly_enabled_original_faces": 805,
+  "newly_disabled_original_faces": 121,
+  "face_mask_policy": "Saved BB enabled and disabled faces; no automatic face removal",
+  "mirror_policy": "Authoritative LEFT; pure X reflection on RIGHT",
+  "non_column_derivation": {
+    "master": "authoring/arches/romanesque/arch_romanesque_non_column_3wide.bbmodel",
+    "master_sha256": "3aa7565a69e594a01f55f018ed19c986636335998851518ade63fd4840f58153",
+    "saved_elements": 103,
+    "left_side_is_authoritative": true,
+    "face_mask_policy": "Saved enabled faces; explicit null only disables; no automatic removal",
+    "component_changes": {
+      "CURVE__crown_left": {
+        "elements": 12,
+        "added_elements": 0,
+        "deleted_elements": 0,
+        "geometry_changes": 0,
+        "newly_enabled_faces": 21,
+        "newly_disabled_faces": 0
+      },
+      "CURVE__crown_right": {
+        "elements": 12,
+        "added_elements": 0,
+        "deleted_elements": 0,
+        "geometry_changes": 0,
+        "newly_enabled_faces": 21,
+        "newly_disabled_faces": 0
+      },
+      "CURVE__curve_lower_left": {
+        "elements": 24,
+        "added_elements": 15,
+        "deleted_elements": 2,
+        "geometry_changes": 0,
+        "newly_enabled_faces": 3,
+        "newly_disabled_faces": 0
+      },
+      "CURVE__curve_lower_right": {
+        "elements": 11,
+        "added_elements": 0,
+        "deleted_elements": 0,
+        "geometry_changes": 0,
+        "newly_enabled_faces": 4,
+        "newly_disabled_faces": 0
+      },
+      "KEYSTONE__crown_center": {
+        "elements": 20,
+        "added_elements": 0,
+        "deleted_elements": 0,
+        "geometry_changes": 0,
+        "newly_enabled_faces": 0,
+        "newly_disabled_faces": 0
+      },
+      "WALL__base_left": {
+        "elements": 3,
+        "added_elements": 0,
+        "deleted_elements": 0,
+        "geometry_changes": 2,
+        "newly_enabled_faces": 8,
+        "newly_disabled_faces": 0
+      },
+      "WALL__base_right": {
+        "elements": 3,
+        "added_elements": 0,
+        "deleted_elements": 0,
+        "geometry_changes": 0,
+        "newly_enabled_faces": 8,
+        "newly_disabled_faces": 0
+      },
+      "WALL__body_left": {
+        "elements": 3,
+        "added_elements": 0,
+        "deleted_elements": 0,
+        "geometry_changes": 3,
+        "newly_enabled_faces": 8,
+        "newly_disabled_faces": 0
+      },
+      "WALL__body_right": {
+        "elements": 3,
+        "added_elements": 0,
+        "deleted_elements": 0,
+        "geometry_changes": 0,
+        "newly_enabled_faces": 8,
+        "newly_disabled_faces": 0
+      },
+      "WALL__crown_left": {
+        "elements": 3,
+        "added_elements": 0,
+        "deleted_elements": 0,
+        "geometry_changes": 0,
+        "newly_enabled_faces": 8,
+        "newly_disabled_faces": 0
+      },
+      "WALL__crown_right": {
+        "elements": 3,
+        "added_elements": 0,
+        "deleted_elements": 0,
+        "geometry_changes": 0,
+        "newly_enabled_faces": 8,
+        "newly_disabled_faces": 0
+      },
+      "WALL__curve_lower_left": {
+        "elements": 3,
+        "added_elements": 0,
+        "deleted_elements": 0,
+        "geometry_changes": 1,
+        "newly_enabled_faces": 6,
+        "newly_disabled_faces": 0
+      },
+      "WALL__curve_lower_right": {
+        "elements": 3,
+        "added_elements": 0,
+        "deleted_elements": 0,
+        "geometry_changes": 0,
+        "newly_enabled_faces": 6,
+        "newly_disabled_faces": 0
+      }
+    },
+    "element_provenance": [
+      {
+        "uuid": "fc5a0b3c-ae6d-5c64-8e02-9a0309398108",
+        "group": "WALL__base_left",
+        "kind": "cube",
+        "element_name": "side_large_001",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "f460202d-6f5c-5b50-ab35-be241816dd18",
+        "group": "WALL__base_left",
+        "kind": "cube",
+        "element_name": "side_large_002",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "bda6935e-33c9-5799-8c13-9a5af0c66657",
+        "group": "WALL__base_left",
+        "kind": "cube",
+        "element_name": "side_large_003",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "af03fc98-5e91-5d37-bed7-fcbb9f33cc99",
+        "group": "WALL__base_right",
+        "kind": "cube",
+        "element_name": "side_large_001",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "70eeb095-f3f5-50fc-9bc4-cd64b7905f71",
+        "group": "WALL__base_right",
+        "kind": "cube",
+        "element_name": "side_large_002",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "83388616-bb1b-5d6b-8cf9-c721a5d86a68",
+        "group": "WALL__base_right",
+        "kind": "cube",
+        "element_name": "side_large_003",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "6e20c3b7-7c7c-5a56-ab17-418f109729e9",
+        "group": "WALL__body_left",
+        "kind": "cube",
+        "element_name": "side_large_001",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "07f220de-2ddb-5955-9fef-836121305e4d",
+        "group": "WALL__body_left",
+        "kind": "cube",
+        "element_name": "side_large_002",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "3e8e6aaf-2347-5a20-9ad2-e270b3e22b01",
+        "group": "WALL__body_left",
+        "kind": "cube",
+        "element_name": "side_large_003",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "5d021c4f-596a-5f53-9698-5970c929276f",
+        "group": "WALL__body_right",
+        "kind": "cube",
+        "element_name": "side_large_001",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "62b2bb17-8241-5bf6-a9e2-061928f4d8de",
+        "group": "WALL__body_right",
+        "kind": "cube",
+        "element_name": "side_large_002",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "59936c42-31d2-5762-b47e-d1bbb894494f",
+        "group": "WALL__body_right",
+        "kind": "cube",
+        "element_name": "side_large_003",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "d14d384d-67a4-5450-8abb-1285956111e5",
+        "group": "CURVE__curve_lower_left",
+        "kind": "cube",
+        "element_name": "corner_large_lower_001",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "00550b00-0e69-5ccf-a2a9-8fdce813cfe1",
+        "group": "CURVE__curve_lower_left",
+        "kind": "cube",
+        "element_name": "corner_large_lower_002",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "ffb03354-859b-59a1-bcf9-74333a7579c1",
+        "group": "CURVE__curve_lower_left",
+        "kind": "cube",
+        "element_name": "corner_large_lower_003",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "493f55ad-4c79-545d-b551-fa54ec6ccde8",
+        "group": "CURVE__curve_lower_left",
+        "kind": "cube",
+        "element_name": "corner_large_lower_004",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "e389cdaf-daab-5be2-b673-5e0e0f39ea39",
+        "group": "CURVE__curve_lower_left",
+        "kind": "cube",
+        "element_name": "corner_large_lower_003",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "88e5ef93-6e88-565c-9c3d-5c35bc732acd",
+        "group": "CURVE__curve_lower_left",
+        "kind": "cube",
+        "element_name": "corner_large_lower_004",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "9b8dbeae-91ac-5278-acaa-4868f6bed226",
+        "group": "CURVE__curve_lower_left",
+        "kind": "cube",
+        "element_name": "corner_large_lower_005",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "11d2d1c2-4212-5850-80c3-eb3a5dacaf39",
+        "group": "CURVE__curve_lower_left",
+        "kind": "cube",
+        "element_name": "corner_large_lower_004",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "5070d5de-3ed7-55e9-a9e6-db1b43cc9b58",
+        "group": "CURVE__curve_lower_left",
+        "kind": "cube",
+        "element_name": "corner_large_lower_006",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "f68bdd14-6c3c-5c04-8491-16c14a52f1d7",
+        "group": "WALL__curve_lower_left",
+        "kind": "cube",
+        "element_name": "side_large_001",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "53523ebb-8640-551c-b323-389c5c7aa3ce",
+        "group": "WALL__curve_lower_left",
+        "kind": "cube",
+        "element_name": "side_large_002",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "c6722490-e5eb-57ed-a3ad-616bc8f366c9",
+        "group": "WALL__curve_lower_left",
+        "kind": "cube",
+        "element_name": "side_large_003",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "7c2b0fe9-6bf1-5c1e-8e45-49b8481acf4e",
+        "group": "CURVE__curve_lower_right",
+        "kind": "cube",
+        "element_name": "corner_large_lower_001",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "88ce0bae-c546-59a1-8815-09f30d963642",
+        "group": "CURVE__curve_lower_right",
+        "kind": "cube",
+        "element_name": "corner_large_lower_002",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "0daf6d2f-9285-5875-9fa2-1935c6fd6007",
+        "group": "CURVE__curve_lower_right",
+        "kind": "cube",
+        "element_name": "corner_large_lower_003",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "5f0d1405-b3a3-51df-aabc-367ce0ead635",
+        "group": "CURVE__curve_lower_right",
+        "kind": "cube",
+        "element_name": "corner_large_lower_004",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "47bfc672-4ed9-53da-8748-e890cd542c75",
+        "group": "CURVE__curve_lower_right",
+        "kind": "cube",
+        "element_name": "corner_large_lower_003",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "b7872487-992f-5be0-9128-a728b0fbbba8",
+        "group": "CURVE__curve_lower_right",
+        "kind": "cube",
+        "element_name": "corner_large_lower_004",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "93bf4e5b-56ca-581e-9821-f472b9d65c25",
+        "group": "CURVE__curve_lower_right",
+        "kind": "cube",
+        "element_name": "corner_large_lower_005",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "4ddfddde-e951-57df-820a-e88069c845a1",
+        "group": "CURVE__curve_lower_right",
+        "kind": "cube",
+        "element_name": "corner_large_lower_004",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "283a26ce-1f8a-54f5-94f1-78a2795477dc",
+        "group": "CURVE__curve_lower_right",
+        "kind": "cube",
+        "element_name": "corner_large_lower_006",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "14a48c54-f783-5314-b332-00a598b7eb97",
+        "group": "CURVE__curve_lower_right",
+        "kind": "cube",
+        "element_name": "corner_large_lower_005",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "d0909715-46dd-5c4b-ad8a-cd864a572fb0",
+        "group": "CURVE__curve_lower_right",
+        "kind": "cube",
+        "element_name": "corner_large_lower_006",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "f6a24b2d-9126-5864-a6dd-48499e1ba732",
+        "group": "WALL__curve_lower_right",
+        "kind": "cube",
+        "element_name": "side_large_001",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "b2d1e8f7-b149-521c-97e9-9947465c2fe4",
+        "group": "WALL__curve_lower_right",
+        "kind": "cube",
+        "element_name": "side_large_002",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "966e8115-9ead-5828-8612-9f6f792cb84a",
+        "group": "WALL__curve_lower_right",
+        "kind": "cube",
+        "element_name": "side_large_003",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "303be73a-30b9-5a68-b00a-17662c5942ee",
+        "group": "CURVE__crown_left",
+        "kind": "cube",
+        "element_name": "corner_large_upper_001",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "2d17edc6-30cd-5db7-b99c-55a608eb98f6",
+        "group": "CURVE__crown_left",
+        "kind": "cube",
+        "element_name": "corner_large_upper_002",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "a0d2ceaf-0cd6-5569-821e-8814185c16c7",
+        "group": "CURVE__crown_left",
+        "kind": "cube",
+        "element_name": "corner_large_upper_003",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "ef9963c0-b371-53ff-9dbc-1fca5a125680",
+        "group": "CURVE__crown_left",
+        "kind": "cube",
+        "element_name": "corner_large_upper_004",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "71ab9067-e76c-5db8-985c-47f578b2c03c",
+        "group": "CURVE__crown_left",
+        "kind": "cube",
+        "element_name": "corner_large_upper_005",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "e5d0130f-a292-54e6-b8ee-d368ad47c2b2",
+        "group": "CURVE__crown_left",
+        "kind": "cube",
+        "element_name": "corner_large_upper_006",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "13514d0c-ebcb-56bd-ae00-cf44175750e9",
+        "group": "CURVE__crown_left",
+        "kind": "cube",
+        "element_name": "corner_large_upper_007",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "55fbe966-a291-589e-9431-af9930b7c429",
+        "group": "CURVE__crown_left",
+        "kind": "cube",
+        "element_name": "corner_large_upper_008",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "0d011738-dd2c-5f29-b93f-bc45fbc7f3c1",
+        "group": "CURVE__crown_left",
+        "kind": "cube",
+        "element_name": "corner_large_upper_009",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "b25d9d32-5344-546e-a50f-10fcfa321f84",
+        "group": "CURVE__crown_left",
+        "kind": "cube",
+        "element_name": "corner_large_upper_010",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "e2939bd3-8f81-586c-bc34-0a8320a60d61",
+        "group": "CURVE__crown_left",
+        "kind": "cube",
+        "element_name": "corner_large_upper_011",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "edce025f-ebe4-554d-be70-99f41a6c5460",
+        "group": "CURVE__crown_left",
+        "kind": "cube",
+        "element_name": "corner_large_upper_012",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "b036db13-8af3-5a99-87d5-99577f708444",
+        "group": "WALL__crown_left",
+        "kind": "cube",
+        "element_name": "side_large_001",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "f87996cc-3701-5674-8d9b-5811bb551cc4",
+        "group": "WALL__crown_left",
+        "kind": "cube",
+        "element_name": "side_large_002",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "0a625e38-866d-515d-b3da-d93c5ac9e315",
+        "group": "WALL__crown_left",
+        "kind": "cube",
+        "element_name": "side_large_003",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "f24e8ede-83fe-5c41-bf22-512995015bb1",
+        "group": "KEYSTONE__crown_center",
+        "kind": "mesh",
+        "element_name": "top_large_001_left",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "3b2d81fe-3ddd-5f51-b053-e9cbb9573402",
+        "group": "KEYSTONE__crown_center",
+        "kind": "mesh",
+        "element_name": "top_large_001_left",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "1fa09620-5642-5127-93b3-c7d0cf8bba62",
+        "group": "KEYSTONE__crown_center",
+        "kind": "mesh",
+        "element_name": "top_large_002_left",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "0fa4febd-a254-5a93-8a6e-62867614a4b8",
+        "group": "KEYSTONE__crown_center",
+        "kind": "mesh",
+        "element_name": "top_large_002_left",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "98d6cef1-e46f-562a-b95e-cb5cdc3b5a0e",
+        "group": "KEYSTONE__crown_center",
+        "kind": "mesh",
+        "element_name": "top_large_003_left",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "cbdba5ed-f5f7-5d62-a1d4-e6ed348d953a",
+        "group": "KEYSTONE__crown_center",
+        "kind": "mesh",
+        "element_name": "top_large_003_left",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "69bc9e6a-ec7e-5953-a507-ba060d18cecf",
+        "group": "KEYSTONE__crown_center",
+        "kind": "mesh",
+        "element_name": "top_large_004_left",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "906af9d3-42b9-5d31-b780-a262ca6d9c60",
+        "group": "KEYSTONE__crown_center",
+        "kind": "mesh",
+        "element_name": "top_large_004_left",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "b431dc37-30a1-5462-8e60-23703bc617b2",
+        "group": "KEYSTONE__crown_center",
+        "kind": "mesh",
+        "element_name": "top_large_006_left",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "a1feadf9-7fa7-541e-8bf6-47765c98a72b",
+        "group": "KEYSTONE__crown_center",
+        "kind": "mesh",
+        "element_name": "top_large_006_left",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "015413cd-8a0c-5ca9-ac04-ebc83e5bc093",
+        "group": "KEYSTONE__crown_center",
+        "kind": "mesh",
+        "element_name": "top_large_008_left",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "ec673a03-242a-5be9-adb6-0e9f5a13fbfb",
+        "group": "KEYSTONE__crown_center",
+        "kind": "mesh",
+        "element_name": "top_large_008_left",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "3f6fb694-4aa4-5058-a889-725ee6aaaf8c",
+        "group": "KEYSTONE__crown_center",
+        "kind": "mesh",
+        "element_name": "top_large_011_left",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "8f1d17fd-45c2-5e0e-a5c3-91ccde414091",
+        "group": "KEYSTONE__crown_center",
+        "kind": "mesh",
+        "element_name": "top_large_011_left",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "df96992c-2dea-5510-8b50-236e87e818a9",
+        "group": "KEYSTONE__crown_center",
+        "kind": "mesh",
+        "element_name": "top_large_012_left",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "1c0033e2-39dc-5ec6-ae45-74b359872932",
+        "group": "KEYSTONE__crown_center",
+        "kind": "mesh",
+        "element_name": "top_large_012_left",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "dbe72605-1a15-59f6-a453-a27b6228d9cf",
+        "group": "KEYSTONE__crown_center",
+        "kind": "mesh",
+        "element_name": "top_large_013_left",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "dc1bdbdc-5bac-534b-8ba4-704b8d7e03fe",
+        "group": "KEYSTONE__crown_center",
+        "kind": "mesh",
+        "element_name": "top_large_013_left",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "7902133c-6bea-5421-89bd-b1017201e817",
+        "group": "KEYSTONE__crown_center",
+        "kind": "mesh",
+        "element_name": "top_large_014_left",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "06dc78ce-84ac-5695-80ac-9ce57abbaa94",
+        "group": "KEYSTONE__crown_center",
+        "kind": "mesh",
+        "element_name": "top_large_014_left",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "2bfa2ba6-39ed-5296-95a4-84f495166eba",
+        "group": "CURVE__crown_right",
+        "kind": "cube",
+        "element_name": "corner_large_upper_001",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "887779dc-6b84-5793-a82d-202ebe84d174",
+        "group": "CURVE__crown_right",
+        "kind": "cube",
+        "element_name": "corner_large_upper_002",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "b1a8adf3-97a3-5489-814c-9eddcb761f83",
+        "group": "CURVE__crown_right",
+        "kind": "cube",
+        "element_name": "corner_large_upper_003",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "22b18637-0844-5ff6-a9a1-70112e120126",
+        "group": "CURVE__crown_right",
+        "kind": "cube",
+        "element_name": "corner_large_upper_004",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "8f7d225b-e5a0-54bf-b73e-4965d52ff4f8",
+        "group": "CURVE__crown_right",
+        "kind": "cube",
+        "element_name": "corner_large_upper_005",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "ae2fd707-ba44-535a-80c7-3c5d14ac433b",
+        "group": "CURVE__crown_right",
+        "kind": "cube",
+        "element_name": "corner_large_upper_006",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "4ecbd814-a028-53ae-9e02-dd01363f10d8",
+        "group": "CURVE__crown_right",
+        "kind": "cube",
+        "element_name": "corner_large_upper_007",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "711f5eb4-09ba-578b-aff0-0659ce54e6d1",
+        "group": "CURVE__crown_right",
+        "kind": "cube",
+        "element_name": "corner_large_upper_008",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "fb025857-d6f5-56fd-aca6-5107d04029d3",
+        "group": "CURVE__crown_right",
+        "kind": "cube",
+        "element_name": "corner_large_upper_009",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "49000ed5-56d2-5c44-892c-22314a2bad3f",
+        "group": "CURVE__crown_right",
+        "kind": "cube",
+        "element_name": "corner_large_upper_010",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "3737fddf-b5a1-551f-afdf-e67e4de411ac",
+        "group": "CURVE__crown_right",
+        "kind": "cube",
+        "element_name": "corner_large_upper_011",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "e84832e4-d058-58ad-9077-3d681ed468b6",
+        "group": "CURVE__crown_right",
+        "kind": "cube",
+        "element_name": "corner_large_upper_012",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "147e8510-a3fe-5d51-bab9-5c3b747f4a58",
+        "group": "WALL__crown_right",
+        "kind": "cube",
+        "element_name": "side_large_001",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "81cd4ddb-cf2f-5b17-8fda-972104661f8a",
+        "group": "WALL__crown_right",
+        "kind": "cube",
+        "element_name": "side_large_002",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "bfd4cc7b-899a-5a69-bb3e-e1d0f9b82b01",
+        "group": "WALL__crown_right",
+        "kind": "cube",
+        "element_name": "side_large_003",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "c557ddb3-86ee-4061-aeb0-b3eb9eac9502",
+        "group": "CURVE__curve_lower_left",
+        "kind": "cube",
+        "element_name": "corner_large_lower_006",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "e4284745-9c29-ae1c-f614-3b5e94e91c72",
+        "group": "CURVE__curve_lower_left",
+        "kind": "cube",
+        "element_name": "corner_large_lower_007",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "b3748ea5-940f-b9f6-8d8a-345712dd7082",
+        "group": "CURVE__curve_lower_left",
+        "kind": "cube",
+        "element_name": "corner_large_lower_007",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "6021642c-33f7-a722-f205-4ec5a87f986d",
+        "group": "CURVE__curve_lower_left",
+        "kind": "cube",
+        "element_name": "corner_large_lower_008",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "4bd8fa34-2f35-9235-8c73-04520d8d14ff",
+        "group": "CURVE__curve_lower_left",
+        "kind": "cube",
+        "element_name": "corner_large_lower_007",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "02cf649e-e4c7-cd6e-f704-9b9c2049c2bc",
+        "group": "CURVE__curve_lower_left",
+        "kind": "cube",
+        "element_name": "corner_large_lower_008",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "807653ab-4ac7-85b0-554b-9e86e27e1600",
+        "group": "CURVE__curve_lower_left",
+        "kind": "cube",
+        "element_name": "corner_large_lower_009",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "4bf3b705-e2df-d164-460f-7f23d33c0dbf",
+        "group": "CURVE__curve_lower_left",
+        "kind": "cube",
+        "element_name": "corner_large_lower_0010",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "b42d7b67-4bb5-a25f-8825-62f188473e4e",
+        "group": "CURVE__curve_lower_left",
+        "kind": "cube",
+        "element_name": "corner_large_lower_004",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "366d2f91-df0a-ddba-1ab5-bc2cf0e1dedd",
+        "group": "CURVE__curve_lower_left",
+        "kind": "cube",
+        "element_name": "corner_large_lower_005",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "8b2554d6-e236-5c9b-504b-f0fe11816791",
+        "group": "CURVE__curve_lower_left",
+        "kind": "cube",
+        "element_name": "corner_large_lower_006",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "dd9ef43f-b6b8-f237-bde8-834e12ff694c",
+        "group": "CURVE__curve_lower_left",
+        "kind": "cube",
+        "element_name": "corner_large_lower_005",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "ea312ce7-6c8a-4f3b-3aae-a249e9f101e2",
+        "group": "CURVE__curve_lower_left",
+        "kind": "cube",
+        "element_name": "corner_large_lower_005",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "9f7ff015-b8f2-3ac1-d24c-e607df542b14",
+        "group": "CURVE__curve_lower_left",
+        "kind": "cube",
+        "element_name": "corner_large_lower_004",
+        "raw_element_count": 1
+      },
+      {
+        "uuid": "dc8db4ce-9506-2d5b-ef3f-2e520a040bf3",
+        "group": "CURVE__curve_lower_left",
+        "kind": "cube",
+        "element_name": "corner_large_lower_009",
+        "raw_element_count": 1
+      }
+    ],
+    "independent_templates": [
+      "non_column_side_large_base",
+      "non_column_side_large",
+      "non_column_corner_large_lower",
+      "non_column_side_large_lower",
+      "non_column_corner_large_upper",
+      "non_column_side_large_crown",
+      "non_column_side_small",
+      "non_column_side_small_base",
+      "non_column_side_small_crown",
+      "non_column_side_medium",
+      "non_column_side_medium_base",
+      "non_column_side_medium_crown",
+      "non_column_corner_small",
+      "non_column_corner_medium"
+    ],
+    "jamb_partition": "BASE through Y16 with small below-zero projections retained; repeatable BODY Y16..32; lower crown Y32 and above; exterior faces only",
+    "narrow_body_scale": "X width/3 anchored to outer jamb; Y and Z unchanged",
+    "narrow_crown_lining": "Saved crown WALL profile, X width/3; no repeated jamb bricks; Y/Z and authored edge projections unchanged",
+    "narrow_crown_scale": "Full curve projected with existing width/3 XY fit and alignment; clip projected Y below zero; depth unchanged",
+    "geometry_policy": "Left source only; pure X mirror on the right; column-setting components unchanged"
+  },
+  "component_templates": 29,
+  "material_finish_variants": 162,
+  "narrow_alignment": {
+    "1": [
+      -0.004586012,
+      -5.320366771
+    ],
+    "2": [
+      -0.009169896,
+      -26.660180311
+    ]
+  },
+  "narrow_core_xy_scale": "width/3",
+  "profile_depth_scale": 1,
+  "collision_slice_units": 0.25,
+  "collision_grid_units": 0.25,
+  "collision_quantization": "Bounds rounded outward on all axes",
+  "face_separation": {
+    "standalone_models_checked": 29,
+    "cluster_layouts_checked": 54,
+    "observed_overlap_pairs": 4801,
+    "unique_overlap_edges": 667,
+    "overlap_face_nodes": 565,
+    "coplanar_faces_separated": 369,
+    "scaled_repeat_source_faces": 3,
+    "normal_offset_step": 0.000375,
+    "max_normal_offset": 0.0015,
+    "remaining_exact_same_plane_overlaps": 0,
+    "remaining_icon_near_same_plane_overlaps": 0
+  },
+  "assemblies": {
+    "1": {
+      "height_blocks": 4,
+      "elements": 170
+    },
+    "2": {
+      "height_blocks": 4,
+      "elements": 838
+    },
+    "3": {
+      "height_blocks": 4,
+      "elements": 418
+    },
+    "4": {
+      "height_blocks": 5,
+      "elements": 1868
+    },
+    "5": {
+      "height_blocks": 6,
+      "elements": 1868
+    },
+    "6": {
+      "height_blocks": 6,
+      "elements": 1840
+    }
+  }
+}

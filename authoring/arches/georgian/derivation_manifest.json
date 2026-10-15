@@ -1,0 +1,141 @@
+{
+  "schema": 1,
+  "master": "authoring/arches/georgian/arch_georgian_3wide.bbmodel",
+  "master_sha256": "a83d6d256327ccb90803cbf518bffa88dd44f52ef86e6adc78e2d946afb49980",
+  "master_cubes": 75,
+  "mirror_policy": "Authoritative LEFT; pure X mirror on RIGHT",
+  "material_finish_variants": 162,
+  "component_templates": 56,
+  "fixed_jamb_inner_edge_units": 2.10064,
+  "collision_grid_units": 0.25,
+  "collision_quantization": "Bounds rounded outward on all axes",
+  "profiles": {
+    "1": {
+      "crown_rows": 1,
+      "springing_units": 7.5,
+      "curve_xy_scale": [
+        0.2693850413893374,
+        0.53125
+      ],
+      "crest_shift_units": 0.6250509184857052,
+      "ridge_segments": 14
+    },
+    "2": {
+      "crown_rows": 1,
+      "springing_units": 0,
+      "curve_xy_scale": [
+        0.6346925206946686,
+        1
+      ],
+      "crest_shift_units": 0.0,
+      "ridge_segments": 14
+    },
+    "3": {
+      "crown_rows": 1,
+      "springing_units": 0,
+      "curve_xy_scale": [
+        1.0,
+        1
+      ],
+      "crest_shift_units": 0,
+      "ridge_segments": 14
+    },
+    "4": {
+      "crown_rows": 2,
+      "springing_units": 10.666666666666668,
+      "curve_xy_scale": [
+        1.3653074793053313,
+        1.3333333333333333
+      ],
+      "crest_shift_units": 15.55551934685461,
+      "ridge_segments": 14
+    },
+    "4_short": {
+      "crown_rows": 1,
+      "springing_units": 0,
+      "curve_xy_scale": [
+        1.3653074793053313,
+        1
+      ],
+      "crest_shift_units": 0.0,
+      "ridge_segments": 14
+    },
+    "5": {
+      "crown_rows": 2,
+      "springing_units": 5.333333333333332,
+      "curve_xy_scale": [
+        1.7306149586106625,
+        1.6666666666666667
+      ],
+      "crest_shift_units": 15.111038693709219,
+      "ridge_segments": 14
+    },
+    "5_short": {
+      "crown_rows": 1,
+      "springing_units": 0,
+      "curve_xy_scale": [
+        1.7306149586106625,
+        1
+      ],
+      "crest_shift_units": 0.0,
+      "ridge_segments": 14
+    },
+    "6": {
+      "crown_rows": 2,
+      "springing_units": 0.0,
+      "curve_xy_scale": [
+        2.095922437915994,
+        2.0
+      ],
+      "crest_shift_units": 14.666558040563828,
+      "ridge_segments": 14
+    },
+    "6_short": {
+      "crown_rows": 1,
+      "springing_units": 0,
+      "curve_xy_scale": [
+        2.095922437915994,
+        1
+      ],
+      "crest_shift_units": 0.0,
+      "ridge_segments": 14
+    }
+  },
+  "face_separation": {
+    "standalone_models_checked": 56,
+    "cluster_layouts_checked": 30,
+    "observed_overlap_pairs": 3036,
+    "unique_overlap_edges": 720,
+    "coplanar_faces_separated": 650,
+    "max_normal_offset": 0.0011250000000000001,
+    "normal_offset_step": 0.000375,
+    "remaining_exact_same_plane_overlaps": 0,
+    "remaining_icon_near_same_plane_overlaps": 0
+  },
+  "assemblies": {
+    "1": {
+      "height_blocks": 3,
+      "elements": 392
+    },
+    "2": {
+      "height_blocks": 3,
+      "elements": 332
+    },
+    "3": {
+      "height_blocks": 3,
+      "elements": 340
+    },
+    "4": {
+      "height_blocks": 4,
+      "elements": 470
+    },
+    "5": {
+      "height_blocks": 4,
+      "elements": 526
+    },
+    "6": {
+      "height_blocks": 4,
+      "elements": 434
+    }
+  }
+}

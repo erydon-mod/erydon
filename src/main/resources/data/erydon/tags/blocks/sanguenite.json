@@ -386,6 +386,18 @@
     "erydon:sanguenite_coping_georgian",
     "erydon:sanguenite_hewn_coping_georgian",
     "erydon:sanguenite_oil_burner",
-    "erydon:sanguenite_rusticated_coping_georgian"
+    "erydon:sanguenite_rusticated_coping_georgian",
+    "erydon:sanguenite_aged_alcove_modern",
+    "erydon:sanguenite_alcove_modern",
+    "erydon:sanguenite_ashlar_alcove_modern",
+    "erydon:sanguenite_hewn_alcove_modern",
+    "erydon:sanguenite_rock_alcove_modern",
+    "erydon:sanguenite_rusticated_alcove_modern",
+    "erydon:sanguenite_aged_arch_georgian",
+    "erydon:sanguenite_arch_georgian",
+    "erydon:sanguenite_ashlar_arch_georgian",
+    "erydon:sanguenite_hewn_arch_georgian",
+    "erydon:sanguenite_rock_arch_georgian",
+    "erydon:sanguenite_rusticated_arch_georgian"
   ]
 }

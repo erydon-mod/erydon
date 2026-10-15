@@ -234,6 +234,18 @@
     "erydon:kelastrion_wall",
     "erydon:kelastrion_wall_georgian",
     "erydon:kelastrion_window_arch",
-    "erydon:kelastrion_window_french_georgian"
+    "erydon:kelastrion_window_french_georgian",
+    "erydon:kelastrion_aged_alcove_modern",
+    "erydon:kelastrion_alcove_modern",
+    "erydon:kelastrion_ashlar_alcove_modern",
+    "erydon:kelastrion_hewn_alcove_modern",
+    "erydon:kelastrion_rock_alcove_modern",
+    "erydon:kelastrion_rusticated_alcove_modern",
+    "erydon:kelastrion_aged_arch_georgian",
+    "erydon:kelastrion_arch_georgian",
+    "erydon:kelastrion_ashlar_arch_georgian",
+    "erydon:kelastrion_hewn_arch_georgian",
+    "erydon:kelastrion_rock_arch_georgian",
+    "erydon:kelastrion_rusticated_arch_georgian"
   ]
 }

@@ -386,6 +386,18 @@
     "erydon:portorium_wall",
     "erydon:portorium_wall_georgian",
     "erydon:portorium_window_arch",
-    "erydon:portorium_window_french_georgian"
+    "erydon:portorium_window_french_georgian",
+    "erydon:portorium_aged_alcove_modern",
+    "erydon:portorium_alcove_modern",
+    "erydon:portorium_ashlar_alcove_modern",
+    "erydon:portorium_hewn_alcove_modern",
+    "erydon:portorium_rock_alcove_modern",
+    "erydon:portorium_rusticated_alcove_modern",
+    "erydon:portorium_aged_arch_georgian",
+    "erydon:portorium_arch_georgian",
+    "erydon:portorium_ashlar_arch_georgian",
+    "erydon:portorium_hewn_arch_georgian",
+    "erydon:portorium_rock_arch_georgian",
+    "erydon:portorium_rusticated_arch_georgian"
   ]
 }

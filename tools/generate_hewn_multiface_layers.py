@@ -406,6 +406,7 @@ def validate_outputs() -> None:
     expected_rock_values = [
         value.replace("_hewn_", "_rock_") if isinstance(value, str) else value
         for value in hewn_values
+        if not isinstance(value, str) or "_hewn_coping_georgian" not in value
     ]
     if load_json(ROCK_TAG).get("values") != expected_rock_values:
         raise RuntimeError("Rock block tag is not an exact Hewn mirror")

@@ -96,6 +96,18 @@ REGISTERED_RAW_MODEL_PATHS = (
     "alcove/alcove_georgian_double_top_right.json",
     "alcove/alcove_georgian_icon.json",
     "alcove/alcove_georgian_single_back.json",
+    "alcove/alcove_georgian_base_detail_left.json",
+    "alcove/alcove_georgian_base_detail_right.json",
+    "alcove/alcove_georgian_middle_detail_left.json",
+    "alcove/alcove_georgian_middle_detail_right.json",
+    "alcove/alcove_georgian_double_base_detail_left.json",
+    "alcove/alcove_georgian_double_base_detail_right.json",
+    "alcove/alcove_georgian_double_middle_detail_left.json",
+    "alcove/alcove_georgian_double_middle_detail_right.json",
+    "alcove/alcove_georgian_triple_base_detail_left.json",
+    "alcove/alcove_georgian_triple_base_detail_right.json",
+    "alcove/alcove_georgian_triple_middle_detail_left.json",
+    "alcove/alcove_georgian_triple_middle_detail_right.json",
     "alcove/alcove_georgian_single_base.json",
     "alcove/alcove_georgian_single_sides.json",
     "alcove/alcove_georgian_single_top.json",
@@ -120,6 +132,21 @@ REGISTERED_RAW_MODEL_PATHS = (
     "alcove/alcove_gothic_triple_top_center.json",
     "alcove/alcove_gothic_triple_top_left.json",
     "alcove/alcove_gothic_triple_top_right.json",
+    "alcove/alcove_modern_single_back.json",
+    "alcove/alcove_modern_single_sides.json",
+    "alcove/alcove_modern_single_base.json",
+    "alcove/alcove_modern_single_top.json",
+    "alcove/alcove_modern_icon.json",
+    "alcove/alcove_modern_double_side_left.json",
+    "alcove/alcove_modern_double_side_right.json",
+    "alcove/alcove_modern_double_top_left.json",
+    "alcove/alcove_modern_double_top_right.json",
+    "alcove/alcove_modern_triple_side_left.json",
+    "alcove/alcove_modern_triple_side_center.json",
+    "alcove/alcove_modern_triple_side_right.json",
+    "alcove/alcove_modern_triple_top_left.json",
+    "alcove/alcove_modern_triple_top_center.json",
+    "alcove/alcove_modern_triple_top_right.json",
     "arch/gothic/arch_gothic_corner_large_lower.json",
     "arch/gothic/arch_gothic_corner_large_upper.json",
     "arch/gothic/arch_gothic_corner_medium.json",
@@ -129,6 +156,91 @@ REGISTERED_RAW_MODEL_PATHS = (
     "arch/gothic/arch_gothic_side_medium.json",
     "arch/gothic/arch_gothic_side_small.json",
     "arch/gothic/arch_gothic_top_large.json",
+    "arch/romanesque/arch_romanesque_corner_small.json",
+    "arch/romanesque/arch_romanesque_corner_medium.json",
+    "arch/romanesque/arch_romanesque_corner_large_upper.json",
+    "arch/romanesque/arch_romanesque_corner_large_lower.json",
+    "arch/romanesque/arch_romanesque_side_small.json",
+    "arch/romanesque/arch_romanesque_side_medium.json",
+    "arch/romanesque/arch_romanesque_side_large.json",
+    "arch/romanesque/arch_romanesque_side_large_lower.json",
+    "arch/romanesque/arch_romanesque_side_medium_upper.json",
+    "arch/romanesque/arch_romanesque_side_large_upper.json",
+    "arch/romanesque/arch_romanesque_side_column.json",
+    "arch/romanesque/arch_romanesque_side_column_upper.json",
+    "arch/romanesque/arch_romanesque_non_column_side_small.json",
+    "arch/romanesque/arch_romanesque_non_column_side_small_base.json",
+    "arch/romanesque/arch_romanesque_non_column_side_small_crown.json",
+    "arch/romanesque/arch_romanesque_non_column_side_medium.json",
+    "arch/romanesque/arch_romanesque_non_column_side_medium_base.json",
+    "arch/romanesque/arch_romanesque_non_column_side_medium_crown.json",
+    "arch/romanesque/arch_romanesque_non_column_side_large.json",
+    "arch/romanesque/arch_romanesque_non_column_side_large_base.json",
+    "arch/romanesque/arch_romanesque_non_column_side_large_lower.json",
+    "arch/romanesque/arch_romanesque_non_column_side_large_crown.json",
+    "arch/romanesque/arch_romanesque_non_column_corner_small.json",
+    "arch/romanesque/arch_romanesque_non_column_corner_medium.json",
+    "arch/romanesque/arch_romanesque_non_column_corner_large_lower.json",
+    "arch/romanesque/arch_romanesque_non_column_corner_large_upper.json",
+    "arch/romanesque/arch_romanesque_plinth.json",
+    "arch/romanesque/arch_romanesque_top_large.json",
+    "arch/romanesque/arch_romanesque_icon.json",
+    "arch/georgian/arch_georgian_base_left.json",
+    "arch/georgian/arch_georgian_base_right.json",
+    "arch/georgian/arch_georgian_middle_left.json",
+    "arch/georgian/arch_georgian_middle_right.json",
+    "arch/georgian/arch_georgian_width1_top_row0_column0.json",
+    "arch/georgian/arch_georgian_width2_top_row0_column0.json",
+    "arch/georgian/arch_georgian_width2_top_row0_column1.json",
+    "arch/georgian/arch_georgian_width3_top_row0_column0.json",
+    "arch/georgian/arch_georgian_width3_top_row0_column1.json",
+    "arch/georgian/arch_georgian_width3_top_row0_column2.json",
+    "arch/georgian/arch_georgian_width4_top_row0_column0.json",
+    "arch/georgian/arch_georgian_width4_top_row0_column1.json",
+    "arch/georgian/arch_georgian_width4_top_row0_column2.json",
+    "arch/georgian/arch_georgian_width4_top_row0_column3.json",
+    "arch/georgian/arch_georgian_width4_top_row1_column0.json",
+    "arch/georgian/arch_georgian_width4_top_row1_column1.json",
+    "arch/georgian/arch_georgian_width4_top_row1_column2.json",
+    "arch/georgian/arch_georgian_width4_top_row1_column3.json",
+    "arch/georgian/arch_georgian_width5_top_row0_column0.json",
+    "arch/georgian/arch_georgian_width5_top_row0_column1.json",
+    "arch/georgian/arch_georgian_width5_top_row0_column2.json",
+    "arch/georgian/arch_georgian_width5_top_row0_column3.json",
+    "arch/georgian/arch_georgian_width5_top_row0_column4.json",
+    "arch/georgian/arch_georgian_width5_top_row1_column0.json",
+    "arch/georgian/arch_georgian_width5_top_row1_column1.json",
+    "arch/georgian/arch_georgian_width5_top_row1_column2.json",
+    "arch/georgian/arch_georgian_width5_top_row1_column3.json",
+    "arch/georgian/arch_georgian_width5_top_row1_column4.json",
+    "arch/georgian/arch_georgian_width6_top_row0_column0.json",
+    "arch/georgian/arch_georgian_width6_top_row0_column1.json",
+    "arch/georgian/arch_georgian_width6_top_row0_column2.json",
+    "arch/georgian/arch_georgian_width6_top_row0_column3.json",
+    "arch/georgian/arch_georgian_width6_top_row0_column4.json",
+    "arch/georgian/arch_georgian_width6_top_row0_column5.json",
+    "arch/georgian/arch_georgian_width6_top_row1_column0.json",
+    "arch/georgian/arch_georgian_width6_top_row1_column1.json",
+    "arch/georgian/arch_georgian_width6_top_row1_column2.json",
+    "arch/georgian/arch_georgian_width6_top_row1_column3.json",
+    "arch/georgian/arch_georgian_width6_top_row1_column4.json",
+    "arch/georgian/arch_georgian_width6_top_row1_column5.json",
+    "arch/georgian/arch_georgian_width4_short_top_column0.json",
+    "arch/georgian/arch_georgian_width4_short_top_column1.json",
+    "arch/georgian/arch_georgian_width4_short_top_column2.json",
+    "arch/georgian/arch_georgian_width4_short_top_column3.json",
+    "arch/georgian/arch_georgian_width5_short_top_column0.json",
+    "arch/georgian/arch_georgian_width5_short_top_column1.json",
+    "arch/georgian/arch_georgian_width5_short_top_column2.json",
+    "arch/georgian/arch_georgian_width5_short_top_column3.json",
+    "arch/georgian/arch_georgian_width5_short_top_column4.json",
+    "arch/georgian/arch_georgian_width6_short_top_column0.json",
+    "arch/georgian/arch_georgian_width6_short_top_column1.json",
+    "arch/georgian/arch_georgian_width6_short_top_column2.json",
+    "arch/georgian/arch_georgian_width6_short_top_column3.json",
+    "arch/georgian/arch_georgian_width6_short_top_column4.json",
+    "arch/georgian/arch_georgian_width6_short_top_column5.json",
+    "arch/georgian/arch_georgian_icon.json",
     "column/gothic/column_gothic_base.json",
     "column/gothic/column_gothic_capital.json",
     "column/gothic/column_gothic_pillar.json",
@@ -537,6 +649,30 @@ def _triangle_area(a: Vec3, b: Vec3, c: Vec3) -> float:
     return _length(_cross(_sub(b, a), _sub(c, a))) * 0.5
 
 
+def _raw_face_vertices(start: Vec3, end: Vec3, face_name: str, face: dict[str, Any]) -> tuple[Vec3, ...]:
+    if "erydon_vertices" not in face:
+        return _local_face_vertices(start, end, face_name)
+    values = face["erydon_vertices"]
+    if not isinstance(values, list) or len(values) != 4:
+        raise UnsupportedGeometry("erydon_vertices must contain exactly 4 finite XYZ arrays")
+    vertices: list[Vec3] = []
+    for value in values:
+        if (
+            not isinstance(value, list)
+            or len(value) != 3
+            or any(isinstance(component, bool) or not isinstance(component, (int, float)) for component in value)
+        ):
+            raise UnsupportedGeometry("erydon_vertices must contain exactly 4 finite XYZ arrays")
+        try:
+            vertex = tuple(float(component) for component in value)
+        except (OverflowError, ValueError) as error:
+            raise UnsupportedGeometry("erydon_vertices must contain exactly 4 finite XYZ arrays") from error
+        if any(not math.isfinite(component) or abs(component) > 3.4028236e38 for component in vertex):
+            raise UnsupportedGeometry("erydon_vertices must contain exactly 4 finite XYZ arrays")
+        vertices.append(vertex)  # type: ignore[arg-type]
+    return tuple(vertices)
+
+
 def _quad_area(vertices: Sequence[Vec3]) -> float:
     return _triangle_area(vertices[0], vertices[1], vertices[2]) + _triangle_area(
         vertices[0], vertices[2], vertices[3]
@@ -548,6 +684,29 @@ def _bounds(vertices: Sequence[Vec3]) -> tuple[Vec3, Vec3]:
         tuple(min(vertex[axis] for vertex in vertices) for axis in range(3)),
         tuple(max(vertex[axis] for vertex in vertices) for axis in range(3)),
     )  # type: ignore[return-value]
+
+
+def _raw_normal_offset(face: dict[str, Any]) -> float:
+    value = face.get("erydon_normal_offset", 0.0)
+    if (
+        isinstance(value, bool)
+        or not isinstance(value, (int, float))
+        or not 0.0 <= value <= 0.05
+        or not math.isfinite(value)
+    ):
+        raise UnsupportedGeometry("erydon_normal_offset must be a finite number from 0 to 0.05")
+    return float(value)
+
+
+def _offset_raw_face_vertices(vertices: Sequence[Vec3], offset: float) -> tuple[Vec3, ...]:
+    if offset == 0.0:
+        return tuple(vertices)
+    normal = _cross(_sub(vertices[1], vertices[0]), _sub(vertices[2], vertices[0]))
+    length = _length(normal)
+    if not math.isfinite(length) or length <= 0.0:
+        return tuple(vertices)
+    delta = _mul(normal, offset / length)
+    return tuple(_add(vertex, delta) for vertex in vertices)
 
 
 def _build_faces(
@@ -633,7 +792,11 @@ def _build_faces(
             if raw_group_rotations is None and raw_face.get("texture", object()) is None:
                 continue
             try:
-                local_vertices = _local_face_vertices(start, end, face_name)
+                normal_offset = _raw_normal_offset(raw_face) if raw_rotations is not None else 0.0
+                local_vertices = (
+                    _raw_face_vertices(start, end, face_name, raw_face)
+                    if raw_rotations is not None else _local_face_vertices(start, end, face_name)
+                )
                 if raw_rotations is None:
                     vertices = tuple(
                         _transform_vertex(vertex, rotation) for vertex in local_vertices
@@ -643,6 +806,7 @@ def _build_faces(
                         _transform_raw_vertex(vertex, raw_rotations)
                         for vertex in local_vertices
                     )
+                    vertices = _offset_raw_face_vertices(vertices, normal_offset)
                 first_edge = _sub(vertices[1], vertices[0])
                 second_edge = _sub(vertices[2], vertices[0])
                 normal = _normalize(_cross(first_edge, second_edge))
@@ -1844,10 +2008,16 @@ def _raw_cull_boundary_state(
                     "Raw erydon_cull_boundary_override must be boolean at "
                     f"element {element_index} face {face_name}"
                 )
-            vertices = tuple(
-                _transform_raw_vertex(vertex, rotation_chains[element_index])
-                for vertex in _local_face_vertices(start, end, face_name)
-            )
+            try:
+                vertices = tuple(
+                    _transform_raw_vertex(vertex, rotation_chains[element_index])
+                    for vertex in _raw_face_vertices(start, end, face_name, face)
+                )
+                vertices = _offset_raw_face_vertices(vertices, _raw_normal_offset(face))
+            except UnsupportedGeometry as error:
+                raise ModelAuditError(
+                    f"Raw element {element_index} face {face_name} cull-boundary analysis failed: {error}"
+                ) from error
             axis, expected = axes[cullface]
             physical_boundary = all(
                 abs(vertex[axis] - expected) <= RAW_LOADER_EPSILON
@@ -1932,7 +2102,7 @@ def _effective_uv_range_distances(
                     end = _raw_vector3(element.get("to"), "raw element to")
                     vertices = tuple(
                         _transform_raw_vertex(vertex, raw_rotations)
-                        for vertex in _local_face_vertices(start, end, face_name)
+                        for vertex in _raw_face_vertices(start, end, face_name, face)
                     )
                     values = _raw_effective_face_uv(face, vertices)
                 except (UnsupportedGeometry, ModelAuditError) as error:

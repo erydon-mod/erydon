@@ -579,6 +579,7 @@ final class SynapheiaPrototypeTest {
         int ruleConnectedOverlays = 0;
         int cutoutOverlays = 0;
         int cutoutMippedOverlays = 0;
+        Set<Identifier> georgianArches = new java.util.HashSet<>();
         try (var paths = Files.walk(namespaceRoot.resolve("optifine/ctm"))) {
             for (Path path : paths.filter(file -> file.toString().endsWith(".properties")).toList()) {
                 Properties properties = new Properties();
@@ -592,6 +593,15 @@ final class SynapheiaPrototypeTest {
                 String relative = namespaceRoot.relativize(path).toString().replace('\\', '/');
                 SynapheiaManifest.Rule rule = SynapheiaManifest.parseRule(
                         new Identifier("minecraft", relative), "production-test", properties, blocks);
+                if (relative.startsWith("optifine/ctm/arch_georgian/")) {
+                    assertEquals(SynapheiaManifest.Method.REPEAT, rule.method(), relative);
+                    assertEquals(1, blocks.size(), relative);
+                    Identifier block = blocks.iterator().next();
+                    assertTrue(block.getPath().endsWith("_arch_georgian"), relative);
+                    assertTrue(georgianArches.add(block), "Duplicate Georgian rule: " + block);
+                    assertEquals("6", properties.getProperty("width"), relative);
+                    assertEquals("6", properties.getProperty("height"), relative);
+                }
                 if (rule.method() == SynapheiaManifest.Method.REPEAT) {
                     repeatRules++;
                 } else {
@@ -611,7 +621,8 @@ final class SynapheiaPrototypeTest {
                 }
             }
         }
-        assertEquals(1160, repeatRules); // Includes 135 pack-independent coping rules.
+        assertEquals(27 * 6, georgianArches.size(), "Every Georgian material and finish needs its own native rule");
+        assertEquals(1322 + 27 * 6, repeatRules); // Existing families plus pack-independent Georgian arches.
         assertEquals(192, overlayRules);
         assertEquals(192, sourceOverlayRules);
         assertEquals(192, ruleConnectedOverlays);

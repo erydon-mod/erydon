@@ -1,0 +1,43 @@
+{
+  "schema": 2,
+  "master": "authoring/alcoves/georgian/alcove_georgian_3wide.bbmodel",
+  "master_sha256": "468d8daecd1e76f9937337409503ef6ac5c6765deac01c8fe00a261483e614f4",
+  "master_cubes": 237,
+  "derived_widths": [
+    1,
+    2
+  ],
+  "material_finish_variants": 162,
+  "component_models": 27,
+  "coplanar_faces_separated": 758,
+  "face_separation": {
+    "standalone_models_checked": 27,
+    "single_cell_states_checked": 24,
+    "cluster_layouts_checked": 12,
+    "observed_overlap_pairs": 6912,
+    "unique_overlap_edges": 1330,
+    "overlap_face_nodes": 1082,
+    "colors": 8,
+    "coplanar_faces_separated": 758,
+    "max_normal_offset": 0.00175,
+    "remaining_exact_same_plane_overlaps": 0
+  },
+  "middle_strip_height": 16,
+  "collision_slice_units": 0.25,
+  "fixed_jamb_inner_edge_units": 2.10064,
+  "ridge_segments_per_side": 7,
+  "crest_vertical_shifts_units": {
+    "1": 0.62505092,
+    "2": 0.0,
+    "3": 0
+  },
+  "notes": [
+    "Master BB is preserved byte for byte; geometry roles do not depend on original UUIDs.",
+    "Narrow curved cores are affine face meshes anchored to the fixed jamb inner edges.",
+    "Narrow mouldings retain authored perpendicular thickness and share mitred joints.",
+    "Pilasters, capitals, plinths and crest retain their authored dimensions.",
+    "Physically top-row capitals are promoted even when grouped in the middle row.",
+    "Exact overlapping faces use graph-colored microscopic offsets without shifting texture phase.",
+    "Runtime UV-cell tessellation preserves overhangs and atlas-safe samples."
+  ]
+}

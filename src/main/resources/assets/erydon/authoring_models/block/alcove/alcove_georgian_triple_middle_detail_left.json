@@ -1,0 +1,191 @@
+{
+  "format_version": "1.21.11",
+  "credit": "Derived from the Georgian three-wide design",
+  "textures": {
+    "stone": "erydon:block/aganite_block"
+  },
+  "elements": [
+    {
+      "name": "outer_jamb_left",
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        0.4,
+        16,
+        16.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone",
+          "erydon_normal_offset": 0.00025
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone",
+          "erydon_normal_offset": 0.00025
+        },
+        "up": {
+          "texture": "#stone",
+          "erydon_normal_offset": 0.00025
+        },
+        "down": {
+          "texture": "#stone",
+          "erydon_normal_offset": 0.00025
+        }
+      }
+    },
+    {
+      "name": "outer_jamb_left",
+      "from": [
+        1.69,
+        0,
+        0
+      ],
+      "to": [
+        2.09,
+        16,
+        16.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone",
+          "erydon_normal_offset": 0.00025
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone",
+          "erydon_normal_offset": 0.00025
+        },
+        "down": {
+          "texture": "#stone",
+          "erydon_normal_offset": 0.00025
+        }
+      }
+    },
+    {
+      "name": "outer_jamb_left",
+      "from": [
+        1.26,
+        0,
+        0
+      ],
+      "to": [
+        1.69,
+        16,
+        16.25
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone",
+          "erydon_normal_offset": 0.00025
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone",
+          "erydon_normal_offset": 0.00025
+        },
+        "down": {
+          "texture": "#stone",
+          "erydon_normal_offset": 0.00025
+        }
+      }
+    },
+    {
+      "name": "outer_jamb_left",
+      "from": [
+        0.4,
+        0,
+        0
+      ],
+      "to": [
+        0.83,
+        16,
+        16.25
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone",
+          "erydon_normal_offset": 0.00025
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone",
+          "erydon_normal_offset": 0.00025
+        },
+        "down": {
+          "texture": "#stone",
+          "erydon_normal_offset": 0.00025
+        }
+      }
+    },
+    {
+      "name": "outer_jamb_left",
+      "from": [
+        0.83,
+        0,
+        0
+      ],
+      "to": [
+        1.26,
+        16,
+        16.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone",
+          "erydon_normal_offset": 0.00025
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone",
+          "erydon_normal_offset": 0.00025
+        },
+        "down": {
+          "texture": "#stone",
+          "erydon_normal_offset": 0.00025
+        }
+      }
+    }
+  ],
+  "erydon_split_world_uv": true
+}

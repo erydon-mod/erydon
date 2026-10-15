@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/alcove/modern/alcove_modern_top",
+  "textures": {
+    "stone": "erydon:block/kylorion_rusticated_block",
+    "particle": "erydon:block/kylorion_rusticated_block"
+  }
+}

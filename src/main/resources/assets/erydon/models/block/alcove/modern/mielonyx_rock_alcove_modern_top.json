@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/alcove/modern/alcove_modern_top",
+  "textures": {
+    "stone": "erydon:block/mielonyx_rock_block",
+    "particle": "erydon:block/mielonyx_rock_block"
+  }
+}

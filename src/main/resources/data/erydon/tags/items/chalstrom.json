@@ -386,6 +386,18 @@
     "erydon:chalstrom_wall",
     "erydon:chalstrom_wall_georgian",
     "erydon:chalstrom_window_arch",
-    "erydon:chalstrom_window_french_georgian"
+    "erydon:chalstrom_window_french_georgian",
+    "erydon:chalstrom_aged_alcove_modern",
+    "erydon:chalstrom_alcove_modern",
+    "erydon:chalstrom_ashlar_alcove_modern",
+    "erydon:chalstrom_hewn_alcove_modern",
+    "erydon:chalstrom_rock_alcove_modern",
+    "erydon:chalstrom_rusticated_alcove_modern",
+    "erydon:chalstrom_aged_arch_georgian",
+    "erydon:chalstrom_arch_georgian",
+    "erydon:chalstrom_ashlar_arch_georgian",
+    "erydon:chalstrom_hewn_arch_georgian",
+    "erydon:chalstrom_rock_arch_georgian",
+    "erydon:chalstrom_rusticated_arch_georgian"
   ]
 }

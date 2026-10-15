@@ -169,7 +169,7 @@ class ModelZFightingSafetyTests(unittest.TestCase):
             re.findall(r'authoring_models/block/([^"\\]+\.json)', java)
         )
         self.assertEqual(loader_paths, set(scanner.REGISTERED_RAW_MODEL_PATHS))
-        self.assertEqual(len(loader_paths), 56)
+        self.assertEqual(len(loader_paths), 168)
 
     def test_ordinary_file_audit_uses_raw_transforms_only_for_registered_models(self) -> None:
         repository = TOOLS.parent
@@ -210,12 +210,12 @@ class ModelZFightingSafetyTests(unittest.TestCase):
             / "src/main/resources/assets/erydon/authoring_models/block"
         )
         intentional_triple_panel_overlaps = {
-            "alcove/alcove_georgian_triple_side_center.json": 6,
-            "alcove/alcove_georgian_triple_top_left.json": 7,
-            "alcove/alcove_georgian_triple_top_right.json": 7,
             "alcove/alcove_gothic_triple_side_center.json": 6,
             "alcove/alcove_gothic_triple_top_left.json": 7,
             "alcove/alcove_gothic_triple_top_right.json": 7,
+            "alcove/alcove_modern_triple_side_center.json": 6,
+            "alcove/alcove_modern_triple_top_left.json": 7,
+            "alcove/alcove_modern_triple_top_right.json": 7,
         }
         intentional_georgian_slope_overlaps = {
             "wall/georgian/wall_georgian_27_lower.json": 644,
@@ -258,6 +258,8 @@ class ModelZFightingSafetyTests(unittest.TestCase):
         observed_intentional_overlaps = {}
         exact_same = 0
         near = 0
+        georgian_near_contacts = {}
+        capital_near_contacts = 0
         authored_cullfaces = 0
         for relative in scanner.REGISTERED_RAW_MODEL_PATHS:
             source = raw_root.joinpath(*relative.split("/")).read_bytes()
@@ -275,6 +277,22 @@ class ModelZFightingSafetyTests(unittest.TestCase):
                 if finding["orientation"] == "same"
                 and finding["plane_quality"] == "exact"
             ]
+            if relative.startswith("alcove/alcove_georgian_"):
+                self.assertFalse(same_findings, "Generated Georgian overlaps must be separated at bake time")
+                near_contacts = [finding for finding in audit["findings"] if finding["plane_quality"] == "near"]
+                if near_contacts:
+                    self.assertTrue(all(finding["orientation"] == "opposite" for finding in near_contacts), relative)
+                    georgian_near_contacts[relative] = len(near_contacts)
+            if relative == "arch/romanesque/arch_romanesque_side_column_upper.json":
+                contacts = [finding for finding in audit["findings"] if finding["plane_quality"] == "near"]
+                # Saved shaft ribs meet at three opposing surfaces. One further
+                # same-facing sliver is below 2e-8 square model units after BB
+                # coordinate serialization; retain the user's enabled faces.
+                self.assertEqual(sum(finding["orientation"] == "opposite" for finding in contacts), 3)
+                slivers = [finding for finding in contacts if finding["orientation"] == "same"]
+                self.assertEqual(len(slivers), 1)
+                self.assertLess(slivers[0]["overlap_area"], 2e-8)
+                capital_near_contacts = len(contacts)
             if same_findings:
                 self.assertIn(relative, intentional_exact_same_overlaps)
                 if relative in intentional_triple_panel_overlaps:
@@ -327,8 +345,19 @@ class ModelZFightingSafetyTests(unittest.TestCase):
             authored_cullfaces += len(scanner._raw_cull_boundary_state(document))
         self.assertEqual(observed_intentional_overlaps, intentional_exact_same_overlaps)
         self.assertEqual(exact_same, 1387)
-        self.assertEqual(near, 36)
-        self.assertEqual(authored_cullfaces, 933)
+        self.assertEqual(georgian_near_contacts, {
+            "alcove/alcove_georgian_single_top.json": 3,
+            "alcove/alcove_georgian_icon.json": 3,
+        })
+        self.assertEqual(capital_near_contacts, 4)
+        self.assertEqual(near - sum(georgian_near_contacts.values()) - capital_near_contacts, 36)
+        # Existing families retain 933 authored cull entries. The saved manual
+        # Romanesque face pass retains 2584, including the separate capital-row
+        # shaft and symmetric narrow clipping. These are metadata; the loader
+        # applies culling only to faces on the owning cell's boundary.
+        # Georgian's native free-format faces carry no legacy cull entries.
+        # Independent plain-arch templates add 1087 saved cull entries.
+        self.assertEqual(authored_cullfaces, 933 + 2584 + 1087)
 
     def test_raw_nested_group_transform_order_matches_golden_vertices(self) -> None:
         source = (FIXTURES / "raw_nested_group_overlap.json").read_bytes()
@@ -487,7 +516,7 @@ class ModelZFightingSafetyTests(unittest.TestCase):
             report = json.loads(json_report.read_text(encoding="utf-8"))
             self.assertEqual(report["mode"], "report-only")
             self.assertIs(report["sourceWrites"], False)
-            self.assertIn("56 registered raw-authoring models", report["policy"]["rawTransforms"])
+            self.assertIn("168 registered raw-authoring models", report["policy"]["rawTransforms"])
             self.assertEqual(report["summary"]["files"], len(before))
             self.assertGreaterEqual(report["summary"]["auto_candidates"], 2)
             with csv_report.open(encoding="utf-8", newline="") as stream:
@@ -869,7 +898,7 @@ class ModelZFightingSafetyTests(unittest.TestCase):
                 raw_canonical_root=raw_root,
                 include_full_recess_repair=True,
             )
-            self.assertEqual(plan["summary"]["registeredRawFilesScanned"], 56)
+            self.assertEqual(plan["summary"]["registeredRawFilesScanned"], 168)
             self.assertEqual(plan["summary"]["rawExactSameFacingFindingsBefore"], 1)
             self.assertEqual(plan["summary"]["predictedRawExactSameFacingFindingsAfter"], 0)
             self.assertEqual(plan["summary"]["predictedUvRegressions"], 0)

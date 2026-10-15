@@ -123,6 +123,7 @@ public final class HorizontalUvLock {
                 || path.startsWith("block/arch/modern/")
                 || path.startsWith("block/arch/romanesque/")
                 || path.startsWith("block/arch/gothic/")
+                || path.startsWith("block/arch/georgian/")
                 || path.startsWith("block/column/circular/")
                 || path.startsWith("block/column/square/")
                 || path.startsWith("block/stairs/spiral/")

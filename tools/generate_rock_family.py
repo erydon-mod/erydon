@@ -33,7 +33,9 @@ JSON_MIRROR_ROOTS = (
 EXPECTED_FORMS = {
     "alcove_georgian",
     "alcove_gothic",
+    "alcove_modern",
     "arch_gothic",
+    "arch_georgian",
     "arch_modern",
     "arch_romanesque",
     "block",
@@ -115,11 +117,17 @@ def write_json(path: Path, value: dict, *, indent: int = 2) -> None:
     )
 
 
+def mirrored_hewn_member(value: object) -> bool:
+    # Coping is generated separately and does not have a Rock counterpart.
+    return isinstance(value, str) and "_hewn_" in value and "_hewn_coping_georgian" not in value
+
+
 def hewn_ids_and_materials() -> tuple[list[str], list[str]]:
     values = load_json(HEWN_TAG)["values"]
-    hewn_ids = [value for value in values if isinstance(value, str) and "_hewn_" in value]
-    if len(hewn_ids) != 621:
-        raise RuntimeError(f"Expected 621 Hewn IDs, found {len(hewn_ids)}")
+    hewn_ids = [value for value in values if mirrored_hewn_member(value)]
+    expected_ids = 27 * len(EXPECTED_FORMS)
+    if len(hewn_ids) != expected_ids:
+        raise RuntimeError(f"Expected {expected_ids} Hewn IDs, found {len(hewn_ids)}")
 
     materials: list[str] = []
     forms_by_material: dict[str, set[str]] = {}
@@ -235,10 +243,18 @@ def prepare_sheet(sheet_suffix: str, sheet: Image.Image) -> Image.Image:
     return sheet.copy()
 
 
+def expected_json_counts() -> tuple[int, int, int]:
+    """Component additions must preserve a complete Hewn/Rock asset mirror."""
+    expected_ids = 27 * len(EXPECTED_FORMS)
+    component_count = sum(1 for path in JSON_MIRROR_ROOTS[1].rglob("*.json")
+                          if mirrored_hewn_member(path.name))
+    return expected_ids, component_count, expected_ids
+
+
 def clone_json_assets() -> None:
-    expected_counts = (594, 4077, 594)
+    expected_counts = expected_json_counts()
     for root, expected in zip(JSON_MIRROR_ROOTS, expected_counts, strict=True):
-        sources = sorted(path for path in root.rglob("*.json") if "_hewn_" in path.name)
+        sources = sorted(path for path in root.rglob("*.json") if mirrored_hewn_member(path.name))
         if len(sources) != expected:
             raise RuntimeError(f"Expected {expected} Hewn JSON files under {root}, found {len(sources)}")
         for source in sources:
@@ -357,7 +373,7 @@ def update_tags() -> None:
         **hewn_tag,
         "values": [
             value.replace("_hewn_", "_rock_") if isinstance(value, str) else value
-            for value in hewn_tag["values"]
+            for value in hewn_tag["values"] if not isinstance(value, str) or "_hewn_coping_georgian" not in value
         ],
     }
     write_json(ROCK_TAG, rock_tag)
@@ -369,7 +385,7 @@ def update_tags() -> None:
         values = document.get("values")
         if not isinstance(values, list):
             continue
-        hewn_values = [value for value in values if isinstance(value, str) and "_hewn_" in value]
+        hewn_values = [value for value in values if mirrored_hewn_member(value)]
         if not hewn_values:
             continue
         generated_rock_values = {value.replace("_hewn_", "_rock_") for value in hewn_values}
@@ -377,7 +393,7 @@ def update_tags() -> None:
         expanded: list[object] = []
         for value in without_generated:
             expanded.append(value)
-            if isinstance(value, str) and "_hewn_" in value:
+            if mirrored_hewn_member(value):
                 expanded.append(value.replace("_hewn_", "_rock_"))
         document["values"] = expanded
         write_json(path, document)
@@ -388,9 +404,10 @@ def update_languages() -> None:
     for filename, (hewn_word, rock_word) in LANG_REPLACEMENTS.items():
         path = language_root / filename
         document = load_json(path)
-        hewn_keys = [key for key in document if "_hewn_" in key]
-        if len(hewn_keys) != 621:
-            raise RuntimeError(f"Expected 621 Hewn language keys in {filename}, found {len(hewn_keys)}")
+        hewn_keys = [key for key in document if mirrored_hewn_member(key)]
+        expected_ids = 27 * len(EXPECTED_FORMS)
+        if len(hewn_keys) != expected_ids:
+            raise RuntimeError(f"Expected {expected_ids} Hewn language keys in {filename}, found {len(hewn_keys)}")
 
         generated_keys = {key.replace("_hewn_", "_rock_") for key in hewn_keys}
         generated_keys.add("option.erydon.gallery.variant.rock")
@@ -399,7 +416,7 @@ def update_languages() -> None:
             if key in generated_keys:
                 continue
             expanded[key] = value
-            if "_hewn_" in key:
+            if mirrored_hewn_member(key):
                 if hewn_word not in value:
                     raise RuntimeError(f"Expected {hewn_word!r} in {filename} value for {key}")
                 expanded[key.replace("_hewn_", "_rock_")] = value.replace(hewn_word, rock_word)
@@ -416,7 +433,7 @@ def update_mod_blocks() -> None:
     rock_registration = re.compile(
         rb'^        [A-Z0-9_]*ROCK[A-Z0-9_]* = registerBlock\("[a-z0-9_]*_rock_[a-z0-9_]*",\r?\n?$'
     )
-    dynamic_rock_markers = (b'_rock_arch_modern"', b'_rock_arch_gothic"', b'_rock_alcove_"')
+    dynamic_rock_markers = (b'_rock_arch_modern"', b'_rock_arch_gothic"', b'_rock_arch_georgian"', b'_rock_alcove_"')
 
     cleaned: list[bytes] = []
     index = 0
@@ -440,7 +457,7 @@ def update_mod_blocks() -> None:
     hewn_registration = re.compile(
         rb'^        [A-Z0-9_]*HEWN[A-Z0-9_]* = registerBlock\("[a-z0-9_]*_hewn_[a-z0-9_]*",\r?\n?$'
     )
-    dynamic_hewn_markers = (b'_hewn_arch_modern"', b'_hewn_arch_gothic"', b'_hewn_alcove_"')
+    dynamic_hewn_markers = (b'_hewn_arch_modern"', b'_hewn_arch_gothic"', b'_hewn_arch_georgian"', b'_hewn_alcove_"')
 
     expanded: list[bytes] = []
     index = 0
@@ -520,12 +537,17 @@ def validate_outputs() -> None:
     if rock_document.get("values") != expected_rock_ids:
         raise RuntimeError("rock.json is not an exact Hewn-family mirror")
 
-    expected_counts = (621, 4752, 621)
+    expected_counts = expected_json_counts()
     for root, expected in zip(JSON_MIRROR_ROOTS, expected_counts, strict=True):
-        sources = sorted(path for path in root.rglob("*.json") if "_hewn_" in path.name)
+        sources = sorted(path for path in root.rglob("*.json") if mirrored_hewn_member(path.name))
         targets = sorted(path for path in root.rglob("*.json") if "_rock_" in path.name)
         if len(targets) != expected:
             raise RuntimeError(f"Expected {expected} Rock JSON files under {root}, found {len(targets)}")
+        expected_targets = {rock_path_from_hewn(source) for source in sources}
+        if set(targets) != expected_targets:
+            missing = sorted(str(path.relative_to(REPO_ROOT)) for path in expected_targets - set(targets))
+            extra = sorted(str(path.relative_to(REPO_ROOT)) for path in set(targets) - expected_targets)
+            raise RuntimeError(f"Rock JSON counterpart mismatch: missing={missing[:3]}, extra={extra[:3]}")
         for source in sources:
             target = rock_path_from_hewn(source)
             if not target.is_file() or target.read_bytes() != rock_bytes_from_hewn(source.read_bytes()):
@@ -583,7 +605,7 @@ def validate_outputs() -> None:
             continue
         values = load_json(path).get("values", [])
         for value in values:
-            if isinstance(value, str) and "_hewn_" in value:
+            if mirrored_hewn_member(value):
                 counterpart = value.replace("_hewn_", "_rock_")
                 if counterpart not in values:
                     raise RuntimeError(f"Missing Rock tag counterpart in {path}: {counterpart}")
@@ -593,10 +615,11 @@ def validate_outputs() -> None:
         if document.get("option.erydon.gallery.variant.rock") != rock_word:
             raise RuntimeError(f"Missing Rock gallery translation in {filename}")
         rock_keys = [key for key in document if "_rock_" in key]
-        if len(rock_keys) != 621:
-            raise RuntimeError(f"Expected 621 Rock language keys in {filename}, found {len(rock_keys)}")
+        expected_ids = 27 * len(EXPECTED_FORMS)
+        if len(rock_keys) != expected_ids:
+            raise RuntimeError(f"Expected {expected_ids} Rock language keys in {filename}, found {len(rock_keys)}")
         for key, value in document.items():
-            if "_hewn_" not in key:
+            if not mirrored_hewn_member(key):
                 continue
             rock_key = key.replace("_hewn_", "_rock_")
             if document.get(rock_key) != value.replace(hewn_word, rock_word):
@@ -610,6 +633,7 @@ def validate_outputs() -> None:
     required_dynamic = (
         'registerModernArch(material + "_rock_arch_modern", material + "_rock_block");',
         'registerGothicArch(material + "_rock_arch_gothic", material + "_rock_block");',
+        'registerGeorgianArch(material + "_rock_arch_georgian", material + "_rock_block");',
         'registerAlcove(material + "_rock_alcove_" + style, material + "_rock_block", maxClusterWidth);',
         'toSlitherId(slabId, "slice_vertical")',
         'toSlitherId(slabId, "slice_horizontal")',
@@ -628,13 +652,13 @@ def main() -> int:
 
     if args.check:
         validate_outputs()
-        print("Rock family outputs verified: 27 materials x 23 forms, with native CTM/PBR tiles.")
+        print(f"Rock family outputs verified: 27 materials x {len(EXPECTED_FORMS)} forms, with native CTM/PBR tiles.")
         return 0
     if args.source is None:
         parser.error("--source is required unless --check is used")
     generate(args.source.resolve())
     validate_outputs()
-    print("Generated and verified the native ERYDON Rock family: 27 materials x 23 forms.")
+    print(f"Generated and verified the native ERYDON Rock family: 27 materials x {len(EXPECTED_FORMS)} forms.")
     return 0
 
 

@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.oliver.erydon.Erydon;
 import com.oliver.erydon.client.profile.ErydonSharedGeometryMetrics;
+import com.oliver.erydon.util.ErydonIdNaming;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.model.loading.v1.PreparableModelLoadingPlugin;
 import net.fabricmc.fabric.api.renderer.v1.Renderer;
@@ -59,9 +60,12 @@ import java.util.regex.Pattern;
 
 public final class ErydonRawModelLoadingPlugin implements PreparableModelLoadingPlugin<ErydonRawModelLoadingPlugin.PreparedModels> {
     private static final Pattern GOTHIC_COLUMN_COMPONENT = Pattern.compile("^block/column/gothic/(.+)_column_gothic_(plinth|base|pillar|capital)(_aged)?$");
-    private static final Pattern GEORGIAN_ALCOVE_COMPONENT = Pattern.compile("^block/alcove/georgian/(.+)_alcove_georgian_(back|sides|base|top|icon|double_side_left|double_side_right|double_top_left|double_top_right|triple_side_left|triple_side_center|triple_side_right|triple_top_left|triple_top_center|triple_top_right)(_aged)?$");
+    private static final Pattern GEORGIAN_ALCOVE_COMPONENT = Pattern.compile("^block/alcove/georgian/(.+)_alcove_georgian_(back|sides|base|top|icon|double_side_left|double_side_right|double_top_left|double_top_right|triple_side_left|triple_side_center|triple_side_right|triple_top_left|triple_top_center|triple_top_right|(?:double_|triple_)?(?:base|middle)_detail_(?:left|right))(_aged)?$");
     private static final Pattern GOTHIC_ALCOVE_COMPONENT = Pattern.compile("^block/alcove/gothic/(.+)_alcove_gothic_(back|sides|base|top|icon|double_side_left|double_side_right|double_top_left|double_top_right|triple_side_left|triple_side_center|triple_side_right|triple_top_left|triple_top_center|triple_top_right)(_aged)?$");
+    private static final Pattern MODERN_ALCOVE_COMPONENT = Pattern.compile("^block/alcove/modern/(.+)_alcove_modern_(back|sides|base|top|icon|double_side_left|double_side_right|double_top_left|double_top_right|triple_side_left|triple_side_center|triple_side_right|triple_top_left|triple_top_center|triple_top_right)(_aged)?$");
     private static final Pattern GOTHIC_ARCH_COMPONENT = Pattern.compile("^block/arch/gothic/(.+)_arch_gothic_(corner_small|corner_medium|corner_large_upper|corner_large_lower|side_small|side_medium|side_large|top_large|icon)(_aged)?$");
+    private static final Pattern ROMANESQUE_ARCH_COMPONENT = Pattern.compile("^block/arch/romanesque/(.+)_arch_romanesque_(corner_small|corner_medium|corner_large_upper|corner_large_lower|side_small|side_medium|side_large|side_large_lower|side_medium_upper|side_large_upper|side_column|side_column_upper|plinth|top_large|icon|non_column_(?:side_small|side_small_base|side_small_crown|side_medium|side_medium_base|side_medium_crown|side_large|side_large_base|side_large_lower|side_large_crown|corner_small|corner_medium|corner_large_lower|corner_large_upper))(_aged)?$");
+    private static final Pattern GEORGIAN_ARCH_COMPONENT = Pattern.compile("^block/arch/georgian/(.+)_arch_georgian_(base_(?:left|right)|middle_(?:left|right)|width[1-6]_top_row[01]_column[0-5]|width[4-6]_short_top_column[0-5]|icon)$");
     private static final Map<String, Identifier> AUTHORING_MODELS = Map.ofEntries(
             Map.entry("coping_georgian/flat", new Identifier(Erydon.MOD_ID, "authoring_models/block/coping/georgian/coping_georgian_flat.json")),
             Map.entry("coping_georgian/slope", new Identifier(Erydon.MOD_ID, "authoring_models/block/coping/georgian/coping_georgian_slope.json")),
@@ -78,6 +82,18 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
             Map.entry("alcove_georgian/base", new Identifier(Erydon.MOD_ID, "authoring_models/block/alcove/alcove_georgian_single_base.json")),
             Map.entry("alcove_georgian/top", new Identifier(Erydon.MOD_ID, "authoring_models/block/alcove/alcove_georgian_single_top.json")),
             Map.entry("alcove_georgian/icon", new Identifier(Erydon.MOD_ID, "authoring_models/block/alcove/alcove_georgian_icon.json")),
+            Map.entry("alcove_georgian/base_detail_left", new Identifier(Erydon.MOD_ID, "authoring_models/block/alcove/alcove_georgian_base_detail_left.json")),
+            Map.entry("alcove_georgian/base_detail_right", new Identifier(Erydon.MOD_ID, "authoring_models/block/alcove/alcove_georgian_base_detail_right.json")),
+            Map.entry("alcove_georgian/middle_detail_left", new Identifier(Erydon.MOD_ID, "authoring_models/block/alcove/alcove_georgian_middle_detail_left.json")),
+            Map.entry("alcove_georgian/middle_detail_right", new Identifier(Erydon.MOD_ID, "authoring_models/block/alcove/alcove_georgian_middle_detail_right.json")),
+            Map.entry("alcove_georgian/double_base_detail_left", new Identifier(Erydon.MOD_ID, "authoring_models/block/alcove/alcove_georgian_double_base_detail_left.json")),
+            Map.entry("alcove_georgian/double_base_detail_right", new Identifier(Erydon.MOD_ID, "authoring_models/block/alcove/alcove_georgian_double_base_detail_right.json")),
+            Map.entry("alcove_georgian/double_middle_detail_left", new Identifier(Erydon.MOD_ID, "authoring_models/block/alcove/alcove_georgian_double_middle_detail_left.json")),
+            Map.entry("alcove_georgian/double_middle_detail_right", new Identifier(Erydon.MOD_ID, "authoring_models/block/alcove/alcove_georgian_double_middle_detail_right.json")),
+            Map.entry("alcove_georgian/triple_base_detail_left", new Identifier(Erydon.MOD_ID, "authoring_models/block/alcove/alcove_georgian_triple_base_detail_left.json")),
+            Map.entry("alcove_georgian/triple_base_detail_right", new Identifier(Erydon.MOD_ID, "authoring_models/block/alcove/alcove_georgian_triple_base_detail_right.json")),
+            Map.entry("alcove_georgian/triple_middle_detail_left", new Identifier(Erydon.MOD_ID, "authoring_models/block/alcove/alcove_georgian_triple_middle_detail_left.json")),
+            Map.entry("alcove_georgian/triple_middle_detail_right", new Identifier(Erydon.MOD_ID, "authoring_models/block/alcove/alcove_georgian_triple_middle_detail_right.json")),
             Map.entry("alcove_georgian/double_side_left", new Identifier(Erydon.MOD_ID, "authoring_models/block/alcove/alcove_georgian_double_side_left.json")),
             Map.entry("alcove_georgian/double_side_right", new Identifier(Erydon.MOD_ID, "authoring_models/block/alcove/alcove_georgian_double_side_right.json")),
             Map.entry("alcove_georgian/double_top_left", new Identifier(Erydon.MOD_ID, "authoring_models/block/alcove/alcove_georgian_double_top_left.json")),
@@ -103,6 +119,21 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
             Map.entry("alcove_gothic/triple_top_left", new Identifier(Erydon.MOD_ID, "authoring_models/block/alcove/alcove_gothic_triple_top_left.json")),
             Map.entry("alcove_gothic/triple_top_center", new Identifier(Erydon.MOD_ID, "authoring_models/block/alcove/alcove_gothic_triple_top_center.json")),
             Map.entry("alcove_gothic/triple_top_right", new Identifier(Erydon.MOD_ID, "authoring_models/block/alcove/alcove_gothic_triple_top_right.json")),
+            Map.entry("alcove_modern/back", new Identifier(Erydon.MOD_ID, "authoring_models/block/alcove/alcove_modern_single_back.json")),
+            Map.entry("alcove_modern/sides", new Identifier(Erydon.MOD_ID, "authoring_models/block/alcove/alcove_modern_single_sides.json")),
+            Map.entry("alcove_modern/base", new Identifier(Erydon.MOD_ID, "authoring_models/block/alcove/alcove_modern_single_base.json")),
+            Map.entry("alcove_modern/top", new Identifier(Erydon.MOD_ID, "authoring_models/block/alcove/alcove_modern_single_top.json")),
+            Map.entry("alcove_modern/icon", new Identifier(Erydon.MOD_ID, "authoring_models/block/alcove/alcove_modern_icon.json")),
+            Map.entry("alcove_modern/double_side_left", new Identifier(Erydon.MOD_ID, "authoring_models/block/alcove/alcove_modern_double_side_left.json")),
+            Map.entry("alcove_modern/double_side_right", new Identifier(Erydon.MOD_ID, "authoring_models/block/alcove/alcove_modern_double_side_right.json")),
+            Map.entry("alcove_modern/double_top_left", new Identifier(Erydon.MOD_ID, "authoring_models/block/alcove/alcove_modern_double_top_left.json")),
+            Map.entry("alcove_modern/double_top_right", new Identifier(Erydon.MOD_ID, "authoring_models/block/alcove/alcove_modern_double_top_right.json")),
+            Map.entry("alcove_modern/triple_side_left", new Identifier(Erydon.MOD_ID, "authoring_models/block/alcove/alcove_modern_triple_side_left.json")),
+            Map.entry("alcove_modern/triple_side_center", new Identifier(Erydon.MOD_ID, "authoring_models/block/alcove/alcove_modern_triple_side_center.json")),
+            Map.entry("alcove_modern/triple_side_right", new Identifier(Erydon.MOD_ID, "authoring_models/block/alcove/alcove_modern_triple_side_right.json")),
+            Map.entry("alcove_modern/triple_top_left", new Identifier(Erydon.MOD_ID, "authoring_models/block/alcove/alcove_modern_triple_top_left.json")),
+            Map.entry("alcove_modern/triple_top_center", new Identifier(Erydon.MOD_ID, "authoring_models/block/alcove/alcove_modern_triple_top_center.json")),
+            Map.entry("alcove_modern/triple_top_right", new Identifier(Erydon.MOD_ID, "authoring_models/block/alcove/alcove_modern_triple_top_right.json")),
             Map.entry("arch_gothic/corner_small", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/gothic/arch_gothic_corner_small.json")),
             Map.entry("arch_gothic/corner_medium", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/gothic/arch_gothic_corner_medium.json")),
             Map.entry("arch_gothic/corner_large_upper", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/gothic/arch_gothic_corner_large_upper.json")),
@@ -112,6 +143,91 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
             Map.entry("arch_gothic/side_large", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/gothic/arch_gothic_side_large.json")),
             Map.entry("arch_gothic/top_large", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/gothic/arch_gothic_top_large.json")),
             Map.entry("arch_gothic/icon", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/gothic/arch_gothic_icon.json")),
+            Map.entry("arch_romanesque/corner_small", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/romanesque/arch_romanesque_corner_small.json")),
+            Map.entry("arch_romanesque/corner_medium", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/romanesque/arch_romanesque_corner_medium.json")),
+            Map.entry("arch_romanesque/corner_large_upper", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/romanesque/arch_romanesque_corner_large_upper.json")),
+            Map.entry("arch_romanesque/corner_large_lower", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/romanesque/arch_romanesque_corner_large_lower.json")),
+            Map.entry("arch_romanesque/side_small", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/romanesque/arch_romanesque_side_small.json")),
+            Map.entry("arch_romanesque/side_medium", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/romanesque/arch_romanesque_side_medium.json")),
+            Map.entry("arch_romanesque/side_large", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/romanesque/arch_romanesque_side_large.json")),
+            Map.entry("arch_romanesque/side_large_lower", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/romanesque/arch_romanesque_side_large_lower.json")),
+            Map.entry("arch_romanesque/side_medium_upper", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/romanesque/arch_romanesque_side_medium_upper.json")),
+            Map.entry("arch_romanesque/side_large_upper", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/romanesque/arch_romanesque_side_large_upper.json")),
+            Map.entry("arch_romanesque/side_column", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/romanesque/arch_romanesque_side_column.json")),
+            Map.entry("arch_romanesque/side_column_upper", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/romanesque/arch_romanesque_side_column_upper.json")),
+            Map.entry("arch_romanesque/non_column_side_small", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/romanesque/arch_romanesque_non_column_side_small.json")),
+            Map.entry("arch_romanesque/non_column_side_small_crown", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/romanesque/arch_romanesque_non_column_side_small_crown.json")),
+            Map.entry("arch_romanesque/non_column_side_small_base", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/romanesque/arch_romanesque_non_column_side_small_base.json")),
+            Map.entry("arch_romanesque/non_column_side_medium", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/romanesque/arch_romanesque_non_column_side_medium.json")),
+            Map.entry("arch_romanesque/non_column_side_medium_crown", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/romanesque/arch_romanesque_non_column_side_medium_crown.json")),
+            Map.entry("arch_romanesque/non_column_side_medium_base", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/romanesque/arch_romanesque_non_column_side_medium_base.json")),
+            Map.entry("arch_romanesque/non_column_side_large", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/romanesque/arch_romanesque_non_column_side_large.json")),
+            Map.entry("arch_romanesque/non_column_side_large_base", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/romanesque/arch_romanesque_non_column_side_large_base.json")),
+            Map.entry("arch_romanesque/non_column_side_large_lower", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/romanesque/arch_romanesque_non_column_side_large_lower.json")),
+            Map.entry("arch_romanesque/non_column_side_large_crown", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/romanesque/arch_romanesque_non_column_side_large_crown.json")),
+            Map.entry("arch_romanesque/non_column_corner_small", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/romanesque/arch_romanesque_non_column_corner_small.json")),
+            Map.entry("arch_romanesque/non_column_corner_medium", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/romanesque/arch_romanesque_non_column_corner_medium.json")),
+            Map.entry("arch_romanesque/non_column_corner_large_lower", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/romanesque/arch_romanesque_non_column_corner_large_lower.json")),
+            Map.entry("arch_romanesque/non_column_corner_large_upper", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/romanesque/arch_romanesque_non_column_corner_large_upper.json")),
+            Map.entry("arch_romanesque/plinth", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/romanesque/arch_romanesque_plinth.json")),
+            Map.entry("arch_romanesque/top_large", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/romanesque/arch_romanesque_top_large.json")),
+            Map.entry("arch_romanesque/icon", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/romanesque/arch_romanesque_icon.json")),
+            Map.entry("arch_georgian/base_left", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_base_left.json")),
+            Map.entry("arch_georgian/base_right", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_base_right.json")),
+            Map.entry("arch_georgian/middle_left", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_middle_left.json")),
+            Map.entry("arch_georgian/middle_right", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_middle_right.json")),
+            Map.entry("arch_georgian/width1_top_row0_column0", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width1_top_row0_column0.json")),
+            Map.entry("arch_georgian/width2_top_row0_column0", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width2_top_row0_column0.json")),
+            Map.entry("arch_georgian/width2_top_row0_column1", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width2_top_row0_column1.json")),
+            Map.entry("arch_georgian/width3_top_row0_column0", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width3_top_row0_column0.json")),
+            Map.entry("arch_georgian/width3_top_row0_column1", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width3_top_row0_column1.json")),
+            Map.entry("arch_georgian/width3_top_row0_column2", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width3_top_row0_column2.json")),
+            Map.entry("arch_georgian/width4_top_row0_column0", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width4_top_row0_column0.json")),
+            Map.entry("arch_georgian/width4_top_row0_column1", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width4_top_row0_column1.json")),
+            Map.entry("arch_georgian/width4_top_row0_column2", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width4_top_row0_column2.json")),
+            Map.entry("arch_georgian/width4_top_row0_column3", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width4_top_row0_column3.json")),
+            Map.entry("arch_georgian/width4_top_row1_column0", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width4_top_row1_column0.json")),
+            Map.entry("arch_georgian/width4_top_row1_column1", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width4_top_row1_column1.json")),
+            Map.entry("arch_georgian/width4_top_row1_column2", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width4_top_row1_column2.json")),
+            Map.entry("arch_georgian/width4_top_row1_column3", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width4_top_row1_column3.json")),
+            Map.entry("arch_georgian/width5_top_row0_column0", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width5_top_row0_column0.json")),
+            Map.entry("arch_georgian/width5_top_row0_column1", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width5_top_row0_column1.json")),
+            Map.entry("arch_georgian/width5_top_row0_column2", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width5_top_row0_column2.json")),
+            Map.entry("arch_georgian/width5_top_row0_column3", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width5_top_row0_column3.json")),
+            Map.entry("arch_georgian/width5_top_row0_column4", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width5_top_row0_column4.json")),
+            Map.entry("arch_georgian/width5_top_row1_column0", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width5_top_row1_column0.json")),
+            Map.entry("arch_georgian/width5_top_row1_column1", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width5_top_row1_column1.json")),
+            Map.entry("arch_georgian/width5_top_row1_column2", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width5_top_row1_column2.json")),
+            Map.entry("arch_georgian/width5_top_row1_column3", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width5_top_row1_column3.json")),
+            Map.entry("arch_georgian/width5_top_row1_column4", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width5_top_row1_column4.json")),
+            Map.entry("arch_georgian/width6_top_row0_column0", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width6_top_row0_column0.json")),
+            Map.entry("arch_georgian/width6_top_row0_column1", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width6_top_row0_column1.json")),
+            Map.entry("arch_georgian/width6_top_row0_column2", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width6_top_row0_column2.json")),
+            Map.entry("arch_georgian/width6_top_row0_column3", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width6_top_row0_column3.json")),
+            Map.entry("arch_georgian/width6_top_row0_column4", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width6_top_row0_column4.json")),
+            Map.entry("arch_georgian/width6_top_row0_column5", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width6_top_row0_column5.json")),
+            Map.entry("arch_georgian/width6_top_row1_column0", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width6_top_row1_column0.json")),
+            Map.entry("arch_georgian/width6_top_row1_column1", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width6_top_row1_column1.json")),
+            Map.entry("arch_georgian/width6_top_row1_column2", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width6_top_row1_column2.json")),
+            Map.entry("arch_georgian/width6_top_row1_column3", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width6_top_row1_column3.json")),
+            Map.entry("arch_georgian/width6_top_row1_column4", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width6_top_row1_column4.json")),
+            Map.entry("arch_georgian/width6_top_row1_column5", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width6_top_row1_column5.json")),
+            Map.entry("arch_georgian/width4_short_top_column0", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width4_short_top_column0.json")),
+            Map.entry("arch_georgian/width4_short_top_column1", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width4_short_top_column1.json")),
+            Map.entry("arch_georgian/width4_short_top_column2", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width4_short_top_column2.json")),
+            Map.entry("arch_georgian/width4_short_top_column3", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width4_short_top_column3.json")),
+            Map.entry("arch_georgian/width5_short_top_column0", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width5_short_top_column0.json")),
+            Map.entry("arch_georgian/width5_short_top_column1", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width5_short_top_column1.json")),
+            Map.entry("arch_georgian/width5_short_top_column2", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width5_short_top_column2.json")),
+            Map.entry("arch_georgian/width5_short_top_column3", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width5_short_top_column3.json")),
+            Map.entry("arch_georgian/width5_short_top_column4", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width5_short_top_column4.json")),
+            Map.entry("arch_georgian/width6_short_top_column0", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width6_short_top_column0.json")),
+            Map.entry("arch_georgian/width6_short_top_column1", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width6_short_top_column1.json")),
+            Map.entry("arch_georgian/width6_short_top_column2", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width6_short_top_column2.json")),
+            Map.entry("arch_georgian/width6_short_top_column3", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width6_short_top_column3.json")),
+            Map.entry("arch_georgian/width6_short_top_column4", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width6_short_top_column4.json")),
+            Map.entry("arch_georgian/width6_short_top_column5", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_width6_short_top_column5.json")),
+            Map.entry("arch_georgian/icon", new Identifier(Erydon.MOD_ID, "authoring_models/block/arch/georgian/arch_georgian_icon.json")),
             Map.entry("wall_georgian_slope/27_upper", new Identifier(Erydon.MOD_ID, "authoring_models/block/wall/georgian/wall_georgian_27_upper.json")),
             Map.entry("wall_georgian_slope/27_lower", new Identifier(Erydon.MOD_ID, "authoring_models/block/wall/georgian/wall_georgian_27_lower.json")),
             Map.entry("wall_georgian_slope/27_lower_onramp", new Identifier(Erydon.MOD_ID, "authoring_models/block/wall/georgian/wall_georgian_27_lower_onramp.json")),
@@ -131,7 +247,10 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
         return modelKey.startsWith("column_gothic/")
                 || modelKey.startsWith("alcove_georgian/")
                 || modelKey.startsWith("alcove_gothic/")
-                || modelKey.startsWith("arch_gothic/");
+                || modelKey.startsWith("alcove_modern/")
+                || modelKey.startsWith("arch_gothic/")
+                || modelKey.startsWith("arch_romanesque/")
+                || modelKey.startsWith("arch_georgian/");
     }
 
     public static CompletableFuture<PreparedModels> load(ResourceManager resourceManager, Executor executor) {
@@ -235,7 +354,7 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
             if (mode == SharedGeometryMode.SHARED_GEOMETRY) {
                 models.forEach((modelKey, model) -> {
                     geometry.put(modelKey, new SharedGeometry(
-                            new GeometryKey(model.sourceId.toString()), model));
+                            new GeometryKey(model.geometryKey()), model));
                 });
             }
             this.sharedGeometries = Map.copyOf(geometry);
@@ -265,7 +384,10 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
                 case "column_gothic" -> "block/column/gothic/column_gothic_" + suffix;
                 case "alcove_georgian" -> "block/alcove/georgian/alcove_georgian_" + suffix;
                 case "alcove_gothic" -> "block/alcove/gothic/alcove_gothic_" + suffix;
+                case "alcove_modern" -> "block/alcove/modern/alcove_modern_" + suffix;
                 case "arch_gothic" -> "block/arch/gothic/arch_gothic_" + suffix;
+                case "arch_romanesque" -> "block/arch/romanesque/arch_romanesque_" + suffix;
+                case "arch_georgian" -> "block/arch/georgian/arch_georgian_" + suffix;
                 default -> throw new IllegalStateException("Unexpected raw-model family " + family);
             };
             return new Identifier(Erydon.MOD_ID, path);
@@ -305,12 +427,37 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
                 return new RawComponent("alcove_gothic/" + suffix, textureId(textureBase, aged));
             }
 
+            matcher = MODERN_ALCOVE_COMPONENT.matcher(id.getPath());
+            if (matcher.matches()) {
+                String textureBase = matcher.group(1);
+                String suffix = matcher.group(2);
+                boolean aged = matcher.group(3) != null;
+                return new RawComponent("alcove_modern/" + suffix, textureId(textureBase, aged));
+            }
+
             matcher = GOTHIC_ARCH_COMPONENT.matcher(id.getPath());
             if (matcher.matches()) {
                 String textureBase = matcher.group(1);
                 String suffix = matcher.group(2);
                 boolean aged = matcher.group(3) != null;
                 return new RawComponent("arch_gothic/" + suffix, textureId(textureBase, aged));
+            }
+
+            matcher = ROMANESQUE_ARCH_COMPONENT.matcher(id.getPath());
+            if (matcher.matches()) {
+                String textureBase = matcher.group(1);
+                String suffix = matcher.group(2);
+                boolean aged = matcher.group(3) != null;
+                return new RawComponent("arch_romanesque/" + suffix, textureId(textureBase, aged));
+            }
+
+            matcher = GEORGIAN_ARCH_COMPONENT.matcher(id.getPath());
+            if (matcher.matches()) {
+                String textureBase = matcher.group(1);
+                String suffix = matcher.group(2);
+                boolean aged = ErydonIdNaming.isAged(textureBase);
+                return new RawComponent("arch_georgian/" + suffix,
+                        textureId(ErydonIdNaming.withoutAged(textureBase), aged));
             }
 
             return null;
@@ -878,6 +1025,7 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
                     "models/block/column/gothic",
                     "models/block/alcove/georgian",
                     "models/block/alcove/gothic",
+                    "models/block/alcove/modern",
                     "models/block/arch/gothic")) {
                 activeModels.putAll(resourceManager.findResources(
                         root, id -> id.getPath().endsWith(".json")));
@@ -938,9 +1086,18 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
             } else if (modelKey.startsWith("alcove_gothic/")) {
                 id = new Identifier(Erydon.MOD_ID, "block/alcove/gothic/" + material
                         + "_alcove_gothic_" + modelKey.substring("alcove_gothic/".length()));
+            } else if (modelKey.startsWith("alcove_modern/")) {
+                id = new Identifier(Erydon.MOD_ID, "block/alcove/modern/" + material
+                        + "_alcove_modern_" + modelKey.substring("alcove_modern/".length()));
             } else if (modelKey.startsWith("arch_gothic/")) {
                 id = new Identifier(Erydon.MOD_ID, "block/arch/gothic/" + material
                         + "_arch_gothic_" + modelKey.substring("arch_gothic/".length()));
+            } else if (modelKey.startsWith("arch_romanesque/")) {
+                id = new Identifier(Erydon.MOD_ID, "block/arch/romanesque/" + material
+                        + "_arch_romanesque_" + modelKey.substring("arch_romanesque/".length()));
+            } else if (modelKey.startsWith("arch_georgian/")) {
+                id = new Identifier(Erydon.MOD_ID, "block/arch/georgian/" + material
+                        + "_arch_georgian_" + modelKey.substring("arch_georgian/".length()));
             } else {
                 throw new IllegalArgumentException("Unexpected raw-model key " + modelKey);
             }
@@ -1117,6 +1274,24 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
     }
 
     private static List<RawSurface> rawSurfaces(RawModelData data) {
+        if (!data.splitWorldUv) {
+            return buildRawSurfaces(data);
+        }
+        List<RawSurface> cached = data.cachedWorldUvSurfaces;
+        if (cached != null) {
+            return cached;
+        }
+        synchronized (data) {
+            cached = data.cachedWorldUvSurfaces;
+            if (cached == null) {
+                cached = splitWorldUvSurfaces(buildRawSurfaces(data));
+                data.cachedWorldUvSurfaces = cached;
+            }
+            return cached;
+        }
+    }
+
+    private static List<RawSurface> buildRawSurfaces(RawModelData data) {
         List<RawSurface> surfaces = new ArrayList<>();
         for (RawElement element : data.elements) {
             for (Map.Entry<Direction, RawFace> entry : element.faces.entrySet()) {
@@ -1127,6 +1302,8 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
                         ? RawElement.defaultUv(vertices, nominalFace)
                         : RawBakedModel.rectUv(face.uv);
                 RawBakedModel.applyUvOffset(uv, face.uvOffset);
+                // Separate authored decorative faces only after fixing their texture phase.
+                applyNormalOffset(vertices, face.normalOffset);
                 Direction cullFace = face.cullFace != null
                         && (face.cullBoundaryOverride
                         || RawBakedModel.isOnCullBoundary(face.cullFace, vertices))
@@ -1136,6 +1313,156 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
             }
         }
         return List.copyOf(surfaces);
+    }
+
+    private record UvVertex(Vector3f position, float u, float v) {
+        private UvVertex blend(UvVertex other, float amount, boolean uAxis, float boundary) {
+            Vector3f point = new Vector3f(position).lerp(other.position, amount);
+            float blendedU = u + (other.u - u) * amount;
+            float blendedV = v + (other.v - v) * amount;
+            return new UvVertex(point, uAxis ? boundary : blendedU, uAxis ? blendedV : boundary);
+        }
+    }
+
+    /** Split the opted-in default mapping at sprite cells without moving any authored geometry. */
+    private static List<RawSurface> splitWorldUvSurfaces(List<RawSurface> surfaces) {
+        List<RawSurface> result = new ArrayList<>(surfaces.size());
+        for (RawSurface surface : surfaces) {
+            if (surface.face.uv != null || atlasSafe(surface.uv)) {
+                result.add(surface);
+                continue;
+            }
+            List<UvVertex> polygon = new ArrayList<>(4);
+            float minU = Float.POSITIVE_INFINITY, maxU = Float.NEGATIVE_INFINITY;
+            float minV = Float.POSITIVE_INFINITY, maxV = Float.NEGATIVE_INFINITY;
+            for (int index = 0; index < 4; index++) {
+                float u = surface.uv[index * 2], v = surface.uv[index * 2 + 1];
+                if (!Float.isFinite(u) || !Float.isFinite(v)) {
+                    throw new IllegalArgumentException("Non-finite default UV in split-world-UV model");
+                }
+                minU = Math.min(minU, u); maxU = Math.max(maxU, u);
+                minV = Math.min(minV, v); maxV = Math.max(maxV, v);
+                polygon.add(new UvVertex(surface.vertices[index], u, v));
+            }
+            int firstU = (int) Math.floor(minU / 16.0F), lastU = (int) Math.floor(maxU / 16.0F);
+            int firstV = (int) Math.floor(minV / 16.0F), lastV = (int) Math.floor(maxV / 16.0F);
+            for (int cellU = firstU; cellU <= lastU; cellU++) {
+                for (int cellV = firstV; cellV <= lastV; cellV++) {
+                    float originU = cellU * 16.0F, originV = cellV * 16.0F;
+                    List<UvVertex> piece = clipUv(polygon, true, originU, true);
+                    piece = clipUv(piece, true, originU + 16.0F, false);
+                    piece = clipUv(piece, false, originV, true);
+                    piece = clipUv(piece, false, originV + 16.0F, false);
+                    if (piece.size() < 3) {
+                        continue;
+                    }
+                    if (piece.size() <= 4) {
+                        addUvPiece(result, surface, piece, originU, originV);
+                    } else {
+                        for (int index = 1; index < piece.size() - 1; index++) {
+                            addUvPiece(result, surface,
+                                    List.of(piece.get(0), piece.get(index), piece.get(index + 1)), originU, originV);
+                        }
+                    }
+                }
+            }
+        }
+        return List.copyOf(result);
+    }
+
+    private static boolean atlasSafe(float[] uv) {
+        for (float value : uv) {
+            if (!Float.isFinite(value) || value < 0.0F || value > 16.0F) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static List<UvVertex> clipUv(List<UvVertex> source, boolean uAxis, float boundary,
+                                        boolean keepGreater) {
+        if (source.isEmpty()) {
+            return source;
+        }
+        List<UvVertex> result = new ArrayList<>(source.size() + 1);
+        UvVertex start = source.get(source.size() - 1);
+        float startValue = uAxis ? start.u : start.v;
+        boolean startInside = keepGreater ? startValue >= boundary : startValue <= boundary;
+        for (UvVertex end : source) {
+            float endValue = uAxis ? end.u : end.v;
+            boolean endInside = keepGreater ? endValue >= boundary : endValue <= boundary;
+            if (startInside != endInside) {
+                appendUvVertex(result, start.blend(end, (boundary - startValue) / (endValue - startValue), uAxis, boundary));
+            }
+            if (endInside) {
+                appendUvVertex(result, end);
+            }
+            start = end;
+            startValue = endValue;
+            startInside = endInside;
+        }
+        if (result.size() > 1 && sameUv(result.get(0), result.get(result.size() - 1))) {
+            result.remove(result.size() - 1);
+        }
+        return result;
+    }
+
+    private static void appendUvVertex(List<UvVertex> polygon, UvVertex vertex) {
+        if (polygon.isEmpty() || !sameUv(polygon.get(polygon.size() - 1), vertex)) {
+            polygon.add(vertex);
+        }
+    }
+
+    private static boolean sameUv(UvVertex first, UvVertex second) {
+        return first.u == second.u && first.v == second.v;
+    }
+
+    private static void addUvPiece(List<RawSurface> output, RawSurface source, List<UvVertex> polygon,
+                                   float originU, float originV) {
+        double twiceArea = 0.0;
+        UvVertex first = polygon.get(0);
+        for (int index = 1; index < polygon.size() - 1; index++) {
+            UvVertex second = polygon.get(index), third = polygon.get(index + 1);
+            twiceArea += Math.abs((double) (second.u - first.u) * (third.v - first.v)
+                    - (double) (second.v - first.v) * (third.u - first.u));
+        }
+        if (twiceArea <= 0.0) {
+            return;
+        }
+        if (polygon.size() == 4) {
+            UvVertex second = polygon.get(1), third = polygon.get(2);
+            double firstArea = (double) (second.u - first.u) * (third.v - first.v)
+                    - (double) (second.v - first.v) * (third.u - first.u);
+            if (firstArea == 0.0) {
+                addUvPiece(output, source, List.of(first, third, polygon.get(3)), originU, originV);
+                return;
+            }
+        }
+        Vector3f[] vertices = new Vector3f[4];
+        float[] uv = new float[8];
+        for (int index = 0; index < 4; index++) {
+            UvVertex vertex = polygon.get(Math.min(index, polygon.size() - 1));
+            vertices[index] = vertex.position;
+            uv[index * 2] = vertex.u - originU;
+            uv[index * 2 + 1] = vertex.v - originV;
+        }
+        output.add(new RawSurface(vertices, uv, source.nominalFace, source.cullFace, source.face));
+    }
+
+    private static void applyNormalOffset(Vector3f[] vertices, float offset) {
+        if (offset == 0.0F) {
+            return;
+        }
+        Vector3f normal = new Vector3f(vertices[1]).sub(vertices[0])
+                .cross(new Vector3f(vertices[2]).sub(vertices[0]));
+        float lengthSquared = normal.lengthSquared();
+        if (!Float.isFinite(lengthSquared) || lengthSquared <= 0.0F) {
+            return;
+        }
+        normal.mul(offset / (float) Math.sqrt(lengthSquared));
+        for (Vector3f vertex : vertices) {
+            vertex.add(normal);
+        }
     }
 
     static List<SurfaceSnapshot> surfaceSnapshots(String modelKey,
@@ -1174,6 +1501,15 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
         );
     }
 
+    static String geometryKeyForTest(Identifier sourceId, JsonElement root) {
+        return RawModelData.parse(sourceId.getPath(), sourceId, root).geometryKey();
+    }
+
+    static boolean reusesWorldUvSurfacesForTest(Identifier sourceId, JsonElement root) {
+        RawModelData data = RawModelData.parse(sourceId.getPath(), sourceId, root);
+        return rawSurfaces(data) == rawSurfaces(data);
+    }
+
     static String sharedOverrideBinding(JsonObject model) {
         MaterialBinding binding = ModelOverrideIndex.bindingFromOverride(model);
         return binding == null ? null : binding.stableValue();
@@ -1199,15 +1535,20 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
         private final Identifier sourceId;
         private final List<RawElement> elements;
         private final Map<String, Identifier> textures;
+        private final boolean splitWorldUv;
+        private final String geometryKey;
+        private volatile List<RawSurface> cachedWorldUvSurfaces;
 
         private RawModelData(String modelKey,
                              Identifier sourceId,
                              List<RawElement> elements,
-                             Map<String, Identifier> textures) {
+                             Map<String, Identifier> textures, boolean splitWorldUv) {
             this.modelKey = modelKey;
             this.sourceId = sourceId;
             this.elements = List.copyOf(elements);
             this.textures = Map.copyOf(textures);
+            this.splitWorldUv = splitWorldUv;
+            this.geometryKey = buildGeometryKey();
         }
 
         private static RawModelData parse(String modelKey, Identifier id, JsonElement root) {
@@ -1216,10 +1557,18 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
             }
 
             JsonObject object = root.getAsJsonObject();
+            boolean splitWorldUv = false;
+            if (object.has("erydon_split_world_uv")) {
+                JsonElement flag = object.get("erydon_split_world_uv");
+                if (!flag.isJsonPrimitive() || !flag.getAsJsonPrimitive().isBoolean()) {
+                    throw new IllegalArgumentException("Expected a boolean for erydon_split_world_uv");
+                }
+                splitWorldUv = flag.getAsBoolean();
+            }
             Map<String, Identifier> textures = parseTextures(object.getAsJsonObject("textures"));
             JsonArray elementArray = object.getAsJsonArray("elements");
             if (elementArray == null) {
-                return new RawModelData(modelKey, id, List.of(), textures);
+                return new RawModelData(modelKey, id, List.of(), textures, splitWorldUv);
             }
 
             Map<Integer, List<RawRotation>> groupRotations = collectGroupRotations(object);
@@ -1230,7 +1579,7 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
                     elements.add(RawElement.parse(element.getAsJsonObject(), groupRotations.getOrDefault(index, List.of())));
                 }
             }
-            return new RawModelData(modelKey, id, elements, textures);
+            return new RawModelData(modelKey, id, elements, textures, splitWorldUv);
         }
 
         @SuppressWarnings("unused")
@@ -1243,7 +1592,32 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
         }
 
         private String geometryKey() {
-            return sourceId.toString();
+            return geometryKey;
+        }
+
+        private String buildGeometryKey() {
+            StringBuilder offsets = new StringBuilder();
+            Direction[] directions = Direction.values();
+            for (int index = 0; index < elements.size(); index++) {
+                RawElement element = elements.get(index);
+                for (Direction direction : directions) {
+                    RawFace face = element.faces.get(direction);
+                    if (face != null && face.normalOffset != 0.0F) {
+                        offsets.append(';').append(index).append(':').append(direction.getName())
+                                .append('=').append(Float.toHexString(face.normalOffset));
+                    }
+                    if (face != null && face.vertices != null) {
+                        offsets.append(";vertices:").append(index).append(':').append(direction.getName());
+                        for (Vector3f vertex : face.vertices) {
+                            offsets.append('=').append(Float.toHexString(vertex.x))
+                                    .append(',').append(Float.toHexString(vertex.y))
+                                    .append(',').append(Float.toHexString(vertex.z));
+                        }
+                    }
+                }
+            }
+            String key = offsets.isEmpty() ? sourceId.toString() : sourceId + "|normal_offsets" + offsets;
+            return splitWorldUv ? key + "|split_world_uv" : key;
         }
 
         private static Map<String, Identifier> parseTextures(JsonObject textureObject) {
@@ -1379,6 +1753,10 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
         }
 
         private Vector3f[] faceVertices(Direction face) {
+            RawFace authoredFace = faces.get(face);
+            if (authoredFace != null && authoredFace.vertices != null) {
+                return authoredFace.copyVertices();
+            }
             float x1 = from[0];
             float y1 = from[1];
             float z1 = from[2];
@@ -1467,14 +1845,26 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
         private final float[] uv;
         private final float[] uvOffset;
         private final boolean cullBoundaryOverride;
+        private final float normalOffset;
+        private final Vector3f[] vertices;
 
         private RawFace(Direction cullFace, String textureKey, float[] uv, float[] uvOffset,
-                        boolean cullBoundaryOverride) {
+                        boolean cullBoundaryOverride, float normalOffset, Vector3f[] vertices) {
             this.cullFace = cullFace;
             this.textureKey = textureKey;
             this.uv = uv == null ? null : uv.clone();
             this.uvOffset = uvOffset.clone();
             this.cullBoundaryOverride = cullBoundaryOverride;
+            this.normalOffset = normalOffset;
+            this.vertices = vertices == null ? null : new Vector3f[]{
+                    new Vector3f(vertices[0]), new Vector3f(vertices[1]),
+                    new Vector3f(vertices[2]), new Vector3f(vertices[3])
+            };
+        }
+
+        private Vector3f[] copyVertices() {
+            return new Vector3f[]{new Vector3f(vertices[0]), new Vector3f(vertices[1]),
+                    new Vector3f(vertices[2]), new Vector3f(vertices[3])};
         }
 
         private static RawFace parse(JsonObject object) {
@@ -1531,7 +1921,45 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
                 }
                 cullBoundaryOverride = overrideElement.getAsBoolean();
             }
-            return new RawFace(cullFace, textureKey, uv, uvOffset, cullBoundaryOverride);
+            float normalOffset = 0.0F;
+            if (object.has("erydon_normal_offset")) {
+                JsonElement offsetElement = object.get("erydon_normal_offset");
+                if (!offsetElement.isJsonPrimitive() || !offsetElement.getAsJsonPrimitive().isNumber()) {
+                    throw new IllegalArgumentException("Expected a finite number from 0 to 0.05 for erydon_normal_offset");
+                }
+                double parsed = offsetElement.getAsDouble();
+                if (!Double.isFinite(parsed) || parsed < 0.0 || parsed > 0.05) {
+                    throw new IllegalArgumentException("Expected a finite number from 0 to 0.05 for erydon_normal_offset");
+                }
+                normalOffset = (float) parsed;
+            }
+            Vector3f[] vertices = null;
+            if (object.has("erydon_vertices")) {
+                JsonElement positions = object.get("erydon_vertices");
+                if (!positions.isJsonArray() || positions.getAsJsonArray().size() != 4) {
+                    throw new IllegalArgumentException("Expected exactly 4 finite XYZ arrays for erydon_vertices");
+                }
+                vertices = new Vector3f[4];
+                for (int index = 0; index < 4; index++) {
+                    JsonElement point = positions.getAsJsonArray().get(index);
+                    if (!point.isJsonArray() || point.getAsJsonArray().size() != 3) {
+                        throw new IllegalArgumentException("Expected exactly 4 finite XYZ arrays for erydon_vertices");
+                    }
+                    float[] xyz = new float[3];
+                    for (int axis = 0; axis < 3; axis++) {
+                        JsonElement value = point.getAsJsonArray().get(axis);
+                        if (!value.isJsonPrimitive() || !value.getAsJsonPrimitive().isNumber()) {
+                            throw new IllegalArgumentException("Expected exactly 4 finite XYZ arrays for erydon_vertices");
+                        }
+                        xyz[axis] = value.getAsFloat();
+                        if (!Float.isFinite(xyz[axis])) {
+                            throw new IllegalArgumentException("Expected exactly 4 finite XYZ arrays for erydon_vertices");
+                        }
+                    }
+                    vertices[index] = new Vector3f(xyz[0], xyz[1], xyz[2]);
+                }
+            }
+            return new RawFace(cullFace, textureKey, uv, uvOffset, cullBoundaryOverride, normalOffset, vertices);
         }
     }
 

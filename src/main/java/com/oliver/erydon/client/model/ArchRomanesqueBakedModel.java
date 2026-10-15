@@ -23,10 +23,13 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockRenderView;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
+import java.util.function.Function;
 
 public final class ArchRomanesqueBakedModel implements BakedModel, FabricBakedModel, ArchQuadSources.Complete {
     private static final String ROMANESQUE_MODEL_PATH = "block/arch/romanesque/";
@@ -41,11 +44,28 @@ public final class ArchRomanesqueBakedModel implements BakedModel, FabricBakedMo
             "side_small",
             "side_medium",
             "side_large",
+            "side_large_lower",
             "side_medium_upper",
             "side_large_upper",
             "side_column",
+            "side_column_upper",
             "plinth",
-            "top_large"
+            "top_large",
+            "icon",
+            "non_column_side_small_crown",
+            "non_column_side_medium_crown",
+            "non_column_side_small",
+            "non_column_side_small_base",
+            "non_column_side_medium",
+            "non_column_side_medium_base",
+            "non_column_side_large",
+            "non_column_side_large_base",
+            "non_column_side_large_lower",
+            "non_column_side_large_crown",
+            "non_column_corner_small",
+            "non_column_corner_medium",
+            "non_column_corner_large_lower",
+            "non_column_corner_large_upper"
     };
     private static final String[] MODERN_MODEL_SUFFIXES = {
             "corner_small",
@@ -73,6 +93,8 @@ public final class ArchRomanesqueBakedModel implements BakedModel, FabricBakedMo
 
     private final BakedModel wrapped;
     private final Sprite particle;
+    private final Map<net.minecraft.block.Block, ChildModels> children = new ConcurrentHashMap<>();
+    private final Map<Direction, ArchHorizontalReflection> depthMirrors = new ConcurrentHashMap<>();
     private record WideKey(net.minecraft.block.Block block, ArchRomanesqueBlock.Arrangement arrangement,
                            int width, Direction facing, boolean reflected) { }
     private final Map<WideKey, List<BakedQuad>> wideQuads = new ConcurrentHashMap<>();
@@ -111,7 +133,8 @@ public final class ArchRomanesqueBakedModel implements BakedModel, FabricBakedMo
             return;
         }
         Direction facing = state.get(ArchRomanesqueBlock.FACING);
-        boolean reflected = state.get(ArchRomanesqueBlock.REFLECTED);
+        boolean reflected = state.get(ArchRomanesqueBlock.REFLECTED)
+                && !childrenFor(state.getBlock()).romanesque;
         if (reflected) {
             context.pushTransform(ArchHorizontalReflection.forState(facing, arrangement.hasTopLarge()));
         }
@@ -121,10 +144,10 @@ public final class ArchRomanesqueBakedModel implements BakedModel, FabricBakedMo
             emitSide(state, context, arrangement.sideR(), true, facing);
             emitUpper(state, context, arrangement.upperL(), false, facing);
             emitUpper(state, context, arrangement.upperR(), true, facing);
-            emitIf(state, context, arrangement.columnL(), "side_column", leftRotation(facing));
-            emitIf(state, context, arrangement.columnR(), "side_column", rightRotation(facing));
+            emitIf(state, context, arrangement.columnL(), columnSuffix(state, arrangement.upperL()), leftRotation(facing));
+            emitIf(state, context, arrangement.columnR(), columnSuffix(state, arrangement.upperR()), rightRotation(facing), true);
             emitIf(state, context, arrangement.plinthL(), "plinth", leftRotation(facing));
-            emitIf(state, context, arrangement.plinthR(), "plinth", rightRotation(facing));
+            emitIf(state, context, arrangement.plinthR(), "plinth", rightRotation(facing), true);
             emitIf(state, context, arrangement.hasTopLarge(), "top_large", rightRotation(facing));
         } finally {
             if (reflected) {
@@ -139,9 +162,8 @@ public final class ArchRomanesqueBakedModel implements BakedModel, FabricBakedMo
         if (stack.getItem() instanceof BlockItem blockItem) {
             Identifier blockId = Registries.BLOCK.getId(blockItem.getBlock());
             if (blockId != null && Erydon.MOD_ID.equals(blockId.getNamespace())
-                    && isGothicArch(blockId.getPath())) {
-                BakedModel icon = MinecraftClient.getInstance().getBakedModelManager()
-                        .getModel(modelId(blockId.getPath(), "icon"));
+                    && (isGothicArch(blockId.getPath()) || isRomanesqueArch(blockId.getPath()))) {
+                BakedModel icon = childrenFor(blockItem.getBlock()).get("icon");
                 if (icon != null) {
                     SharedGeometryChildModel.emit(context, icon);
                     return;
@@ -151,40 +173,29 @@ public final class ArchRomanesqueBakedModel implements BakedModel, FabricBakedMo
         context.fallbackConsumer().accept(wrapped);
     }
 
-    private static void emitCorner(BlockState state,
+    private void emitCorner(BlockState state,
                                    RenderContext context,
                                    ArchRomanesqueBlock.Corner corner,
                                    boolean flipped,
                                    Direction facing) {
-        String suffix = switch (corner) {
-            case SMALL -> "corner_small";
-            case MEDIUM -> "corner_medium";
-            case LARGE_UPPER -> "corner_large_upper";
-            case LARGE_LOWER -> "corner_large_lower";
-            case NONE -> null;
-        };
+        String suffix = cornerSuffix(state, corner);
         if (suffix != null) {
-            emit(state, context, suffix, flipped ? rightRotation(facing) : leftRotation(facing));
+            emit(state, context, suffix, flipped ? rightRotation(facing) : leftRotation(facing), flipped);
         }
     }
 
-    private static void emitSide(BlockState state,
+    private void emitSide(BlockState state,
                                  RenderContext context,
                                  ArchRomanesqueBlock.Side side,
                                  boolean right,
                                  Direction facing) {
-        String suffix = switch (side) {
-            case SMALL -> "side_small";
-            case MEDIUM -> "side_medium";
-            case LARGE -> "side_large";
-            case NONE -> null;
-        };
+        String suffix = sideSuffix(state, side);
         if (suffix != null) {
-            emit(state, context, suffix, right ? rightRotation(facing) : leftRotation(facing));
+            emit(state, context, suffix, right ? rightRotation(facing) : leftRotation(facing), right);
         }
     }
 
-    private static void emitUpper(BlockState state,
+    private void emitUpper(BlockState state,
                                   RenderContext context,
                                   ArchRomanesqueBlock.Upper upper,
                                   boolean right,
@@ -195,30 +206,113 @@ public final class ArchRomanesqueBakedModel implements BakedModel, FabricBakedMo
             case NONE -> null;
         };
         if (suffix != null) {
-            emit(state, context, suffix, right ? rightRotation(facing) : leftRotation(facing));
+            emit(state, context, suffix, right ? rightRotation(facing) : leftRotation(facing), right);
         }
     }
 
-    private static void emitIf(BlockState state, RenderContext context, boolean condition, String suffix, int degrees) {
+    private void emitIf(BlockState state, RenderContext context, boolean condition, String suffix, int degrees) {
         if (condition) {
             emit(state, context, suffix, degrees);
         }
     }
 
-    private static void emit(BlockState state, RenderContext context, String suffix, int degrees) {
+    private void emitIf(BlockState state, RenderContext context, boolean condition, String suffix,
+                        int degrees, boolean right) {
+        if (condition) emit(state, context, suffix, degrees, right);
+    }
+
+    private void emit(BlockState state, RenderContext context, String suffix, int degrees) {
+        emit(state, context, suffix, degrees, false);
+    }
+
+    private void emit(BlockState state, RenderContext context, String suffix, int degrees, boolean right) {
         BakedModel model = getModel(state, suffix);
-        if (model != null) {
-            emitTransformed(context, model, degrees);
+        boolean mirror = right && childrenFor(state.getBlock()).romanesque;
+        if (mirror) context.pushTransform(depthMirror(state));
+        try {
+            if (model != null) emitTransformed(context, model, degrees);
+        } finally {
+            if (mirror) context.popTransform();
         }
     }
 
-    private static BakedModel getModel(BlockState state, String suffix) {
-        Identifier blockId = Registries.BLOCK.getId(state.getBlock());
-        if (blockId == null || !Erydon.MOD_ID.equals(blockId.getNamespace())) {
-            return null;
+    private ArchHorizontalReflection depthMirror(BlockState state) {
+        return depthMirrors.computeIfAbsent(state.get(ArchRomanesqueBlock.FACING),
+                ArchHorizontalReflection::forDepthMirror);
+    }
+
+    private BakedModel getModel(BlockState state, String suffix) {
+        return childrenFor(state.getBlock()).get(suffix);
+    }
+
+    /** Family wrappers and their child caches are rebuilt on resource reload. */
+    private ChildModels childrenFor(net.minecraft.block.Block block) {
+        return children.computeIfAbsent(block, owner -> {
+            Identifier id = Registries.BLOCK.getId(owner);
+            if (id == null || !Erydon.MOD_ID.equals(id.getNamespace())) {
+                return new ChildModels(null, ignored -> null);
+            }
+            var manager = MinecraftClient.getInstance().getBakedModelManager();
+            return new ChildModels(id.getPath(), manager::getModel);
+        });
+    }
+
+    static final class ChildModels {
+        private final Map<String, BakedModel> resolved;
+        private final boolean romanesque;
+
+        ChildModels(String blockPath, Function<Identifier, BakedModel> resolver) {
+            romanesque = blockPath != null && isRomanesqueArch(blockPath);
+            Map<String, BakedModel> models = new HashMap<>();
+            if (blockPath != null) {
+                for (String suffix : modelSuffixes(blockPath)) {
+                    models.put(suffix, resolver.apply(modelId(blockPath, suffix)));
+                }
+            }
+            resolved = Collections.unmodifiableMap(models);
         }
 
-        return MinecraftClient.getInstance().getBakedModelManager().getModel(modelId(blockId.getPath(), suffix));
+        BakedModel get(String suffix) { return resolved.get(suffix); }
+    }
+
+    static String sideSuffix(ArchRomanesqueBlock.Side side, ArchRomanesqueBlock.Corner corner,
+                             boolean romanesque) {
+        return switch (side) {
+            case SMALL -> "side_small";
+            case MEDIUM -> "side_medium";
+            case LARGE -> romanesque && corner == ArchRomanesqueBlock.Corner.LARGE_LOWER
+                    ? "side_large_lower" : "side_large";
+            case NONE -> null;
+        };
+    }
+
+    private String sideSuffix(BlockState state, ArchRomanesqueBlock.Side side) {
+        if (childrenFor(state.getBlock()).romanesque) {
+            return state.get(ArchRomanesqueBlock.ARRANGEMENT).authoredSideSuffix(side);
+        }
+        return sideSuffix(side, state.get(ArchRomanesqueBlock.ARRANGEMENT).corner(),
+                false);
+    }
+
+    private String cornerSuffix(BlockState state, ArchRomanesqueBlock.Corner corner) {
+        if (childrenFor(state.getBlock()).romanesque) {
+            return state.get(ArchRomanesqueBlock.ARRANGEMENT).authoredCornerSuffix();
+        }
+        return switch (corner) {
+            case SMALL -> "corner_small";
+            case MEDIUM -> "corner_medium";
+            case LARGE_UPPER -> "corner_large_upper";
+            case LARGE_LOWER -> "corner_large_lower";
+            case NONE -> null;
+        };
+    }
+
+    static String columnSuffix(ArchRomanesqueBlock.Upper upper, boolean romanesque) {
+        return romanesque && upper != ArchRomanesqueBlock.Upper.NONE ? "side_column_upper" : "side_column";
+    }
+
+    private String columnSuffix(BlockState state, ArchRomanesqueBlock.Upper upper) {
+        return columnSuffix(upper, childrenFor(state.getBlock()).romanesque);
     }
 
     public static Identifier modelId(String blockPath, String suffix) {
@@ -241,6 +335,10 @@ public final class ArchRomanesqueBakedModel implements BakedModel, FabricBakedMo
             return GOTHIC_MODEL_PATH;
         }
         return isModernArch(blockPath) ? MODERN_MODEL_PATH : ROMANESQUE_MODEL_PATH;
+    }
+
+    private static boolean isRomanesqueArch(String blockPath) {
+        return blockPath.contains("_arch_romanesque");
     }
 
     private static boolean isModernArch(String blockPath) {
@@ -295,7 +393,7 @@ public final class ArchRomanesqueBakedModel implements BakedModel, FabricBakedMo
         if (arrangement.isWide()) return face == null ? wideQuads(state) : List.of();
         Direction facing = state.get(ArchRomanesqueBlock.FACING);
         ArchHorizontalReflection reflection = state.get(ArchRomanesqueBlock.REFLECTED)
-                ? ArchHorizontalReflection.forState(facing, arrangement.hasTopLarge()) : null;
+                && !childrenFor(state.getBlock()).romanesque ? ArchHorizontalReflection.forState(facing, arrangement.hasTopLarge()) : null;
         Direction sourceFace = reflection == null ? face : reflection.face(face);
         List<BakedQuad> quads = new ArrayList<>();
 
@@ -304,10 +402,10 @@ public final class ArchRomanesqueBakedModel implements BakedModel, FabricBakedMo
         addSideQuads(quads, state, arrangement.sideR(), true, facing, sourceFace, random);
         addUpperQuads(quads, state, arrangement.upperL(), false, facing, sourceFace, random);
         addUpperQuads(quads, state, arrangement.upperR(), true, facing, sourceFace, random);
-        addIfQuads(quads, state, arrangement.columnL(), "side_column", leftRotation(facing), sourceFace, random);
-        addIfQuads(quads, state, arrangement.columnR(), "side_column", rightRotation(facing), sourceFace, random);
+        addIfQuads(quads, state, arrangement.columnL(), columnSuffix(state, arrangement.upperL()), leftRotation(facing), sourceFace, random);
+        addIfQuads(quads, state, arrangement.columnR(), columnSuffix(state, arrangement.upperR()), rightRotation(facing), sourceFace, random, true);
         addIfQuads(quads, state, arrangement.plinthL(), "plinth", leftRotation(facing), sourceFace, random);
-        addIfQuads(quads, state, arrangement.plinthR(), "plinth", rightRotation(facing), sourceFace, random);
+        addIfQuads(quads, state, arrangement.plinthR(), "plinth", rightRotation(facing), sourceFace, random, true);
         addIfQuads(quads, state, arrangement.hasTopLarge(), "top_large", rightRotation(facing), sourceFace, random);
         if (reflection != null) {
             quads.replaceAll(reflection::reflect);
@@ -315,44 +413,33 @@ public final class ArchRomanesqueBakedModel implements BakedModel, FabricBakedMo
         return quads;
     }
 
-    private static void addCornerQuads(List<BakedQuad> quads,
+    private void addCornerQuads(List<BakedQuad> quads,
                                        BlockState state,
                                        ArchRomanesqueBlock.Corner corner,
                                        boolean flipped,
                                        Direction facing,
                                        Direction face,
                                        Random random) {
-        String suffix = switch (corner) {
-            case SMALL -> "corner_small";
-            case MEDIUM -> "corner_medium";
-            case LARGE_UPPER -> "corner_large_upper";
-            case LARGE_LOWER -> "corner_large_lower";
-            case NONE -> null;
-        };
+        String suffix = cornerSuffix(state, corner);
         if (suffix != null) {
-            addQuads(quads, state, suffix, flipped ? rightRotation(facing) : leftRotation(facing), face, random);
+            addQuads(quads, state, suffix, flipped ? rightRotation(facing) : leftRotation(facing), face, random, flipped);
         }
     }
 
-    private static void addSideQuads(List<BakedQuad> quads,
+    private void addSideQuads(List<BakedQuad> quads,
                                      BlockState state,
                                      ArchRomanesqueBlock.Side side,
                                      boolean right,
                                      Direction facing,
                                      Direction face,
                                      Random random) {
-        String suffix = switch (side) {
-            case SMALL -> "side_small";
-            case MEDIUM -> "side_medium";
-            case LARGE -> "side_large";
-            case NONE -> null;
-        };
+        String suffix = sideSuffix(state, side);
         if (suffix != null) {
-            addQuads(quads, state, suffix, right ? rightRotation(facing) : leftRotation(facing), face, random);
+            addQuads(quads, state, suffix, right ? rightRotation(facing) : leftRotation(facing), face, random, right);
         }
     }
 
-    private static void addUpperQuads(List<BakedQuad> quads,
+    private void addUpperQuads(List<BakedQuad> quads,
                                       BlockState state,
                                       ArchRomanesqueBlock.Upper upper,
                                       boolean right,
@@ -365,11 +452,11 @@ public final class ArchRomanesqueBakedModel implements BakedModel, FabricBakedMo
             case NONE -> null;
         };
         if (suffix != null) {
-            addQuads(quads, state, suffix, right ? rightRotation(facing) : leftRotation(facing), face, random);
+            addQuads(quads, state, suffix, right ? rightRotation(facing) : leftRotation(facing), face, random, right);
         }
     }
 
-    private static void addIfQuads(List<BakedQuad> quads,
+    private void addIfQuads(List<BakedQuad> quads,
                                    BlockState state,
                                    boolean condition,
                                    String suffix,
@@ -381,13 +468,28 @@ public final class ArchRomanesqueBakedModel implements BakedModel, FabricBakedMo
         }
     }
 
-    private static void addQuads(List<BakedQuad> quads,
-                                 BlockState state,
-                                 String suffix,
-                                 int degrees,
-                                 Direction face,
-                                 Random random) {
-        AxiomFallbackQuads.add(quads, getModel(state, suffix), degrees, face, random, true);
+    private void addIfQuads(List<BakedQuad> quads, BlockState state, boolean condition,
+                            String suffix, int degrees, Direction face, Random random, boolean right) {
+        if (condition) addQuads(quads, state, suffix, degrees, face, random, right);
+    }
+
+    private void addQuads(List<BakedQuad> quads, BlockState state, String suffix,
+                          int degrees, Direction face, Random random) {
+        addQuads(quads, state, suffix, degrees, face, random, false);
+    }
+
+    private void addQuads(List<BakedQuad> quads, BlockState state, String suffix,
+                          int degrees, Direction face, Random random, boolean right) {
+        boolean mirror = right && childrenFor(state.getBlock()).romanesque;
+        ArchHorizontalReflection reflection = mirror ? depthMirror(state) : null;
+        int start = quads.size();
+        AxiomFallbackQuads.add(quads, getModel(state, suffix), degrees,
+                mirror ? reflection.face(face) : face, random, true);
+        if (mirror) {
+            for (int index = start; index < quads.size(); index++) {
+                quads.set(index, reflection.reflect(quads.get(index)));
+            }
+        }
     }
 
     @Override

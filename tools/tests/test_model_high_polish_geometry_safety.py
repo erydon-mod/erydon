@@ -12,13 +12,18 @@ MODELS = ROOT / "src/main/resources/assets/erydon/authoring_models/block"
 
 
 def vertices(element, face):
+    explicit = element["faces"][face].get("erydon_vertices")
+    if explicit is not None:
+        return explicit
     rotation = raw.RawRotation.parse(element.get("rotation"), [8, 8, 8], "test")
     return [rotation.transform(p) for p in raw._face_vertices(element["from"], element["to"], face)]
 
 
 class HighPolishGeometryTests(unittest.TestCase):
     def test_double_sides_follow_their_own_dome_rim(self):
-        for style in ("georgian", "gothic"):
+        # Georgian now has an authored composite crown and fixed pilasters;
+        # its full source/component parity is checked by the Georgian suite.
+        for style in ("gothic", "modern"):
             for side in ("left", "right"):
                 top = json.loads((MODELS / f"alcove/alcove_{style}_double_top_{side}.json").read_text())["elements"]
                 walls = json.loads((MODELS / f"alcove/alcove_{style}_double_side_{side}.json").read_text())["elements"]
@@ -38,21 +43,26 @@ class HighPolishGeometryTests(unittest.TestCase):
                 self.assertNotIn("up", top[7]["faces"], "Remove the buried cap, not the visible front")
 
     def test_wide_alcoves_have_continuous_fronts_above_the_opening(self):
-        for style in ("georgian", "gothic"):
+        for style in ("georgian", "gothic", "modern"):
             for size, sides in (("double", ("left", "right")),
                                 ("triple", ("left", "center", "right"))):
                 polygons = []
                 for column, side in enumerate(sides):
                     elements = json.loads((MODELS / f"alcove/alcove_{style}_{size}_top_{side}.json").read_text())["elements"]
                     lining = [e for e in elements if e.get("name") == "roof_inner_lining"]
-                    self.assertEqual(1, len(lining))
-                    self.assertEqual({"down"}, set(lining[0]["faces"]))
-                    self.assertLess(lining[0]["to"][1], 16, "The ceiling must remain inside the roof")
+                    if style != "georgian":
+                        self.assertEqual(1, len(lining))
+                        self.assertEqual({"down"}, set(lining[0]["faces"]))
+                        self.assertLess(lining[0]["to"][1], 16, "The ceiling must remain inside the roof")
                     for element in elements:
                         for face in element["faces"]:
                             points = vertices(element, face)
                             depths = [p[2] for p in points]
-                            if min(depths) > 15.85 and max(depths) - min(depths) < .0001:
+                            # Projecting moulding is intentionally separated by
+                            # open recesses. Test the complete structural facade
+                            # at the block face, rather than that decorative layer.
+                            maximum_depth = 16.51 if style == "georgian" else 16.01
+                            if min(depths) > 15.85 and max(depths) <= maximum_depth and max(depths) - min(depths) < .0001:
                                 polygons.append([(x + column * 16, y) for x, y, _ in points])
                 # Avoid vertices and the intentionally stepped outer jamb. A
                 # vertical ray through the facade may enter it once only; the

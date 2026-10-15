@@ -1,0 +1,252 @@
+{
+  "format_version": "1.21.11",
+  "credit": "Made with Blockbench; ERYDON Georgian alcove 3-wide elliptical side wall",
+  "textures": {
+    "particle": "erydon:block/aganite_block",
+    "stone": "erydon:block/aganite_block"
+  },
+  "elements": [
+    {
+      "name": "georgian_triple_side_00",
+      "from": [
+        0.59285,
+        0,
+        13.89065
+      ],
+      "to": [
+        3.47623,
+        16,
+        13.97065
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 82.52363,
+        "z": 0,
+        "origin": [
+          2.03454,
+          8,
+          13.93065
+        ]
+      },
+      "faces": {
+        "south": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_01",
+      "from": [
+        1.20819,
+        0,
+        11.36727
+      ],
+      "to": [
+        4.19571,
+        16,
+        11.44727
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 68.10363,
+        "z": 0,
+        "origin": [
+          2.70195,
+          8,
+          11.40727
+        ]
+      },
+      "faces": {
+        "south": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_02",
+      "from": [
+        2.42949,
+        0,
+        8.95949
+      ],
+      "to": [
+        5.60349,
+        16,
+        9.03949
+      ],
+      "rotation": {
+        "x": 0,
+        "y": 55.02869,
+        "z": 0,
+        "origin": [
+          4.01649,
+          8,
+          8.99949
+        ]
+      },
+      "faces": {
+        "south": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_03",
+      "from": [
+        4.23363,
+        0,
+        6.74047
+      ],
+      "to": [
+        7.6428,
+        16,
+        6.82047
+      ],
+      "rotation": {
+        "angle": 43.59434,
+        "axis": "y",
+        "origin": [
+          5.93822,
+          8,
+          6.78047
+        ]
+      },
+      "faces": {
+        "south": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_04",
+      "from": [
+        6.57961,
+        0,
+        4.77763
+      ],
+      "to": [
+        10.23788,
+        16,
+        4.85763
+      ],
+      "rotation": {
+        "angle": 33.69007,
+        "axis": "y",
+        "origin": [
+          8.40875,
+          8,
+          4.81763
+        ]
+      },
+      "faces": {
+        "south": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_05",
+      "from": [
+        9.40728,
+        0,
+        3.13061
+      ],
+      "to": [
+        13.29873,
+        16,
+        3.21061
+      ],
+      "rotation": {
+        "angle": 25.0234,
+        "axis": "y",
+        "origin": [
+          11.353,
+          8,
+          3.17061
+        ]
+      },
+      "faces": {
+        "south": {
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "name": "georgian_triple_side_06",
+      "from": [
+        12.63877,
+        0,
+        1.84946
+      ],
+      "to": [
+        16.7243,
+        16,
+        1.92946
+      ],
+      "rotation": {
+        "angle": 17.26899,
+        "axis": "y",
+        "origin": [
+          14.68154,
+          8,
+          1.88946
+        ]
+      },
+      "faces": {
+        "south": {
+          "texture": "#stone",
+          "erydon_uv_offset": [
+            -0.6440906524658203,
+            0
+          ]
+        }
+      }
+    },
+    {
+      "name": "outer_jamb_left",
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        2.10064,
+        16,
+        16
+      ],
+      "faces": {
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        }
+      }
+    }
+  ],
+  "groups": [
+    {
+      "name": "georgian_triple_side_left",
+      "origin": [
+        8,
+        8,
+        8
+      ],
+      "scope": 0,
+      "color": 0,
+      "children": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ]
+    },
+    7
+  ]
+}

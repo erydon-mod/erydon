@@ -282,6 +282,7 @@ tasks.register('auditErydonHighStateBlocks') {
             if (base.endsWith('_arch_romanesque')) return 'ArchRomanesqueBlock'
             if (base.endsWith('_arch_modern')) return 'ArchRomanesqueBlock'
             if (base.endsWith('_arch_gothic')) return 'ArchRomanesqueBlock'
+            if (base.endsWith('_arch_georgian')) return 'ArchRomanesqueBlock'
             if (base.endsWith('_alcove_georgian') || base.endsWith('_alcove_gothic')) return 'AlcoveBlock'
             if (base.endsWith('_surround_georgian')) return 'SurroundBlock'
             if (base.endsWith('_surround_guilloche')) return 'HandedSurroundBlock'

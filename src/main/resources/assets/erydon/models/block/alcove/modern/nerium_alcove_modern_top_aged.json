@@ -1,0 +1,7 @@
+{
+  "parent": "erydon:block/alcove/modern/alcove_modern_top",
+  "textures": {
+    "stone": "erydon:block/nerium_block_aged",
+    "particle": "erydon:block/nerium_block_aged"
+  }
+}

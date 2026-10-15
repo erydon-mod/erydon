@@ -1,31 +1,43 @@
 {
   "format_version": "1.21.11",
-  "credit": "Made with Blockbench",
+  "credit": "Derived from the Georgian three-wide design",
+  "textures": {
+    "stone": "erydon:block/aganite_block"
+  },
   "elements": [
     {
       "name": "back",
-      "from": [0, 0, 0],
-      "to": [16, 16, 2],
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        2
+      ],
       "faces": {
         "north": {
-          "texture": "#missing"
-        },
-        "south": {
-          "texture": "#missing"
+          "texture": "#stone"
         },
         "east": {
-          "texture": "#missing"
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
         },
         "west": {
-          "texture": "#missing"
+          "texture": "#stone"
         },
         "up": {
-          "texture": "#missing"
+          "texture": "#stone"
         },
         "down": {
-          "texture": "#missing"
+          "texture": "#stone"
         }
       }
     }
-  ]
+  ],
+  "erydon_split_world_uv": true
 }

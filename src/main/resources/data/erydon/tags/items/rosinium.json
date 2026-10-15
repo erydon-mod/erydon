@@ -386,6 +386,18 @@
     "erydon:rosinium_wall",
     "erydon:rosinium_wall_georgian",
     "erydon:rosinium_window_arch",
-    "erydon:rosinium_window_french_georgian"
+    "erydon:rosinium_window_french_georgian",
+    "erydon:rosinium_aged_alcove_modern",
+    "erydon:rosinium_alcove_modern",
+    "erydon:rosinium_ashlar_alcove_modern",
+    "erydon:rosinium_hewn_alcove_modern",
+    "erydon:rosinium_rock_alcove_modern",
+    "erydon:rosinium_rusticated_alcove_modern",
+    "erydon:rosinium_aged_arch_georgian",
+    "erydon:rosinium_arch_georgian",
+    "erydon:rosinium_ashlar_arch_georgian",
+    "erydon:rosinium_hewn_arch_georgian",
+    "erydon:rosinium_rock_arch_georgian",
+    "erydon:rosinium_rusticated_arch_georgian"
   ]
 }

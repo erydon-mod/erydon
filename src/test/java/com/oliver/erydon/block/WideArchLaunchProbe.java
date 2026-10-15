@@ -20,6 +20,11 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.EmptyBlockView;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.server.world.ServerWorld;
 
 import java.lang.reflect.Method;
@@ -32,6 +37,8 @@ import static com.oliver.erydon.block.DoubleColumnRepairLaunchProbe.require;
 
 /** Real state/cluster coverage; renderer tests use synthetic surfaces without opening Minecraft. */
 public final class WideArchLaunchProbe implements PreLaunchEntrypoint {
+    private int styleInteractionCases;
+    private int styleToggleCases;
     private int cases;
     private final java.util.Set<List<Object>> comparedShapes = new java.util.HashSet<>();
 
@@ -45,22 +52,34 @@ public final class WideArchLaunchProbe implements PreLaunchEntrypoint {
             ArchRomanesqueBlock[] families = {
                     new ArchRomanesqueBlock(AbstractBlock.Settings.create()),
                     new ArchModernBlock(AbstractBlock.Settings.create()),
-                    new ArchGothicBlock(AbstractBlock.Settings.create())};
-            String[] styles = {"romanesque", "modern", "gothic"};
+                    new ArchGothicBlock(AbstractBlock.Settings.create()),
+                    new ArchGeorgianBlock(AbstractBlock.Settings.create())};
+            String[] styles = {"romanesque", "modern", "gothic", "georgian"};
             Method layout = ArchRomanesqueBlock.class.getDeclaredMethod("computeArrangement",
                     int.class, int.class, int.class, int.class, StyleSet.class);
             layout.setAccessible(true);
             for (int family = 0; family < families.length; family++) {
                 ArchRomanesqueBlock block = families[family];
                 Registry.register(Registries.BLOCK, new Identifier("erydon", "probe_arch_" + styles[family]), block);
-                require(block.getDefaultState().get(WIDTH) == 3, "New placement default is not 3");
+                require(block.getDefaultState().get(WIDTH) == 6, "New placement must automatically grow through six");
+                styleInteractionFaces(block);
                 transitions(block);
                 for (int width = 1; width <= 6; width++) for (int height = 1; height <= 7; height++) {
                     for (StyleSet style : family == 0 ? StyleSet.values() : new StyleSet[]{StyleSet.BASE}) {
                         for (int row = 0; row < height; row++) for (int x = 0; x < width; x++) {
                             Arrangement arr = (Arrangement) layout.invoke(block, width, height, x, row, style);
+                            if (family == 0) {
+                                if (width > 1) require(arr.isColumnStyle() == (style == StyleSet.COLUMN)
+                                                || arr.isVoid(), "Romanesque owner lost its style: " + arr);
+                                if (style == StyleSet.BASE && row == height - 1
+                                        && row >= (width == 1 ? 1 : width == 2 ? 1 : Math.min(height, (2 * width + 2) / 3))
+                                        && (width <= 2 || x != width / 2 || width % 2 == 0)
+                                        && (!arr.isVoid())) {
+                                    require(arr.isNonColumnBase(), "Plain bottom row lost its edited base: " + arr);
+                                }
+                            }
                             BlockState state = block.getDefaultState().with(WIDTH, width).with(ARRANGEMENT, arr);
-                            if (width > 3 && row < Math.min(height, (2 * width + 2) / 3)) {
+                            if (width > 3 && row < Math.min(height, block instanceof ArchGeorgianBlock ? (width + 2) / 3 : (2 * width + 2) / 3)) {
                                 require(arr.isWide(), "Wide crown fell back to legacy layout");
                                 require(arr.wideX(width) == x && arr.wideRow() == row, "Incorrect crown cell");
                                 require(arr.mirrored().wideX(width) == width-1-x, "Wide mirror moved to the wrong cell");
@@ -78,12 +97,12 @@ public final class WideArchLaunchProbe implements PreLaunchEntrypoint {
                                         net.minecraft.block.ShapeContext.absent());
                                 sharedShapeCache(oriented);
                                 sharedShapeCache(oriented.with(WATERLOGGED, true));
-                                if (arr.isWide()) {
+                                if (arr.isWide() && !(block instanceof ArchGeorgianBlock)) {
                                     compareApprovedShape(oriented);
                                     compareApprovedShape(oriented.with(REFLECTED, true));
                                 }
                                 require(!outline.isEmpty(), "Empty cell cannot be targeted: " + styles[family] + " " + width + "x" + height + " " + arr);
-                                if (arr.isWide() && !collision.isEmpty()) {
+                                if (arr.isWide() && !(block instanceof ArchGeorgianBlock) && !collision.isEmpty()) {
                                     require(collision.getMin(Direction.Axis.Y) >= -1e-6 && collision.getMax(Direction.Axis.Y) <= 1+1e-6,
                                             "Crown collision escaped its vertical cell");
                                 }
@@ -93,8 +112,13 @@ public final class WideArchLaunchProbe implements PreLaunchEntrypoint {
                     }
                 }
                 callbacks(block);
+                if (block instanceof ArchGeorgianBlock georgian) georgianOwners(georgian);
+                automaticGrowth(block);
+                debugWidthCyclesOnShortRuns(block);
             }
-            com.oliver.erydon.client.model.WideArchMeshLaunchChecks.run(families);
+            System.out.println("ERYDON_ARCH_STYLE_INTERACTION_OK cases=" + styleInteractionCases
+                    + " toggles=" + styleToggleCases);
+            com.oliver.erydon.client.model.WideArchMeshLaunchChecks.run(java.util.Arrays.copyOf(families, 3));
             com.oliver.erydon.client.model.ArchContinuityLaunchChecks.run();
             System.out.println("ERYDON_WIDE_ARCHES_OK cases=" + cases);
             System.exit(0);
@@ -104,11 +128,12 @@ public final class WideArchLaunchProbe implements PreLaunchEntrypoint {
     private void compareApprovedShape(BlockState state) {
         if (!comparedShapes.add(List.of(state.getBlock().getClass(), state.get(ARRANGEMENT), state.get(WIDTH),
                 state.get(FACING), state.get(REFLECTED)))) return;
-        // The approved implementation simplified every union. Keep it as the independent
-        // reference while production batches those same boxes before simplifying.
+        // Derive the reference from authored boxes independently of the production
+        // cache, collecting them before building one exact coordinate grid.
         var arrangement = state.get(ARRANGEMENT);
         int width = state.get(WIDTH);
-        net.minecraft.util.shape.VoxelShape[] reference = {net.minecraft.util.shape.VoxelShapes.empty()};
+        var boxes = new java.util.ArrayList<double[]>();
+        int turns = switch (state.get(FACING)) { case EAST -> 1; case SOUTH -> 2; case WEST -> 3; default -> 0; };
         for (var component : WideArchLayout.components(arrangement)) {
             var source = state.with(ARRANGEMENT, component.arrangement()).with(WIDTH, 3).with(FACING, Direction.NORTH);
             source.getCollisionShape(EmptyBlockView.INSTANCE, BlockPos.ORIGIN).forEachBox((x0,y0,z0,x1,y1,z1) -> {
@@ -116,19 +141,16 @@ public final class WideArchLaunchProbe implements PreLaunchEntrypoint {
                 double right = Math.min(1, WideArchLayout.x(x1, component, arrangement, width));
                 double bottom = Math.max(0, WideArchLayout.y(y0, component, arrangement, width));
                 double top = Math.min(1, WideArchLayout.y(y1, component, arrangement, width));
-                if (right > left && top > bottom) reference[0] = net.minecraft.util.shape.VoxelShapes.union(reference[0],
-                        net.minecraft.util.shape.VoxelShapes.cuboid(left, bottom, z0, right, top, z1));
+                if (right <= left || top <= bottom) return;
+                double[] box = {left, bottom, z0, right, top, z1};
+                for (int turn = 0; turn < turns; turn++) {
+                    box = new double[]{1-box[5], box[1], box[0], 1-box[2], box[4], box[3]};
+                }
+                boxes.add(box);
             });
         }
-        int turns = switch (state.get(FACING)) { case EAST -> 1; case SOUTH -> 2; case WEST -> 3; default -> 0; };
-        for (int i = 0; i < turns; i++) {
-            net.minecraft.util.shape.VoxelShape[] rotated = {net.minecraft.util.shape.VoxelShapes.empty()};
-            reference[0].forEachBox((x0,y0,z0,x1,y1,z1) -> rotated[0] = net.minecraft.util.shape.VoxelShapes.union(rotated[0],
-                    net.minecraft.util.shape.VoxelShapes.cuboid(1-z1, y0, x0, 1-z0, y1, x1)));
-            reference[0] = rotated[0];
-        }
         var actual = state.getCollisionShape(EmptyBlockView.INSTANCE, BlockPos.ORIGIN);
-        require(!net.minecraft.util.shape.VoxelShapes.matchesAnywhere(reference[0], actual,
+        require(!net.minecraft.util.shape.VoxelShapes.matchesAnywhere(AlcoveVoxelShapes.fromBoxes(boxes), actual,
                 net.minecraft.util.function.BooleanBiFunction.NOT_SAME), "Optimized collision changed: " + state);
     }
 
@@ -224,7 +246,7 @@ public final class WideArchLaunchProbe implements PreLaunchEntrypoint {
             sharedShapeCache(block.getDefaultState().with(WIDTH, 6).with(ARRANGEMENT, Arrangement.WIDE_H4_Y0_L0)
                     .with(WATERLOGGED, true));
         }
-        require(arches == 486, "Full startup omitted registered arches: " + arches);
+        require(arches == 648, "Full startup omitted registered arches: " + arches);
         require(modelIds.size() == arches, "Arch model registrations grew with state count");
         com.oliver.erydon.client.model.ArchContinuityLaunchChecks.run();
         long completed = System.nanoTime();
@@ -238,8 +260,60 @@ public final class WideArchLaunchProbe implements PreLaunchEntrypoint {
                 + " usedMiB=" + (runtime.totalMemory()-runtime.freeMemory())/1024/1024);
     }
 
+    private void styleInteractionFaces(ArchRomanesqueBlock block) throws Exception {
+        TestPlayer player = DoubleColumnRepairLaunchProbe.allocate(TestPlayer.class);
+        for (Direction facing : Direction.Type.HORIZONTAL) for (Direction face : Direction.values()) {
+            for (Hand hand : Hand.values()) for (boolean sneaking : new boolean[]{false, true}) {
+                for (var held : List.of(ItemStack.EMPTY, new ItemStack(Items.STONE), new ItemStack(Items.DEBUG_STICK))) {
+                    TestWorld world = world();
+                    Direction right = block.getClusterRightDirection(facing);
+                    for (int row = 0; row < 4; row++) for (int x = 0; x < 3; x++) {
+                        world.states.put(BlockPos.ORIGIN.offset(right, x).down(row),
+                                block.getDefaultState().with(FACING, facing));
+                    }
+                    block.recalcCluster(world, BlockPos.ORIGIN);
+                    Map<BlockPos, BlockState> before = Map.copyOf(world.states);
+                    player.held = held;
+                    player.sneaking = sneaking;
+                    BlockHitResult hit = new BlockHitResult(Vec3d.ofCenter(BlockPos.ORIGIN), face, BlockPos.ORIGIN, false);
+                    boolean toggle = block.getClass() == ArchRomanesqueBlock.class
+                            && face.getAxis() == facing.getAxis() && hand == Hand.MAIN_HAND
+                            && !sneaking && !held.isOf(Items.DEBUG_STICK);
+                    ActionResult result = block.onUse(world.getBlockState(BlockPos.ORIGIN), world,
+                            BlockPos.ORIGIN, player, hand, hit);
+                    String label = block.getClass().getSimpleName() + " " + facing + " hit=" + face
+                            + " hand=" + hand + " sneak=" + sneaking + " held=" + held;
+                    require(result == (toggle ? ActionResult.SUCCESS : ActionResult.PASS),
+                            "Wrong arch interaction result: " + label);
+                    if (toggle) {
+                        require(world.states.values().stream().allMatch(state -> state.get(ARRANGEMENT).isColumnStyle()),
+                                "Front/back click did not toggle the whole cluster: " + label);
+                        require(block.onUse(world.getBlockState(BlockPos.ORIGIN), world,
+                                        BlockPos.ORIGIN, player, hand, hit) == ActionResult.SUCCESS,
+                                "Front/back return toggle was not consumed: " + label);
+                        require(world.states.equals(before), "Second toggle did not restore the plain cluster: " + label);
+                        styleToggleCases += 2;
+                    } else {
+                        require(world.states.equals(before), "Placement/pass click changed the cluster: " + label);
+                    }
+                    styleInteractionCases++;
+                }
+            }
+        }
+    }
+
+    /** Only the fields read by the interaction handler exist in this in-memory player. */
+    private static final class TestPlayer extends ServerPlayerEntity {
+        private ItemStack held;
+        private boolean sneaking;
+        private TestPlayer() { super(null, null, null); }
+        @Override public ItemStack getStackInHand(Hand hand) { return held; }
+        @Override public boolean isSneaking() { return sneaking; }
+    }
+
     private void callbacks(ArchRomanesqueBlock block) throws Exception {
-        ArchRomanesqueBlock mixed = block instanceof ArchGothicBlock ? new ArchGothicBlock(AbstractBlock.Settings.create())
+        ArchRomanesqueBlock mixed = block instanceof ArchGeorgianBlock ? new ArchGeorgianBlock(AbstractBlock.Settings.create())
+                : block instanceof ArchGothicBlock ? new ArchGothicBlock(AbstractBlock.Settings.create())
                 : block instanceof ArchModernBlock ? new ArchModernBlock(AbstractBlock.Settings.create())
                 : new ArchRomanesqueBlock(AbstractBlock.Settings.create());
         for (int width = 1; width <= 6; width++) for (Direction facing : Direction.Type.HORIZONTAL) {
@@ -255,7 +329,7 @@ public final class WideArchLaunchProbe implements PreLaunchEntrypoint {
             BlockState changed = before.with(WIDTH, width);
             world.states.put(BlockPos.ORIGIN, changed);
             block.onBlockAdded(changed, world, BlockPos.ORIGIN, before, false);
-            if (width == 3) block.recalcCluster(world, BlockPos.ORIGIN);
+            if (width == 6) block.recalcCluster(world, BlockPos.ORIGIN);
             require(world.states.values().stream().allMatch(state -> state.get(WIDTH) == selectedWidth), "Debug width did not propagate");
             for (int row = 0; row < 7; row++) for (int x = 0; x < width; x++) {
                 require(world.getBlockState(BlockPos.ORIGIN.offset(right,x).down(row)).get(WATERLOGGED) == (x%2 == 1),
@@ -288,6 +362,175 @@ public final class WideArchLaunchProbe implements PreLaunchEntrypoint {
             require(world.states.values().stream().allMatch(state -> state.get(WIDTH) == selectedWidth), "Removal reset selected width");
             cases++;
         }
+    }
+
+    private void debugWidthCyclesOnShortRuns(ArchRomanesqueBlock block) throws Exception {
+        for (int initial : new int[]{1, 3}) {
+            TestWorld world = world();
+            Direction right = block.getClusterRightDirection(Direction.NORTH);
+            for (int x = 0; x < initial; x++) world.states.put(BlockPos.ORIGIN.offset(right, x), block.getDefaultState());
+            block.recalcCluster(world, BlockPos.ORIGIN);
+            for (int expected = 1; expected <= 6; expected++) {
+                require(block.cycleDebugWidth(world, BlockPos.ORIGIN, false) == expected,
+                        "Short run trapped the debug cap at its rendered width");
+            }
+            require(block.cycleDebugWidth(world, BlockPos.ORIGIN, true) == 5, "Reverse cycle missed cap5");
+            require(block.cycleDebugWidth(world, BlockPos.ORIGIN, false) == 6, "Automatic reset is unreachable");
+            for (int x = initial; x < 6; x++) {
+                var pos = BlockPos.ORIGIN.offset(right, x);
+                var placed = block.getDefaultState(); world.states.put(pos, placed);
+                block.onPlaced(world, pos, placed, null, ItemStack.EMPTY);
+            }
+            require(world.states.values().stream().allMatch(state -> state.get(WIDTH) == 6),
+                    "Returning to automatic mode did not grow the short run");
+            block.cycleDebugWidth(world, BlockPos.ORIGIN, false); // cap1
+            block.cycleDebugWidth(world, BlockPos.ORIGIN, false); // cap2
+            var added = BlockPos.ORIGIN.offset(right, 6);
+            world.states.put(added, block.getDefaultState());
+            block.onPlaced(world, added, block.getDefaultState(), null, ItemStack.EMPTY);
+            // Newly attached members must carry the cap if all original members disappear.
+            for (int x = 0; x < 6; x++) {
+                var pos = BlockPos.ORIGIN.offset(right, x);
+                var removed = world.states.remove(pos);
+                block.onStateReplaced(removed, world, pos, Blocks.AIR.getDefaultState(), false);
+            }
+            for (int x = 7; x < 11; x++) {
+                var pos = BlockPos.ORIGIN.offset(right, x);
+                var placed = block.getDefaultState(); world.states.put(pos, placed);
+                block.onPlaced(world, pos, placed, null, ItemStack.EMPTY);
+            }
+            require(world.states.values().stream().allMatch(state -> state.get(WIDTH) <= 2),
+                    "Manual cap was lost when original members were removed");
+            cases++;
+        }
+    }
+
+    private void automaticGrowth(ArchRomanesqueBlock block) throws Exception {
+        for (Direction facing : Direction.Type.HORIZONTAL) {
+            TestWorld world = world();
+            Direction right = block.getClusterRightDirection(facing);
+            for (int length = 1; length <= 13; length++) {
+                for (int row = 0; row < 4; row++) {
+                    BlockPos pos = BlockPos.ORIGIN.offset(right, length - 1).down(row);
+                    BlockState placed = block.getDefaultState().with(FACING, facing);
+                    world.states.put(pos, placed);
+                    block.onPlaced(world, pos, placed, null, ItemStack.EMPTY);
+                }
+                for (int x = 0; x < length; x++) {
+                    int expected = Math.min(6, length - x / 6 * 6);
+                    for (int row = 0; row < 4; row++) {
+                        var state = world.getBlockState(BlockPos.ORIGIN.offset(right, x).down(row));
+                        require(state.get(WIDTH) == expected,
+                                "Automatic run did not widen/restart: " + length + " at " + x + " " + state);
+                    }
+                }
+                Map<BlockPos, BlockState> settled = Map.copyOf(world.states);
+                block.recalcCluster(world, BlockPos.ORIGIN);
+                require(world.states.equals(settled), "Recalc treated an automatic width as a manual cap");
+                cases++;
+            }
+        }
+    }
+
+    private void georgianOwners(ArchGeorgianBlock block) throws Exception {
+        var stream = getClass().getClassLoader().getResourceAsStream(
+                "assets/erydon/interaction_shapes/arch_georgian.json");
+        require(stream != null, "Missing Georgian authored collision fixture");
+        com.google.gson.JsonObject source;
+        try (var reader = new java.io.InputStreamReader(stream, java.nio.charset.StandardCharsets.UTF_8)) {
+            source = com.google.gson.JsonParser.parseReader(reader).getAsJsonObject().getAsJsonObject("components");
+        }
+        for (int width = 1; width <= 6; width++) for (int height = 1; height <= 5; height++) {
+            int crownRows = Math.min(height, (width + 2) / 3);
+            for (Direction facing : Direction.Type.HORIZONTAL) {
+                TestWorld world = world();
+                // The source faces +Z. Its +X axis therefore points this way
+                // after rotating the complete design to the placed facing.
+                Direction sourceX = facing.rotateYCounterclockwise();
+                for (int row = 0; row < height; row++) for (int column = 0; column < width; column++) {
+                    world.states.put(BlockPos.ORIGIN.offset(sourceX, column).down(row),
+                            block.getDefaultState().with(FACING, facing));
+                }
+                block.recalcCluster(world, BlockPos.ORIGIN);
+                var authored = new java.util.ArrayList<double[]>();
+                var placed = new java.util.ArrayList<double[]>();
+                for (int row = 0; row < height; row++) for (int column = 0; column < width; column++) {
+                    BlockPos owner = BlockPos.ORIGIN.offset(sourceX, column).down(row);
+                    BlockState state = world.getBlockState(owner);
+                    List<String> expected;
+                    if (row < crownRows) {
+                        String suffix = width > 3 && height == 1
+                                ? "width" + width + "_short_top_column" + column
+                                : "width" + width + "_top_row" + row + "_column" + column;
+                        expected = List.of(suffix);
+                    } else {
+                        String part = row == height - 1 ? "base_" : "middle_";
+                        expected = width == 1 ? List.of(part + "left", part + "right")
+                                : column == 0 ? List.of(part + "left")
+                                : column == width - 1 ? List.of(part + "right") : List.of();
+                    }
+                    require(GeorgianArchLayout.components(state.get(ARRANGEMENT), state.get(WIDTH)).equals(expected),
+                            "Georgian child was attached to the wrong owner: " + width + "x" + height
+                                    + " " + facing + " column=" + column + " row=" + row + " " + state);
+                    for (String suffix : expected) for (var encoded : source.getAsJsonArray(suffix)) {
+                        var box = encoded.getAsJsonArray();
+                        double[] bounds = new double[6];
+                        for (int axis = 0; axis < 6; axis++) bounds[axis] = box.get(axis).getAsDouble() / 16;
+                        bounds[0] += column; bounds[3] += column;
+                        bounds[1] -= row; bounds[4] -= row;
+                        authored.add(georgianRotateBox(bounds, facing));
+                    }
+                    var collision = state.getCollisionShape(EmptyBlockView.INSTANCE, owner);
+                    collision.forEachBox((x0,y0,z0,x1,y1,z1) -> placed.add(new double[]{
+                            x0 + owner.getX(), y0 + owner.getY(), z0 + owner.getZ(),
+                            x1 + owner.getX(), y1 + owner.getY(), z1 + owner.getZ()}));
+                    require(!net.minecraft.util.shape.VoxelShapes.matchesAnywhere(collision,
+                            state.with(REFLECTED, true).getCollisionShape(EmptyBlockView.INSTANCE, owner),
+                            net.minecraft.util.function.BooleanBiFunction.NOT_SAME),
+                            "Paired Georgian geometry applied a second reflection");
+                }
+                var reference = AlcoveVoxelShapes.fromBoxes(authored);
+                require(!net.minecraft.util.shape.VoxelShapes.matchesAnywhere(reference,
+                        AlcoveVoxelShapes.fromBoxes(placed), net.minecraft.util.function.BooleanBiFunction.NOT_SAME),
+                        "Placed Georgian owners do not assemble the source shape: " + width + "x" + height + " " + facing);
+                for (BlockMirror mirror : new BlockMirror[]{BlockMirror.LEFT_RIGHT, BlockMirror.FRONT_BACK}) {
+                    var expected = new java.util.ArrayList<double[]>();
+                    var actual = new java.util.ArrayList<double[]>();
+                    int axis = mirror == BlockMirror.FRONT_BACK ? 0 : 2;
+                    for (double[] box : authored) {
+                        double[] reflected = box.clone();
+                        reflected[axis] = 1 - box[axis + 3];
+                        reflected[axis + 3] = 1 - box[axis];
+                        expected.add(reflected);
+                    }
+                    for (var entry : world.states.entrySet()) {
+                        BlockPos old = entry.getKey();
+                        BlockPos owner = axis == 0 ? new BlockPos(-old.getX(), old.getY(), old.getZ())
+                                : new BlockPos(old.getX(), old.getY(), -old.getZ());
+                        entry.getValue().mirror(mirror).getCollisionShape(EmptyBlockView.INSTANCE, owner)
+                                .forEachBox((x0,y0,z0,x1,y1,z1) -> actual.add(new double[]{
+                                        x0 + owner.getX(), y0 + owner.getY(), z0 + owner.getZ(),
+                                        x1 + owner.getX(), y1 + owner.getY(), z1 + owner.getZ()}));
+                    }
+                    require(!net.minecraft.util.shape.VoxelShapes.matchesAnywhere(AlcoveVoxelShapes.fromBoxes(expected),
+                            AlcoveVoxelShapes.fromBoxes(actual), net.minecraft.util.function.BooleanBiFunction.NOT_SAME),
+                            "Georgian assembled mirror differs from a physical reflection: "
+                                    + width + "x" + height + " " + facing + " " + mirror);
+                }
+                cases++;
+            }
+        }
+    }
+
+    private static double[] georgianRotateBox(double[] bounds, Direction facing) {
+        // Rotate assembled coordinates about the first owner's centre. This
+        // deliberately differs from rotating each child before attaching it.
+        return switch (facing) {
+            case NORTH -> new double[]{1-bounds[3], bounds[1], 1-bounds[5], 1-bounds[0], bounds[4], 1-bounds[2]};
+            case EAST -> new double[]{bounds[2], bounds[1], 1-bounds[3], bounds[5], bounds[4], 1-bounds[0]};
+            case WEST -> new double[]{1-bounds[5], bounds[1], bounds[0], 1-bounds[2], bounds[4], bounds[3]};
+            default -> bounds;
+        };
     }
 
     private static TestWorld world() throws Exception {
