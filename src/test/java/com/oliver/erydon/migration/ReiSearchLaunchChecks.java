@@ -80,5 +80,6 @@ public final class ReiSearchLaunchChecks {
                     +" catalogue="+checked+" georgianArches="+georgianArches+" copingDesigns="+copingDesigns);
         System.out.println("ERYDON_REI_SEARCH_OK: "+checked+" catalogue items, "+full+" full blocks, "+copings
                 +" copings, "+standard+" standard-finish items through actual REI cacheData");
+        ReiFullBlockSearchLaunchChecks.run();
     }
 }

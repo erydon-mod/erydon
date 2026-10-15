@@ -94,6 +94,8 @@ dependencies {
     modRuntimeOnly "com.terraformersmc:modmenu:7.2.2" // optional
     // 12.1.740 supports the project's Loom 1.6; later REI builds require Loom 1.7.
     modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:12.1.740"
+    // Compile the optional query hook against the same REI implementation used in development.
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-fabric:12.1.740") { transitive = false }
     modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:12.1.740"
     modCompileOnly("mezz.jei:jei-1.20.1-fabric:15.16.2.73") {
         transitive = false
