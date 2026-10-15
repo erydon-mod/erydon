@@ -2,8 +2,11 @@ package com.oliver.erydon.client.model;
 
 import com.oliver.erydon.block.WindowFrenchGeorgianBlock;
 import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
+import net.fabricmc.fabric.api.renderer.v1.model.SpriteFinder;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.fabricmc.fabric.impl.client.indigo.renderer.IndigoRenderer;
+import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.EncodingFormat;
+import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.MutableQuadViewImpl;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.enums.DoorHinge;
 import net.minecraft.client.MinecraftClient;
@@ -28,6 +31,7 @@ import java.lang.reflect.Proxy;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -64,13 +68,37 @@ public final class GeorgianWindowRenderingLaunchChecks {
             singleton.set(null, client);
             var renderer = new WindowFrenchGeorgianBakedModel(wrapped);
             List<Identifier> fabric = new ArrayList<>();
-            int[] transforms = {0};
+            var transforms = new ArrayDeque<RenderContext.QuadTransform>();
+            var mesh = IndigoRenderer.INSTANCE.meshBuilder();
+            var delegate = mesh.getEmitter();
+            var emitter = new MutableQuadViewImpl() {
+                { data = new int[EncodingFormat.TOTAL_STRIDE]; clear(); }
+                @Override public void emitDirectly() {
+                    for (var transform : transforms) if (!transform.transform(this)) return;
+                    delegate.copyFrom(this).emit();
+                }
+            };
+            var material = IndigoRenderer.INSTANCE.materialFinder().find();
+            SpriteFinder finder = (SpriteFinder) Proxy.newProxyInstance(SpriteFinder.class.getClassLoader(),
+                    new Class<?>[]{SpriteFinder.class}, (proxy, method, args) -> sprite);
             RenderContext context = (RenderContext) Proxy.newProxyInstance(RenderContext.class.getClassLoader(),
                     new Class<?>[]{RenderContext.class}, (proxy, method, args) -> {
                         switch (method.getName()) {
-                            case "pushTransform" -> transforms[0]++;
-                            case "popTransform" -> transforms[0]--;
-                            case "fallbackConsumer" -> { return (Consumer<BakedModel>) model -> fabric.add(ids.get(model)); }
+                            case "pushTransform" -> {
+                                var transform = (RenderContext.QuadTransform) args[0];
+                                if (transform instanceof WorldAlignedYRotation)
+                                    field(WorldAlignedYRotation.class, "spriteFinder").set(transform, finder);
+                                transforms.push(transform);
+                            }
+                            case "popTransform" -> transforms.pop();
+                            case "fallbackConsumer" -> { return (Consumer<BakedModel>) model -> {
+                                fabric.add(ids.get(model));
+                                for (int face = -1; face < 6; face++) {
+                                    Direction side = face < 0 ? null : Direction.values()[face];
+                                    for (BakedQuad quad : model.getQuads(null, side, Random.create(0)))
+                                        emitter.fromVanilla(quad, material, side).emit();
+                                }
+                            }; }
                             default -> throw new AssertionError("Unexpected render context call " + method.getName());
                         }
                         return null;
@@ -85,7 +113,17 @@ public final class GeorgianWindowRenderingLaunchChecks {
                 require(actual.isEmpty() == clearCentre, "A window disappeared or a lower centre retained geometry: " + state);
                 fabric.clear();
                 renderer.emitBlockQuads(null, state, BlockPos.ORIGIN, () -> Random.create(0), context);
-                require(transforms[0] == 0, "Georgian rendering leaked a transform");
+                require(transforms.isEmpty(), "Georgian rendering leaked a transform");
+                List<float[]> emitted = new ArrayList<>();
+                mesh.build().forEach(quad -> {
+                    float[] positions = new float[12];
+                    for (int vertex = 0; vertex < 4; vertex++) {
+                        positions[vertex * 3] = quad.x(vertex);
+                        positions[vertex * 3 + 1] = quad.y(vertex);
+                        positions[vertex * 3 + 2] = quad.z(vertex);
+                    }
+                    emitted.add(positions);
+                });
                 List<Identifier> expected = expected(state);
                 require(fabric.equals(expected), "Fabric selected wrong components: " + state + " " + fabric);
                 require(axiom.equals(expected), "Axiom selected different components: " + state + " " + axiom);
@@ -117,14 +155,73 @@ public final class GeorgianWindowRenderingLaunchChecks {
                         }
                     }
                 }
+                if (state.get(OPEN) && (state.get(CORNER) == Corner.NONE && state.get(PIECE).asString().startsWith("upper")
+                        || state.get(PIECE) == Piece.UPPER_SINGLE)) {
+                    fixedFrameSurfaces(renderer, state, emitted);
+                }
                 checked++;
             }
             System.out.println("ERYDON_GEORGIAN_WINDOW_RENDERING_OK states=" + checked
-                    + " FabricAxiomComponents=exact closedStraightQuads=exact openCentres=clear openOuterWings=retained openCornerPost=6quads");
+                    + " FabricAxiomComponents=exact closedStraightQuads=exact openCentres=clear openOuterWings=retained openCornerPost=6quads"
+                    + " fixedFanlightJambs=FabricMesh+AxiomAllFacings");
         } finally {
             singleton.set(null, previous);
         }
     }
+
+    /** Real emitted faces, not component IDs, must close both sides of each fixed fanlight. */
+    private static void fixedFrameSurfaces(WindowFrenchGeorgianBakedModel renderer, BlockState state,
+                                           List<float[]> emitted) {
+        List<float[]> fallback = new ArrayList<>();
+        for (int face = -1; face < 6; face++) {
+            for (BakedQuad quad : renderer.getQuads(state, face < 0 ? null : Direction.values()[face], Random.create(0))) {
+                float[] positions = new float[12];
+                for (int vertex = 0; vertex < 4; vertex++) for (int axis = 0; axis < 3; axis++)
+                    positions[vertex * 3 + axis] = Float.intBitsToFloat(quad.getVertexData()[vertex * 8 + axis]);
+                fallback.add(positions);
+            }
+        }
+        for (double x : new double[]{.75, 15.25}) for (double y : new double[]{6.5, 10, 14}) {
+            double[] horizontal = rotate(x / 16, 3.0 / 16, state.get(FACING));
+            double[] point = {horizontal[0], y / 16, horizontal[1]};
+            require(emitted.stream().anyMatch(quad -> covers(quad, point)), "Fabric lost fixed fanlight jamb at "
+                    + Arrays.toString(point) + " " + state);
+            require(fallback.stream().anyMatch(quad -> covers(quad, point)), "Axiom lost fixed fanlight jamb at "
+                    + Arrays.toString(point) + " " + state);
+        }
+        if (state.get(CORNER) == Corner.NONE && state.get(PIECE) != Piece.UPPER_SINGLE) {
+            double[] horizontal = rotate(.75 / 16, 1.5 / 16, state.get(FACING));
+            double[] point = {horizontal[0], 5.852 / 16, horizontal[1]};
+            require(emitted.stream().anyMatch(quad -> covers(quad, point)), "Fabric lost the clipped jamb's internal bottom cap");
+            require(fallback.stream().anyMatch(quad -> covers(quad, point)), "Axiom lost the clipped jamb's internal bottom cap");
+        }
+    }
+
+    private static boolean covers(float[] quad, double[] point) {
+        return coversTriangle(quad, point, 0, 1, 2) || coversTriangle(quad, point, 0, 2, 3);
+    }
+
+    private static boolean coversTriangle(float[] quad, double[] point, int a, int b, int c) {
+        double[] u = new double[3], v = new double[3], w = new double[3];
+        for (int axis = 0; axis < 3; axis++) {
+            u[axis] = quad[b * 3 + axis] - quad[a * 3 + axis];
+            v[axis] = quad[c * 3 + axis] - quad[a * 3 + axis];
+            w[axis] = point[axis] - quad[a * 3 + axis];
+        }
+        double uu = dot(u, u), uv = dot(u, v), vv = dot(v, v), wu = dot(w, u), wv = dot(w, v);
+        double denominator = uu * vv - uv * uv;
+        if (denominator <= 1e-14) return false;
+        double first = (vv * wu - uv * wv) / denominator, second = (uu * wv - uv * wu) / denominator;
+        if (first < -1e-5 || second < -1e-5 || first + second > 1.00001) return false;
+        double distanceSquared = 0;
+        for (int axis = 0; axis < 3; axis++) {
+            double residual = w[axis] - first * u[axis] - second * v[axis];
+            distanceSquared += residual * residual;
+        }
+        return distanceSquared <= 1e-10;
+    }
+
+    private static double dot(double[] a, double[] b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
 
     private static List<Identifier> expected(BlockState state) {
         List<Identifier> result = new ArrayList<>();

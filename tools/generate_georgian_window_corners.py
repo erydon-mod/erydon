@@ -1,7 +1,8 @@
 """Derive Georgian fixed fanlights, open cluster edges and corner assemblies.
 
-The authored ordinary-window templates remain authoritative. Existing vertices,
-UVs and pane coatings are preserved; exposed stone cuts gain implicit-UV caps.
+The authored ordinary-window templates remain authoritative. Fixed frame stone,
+UVs and pane coatings are retained; the cluster jamb is clipped below the fanlight
+to clear its opening, and exposed stone cuts gain implicit-UV caps.
 Source hashes use canonical JSON so checkout line endings do not affect the contract.
 """
 
@@ -41,9 +42,9 @@ CUT_CAPS = {
     "open_corner_upper_single_rh": {18: ("west",)},
     "open_corner_upper_multi_lh": {12: ("east",), 32: ("down",)},
     "open_corner_upper_multi_rh": {12: ("west",), 33: ("down",)},
-    "open_upper_single_mid": {18: ("west", "east"), 22: ("west", "down"), 23: ("down",)},
-    "open_upper_single_edge_lh": {18: ("west",), 22: ("west", "down"), 23: ("down",)},
-    "open_upper_single_edge_rh": {18: ("east",), 22: ("west", "down"), 23: ("down",)},
+    "open_upper_single_mid": {18: ("west", "east")},
+    "open_upper_single_edge_lh": {18: ("west",)},
+    "open_upper_single_edge_rh": {18: ("east",)},
 }
 
 
@@ -92,15 +93,21 @@ def outputs() -> dict[Path, dict]:
             child["parent"] = MODEL_ID + target_name
             result[path.with_name(path.name.replace("_open_upper_", "_open_corner_upper_"))] = child
 
-    # The one-wide fanlight is fixed in every column. Remove its full-height
-    # outside jamb in a multi-column opening; the original wide edge wings below
-    # provide exactly the old outer opening, without any centre leaves.
+    # The one-wide fanlight is fixed in every column. Only the lower portion of
+    # its full-height jamb belongs to the opening: the upper stone still fills
+    # the gaps around the angled arch blocks. Match the opposite fixed jamb's
+    # foot, then keep the original wide edge wings without any centre leaves.
     single = sources["single_lh"]
     jamb = single["elements"][34]
     if jamb["from"] != [0, 0, 0] or jamb["to"] != [1.5, 14.5, 3]:
         raise ValueError("Authored fixed jamb changed; review open cluster fanlight")
     removed = WINGS["single_lh"][0] | {34}
     fanlight = [element for index, element in enumerate(single["elements"]) if index not in removed]
+    fixed_jamb = copy.deepcopy(jamb)
+    fixed_jamb["from"][1] = single["elements"][2]["from"][1]
+    # The clipped bottom lies inside the cell, not on its neighbour boundary.
+    fixed_jamb["faces"]["down"].pop("cullface", None)
+    fanlight.append(fixed_jamb)
     for suffix in ("mid", "edge_lh", "edge_rh"):
         derived = copy.deepcopy(single)
         derived["elements"] = copy.deepcopy(fanlight)
@@ -156,7 +163,7 @@ def main():
             path.write_text(json.dumps(content, indent=2) + "\n", encoding="utf-8", newline="\n")
     if mismatches:
         raise SystemExit("Outdated Georgian corner models:\n" + "\n".join(mismatches))
-    print(f"Georgian open models {'verified' if args.check else 'generated'}: {len(generated)} files; authored geometry preserved; exposed stone cuts capped")
+    print(f"Georgian open models {'verified' if args.check else 'generated'}: {len(generated)} files; fixed frame retained; lower cluster jamb cleared; exposed stone cuts capped")
 
 
 if __name__ == "__main__":
