@@ -80,10 +80,19 @@ float erydonInlayTraceGroove(vec2 localStart, vec2 rayTexels,
     return 0.0;
 }
 
+// Invocation-local exact bounds for consecutive samples in one crossed tile.
+vec2 erydonInlayLastSubstrateTile = vec2(0.0);
+vec4 erydonInlayLastSubstrateBounds = vec4(0.0);
+bool erydonInlayLastSubstrateTileValid = false;
+
 vec4 erydonInlaySubstrateBounds(vec2 local) {
     vec4 bounds = erydonInlayBaseBounds;
     vec2 tiles = floor(local);
     if (all(equal(tiles, vec2(0.0)))) return bounds;
+    if (erydonInlayLastSubstrateTileValid && all(equal(tiles, erydonInlayLastSubstrateTile))) {
+        return erydonInlayLastSubstrateBounds;
+    }
+    erydonInlayLastSubstrateTileValid = false;
     vec2 repeatDelta;
     // Ribbons already use the canonical world U/V basis above. Their rotated
     // tangent cannot pass the ordinary axis-aligned repeat-delta guard.
@@ -95,7 +104,13 @@ vec4 erydonInlaySubstrateBounds(vec2 local) {
     vec2 target = mod(vec2(mod(phase, 6.0), floor(phase / 6.0)) + repeatDelta, 6.0);
     float targetRecord = family + target.y * 6.0 + target.x;
     if (targetRecord < 0.0 || targetRecord >= erydonCtmPomRecordCount()) return bounds;
-    return erydonCtmPomReadBoundsPx(targetRecord);
+    vec4 targetBounds = erydonCtmPomReadBoundsPx(targetRecord);
+    if (all(lessThan(abs(tiles), vec2(16777216.0)))) {
+        erydonInlayLastSubstrateTile = tiles;
+        erydonInlayLastSubstrateBounds = targetBounds;
+        erydonInlayLastSubstrateTileValid = true;
+    }
+    return targetBounds;
 }
 
 vec2 erydonInlaySubstrateUv(vec2 local, out vec2 gradientScale) {
