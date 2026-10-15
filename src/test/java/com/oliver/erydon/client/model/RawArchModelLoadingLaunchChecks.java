@@ -14,7 +14,10 @@ import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.fabricmc.fabric.impl.client.indigo.renderer.IndigoRenderer;
 import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.EncodingFormat;
 import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.MutableQuadViewImpl;
+import net.fabricmc.fabric.api.resource.ModResourcePack;
+import net.fabricmc.fabric.impl.resource.loader.FabricModResourcePack;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
@@ -25,7 +28,10 @@ import net.minecraft.client.texture.Sprite;
 import net.minecraft.resource.DirectoryResourcePack;
 import net.minecraft.resource.LifecycledResourceManagerImpl;
 import net.minecraft.resource.ResourceManager;
+import net.minecraft.resource.Resource;
+import net.minecraft.resource.ResourcePack;
 import net.minecraft.resource.ResourceType;
+import net.minecraft.resource.ZipResourcePack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -35,10 +41,14 @@ import net.minecraft.world.BlockRenderView;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -64,8 +74,14 @@ final class RawArchModelLoadingLaunchChecks {
         String anchor = "assets/erydon/authoring_models/block/arch/romanesque/arch_romanesque_icon.json";
         Path root = Path.of(RawArchModelLoadingLaunchChecks.class.getClassLoader().getResource(anchor).toURI());
         for (int i = 0; i < Path.of(anchor).getNameCount(); i++) root = root.getParent();
-        try (var resources = new LifecycledResourceManagerImpl(ResourceType.CLIENT_RESOURCES,
-                List.of(new DirectoryResourcePack("erydon", root, false)))) {
+        try (var resources = new LifecycledResourceManagerImpl(ResourceType.CLIENT_RESOURCES, packStack(root))) {
+            Identifier nativeParent = new Identifier("erydon", "models/block/arch/romanesque/arch_romanesque_side_small.json");
+            String grouped = resources.getResource(nativeParent).orElseThrow().getResourcePackName();
+            String underlying = resources.getAllResources(nativeParent).get(0).getResourcePackName();
+            require(grouped.equals("fabric") && underlying.equals("erydon"),
+                    "Native fixture did not reproduce Fabric's grouped resource provenance: " + grouped + "/" + underlying);
+            System.out.println("ERYDON_RAW_ARCH_FABRIC_PROVENANCE_OK getResource=" + grouped + " getAllResources=" + underlying
+                    + " legacyOverrideMisclassification=confirmed");
             ModelResolver baseline = load(resources, "baseline");
             // This reproduces the old omission without changing production code: the strict
             // index sees neither new arch family and silently returns their empty JSON anchors.
@@ -83,6 +99,7 @@ final class RawArchModelLoadingLaunchChecks {
             }
             // Clear the property to cover the actual new default, rather than forcing it on.
             ModelResolver shared = load(resources, null);
+            externalOverrideProof(resources, shared, sprite);
             int components = 0, emptyCells = 0, emitted = 0, wrapped = 0;
             try (ContinuityFixture continuity = new ContinuityFixture(sprite)) {
                 for (String style : List.of("romanesque", "georgian"))
@@ -126,6 +143,113 @@ final class RawArchModelLoadingLaunchChecks {
         } finally {
             if (previousMode == null) System.clearProperty(property); else System.setProperty(property, previousMode);
         }
+    }
+
+    private static List<ResourcePack> packStack(Path nativeRoot) throws Exception {
+        class NativePack extends DirectoryResourcePack implements ModResourcePack {
+            NativePack() { super("erydon", nativeRoot, true); }
+            @Override public ModMetadata getFabricModMetadata() {
+                return FabricLoader.getInstance().getModContainer("erydon").orElseThrow().getMetadata();
+            }
+        }
+        List<ResourcePack> packs = new ArrayList<>();
+        packs.add(new FabricModResourcePack(ResourceType.CLIENT_RESOURCES, List.of(new NativePack())));
+        String configured = System.getProperty("erydon.raw_arch.devPackRoot");
+        if (configured != null && !configured.isBlank()) {
+            Path dev = Path.of(configured).toAbsolutePath().normalize();
+            String selected = Files.readAllLines(dev.resolve("options.txt")).stream()
+                    .filter(line -> line.startsWith("resourcePacks:")).findFirst().orElseThrow()
+                    .substring("resourcePacks:".length());
+            for (var entry : JsonParser.parseString(selected).getAsJsonArray()) {
+                String name = entry.getAsString();
+                if (name.equals("vanilla") || name.equals("fabric")) continue;
+                if (name.startsWith("file/")) {
+                    Path packRoot = dev.resolve("resourcepacks").normalize();
+                    Path pack = packRoot.resolve(name.substring("file/".length())).normalize();
+                    require(pack.startsWith(packRoot) && Files.exists(pack), "Missing or invalid active test pack " + name);
+                    packs.add(Files.isDirectory(pack) ? new DirectoryResourcePack(name, pack, false)
+                            : new ZipResourcePack(name, pack.toFile(), false));
+                } else if (name.equals("erydon:high_polish_glazing")) {
+                    Path pack = nativeRoot.resolve("resourcepacks/high_polish_glazing");
+                    require(Files.isDirectory(pack), "Missing active built-in glazing test pack");
+                    packs.add(new DirectoryResourcePack(name, pack, true));
+                } else throw new AssertionError("Unsupported active pack in the raw arch regression: " + name);
+            }
+        }
+        System.out.println("ERYDON_RAW_ARCH_PACK_STACK " + packs.stream().map(ResourcePack::getName).toList()
+                + " vanillaScope=erydon-resource-queries-only");
+        return packs;
+    }
+
+    private static void externalOverrideProof(ResourceManager resources, ModelResolver nativeShared, Sprite sprite) throws Exception {
+        Identifier model = new Identifier("erydon", "block/arch/romanesque/aganite_arch_romanesque_side_small");
+        Identifier child = new Identifier("erydon", "models/" + model.getPath() + ".json");
+        Identifier parent = new Identifier("erydon", "models/block/arch/romanesque/arch_romanesque_side_small.json");
+        String texture = """
+                {"parent":"erydon:block/arch/romanesque/arch_romanesque_side_small",
+                 "textures":{"stone":"external:block/stone","particle":"external:block/particle"}}
+                """;
+        Sprite surfaceSprite = new Sprite(new Identifier("erydon", "raw_arch_override_atlas"),
+                sprite.getContents(), 64, 64, 32, 16) {};
+        Sprite particleSprite = new Sprite(new Identifier("erydon", "raw_arch_override_particle_atlas"),
+                sprite.getContents(), 64, 64, 48, 48) {};
+        int textureCases = 0;
+        for (boolean retainLower : new boolean[]{false, true}) {
+            ModelResolver changed = load(overridden(resources, child, texture, retainLower), null);
+            UnbakedModel raw = resolve(changed, model);
+            require(raw != null, "A safe external texture-only override fell back to an empty parent");
+            BakedModel baked = raw.bake(null, id -> switch (id.getTextureId().toString()) {
+                case "external:block/stone" -> surfaceSprite;
+                case "external:block/particle" -> particleSprite;
+                default -> sprite;
+            }, ModelRotation.X0_Y0, model);
+            require(baked instanceof SharedGeometryChildModel && baked.getParticleSprite() == particleSprite,
+                    "External single-provider/stacked override lost sharing or its exact particle binding");
+            List<float[]> emitted = emit(baked, surfaceSprite);
+            require(!emitted.isEmpty() && emitted.size() == emit(bake(nativeShared, model, sprite), sprite).size(),
+                    "Texture-only override changed the number of rendered faces");
+            for (float[] quad : emitted) for (int vertex = 0; vertex < 4; vertex++) {
+                float u = quad[3 + vertex * 5 + 3], v = quad[3 + vertex * 5 + 4];
+                require(u >= surfaceSprite.getMinU() - 1e-6 && u <= surfaceSprite.getMaxU() + 1e-6
+                        && v >= surfaceSprite.getMinV() - 1e-6 && v <= surfaceSprite.getMaxV() + 1e-6,
+                        "External stone texture escaped its requested atlas sprite");
+            }
+            textureCases++;
+        }
+        String structuralChild = texture.replace("\"textures\":", "\"elements\":[{\"from\":[0,0,0],\"to\":[16,16,16],"
+                + "\"faces\":{\"north\":{\"texture\":\"#stone\"}}}],\"textures\":");
+        require(resolve(load(overridden(resources, child, structuralChild, false), null), model) == null,
+                "A single external provider's authored child geometry was ignored");
+        String structuralParent = """
+                {"parent":"minecraft:block/block","textures":{"particle":"#stone"},
+                 "elements":[{"from":[0,0,0],"to":[16,16,16],"faces":{"north":{"texture":"#stone"}}}]}
+                """;
+        ModelResolver parentChanged = load(overridden(resources, parent, structuralParent, false), null);
+        require(resolve(parentChanged, model) == null, "An authored parent override was overwritten by shared geometry");
+        require(resolve(parentChanged, modelId("aganite_arch_romanesque", "non_column_side_small", "romanesque")) != null,
+                "One structural parent override disabled unrelated shared components");
+        System.out.println("ERYDON_RAW_ARCH_OVERRIDES_OK textureCases=" + textureCases
+                + " singleExternalProvider=preserved stackedTexture=preserved structuralChild=vanilla structuralParent=vanilla unrelatedComponent=shared");
+    }
+
+    private static ResourceManager overridden(ResourceManager resources, Identifier id, String json, boolean retainLower) {
+        ResourcePack provider = (ResourcePack) Proxy.newProxyInstance(ResourcePack.class.getClassLoader(),
+                new Class<?>[]{ResourcePack.class}, (proxy, method, args) -> {
+                    require(method.getName().equals("getName"), "Unexpected override provider query " + method);
+                    return "external-arch-models";
+                });
+        Resource changed = new Resource(provider, () -> new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8)));
+        return (ResourceManager) Proxy.newProxyInstance(ResourceManager.class.getClassLoader(), new Class<?>[]{ResourceManager.class},
+                (proxy, method, args) -> {
+                    if (args != null && args.length > 0 && id.equals(args[0])) {
+                        if (method.getName().equals("getResource")) return Optional.of(changed);
+                        if (method.getName().equals("getAllResources")) {
+                            List<Resource> stack = new ArrayList<>(retainLower ? resources.getAllResources(id) : List.of());
+                            stack.add(changed); return List.copyOf(stack);
+                        }
+                    }
+                    return method.invoke(resources, args);
+                });
     }
 
     private static Identifier modelId(String block, String suffix, String style) {

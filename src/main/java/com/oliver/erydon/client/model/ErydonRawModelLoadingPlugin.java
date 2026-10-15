@@ -1148,13 +1148,14 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
                                             Identifier resourceId,
                                             String builtInPack) {
             List<Resource> resources = resourceManager.getAllResources(resourceId);
-            if (resources.size() > 1) {
+            if (resources.size() != 1) {
                 return true;
             }
-            Optional<Resource> active = resourceManager.getResource(resourceId);
-            return active.isEmpty()
-                    || (builtInPack != null
-                    && !builtInPack.equals(active.get().getResourcePackName()));
+            // Fabric's getResource identifies the outer "fabric" group, while
+            // getAllResources identifies its owning mod pack. Compare the same
+            // underlying provenance used by mostFrequentAuthoringPack above.
+            return builtInPack != null
+                    && !builtInPack.equals(resources.get(0).getResourcePackName());
         }
 
         private static JsonObject readActiveModel(ResourceManager resourceManager, Identifier resourceId) {
