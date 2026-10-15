@@ -80,7 +80,9 @@ public final class GeorgianWindowRenderingLaunchChecks {
                 models.lookups.clear();
                 List<BakedQuad> actual = renderer.getQuads(state, null, Random.create(0));
                 List<Identifier> axiom = List.copyOf(models.lookups);
-                require(!actual.isEmpty(), "An entire Georgian window disappeared");
+                boolean clearCentre = state.get(CORNER) == Corner.NONE && state.get(OPEN)
+                        && state.get(PIECE) == Piece.LOWER_MULTI_MID && !state.get(SILL);
+                require(actual.isEmpty() == clearCentre, "A window disappeared or a lower centre retained geometry: " + state);
                 fabric.clear();
                 renderer.emitBlockQuads(null, state, BlockPos.ORIGIN, () -> Random.create(0), context);
                 require(transforms[0] == 0, "Georgian rendering leaked a transform");
@@ -88,7 +90,18 @@ public final class GeorgianWindowRenderingLaunchChecks {
                 require(fabric.equals(expected), "Fabric selected wrong components: " + state + " " + fabric);
                 require(axiom.equals(expected), "Axiom selected different components: " + state + " " + axiom);
                 if (state.get(CORNER) == Corner.NONE) {
-                    same(actual, renderer.getQuads(state.with(PIECE, state.get(PIECE).single()), null, Random.create(0)));
+                    if (!state.get(OPEN)) {
+                        // Closing a wide run retains the exact one-wide appearance from 1.5.44,
+                        // including the culled buckets consumed by Axiom and ordinary rendering.
+                        same(actual, renderer.getQuads(state.with(PIECE, state.get(PIECE).single()), null, Random.create(0)));
+                        for (Direction side : Direction.values()) {
+                            same(renderer.getQuads(state, side, Random.create(0)),
+                                    renderer.getQuads(state.with(PIECE, state.get(PIECE).single()), side, Random.create(0)));
+                        }
+                    } else {
+                        openStraightGeometry(renderer, state, models.get(WindowFrenchGeorgianBakedModel.modelId(
+                                "aganite_window_french_georgian", "sill")));
+                    }
                 } else if (state.get(OPEN) && state.get(PIECE).single() == Piece.LOWER_SINGLE && !state.get(SILL)) {
                     require(actual.size() == 6, "Open lower corner retained leaf/frame/glass geometry");
                     double x = state.get(CORNER) == Corner.LEFT ? .09375 : .90625;
@@ -107,7 +120,7 @@ public final class GeorgianWindowRenderingLaunchChecks {
                 checked++;
             }
             System.out.println("ERYDON_GEORGIAN_WINDOW_RENDERING_OK states=" + checked
-                    + " FabricAxiomComponents=exact legacyStraightQuads=exact openCornerPost=6quads");
+                    + " FabricAxiomComponents=exact closedStraightQuads=exact openCentres=clear openOuterWings=retained openCornerPost=6quads");
         } finally {
             singleton.set(null, previous);
         }
@@ -116,7 +129,7 @@ public final class GeorgianWindowRenderingLaunchChecks {
     private static List<Identifier> expected(BlockState state) {
         List<Identifier> result = new ArrayList<>();
         boolean corner = state.get(CORNER) != Corner.NONE;
-        Piece primary = corner ? state.get(PIECE) : state.get(PIECE).asString().startsWith("upper") ? Piece.UPPER_SINGLE : Piece.LOWER_SINGLE;
+        Piece primary = corner || state.get(OPEN) ? state.get(PIECE) : state.get(PIECE).single();
         face(result, primary, state, corner);
         if (corner) {
             boolean left = (state.get(CORNER) == Corner.LEFT) != state.get(OPEN);
@@ -141,24 +154,84 @@ public final class GeorgianWindowRenderingLaunchChecks {
             case UPPER_MULTI_MID -> "open_upper_multi_mid";
             default -> null;
         };
-        else suffix = "open_" + piece.asString() + "_" + hinge;
+        else suffix = switch (piece) {
+            case UPPER_SINGLE -> "open_upper_single_" + hinge;
+            case LOWER_SINGLE -> "open_lower_single_" + hinge;
+            case UPPER_MULTI_LH -> "open_upper_single_edge_lh";
+            case UPPER_MULTI_RH -> "open_upper_single_edge_rh";
+            case UPPER_MULTI_MID -> "open_upper_single_mid";
+            case LOWER_MULTI_LH -> "open_lower_multi_lh";
+            case LOWER_MULTI_RH -> "open_lower_multi_rh";
+            case LOWER_MULTI_MID -> null;
+        };
         if (suffix != null) add(result, suffix);
         if (state.get(SILL)) {
             add(result, "sill");
-            if (open && !corner && piece == Piece.LOWER_SINGLE) add(result, "sill_" + hinge);
+            if (open && !corner) {
+                if (piece == Piece.LOWER_SINGLE) add(result, "sill_" + hinge);
+                else if (piece == Piece.LOWER_MULTI_LH) add(result, "sill_lh");
+                else if (piece == Piece.LOWER_MULTI_RH) add(result, "sill_rh");
+            }
         }
+    }
+
+    private static void openStraightGeometry(WindowFrenchGeorgianBakedModel renderer, BlockState state, BakedModel authoredSill) {
+        Piece piece = state.get(PIECE);
+        List<BakedQuad> quads = new ArrayList<>(renderer.getQuads(state, null, Random.create(0)));
+        for (Direction side : Direction.values()) quads.addAll(renderer.getQuads(state, side, Random.create(0)));
+        if (piece == Piece.LOWER_MULTI_MID) {
+            if (!state.get(SILL)) require(quads.isEmpty(), "An open lower centre still has a culled frame/glass face");
+            List<BakedQuad> expected = new ArrayList<>();
+            if (state.get(SILL)) {
+                int rotation = switch (state.get(FACING)) {
+                    case EAST -> 90; case SOUTH -> 180; case WEST -> 270; default -> 0;
+                };
+                AxiomFallbackQuads.add(expected, authoredSill, rotation, null, Random.create(0), true);
+                for (Direction side : Direction.values()) {
+                    AxiomFallbackQuads.add(expected, authoredSill, rotation, side, Random.create(0), true);
+                }
+            }
+            same(quads, expected);
+            require(quads.stream().allMatch(quad -> quad.getColorIndex() == -1),
+                    "An open lower centre retained glass or lead");
+        } else if (piece == Piece.UPPER_MULTI_MID) {
+            // The one-wide fanlight stays glazed, but no pane may project into the opening.
+            for (BakedQuad quad : quads) for (int vertex = 0; vertex < 4; vertex++) {
+                require(depth(quad, vertex, state.get(FACING)) <= .250001,
+                        "A centre fanlight retained a deep hinged pane");
+            }
+            require(quads.stream().anyMatch(quad -> quad.getColorIndex() == 0), "An upper centre lost its fixed fanlight glass");
+        } else if (piece == Piece.LOWER_MULTI_LH || piece == Piece.LOWER_MULTI_RH
+                || piece == Piece.UPPER_MULTI_LH || piece == Piece.UPPER_MULTI_RH) {
+            require(quads.stream().anyMatch(quad -> {
+                for (int vertex = 0; vertex < 4; vertex++) if (depth(quad, vertex, state.get(FACING)) > .75) return true;
+                return false;
+            }), "An outer edge lost its opening wing");
+        }
+    }
+
+    private static double depth(BakedQuad quad, int vertex, Direction facing) {
+        int[] data = quad.getVertexData();
+        double x = Float.intBitsToFloat(data[vertex * 8]);
+        double z = Float.intBitsToFloat(data[vertex * 8 + 2]);
+        return switch (facing) {
+            case EAST -> 1 - x;
+            case SOUTH -> 1 - z;
+            case WEST -> x;
+            default -> z;
+        };
     }
 
     private static void add(List<Identifier> list, String suffix) {
         list.add(WindowFrenchGeorgianBakedModel.modelId("aganite_window_french_georgian", suffix));
     }
     private static void same(List<BakedQuad> a, List<BakedQuad> b) {
-        require(a.size() == b.size(), "Legacy straight quad count differs");
+        require(a.size() == b.size(), "Expected geometry quad count differs");
         for (int i = 0; i < a.size(); i++) {
             BakedQuad left = a.get(i), right = b.get(i);
             require(Arrays.equals(left.getVertexData(), right.getVertexData()) && left.getColorIndex() == right.getColorIndex()
                     && left.getFace() == right.getFace() && left.getSprite() == right.getSprite() && left.hasShade() == right.hasShade(),
-                    "Legacy straight UV/position/normal/tint/lighting/order changed from its one-wide equivalent");
+                    "Expected geometry UV/position/normal/tint/lighting/order differs");
         }
     }
     private static double[] rotate(double x, double z, Direction facing) {

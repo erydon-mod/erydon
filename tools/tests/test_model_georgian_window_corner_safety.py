@@ -14,7 +14,7 @@ spec.loader.exec_module(generator)
 class GeorgianWindowCornerSafetyTest(unittest.TestCase):
     def test_generated_outputs_are_current_and_bounded(self):
         outputs = generator.outputs()
-        self.assertEqual(410, len(outputs))  # Five shared shapes and 81 material bindings each.
+        self.assertEqual(656, len(outputs))  # Eight shared shapes and 81 material bindings each.
         for path, expected in outputs.items():
             self.assertEqual(expected, generator.load(path), str(path.relative_to(ROOT)))
 
@@ -40,6 +40,22 @@ class GeorgianWindowCornerSafetyTest(unittest.TestCase):
         self.assertEqual([3, 16, 3], element["to"])
         self.assertEqual({"north", "east", "south", "west", "up", "down"}, set(element["faces"]))
         self.assertTrue(all(face == {"texture": "#stone"} for face in element["faces"].values()))
+
+    def test_open_cluster_keeps_single_fanlights_and_only_original_outer_wings(self):
+        source = generator.load(generator.MODELS / "window_french_georgian_open_upper_single_lh.json")
+        removed = generator.WINGS["single_lh"][0] | {34}
+        fixed = [element for index, element in enumerate(source["elements"]) if index not in removed]
+        for suffix in ("mid", "edge_lh", "edge_rh"):
+            derived = generator.load(generator.MODELS / f"window_french_georgian_open_upper_single_{suffix}.json")
+            self.assertEqual(fixed, derived["elements"][:len(fixed)])
+            if suffix == "mid":
+                self.assertEqual(len(fixed), len(derived["elements"]))
+                self.assertTrue(all(element["from"][1] >= 4.846 for element in derived["elements"]))
+            else:
+                wing = suffix.replace("edge_", "multi_")
+                original = generator.load(generator.MODELS / f"window_french_georgian_open_upper_{wing}.json")
+                self.assertEqual([element for index, element in enumerate(original["elements"])
+                                  if index in generator.WINGS[wing][0]], derived["elements"][len(fixed):])
 
     def test_all_material_finishes_keep_the_existing_stone_glazing_and_lead(self):
         originals = [path for path in generator.MODELS.glob("*_closed_lower_single*.json")

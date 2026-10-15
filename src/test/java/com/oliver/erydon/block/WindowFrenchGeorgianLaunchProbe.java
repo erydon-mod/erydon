@@ -57,7 +57,7 @@ public final class WindowFrenchGeorgianLaunchProbe implements PreLaunchEntrypoin
         cornerAttachment(block);
         GeorgianWindowRenderingLaunchChecks.run(block);
         System.out.println("ERYDON_GEORGIAN_WINDOWS_OK states=" + states + " layouts=" + layouts
-                + " oldStateKeys=preserved straightCollision=single cornerOpenings=clear clusterSync=preserved cornerAttachment=runEnds");
+                + " oldStateKeys=preserved closedStraightCollision=single openClusterCentres=clear cornerOpenings=clear clusterSync=preserved cornerAttachment=runEnds");
     }
 
     private static void cornerAttachment(WindowFrenchGeorgianBlock block) throws Exception {
@@ -93,12 +93,33 @@ public final class WindowFrenchGeorgianLaunchProbe implements PreLaunchEntrypoin
             var saved = NbtHelper.fromBlockState(state);
             require(NbtHelper.toBlockState(Registries.BLOCK.getReadOnlyWrapper(), saved) == state,
                     "An old piece/glass/hinge/corner state no longer round-trips");
-            Piece expected = state.get(CORNER) == Corner.NONE ? state.get(PIECE).single() : state.get(PIECE);
+            Piece expected = state.get(CORNER) == Corner.NONE && !state.get(OPEN)
+                    ? state.get(PIECE).single() : state.get(PIECE);
             require(primaryPiece(state) == expected, "Wrong effective primary piece");
             VoxelShape shape = collision(block, state);
             if (state.get(CORNER) == Corner.NONE) {
-                same(shape, collision(block, state.with(PIECE, state.get(PIECE).single())),
-                        "Legacy straight collision differs from the authored one-wide window");
+                if (!state.get(OPEN)) {
+                    same(shape, collision(block, state.with(PIECE, state.get(PIECE).single())),
+                            "Closed straight collision differs from the authored one-wide window");
+                } else {
+                    // A wide cluster opens only at the ends. Its centre must be traversable,
+                    // even though easy targeting deliberately keeps a full outline/raycast.
+                    Piece piece = state.get(PIECE);
+                    Direction facing = state.get(FACING);
+                    if (piece == Piece.LOWER_MULTI_MID) {
+                        if (!state.get(SILL)) require(shape.isEmpty(), "Open lower centre retained collision");
+                        else require(shape.getBoundingBoxes().stream().allMatch(box -> box.maxY <= .031251),
+                                "Open lower centre retained collision above the sill");
+                    }
+                    if (piece == Piece.LOWER_MULTI_MID || piece == Piece.UPPER_MULTI_MID) {
+                        require(!contains(shape, rotate(.0625, .125, .75, facing))
+                                        && !contains(shape, rotate(.9375, .125, .75, facing)),
+                                "An open centre retained a side wing's collision");
+                    } else if (piece == Piece.LOWER_MULTI_LH || piece == Piece.LOWER_MULTI_RH) {
+                        double wingX = piece == Piece.LOWER_MULTI_LH ? .9375 : .0625;
+                        require(contains(shape, rotate(wingX, .5, .75, facing)), "An open outer wing lost collision");
+                    }
+                }
             } else if (!state.get(OPEN)) {
                 VoxelShape first = (VoxelShape) oldFace.invoke(block, state, state.get(FACING), state.get(PIECE),
                         state.get(HINGE), state.get(SILL));
@@ -131,96 +152,142 @@ public final class WindowFrenchGeorgianLaunchProbe implements PreLaunchEntrypoin
     private static int layouts(WindowFrenchGeorgianBlock block) throws Exception {
         int checked = 0;
         for (Direction facing : Direction.Type.HORIZONTAL) {
-            for (int[] heights : new int[][]{{1}, {3}, {3, 3, 3}, {2, 4, 3, 4, 2}}) {
+            for (int[] heights : new int[][]{{1}, {3}, {3, 3}, {3, 3, 3}, {3, 3, 3, 3, 3}, {2, 4, 3, 4, 2}}) {
                 TestWorld world = world();
                 Direction right = facing.rotateYClockwise();
+                BlockPos anchor = new BlockPos(0, 64, 0);
                 for (int column = 0; column < heights.length; column++) for (int y = 0; y < heights[column]; y++) {
-                    BlockPos pos = new BlockPos(0, 64, 0).offset(right, column).up(y);
-                    // Old greedy rectangles placed fanlights at y=1 across the
-                    // whole ragged row and y=2 across its three inner columns.
-                    Piece legacy = heights.length == 5 && (y == 1 || y == 2)
-                            ? Piece.UPPER_MULTI_MID : y == 3 ? Piece.UPPER_SINGLE : Piece.LOWER_MULTI_MID;
-                    world.states.put(pos, block.getDefaultState().with(FACING, facing)
-                            .with(PIECE, legacy).with(HINGE, column % 2 == 0 ? DoorHinge.LEFT : DoorHinge.RIGHT));
+                    BlockPos pos = anchor.offset(right, column).up(y);
+                    // Start from 1.5.44-style independent SINGLE columns, including a
+                    // previously open save, so reflow must restore horizontal end metadata.
+                    Piece piece = y == heights[column] - 1 ? Piece.UPPER_SINGLE : Piece.LOWER_SINGLE;
+                    world.states.put(pos, block.getDefaultState().with(FACING, facing).with(OPEN, true)
+                            .with(PIECE, piece).with(HINGE, column % 2 == 0 ? DoorHinge.LEFT : DoorHinge.RIGHT));
                 }
                 Set<BlockPos> positions = Set.copyOf(world.states.keySet());
-                require(block.recalcCluster(world, new BlockPos(0, 64, 0)).recalculated(), "Straight cluster did not recalculate");
+                require(block.recalcCluster(world, anchor).recalculated(), "Straight cluster did not recalculate");
                 require(world.states.keySet().equals(positions), "Layout created/deleted a block");
+                assertAutoColumns(world, positions, facing);
                 for (int column = 0; column < heights.length; column++) for (int y = 0; y < heights[column]; y++) {
-                    BlockState actual = world.getBlockState(new BlockPos(0, 64, 0).offset(right, column).up(y));
-                    require(actual.get(PIECE) == (y == heights[column] - 1 ? Piece.UPPER_SINGLE : Piece.LOWER_SINGLE),
-                            "Ragged layout retained an intermediate fanlight");
-                    require(actual.get(SILL) == (y == 0), "Column sill is not at its own bottom");
-                    require(actual.get(HINGE) == (column % 2 == 0 ? DoorHinge.LEFT : DoorHinge.RIGHT), "Adjacent columns lost their hinges");
+                    BlockState actual = world.getBlockState(anchor.offset(right, column).up(y));
+                    require(actual.get(HINGE) == (column % 2 == 0 ? DoorHinge.LEFT : DoorHinge.RIGHT),
+                            "Adjacent columns lost their hinges");
                 }
-                sync(block, world, new BlockPos(0, 64, 0));
+                sync(block, world, anchor);
                 checked++;
             }
             for (Corner corner : new Corner[]{Corner.LEFT, Corner.RIGHT}) {
                 TestWorld world = world();
                 BlockPos owner = new BlockPos(0, 64, 0);
                 Direction run = corner == Corner.LEFT ? facing.rotateYClockwise() : facing.rotateYCounterclockwise();
+                Direction secondary = corner.secondaryFacing(facing);
                 for (int x = 0; x < 3; x++) for (int y = 0; y < 3; y++) {
                     world.states.put(owner.offset(run, x).up(y), block.getDefaultState().with(FACING, facing)
                             .with(CORNER, x == 0 ? corner : Corner.NONE));
+                    if (x > 0) world.states.put(owner.offset(facing.getOpposite(), x).up(y),
+                            block.getDefaultState().with(FACING, secondary));
                 }
+                Set<BlockPos> positions = Set.copyOf(world.states.keySet());
                 require(block.recalcCluster(world, owner).recalculated(), "Corner cluster did not recalculate");
+                require(world.states.keySet().equals(positions), "Corner reflow created/deleted a block");
                 for (int y = 0; y < 3; y++) {
                     Piece expected = corner == Corner.LEFT
                             ? (y == 2 ? Piece.UPPER_MULTI_RH : Piece.LOWER_MULTI_RH)
                             : (y == 2 ? Piece.UPPER_MULTI_LH : Piece.LOWER_MULTI_LH);
                     require(world.getBlockState(owner.up(y)).get(PIECE) == expected, "Closed corner lost its existing end piece");
+                    for (Direction plane : new Direction[]{facing, secondary}) {
+                        Direction extension = plane == facing ? run : facing.getOpposite();
+                        Piece middle = y == 2 ? Piece.UPPER_MULTI_MID : Piece.LOWER_MULTI_MID;
+                        require(world.getBlockState(owner.offset(extension).up(y)).get(PIECE) == middle,
+                                "A corner arm retained an interior opening wing");
+                        BlockPos end = owner.offset(extension, 2).up(y);
+                        Piece endPiece = rowPiece(y == 2, positions.contains(end.offset(plane.rotateYCounterclockwise())),
+                                positions.contains(end.offset(plane.rotateYClockwise())));
+                        require(world.getBlockState(end).get(PIECE) == endPiece, "A corner arm lost its outer opening wing");
+                    }
                 }
                 sync(block, world, owner);
                 checked++;
             }
+            // Vertical holes form independent true-height columns; adjacency is row-local.
+            Set<BlockPos> localHoles = Set.of(new BlockPos(0, 0, 0), new BlockPos(0, 1, 0), new BlockPos(0, 3, 0),
+                    new BlockPos(1, 1, 0), new BlockPos(1, 2, 0), new BlockPos(1, 3, 0));
+            TestWorld gapped = world();
+            Direction right = facing.rotateYClockwise();
+            for (BlockPos local : localHoles) {
+                BlockPos pos = new BlockPos(0, 64, 0).offset(right, local.getX()).up(local.getY());
+                gapped.states.put(pos, block.getDefaultState().with(FACING, facing).with(PIECE, Piece.LOWER_MULTI_MID));
+            }
+            Set<BlockPos> holes = Set.copyOf(gapped.states.keySet());
+            Set<BlockPos> covered = new HashSet<>();
+            var runs = partitionColumns(holes, facing);
+            require(runs.size() == 3, "Vertical gap was bridged or adjacent columns merged");
+            for (Rect run : runs) {
+                require(run.width == 1, "A new straight run is wider than one block");
+                for (BlockPos pos : run.iterate()) require(covered.add(pos), "Column partitions overlap");
+            }
+            require(covered.equals(holes), "Column partition lost or invented blocks");
+            BlockPos anchor = new BlockPos(0, 64, 0);
+            require(block.recalcCluster(gapped, anchor).recalculated(), "Gapped component did not recalculate");
+            assertAutoColumns(gapped, holes, facing);
+            sync(block, gapped, anchor);
+            checked++;
+
+            TestWorld locked = world();
+            for (int x = 0; x < 2; x++) for (int y = 0; y < 3; y++) {
+                locked.states.put(anchor.offset(right, x).up(y), block.getDefaultState()
+                        .with(FACING, facing).with(PIECE, Piece.LOWER_MULTI_MID));
+            }
+            BlockPos manual = anchor.up();
+            ClusterManualLockState.setLocked(locked, ClusterManualLockState.WINDOW_FRENCH_GEORGIAN_SCOPE, manual, true);
+            BlockState original = locked.getBlockState(manual);
+            require(block.recalcCluster(locked, manual.down()).recalculated(), "Auto component beside manual state did not recalculate");
+            require(locked.getBlockState(manual) == original, "Reflow overwrote a manual state");
+            Set<BlockPos> automatic = new HashSet<>(locked.states.keySet());
+            automatic.remove(manual);
+            assertAutoColumns(locked, automatic, facing);
+            checked++;
         }
-        // Vertical holes create separate real runs, without depending on the width of a rectangle.
-        Set<BlockPos> holes = Set.of(new BlockPos(0, 0, 0), new BlockPos(0, 1, 0), new BlockPos(0, 3, 0),
-                new BlockPos(1, 1, 0), new BlockPos(1, 2, 0), new BlockPos(1, 3, 0));
-        Set<BlockPos> covered = new HashSet<>();
-        var runs = partitionColumns(holes, Direction.NORTH);
-        require(runs.size() == 3, "Vertical gap was bridged or adjacent columns merged");
-        for (Rect run : runs) {
-            require(run.width == 1, "A new straight run is wider than one block");
-            for (BlockPos pos : run.iterate()) require(covered.add(pos), "Column partitions overlap");
+        return checked;
+    }
+
+    private static void assertAutoColumns(TestWorld world, Set<BlockPos> component, Direction facing) {
+        Direction right = facing.rotateYClockwise();
+        for (BlockPos pos : component) {
+            BlockState state = world.getBlockState(pos);
+            boolean top = !component.contains(pos.up());
+            Piece expected = rowPiece(top, component.contains(pos.offset(right.getOpposite())), component.contains(pos.offset(right)));
+            require(state.get(PIECE) == expected, "Wrong row edge/top metadata at " + pos + ": " + state.get(PIECE) + " expected " + expected);
+            require(state.get(SILL) == !component.contains(pos.down()), "Column sill is not at its own bottom");
         }
-        require(covered.equals(holes), "Column partition lost or invented blocks");
-        TestWorld gapped = world();
-        for (BlockPos pos : holes) gapped.states.put(pos.up(64), block.getDefaultState()
-                .with(FACING, Direction.NORTH).with(PIECE, Piece.LOWER_MULTI_MID));
-        require(block.recalcCluster(gapped, new BlockPos(0, 64, 0)).recalculated(), "Gapped component did not recalculate");
-        for (BlockPos pos : holes) {
-            BlockState state = gapped.getBlockState(pos.up(64));
-            require(state.get(PIECE) == (holes.contains(pos.up()) ? Piece.LOWER_SINGLE : Piece.UPPER_SINGLE),
-                    "Gapped connected columns used another column's fanlight height");
-            require(state.get(SILL) == !holes.contains(pos.down()), "Gapped run lost its own lower sill");
-        }
-        sync(block, gapped, new BlockPos(0, 64, 0));
-        TestWorld locked = world();
-        for (int x = 0; x < 2; x++) for (int y = 0; y < 3; y++) {
-            locked.states.put(new BlockPos(x, 64 + y, 0), block.getDefaultState().with(PIECE, Piece.LOWER_MULTI_MID));
-        }
-        BlockPos manual = new BlockPos(0, 65, 0);
-        ClusterManualLockState.setLocked(locked, ClusterManualLockState.WINDOW_FRENCH_GEORGIAN_SCOPE, manual, true);
-        BlockState original = locked.getBlockState(manual);
-        block.recalcCluster(locked, manual.down());
-        require(locked.getBlockState(manual) == original, "Reflow overwrote a manual state");
-        require(locked.getBlockState(manual.down()).get(PIECE) == Piece.UPPER_SINGLE, "Manual boundary did not end the auto column");
-        require(locked.getBlockState(manual.up()).get(PIECE) == Piece.UPPER_SINGLE, "Connected path above manual boundary was not partitioned");
-        return checked + 3;
+    }
+
+    private static Piece rowPiece(boolean upper, boolean left, boolean right) {
+        if (!left && !right) return upper ? Piece.UPPER_SINGLE : Piece.LOWER_SINGLE;
+        if (!left) return upper ? Piece.UPPER_MULTI_RH : Piece.LOWER_MULTI_RH;
+        if (!right) return upper ? Piece.UPPER_MULTI_LH : Piece.LOWER_MULTI_LH;
+        return upper ? Piece.UPPER_MULTI_MID : Piece.LOWER_MULTI_MID;
     }
 
     private static void sync(WindowFrenchGeorgianBlock block, TestWorld world, BlockPos anchor) throws Exception {
         Method open = WindowFrenchGeorgianBlock.class.getDeclaredMethod("applyOpenToCluster", World.class, BlockPos.class, boolean.class);
         Method glass = WindowFrenchGeorgianBlock.class.getDeclaredMethod("applyGlassToCluster", World.class, BlockPos.class, WindowArchBlock.Glass.class);
         open.setAccessible(true); glass.setAccessible(true);
-        for (boolean value : new boolean[]{true, false}) {
-            open.invoke(block, world, anchor, value);
-            require(world.states.values().stream().allMatch(state -> state.get(OPEN) == value), "Adjacent windows stopped opening together");
+        Map<BlockPos, BlockState> layout = Map.copyOf(world.states);
+        for (WindowArchBlock.Glass finish : WindowArchBlock.Glass.values()) {
+            glass.invoke(block, world, anchor, finish);
+            require(world.states.values().stream().allMatch(state -> state.get(GLASS) == finish), "Cluster glazing stopped synchronizing");
+            for (boolean value : new boolean[]{true, false}) {
+                open.invoke(block, world, anchor, value);
+                require(world.states.values().stream().allMatch(state -> state.get(OPEN) == value), "Adjacent windows stopped opening together");
+                for (var entry : layout.entrySet()) {
+                    BlockState before = entry.getValue();
+                    BlockState after = world.getBlockState(entry.getKey());
+                    require(before.with(OPEN, value).with(GLASS, finish) == after,
+                            "Opening/glazing changed the fanlight, sill, hinge or cluster-end placement");
+                }
+            }
         }
-        glass.invoke(block, world, anchor, WindowArchBlock.Glass.TWO_WAY);
-        require(world.states.values().stream().allMatch(state -> state.get(GLASS) == WindowArchBlock.Glass.TWO_WAY), "Cluster glazing stopped synchronizing");
     }
 
     private static VoxelShape collision(WindowFrenchGeorgianBlock block, BlockState state) {

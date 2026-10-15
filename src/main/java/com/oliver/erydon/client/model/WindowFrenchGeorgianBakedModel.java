@@ -50,6 +50,11 @@ public final class WindowFrenchGeorgianBakedModel implements BakedModel, FabricB
             "open_upper_single_rh",
             "open_lower_single_lh",
             "open_lower_single_rh",
+            "open_lower_multi_lh",
+            "open_lower_multi_rh",
+            "open_upper_single_edge_lh",
+            "open_upper_single_edge_rh",
+            "open_upper_single_mid",
             "open_upper_multi_mid",
             "open_corner_upper_single_lh",
             "open_corner_upper_single_rh",
@@ -176,7 +181,12 @@ public final class WindowFrenchGeorgianBakedModel implements BakedModel, FabricB
         return switch (piece) {
             case UPPER_SINGLE -> "open_upper_single_" + hingeSuffix(hinge);
             case LOWER_SINGLE -> "open_lower_single_" + hingeSuffix(hinge);
-            default -> throw new IllegalArgumentException("Straight window piece was not normalized: " + piece);
+            case UPPER_MULTI_LH -> "open_upper_single_edge_lh";
+            case UPPER_MULTI_RH -> "open_upper_single_edge_rh";
+            case UPPER_MULTI_MID -> "open_upper_single_mid";
+            case LOWER_MULTI_LH -> "open_lower_multi_lh";
+            case LOWER_MULTI_RH -> "open_lower_multi_rh";
+            case LOWER_MULTI_MID -> null;
         };
     }
 

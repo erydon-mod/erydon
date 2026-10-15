@@ -372,6 +372,9 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
         if (world.isClient) return ActionResult.SUCCESS;
 
         boolean newOpen = !state.get(OPEN);
+        // Refresh saved 1.5.44 single-column layouts before opening the whole run.
+        // Manual pieces remain governed by their existing layout locks.
+        reflowConnectedAutoComponent(world, pos);
         applyOpenToCluster(world, pos, newOpen);
 
         world.playSound(
@@ -591,8 +594,8 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
         }
         if (ClusterRecalcSafety.unsafeResult(component) != null) return;
 
-        for (Rect column : partitionColumns(component, facing)) applyRectLayout(world, column, false);
-        for (Rect rect : cornerRects) applyRectLayout(world, rect, true);
+        for (Rect column : partitionColumns(component, facing)) applyRectLayout(world, column, false, component);
+        for (Rect rect : cornerRects) applyRectLayout(world, rect, true, component);
     }
 
     /** Independent vertical runs avoid wide fanlights and artificial tops in ragged clusters. */
@@ -675,7 +678,7 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
                 .with(CORNER, corner);
     }
 
-    private void applyRectLayout(World world, Rect rect, boolean cornersOnly) {
+    private void applyRectLayout(World world, Rect rect, boolean cornersOnly, Set<BlockPos> component) {
         BlockState seedState = world.getBlockState(rect.bottomLeft);
         if (!seedState.isOf(this)) return;
 
@@ -698,6 +701,13 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
                 if (!s.isOf(this) || !occupiesFacing(s, rect.facing)) continue;
                 if ((s.get(CORNER) != Corner.NONE) != cornersOnly) continue;
                 Piece piece = computePiece(w, isTop, dx);
+                if (!cornersOnly) {
+                    boolean left = component.contains(p.offset(rect.rightDir.getOpposite()));
+                    boolean right = component.contains(p.offset(rect.rightDir));
+                    // Preserve each column's own top, but retain row-end information
+                    // so only the outside columns carry a swung-open pane.
+                    piece = computePiece(left || right ? 3 : 1, isTop, left ? (right ? 1 : 2) : 0);
+                }
 
                 BlockState ns = s
                         .with(OPEN, open)
@@ -1060,10 +1070,10 @@ private ClusterPartition partitionComponent(World world, BlockPos seed, Directio
         return state.get(CORNER).pieceFor(state.get(PIECE), state.get(OPEN));
     }
 
-    /** Keep every published piece value readable, but render old straight runs as individual windows. */
+    /** Closed tops stay one wide; open pieces retain the cluster's outer-edge placement. */
     public static Piece primaryPiece(BlockState state) {
         Piece saved = state.get(PIECE);
-        return state.get(CORNER) == Corner.NONE ? saved.single() : saved;
+        return state.get(CORNER) == Corner.NONE && !state.get(OPEN) ? saved.single() : saved;
     }
 
     private static List<Direction> facings(BlockState state) {

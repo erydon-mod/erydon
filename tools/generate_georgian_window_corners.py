@@ -1,4 +1,4 @@
-"""Derive open Georgian corner fanlights without their hinged leaf assemblies.
+"""Derive Georgian fixed fanlights, open cluster edges and corner assemblies.
 
 The authored ordinary-window templates remain authoritative. Retained elements,
 including pane coatings and implicit CTM UVs, are copied unchanged. Source hashes
@@ -39,12 +39,14 @@ def load(path: Path) -> dict:
 
 def outputs() -> dict[Path, dict]:
     result = {}
+    sources = {}
     for suffix, (removed, expected_hash) in WINGS.items():
         source_name = PREFIX + "open_upper_" + suffix
         source = load(MODELS / (source_name + ".json"))
         actual = hashlib.sha256(json.dumps(source, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
         if actual != expected_hash:
             raise ValueError(f"Authored {source_name} changed; review wing ownership before regenerating")
+        sources[suffix] = source
         derived = copy.deepcopy(source)
         derived["elements"] = [element for index, element in enumerate(source["elements"]) if index not in removed]
         # Keep the fixed pane and every authored UV/tint/face attribute unchanged.
@@ -62,6 +64,34 @@ def outputs() -> dict[Path, dict]:
                 raise ValueError(f"Unexpected authored parent: {path.name}")
             child["parent"] = MODEL_ID + target_name
             result[path.with_name(path.name.replace("_open_upper_", "_open_corner_upper_"))] = child
+
+    # The one-wide fanlight is fixed in every column. Remove its full-height
+    # outside jamb in a multi-column opening; the original wide edge wings below
+    # provide exactly the old outer opening, without any centre leaves.
+    single = sources["single_lh"]
+    jamb = single["elements"][34]
+    if jamb["from"] != [0, 0, 0] or jamb["to"] != [1.5, 14.5, 3]:
+        raise ValueError("Authored fixed jamb changed; review open cluster fanlight")
+    removed = WINGS["single_lh"][0] | {34}
+    fanlight = [element for index, element in enumerate(single["elements"]) if index not in removed]
+    for suffix in ("mid", "edge_lh", "edge_rh"):
+        derived = copy.deepcopy(single)
+        derived["elements"] = copy.deepcopy(fanlight)
+        if suffix != "mid":
+            wing = suffix.replace("edge_", "multi_")
+            derived["elements"].extend(copy.deepcopy(element)
+                                       for index, element in enumerate(sources[wing]["elements"])
+                                       if index in WINGS[wing][0])
+        target_name = PREFIX + "open_upper_single_" + suffix
+        result[MODELS / (target_name + ".json")] = derived
+        for path in sorted(MODELS.glob("*_closed_upper_single*.json")):
+            if path.name.startswith(PREFIX):
+                continue
+            child = load(path)
+            if child.get("parent") != MODEL_ID + PREFIX + "closed_upper_single":
+                raise ValueError(f"Unexpected authored parent: {path.name}")
+            child["parent"] = MODEL_ID + target_name
+            result[path.with_name(path.name.replace("_closed_upper_single", "_open_upper_single_" + suffix))] = child
 
     post_name = PREFIX + "open_corner_post"
     result[MODELS / (post_name + ".json")] = {
@@ -96,7 +126,7 @@ def main():
             path.write_text(json.dumps(content, indent=2) + "\n", encoding="utf-8", newline="\n")
     if mismatches:
         raise SystemExit("Outdated Georgian corner models:\n" + "\n".join(mismatches))
-    print(f"Georgian corner models {'verified' if args.check else 'generated'}: {len(generated)} files; retained fanlight elements unchanged")
+    print(f"Georgian open models {'verified' if args.check else 'generated'}: {len(generated)} files; retained authored elements unchanged")
 
 
 if __name__ == "__main__":
