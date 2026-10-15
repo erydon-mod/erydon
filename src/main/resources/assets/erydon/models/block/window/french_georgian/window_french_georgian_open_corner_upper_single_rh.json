@@ -731,6 +731,9 @@
         },
         "down": {
           "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
         }
       }
     },

@@ -1,8 +1,8 @@
 """Derive Georgian fixed fanlights, open cluster edges and corner assemblies.
 
-The authored ordinary-window templates remain authoritative. Retained elements,
-including pane coatings and implicit CTM UVs, are copied unchanged. Source hashes
-use canonical JSON so checkout line endings do not affect the contract.
+The authored ordinary-window templates remain authoritative. Existing vertices,
+UVs and pane coatings are preserved; exposed stone cuts gain implicit-UV caps.
+Source hashes use canonical JSON so checkout line endings do not affect the contract.
 """
 
 from __future__ import annotations
@@ -31,6 +31,33 @@ WINGS = {
     "multi_rh": ({1, 2, 3, 4, 5, 13, 15, 16, 17, 43},
                  "1e46234cf495dc81e96598f71a2e062b4fc9d420e8e6bc56fd71cb03e27a861e"),
 }
+
+
+# Removing complete wings/jambs also removes the solids that hid these omitted
+# element faces. Keep every original face, and cap only the newly exposed cuts.
+# Indices are in the derived assemblies, protected by the source hashes above.
+CUT_CAPS = {
+    "open_corner_upper_single_lh": {18: ("east",)},
+    "open_corner_upper_single_rh": {18: ("west",)},
+    "open_corner_upper_multi_lh": {12: ("east",), 32: ("down",)},
+    "open_corner_upper_multi_rh": {12: ("west",), 33: ("down",)},
+    "open_upper_single_mid": {18: ("west", "east"), 22: ("west", "down"), 23: ("down",)},
+    "open_upper_single_edge_lh": {18: ("west",), 22: ("west", "down"), 23: ("down",)},
+    "open_upper_single_edge_rh": {18: ("east",), 22: ("west", "down"), 23: ("down",)},
+}
+
+
+def cap_exposed_cuts(suffix: str, model: dict) -> None:
+    for index, directions in CUT_CAPS.get(suffix, {}).items():
+        element = model["elements"][index]
+        if any(face["texture"] != "#stone" for face in element["faces"].values()):
+            raise ValueError(f"Cut cap targeted non-stone geometry: {suffix} element {index}")
+        for direction in directions:
+            if direction in element["faces"]:
+                raise ValueError(f"Cut cap already exists: {suffix} element {index} {direction}")
+            # These cuts sit inside the cell, so neighbour culling is invalid.
+            # Implicit UVs let the existing Continuity repeat rule project them.
+            element["faces"][direction] = {"texture": "#stone"}
 
 
 def load(path: Path) -> dict:
@@ -109,6 +136,9 @@ def outputs() -> dict[Path, dict]:
             raise ValueError(f"Unexpected material parent: {path.name}")
         child["parent"] = MODEL_ID + post_name
         result[path.with_name(path.name.replace("_closed_lower_single", "_open_corner_post"))] = child
+    for path, model in result.items():
+        if path.name.startswith(PREFIX):
+            cap_exposed_cuts(path.stem.removeprefix(PREFIX), model)
     return result
 
 
@@ -126,7 +156,7 @@ def main():
             path.write_text(json.dumps(content, indent=2) + "\n", encoding="utf-8", newline="\n")
     if mismatches:
         raise SystemExit("Outdated Georgian corner models:\n" + "\n".join(mismatches))
-    print(f"Georgian open models {'verified' if args.check else 'generated'}: {len(generated)} files; retained authored elements unchanged")
+    print(f"Georgian open models {'verified' if args.check else 'generated'}: {len(generated)} files; authored geometry preserved; exposed stone cuts capped")
 
 
 if __name__ == "__main__":

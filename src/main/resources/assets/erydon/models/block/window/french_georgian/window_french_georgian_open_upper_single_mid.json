@@ -731,6 +731,12 @@
         },
         "down": {
           "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
         }
       }
     },
@@ -875,6 +881,12 @@
         },
         "up": {
           "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
         }
       }
     },
@@ -913,6 +925,9 @@
           "texture": "#stone"
         },
         "up": {
+          "texture": "#stone"
+        },
+        "down": {
           "texture": "#stone"
         }
       }

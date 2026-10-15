@@ -494,6 +494,9 @@
         },
         "down": {
           "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
         }
       }
     },
@@ -1256,6 +1259,9 @@
           "texture": "#stone"
         },
         "west": {
+          "texture": "#stone"
+        },
+        "down": {
           "texture": "#stone"
         }
       }

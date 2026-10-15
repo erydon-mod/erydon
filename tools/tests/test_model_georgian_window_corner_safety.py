@@ -1,4 +1,7 @@
 import importlib.util
+import copy
+import itertools
+import math
 import csv
 import json
 import unittest
@@ -9,6 +12,57 @@ ROOT = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location("window_corners", ROOT / "tools/generate_georgian_window_corners.py")
 generator = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(generator)
+
+
+# Independently check actual rotated solid geometry, rather than accepting the
+# generator's component selections or expected cap table as visual proof.
+FACE_AXES = {"west": (0, -1), "east": (0, 1), "down": (1, -1),
+             "up": (1, 1), "north": (2, -1), "south": (2, 1)}
+
+
+def rotated(point, element, inverse=False):
+    rotation = element.get("rotation", {})
+    angle = rotation.get("angle", 0)
+    if not angle:
+        return point
+    axis = "xyz".index(rotation["axis"])
+    first, second = (axis + 1) % 3, (axis + 2) % 3
+    origin = rotation["origin"]
+    angle = math.radians(-angle if inverse else angle)
+    local = [point[index] - origin[index] for index in range(3)]
+    result = local.copy()
+    result[first] = local[first] * math.cos(angle) - local[second] * math.sin(angle)
+    result[second] = local[first] * math.sin(angle) + local[second] * math.cos(angle)
+    return [result[index] + origin[index] for index in range(3)]
+
+
+def inside(point, element):
+    local = rotated(point, element, inverse=True)
+    return all(element["from"][index] - 1e-5 <= local[index] <= element["to"][index] + 1e-5
+               for index in range(3))
+
+
+def uncovered_stone_faces(model):
+    solids = [element for element in model["elements"]
+              if all(face["texture"] == "#stone" for face in element["faces"].values())]
+    uncovered = []
+    for index, element in enumerate(model["elements"]):
+        if element not in solids:
+            continue
+        for direction, (axis, sign) in FACE_AXES.items():
+            if direction in element["faces"]:
+                continue
+            other_axes = [other for other in range(3) if other != axis]
+            for fractions in itertools.product((.03, .18, .34, .5, .66, .82, .97), repeat=2):
+                point = element["from"].copy()
+                point[axis] = (element["to"][axis] if sign > 0 else element["from"][axis]) + sign * .002
+                for other, fraction in zip(other_axes, fractions):
+                    point[other] += fraction * (element["to"][other] - element["from"][other])
+                point = rotated(point, element)
+                if not any(inside(point, solid) for solid in solids if solid is not element):
+                    uncovered.append((index, direction))
+                    break
+    return uncovered
 
 
 class GeorgianWindowCornerSafetyTest(unittest.TestCase):
@@ -23,7 +77,7 @@ class GeorgianWindowCornerSafetyTest(unittest.TestCase):
             original = generator.load(generator.MODELS / f"window_french_georgian_open_upper_{suffix}.json")
             derived = generator.load(generator.MODELS / f"window_french_georgian_open_corner_upper_{suffix}.json")
             retained = [element for index, element in enumerate(original["elements"]) if index not in removed]
-            self.assertEqual(retained, derived["elements"])
+            self.assert_authored_elements_preserved(retained, derived["elements"])
             self.assertEqual(10, len(removed), "Remove a whole authored wing, not just its pane")
             for element in derived["elements"]:
                 panes = [face for face in element["faces"].values() if face["texture"] == "#pane"]
@@ -47,7 +101,7 @@ class GeorgianWindowCornerSafetyTest(unittest.TestCase):
         fixed = [element for index, element in enumerate(source["elements"]) if index not in removed]
         for suffix in ("mid", "edge_lh", "edge_rh"):
             derived = generator.load(generator.MODELS / f"window_french_georgian_open_upper_single_{suffix}.json")
-            self.assertEqual(fixed, derived["elements"][:len(fixed)])
+            self.assert_authored_elements_preserved(fixed, derived["elements"][:len(fixed)])
             if suffix == "mid":
                 self.assertEqual(len(fixed), len(derived["elements"]))
                 self.assertTrue(all(element["from"][1] >= 4.846 for element in derived["elements"]))
@@ -56,6 +110,31 @@ class GeorgianWindowCornerSafetyTest(unittest.TestCase):
                 original = generator.load(generator.MODELS / f"window_french_georgian_open_upper_{wing}.json")
                 self.assertEqual([element for index, element in enumerate(original["elements"])
                                   if index in generator.WINGS[wing][0]], derived["elements"][len(fixed):])
+
+    def assert_authored_elements_preserved(self, originals, derived):
+        self.assertEqual(len(originals), len(derived))
+        for original, actual in zip(originals, derived):
+            self.assertEqual({key: value for key, value in original.items() if key != "faces"},
+                             {key: value for key, value in actual.items() if key != "faces"})
+            for direction, face in original["faces"].items():
+                self.assertEqual(face, actual["faces"][direction], "An authored face/UV/tint changed")
+            for direction in actual["faces"].keys() - original["faces"].keys():
+                self.assertEqual({"texture": "#stone"}, actual["faces"][direction],
+                                 "Cut caps must have implicit CTM UVs and no neighbour culling")
+
+    def test_open_templates_have_no_exposed_missing_stone_faces(self):
+        templates = sorted(generator.MODELS.glob("window_french_georgian_open*.json"))
+        self.assertEqual(17, len(templates))
+        for path in templates:
+            self.assertEqual([], uncovered_stone_faces(generator.load(path)), path.name)
+
+    def test_exposure_check_rejects_previous_open_fanlight_cut_holes(self):
+        model = copy.deepcopy(generator.load(generator.MODELS / "window_french_georgian_open_upper_single_mid.json"))
+        old_holes = {(18, "west"), (18, "east"), (22, "west"), (22, "down"), (23, "down")}
+        for index, direction in old_holes:
+            del model["elements"][index]["faces"][direction]
+        self.assertEqual(old_holes, set(uncovered_stone_faces(model)),
+                         "Geometry audit failed to detect the actual uncapped fanlight regression")
 
     def test_all_material_finishes_keep_the_existing_stone_glazing_and_lead(self):
         originals = [path for path in generator.MODELS.glob("*_closed_lower_single*.json")
