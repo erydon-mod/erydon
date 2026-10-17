@@ -4,6 +4,7 @@ import net.minecraft.util.math.Direction;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -138,6 +139,96 @@ class SynapheiaSlopeConnectionsTest {
         assertEquals(3, Integer.bitCount(maskFor(slope, Direction.UP,
                 Map.of("-1,1,0", slope, "0,0,-1", slope, "-1,1,-1", slope))));
     }
+
+    @Test void physicalFoldFallbackPreservesExistingLoweredCubeCorner() {
+        Surface slope = ramp(1, 0);
+        int edges = bit(Direction.UP, -1, 0, 0) | bit(Direction.UP, 0, 0, -1);
+        assertEquals(edges | cornerBit(Direction.UP, Direction.WEST, Direction.NORTH),
+                maskFor(slope, Direction.UP, Map.of("-1,1,0", slope, "0,0,-1", slope,
+                        "-1,0,-1", cubeFace(Direction.UP))),
+                "A raised edge witness must not suppress the established lower projected diagonal");
+    }
+
+    @Test void verticalFoldCornersFollowTheActualCubeColumnInBothDirections() {
+        int checked = 0;
+        for (int family = 0; family < 3; family++) for (boolean left : new boolean[]{false, true}) {
+            if (family == 0 && left) continue; // The 45-degree vertical family has no handed state.
+            for (int turns = 0; turns < 4; turns++) {
+                float high = family == 2 ? .5F : 0, low = family == 1 ? .5F : 1;
+                Surface wall = new Surface(family == 0 ? Direction.SOUTH : Direction.EAST,
+                        new Point(high, 0, 1), new Point(low, 0, 0),
+                        new Point(low, 1, 0), new Point(high, 1, 1));
+                Direction cubeFace = family == 0 ? Direction.WEST : family == 1 ? Direction.SOUTH : Direction.NORTH;
+                Direction wallEdge = family == 0 ? Direction.WEST : family == 1 ? Direction.SOUTH : Direction.NORTH;
+                Direction cubeEdge = family == 0 ? Direction.NORTH : family == 1 ? Direction.EAST : Direction.WEST;
+                int[] cubeOffset = family == 0 ? new int[]{0, 0, 1}
+                        : family == 1 ? new int[]{-1, 0, 0} : new int[]{1, 0, 0};
+                if (left) {
+                    Point[] reflected = java.util.Arrays.stream(wall.points)
+                            .map(p -> new Point(p.x(), p.y(), 1 - p.z())).toArray(Point[]::new);
+                    wall = new Surface(reflectZ(wall.face), reflected);
+                    cubeFace = reflectZ(cubeFace); wallEdge = reflectZ(wallEdge); cubeEdge = reflectZ(cubeEdge);
+                    cubeOffset[2] = -cubeOffset[2];
+                }
+                wall = transformed(wall, mapped(wall.face, turns, false), turns, false);
+                cubeFace = mapped(cubeFace, turns, false);
+                wallEdge = mapped(wallEdge, turns, false); cubeEdge = mapped(cubeEdge, turns, false);
+                cubeOffset = mappedOffset(cubeOffset[0], 0, cubeOffset[2], turns, false);
+                Surface cube = cubeFace(cubeFace);
+                var neighbours = new HashMap<String, Surface>();
+                neighbours.put("0,-1,0", wall); neighbours.put("0,1,0", wall);
+                for (int y = -1; y <= 1; y++) neighbours.put(key(cubeOffset[0], y, cubeOffset[2]), cube);
+                String context = "family=" + family + ", left=" + left + ", turns=" + turns;
+                int expected = threeJoinedEdges(wall.face, wallEdge);
+                assertEquals(expected, physicalMask(wall, neighbours), "Wall fold: " + context);
+                // A missing physical diagonal must still leave its genuine inner corner.
+                neighbours.remove(key(cubeOffset[0], 1, cubeOffset[2]));
+                assertEquals(expected & ~cornerBit(wall.face, wallEdge, Direction.UP),
+                        physicalMask(wall, neighbours), "Missing upper cube: " + context);
+                neighbours.remove(key(cubeOffset[0], -1, cubeOffset[2]));
+                assertEquals(expected & ~cornerBit(wall.face, wallEdge, Direction.UP)
+                                & ~cornerBit(wall.face, wallEdge, Direction.DOWN),
+                        physicalMask(wall, neighbours), "Neither physical diagonal: " + context);
+
+                neighbours.clear();
+                neighbours.put("0,-1,0", cube); neighbours.put("0,1,0", cube);
+                for (int y = -1; y <= 1; y++) neighbours.put(key(-cubeOffset[0], y, -cubeOffset[2]), wall);
+                assertEquals(threeJoinedEdges(cubeFace, cubeEdge), physicalMask(cube, neighbours),
+                        "Reciprocal full block fold: " + context);
+                checked++;
+            }
+        }
+        assertEquals(20, checked);
+    }
+
+    private static int physicalMask(Surface source, Map<String, Surface> neighbours) {
+        return mask(source.face, source, (x, y, z, edge) -> {
+            assertTrue(Math.abs(x) <= 1 && Math.abs(y) <= 1 && Math.abs(z) <= 1);
+            Surface target = neighbours.get(key(x, y, z));
+            return target != null && surfacesJoin(source.face, source, target, edge, x, y, z);
+        });
+    }
+
+    private static int threeJoinedEdges(Direction face, Direction side) {
+        return bit(face, side.getOffsetX(), 0, side.getOffsetZ()) | bit(face, 0, 1, 0) | bit(face, 0, -1, 0)
+                | cornerBit(face, side, Direction.UP) | cornerBit(face, side, Direction.DOWN);
+    }
+
+    private static int cornerBit(Direction face, Direction first, Direction second) {
+        int edges = bit(face, first.getOffsetX(), first.getOffsetY(), first.getOffsetZ())
+                | bit(face, second.getOffsetX(), second.getOffsetY(), second.getOffsetZ());
+        for (int i = 0; i < 4; i++) {
+            int pair = (1 << (2 * i)) | (1 << (2 * ((i + 1) & 3)));
+            if (pair == edges) return 1 << (2 * i + 1);
+        }
+        throw new AssertionError("Expected adjacent edge pair");
+    }
+
+    private static Direction reflectZ(Direction face) {
+        return face.getAxis() == Direction.Axis.Z ? face.getOpposite() : face;
+    }
+
+    private static String key(int x, int y, int z) { return x + "," + y + "," + z; }
 
     @Test void neighbourReadsStayInsideTheExistingBoundedCache() {
         Set<String> offsets = new HashSet<>();

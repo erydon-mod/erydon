@@ -180,11 +180,13 @@ final class SynapheiaSlopeConnections {
 
     static int mask(Direction face, Surface source, Lookup lookup) {
         Edge[] edges = new Edge[4];
+        int[] neighbours = new int[4];
         int mask = 0;
         for (int i = 0; i < 4; i++) {
             var direction = SynapheiaRepeatBakedModel.tangentOffset(face, i);
             edges[i] = source.boundary(direction);
-            if (edges[i] != null && connects(edges[i], direction, lookup)) mask |= 1 << (2 * i);
+            if (edges[i] != null) neighbours[i] = connectedNeighbours(edges[i], lookup);
+            if (neighbours[i] != 0) mask |= 1 << (2 * i);
         }
         for (int i = 0; i < 4; i++) {
             int next = (i + 1) & 3;
@@ -193,29 +195,57 @@ final class SynapheiaSlopeConnections {
             if (corner == null) continue;
             var a = SynapheiaRepeatBakedModel.tangentOffset(face, i);
             var b = SynapheiaRepeatBakedModel.tangentOffset(face, next);
-            if (connects(new Edge(corner, corner), new SynapheiaRepeatBakedModel.Offset(
-                    a.x() + b.x(), a.y() + b.y(), a.z() + b.z()), lookup)) mask |= 1 << (2 * i + 1);
+            // Keep established projected/raised corner joins. The physical fallback
+            // additionally follows folds whose diagonal lies outside that projection.
+            if (cornerConnects(new Edge(corner, corner), new SynapheiaRepeatBakedModel.Offset(
+                    a.x() + b.x(), a.y() + b.y(), a.z() + b.z()), lookup)
+                    || cornerConnects(corner, neighbours[i], neighbours[next], lookup)) mask |= 1 << (2 * i + 1);
         }
         return mask;
     }
 
-    private static boolean connects(Edge edge, SynapheiaRepeatBakedModel.Offset direction, Lookup lookup) {
+    private static int connectedNeighbours(Edge edge, Lookup lookup) {
         Point midpoint = edge.midpoint();
         int xExtra = boundaryOffset(midpoint.x), yExtra = boundaryOffset(midpoint.y), zExtra = boundaryOffset(midpoint.z);
-        if (!edge.a.near(edge.b)) {
-            // A ramp endpoint on two grid planes may meet the tangent, normal-adjacent,
-            // or diagonally raised cube. All three cells use the existing 3x3x3 cache.
-            for (int x = 0; x <= (xExtra != 0 ? 1 : 0); x++) {
-                for (int y = 0; y <= (yExtra != 0 ? 1 : 0); y++) {
-                    for (int z = 0; z <= (zExtra != 0 ? 1 : 0); z++) {
-                        int dx = x * xExtra, dy = y * yExtra, dz = z * zExtra;
-                        if ((dx != 0 || dy != 0 || dz != 0) && lookup.connects(dx, dy, dz, edge)) return true;
-                    }
+        int neighbours = 0;
+        // Retain the actual joining cells, not just their projected CTM directions.
+        // A folded face can join a cube normal to that projection; its upper/lower
+        // corners must then follow that same cube column rather than an empty diagonal.
+        for (int x = 0; x <= (xExtra != 0 ? 1 : 0); x++) {
+            for (int y = 0; y <= (yExtra != 0 ? 1 : 0); y++) {
+                for (int z = 0; z <= (zExtra != 0 ? 1 : 0); z++) {
+                    int dx = x * xExtra, dy = y * yExtra, dz = z * zExtra;
+                    if ((dx != 0 || dy != 0 || dz != 0) && lookup.connects(dx, dy, dz, edge))
+                        neighbours |= 1 << ((dx + 1) * 9 + (dy + 1) * 3 + dz + 1);
                 }
             }
-            return false;
         }
-        // A CTM corner still requires the projected diagonal, not either cardinal cell.
+        return neighbours;
+    }
+
+    private static boolean cornerConnects(Point corner, int firstNeighbours, int secondNeighbours, Lookup lookup) {
+        Edge point = new Edge(corner, corner);
+        for (int first = firstNeighbours; first != 0; first &= first - 1) {
+            int a = Integer.numberOfTrailingZeros(first);
+            int ax = a / 9 - 1, ay = a / 3 % 3 - 1, az = a % 3 - 1;
+            for (int second = secondNeighbours; second != 0; second &= second - 1) {
+                int b = Integer.numberOfTrailingZeros(second);
+                int bx = b / 9 - 1, by = b / 3 % 3 - 1, bz = b % 3 - 1;
+                if (ax * bx < 0 || ay * by < 0 || az * bz < 0) continue;
+                int dx = ax != 0 ? ax : bx, dy = ay != 0 ? ay : by, dz = az != 0 ? az : bz;
+                // A cardinal neighbour alone cannot fill its own missing corner.
+                if ((dx == ax && dy == ay && dz == az) || (dx == bx && dy == by && dz == bz)) continue;
+                if (cornerConnects(point, new SynapheiaRepeatBakedModel.Offset(dx, dy, dz), lookup)) return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean cornerConnects(Edge edge, SynapheiaRepeatBakedModel.Offset direction, Lookup lookup) {
+        Point corner = edge.a;
+        int xExtra = boundaryOffset(corner.x), yExtra = boundaryOffset(corner.y), zExtra = boundaryOffset(corner.z);
+        // Preserve the optional normal offset for raised/lowered joins, while
+        // requiring the diagonal beyond both physically connected neighbours.
         for (int x = 0; x <= (direction.x() == 0 && xExtra != 0 ? 1 : 0); x++) {
             for (int y = 0; y <= (direction.y() == 0 && yExtra != 0 ? 1 : 0); y++) {
                 for (int z = 0; z <= (direction.z() == 0 && zExtra != 0 ? 1 : 0); z++) {

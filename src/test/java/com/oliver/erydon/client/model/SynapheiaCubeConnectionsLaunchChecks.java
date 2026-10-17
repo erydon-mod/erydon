@@ -1,10 +1,12 @@
 package com.oliver.erydon.client.model;
 
 import com.oliver.erydon.block.SlopeBlock;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.enums.BlockHalf;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -76,12 +78,20 @@ public final class SynapheiaCubeConnectionsLaunchChecks {
         System.out.println("ERYDON_CUBE_CTM_PARITY_OK: " + checked
                 + " production masks, all six faces, independent seam patterns; cached replays read each of at most 27 cells once");
         foldedMasks(tiles, stoneId);
+        SynapheiaVerticalOverlayLaunchChecks.run();
         SynapheiaOverlaySelectionLaunchChecks.run();
     }
 
     /** Actual registry/state/material/visibility branches, with model geometry injected before client startup. */
     private static void foldedMasks(List<Identifier> tiles, Identifier stoneId) {
         Identifier slopeId = new Identifier("erydon", "glacium_slope");
+        // The focused bootstrap need not register the full architectural catalogue.
+        // Reuse a real existing block, or register just this production slope fixture.
+        if (!Registries.BLOCK.containsId(slopeId)) {
+            Block fixture = Registry.register(Registries.BLOCK, slopeId,
+                    new SlopeBlock(Block.Settings.copy(Blocks.STONE)));
+            fixture.getStateManager().getStates().forEach(BlockState::initShapeCache);
+        }
         var block = Registries.BLOCK.get(slopeId);
         require(block instanceof SlopeBlock, "Missing real registered slope fixture");
         BlockState stone = Blocks.STONE.getDefaultState();
