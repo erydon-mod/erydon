@@ -8,6 +8,9 @@ import com.oliver.daedalon.block.FinialSupportPlacement;
 import com.oliver.daedalon.block.FixedDecorBlock;
 import com.oliver.daedalon.block.TwoSizeDecorBlock;
 import com.oliver.erydon.block.CopingBlock;
+import com.oliver.erydon.block.CopingDesign;
+import com.oliver.erydon.block.LayerBlock;
+import com.oliver.erydon.block.LayerMultifaceBlock;
 import com.oliver.erydon.block.ShallowSlopeBlock;
 import com.oliver.erydon.block.SlopeBlock;
 import com.oliver.erydon.block.SlopeSteepBlock;
@@ -76,17 +79,21 @@ public final class FinialCopingCompatLaunchProbe implements PreLaunchEntrypoint 
             CopingBlock coping = new CopingBlock(Block.Settings.copy(Blocks.STONE));
             register("erydon:glacium_coping_georgian", coping);
             coping.getStateManager().getStates().forEach(BlockState::initShapeCache);
+            CopingBlock grand = new CopingBlock(Block.Settings.copy(Blocks.STONE),CopingDesign.GEORGIAN_GRAND);
+            register("erydon:glacium_coping_georgian_grand",grand);
+            grand.getStateManager().getStates().forEach(BlockState::initShapeCache);
+            List<CopingBlock> designs=List.of(coping,grand);
             long before = retainedHeapBytes();
             List<FinialBlock> finials = registerActualFinialCatalogue();
             for (FinialBlock finial : finials) finial.getStateManager().getStates().forEach(BlockState::initShapeCache);
             long after = retainedHeapBytes();
             int stateCount = finials.stream().mapToInt(block -> block.getStateManager().getStates().size()).sum();
-            int packedStates = 275 * 2 * 4 * FinialSupport.Profile.values().length;
-            require(finials.size() == 275 && stateCount == packedStates,
+            int packedStates = 280 * 2 * 4 * FinialSupport.Profile.values().length;
+            require(finials.size() == 280 && stateCount == packedStates && FinialSupport.Profile.values().length==51,
                     "Finial IDs or packed state space changed: blocks=" + finials.size() + ", states=" + stateCount);
-            require(stateCount < 96800, "Packed support state did not reduce the previous 96,800-state proposal");
-            System.out.println("ERYDON_FINIAL_STATE_SPACE_OK: 275 actual catalogue IDs, " + stateCount
-                    + " packed states versus 96800 unpacked; retained heap delta=" + (after - before) + " bytes");
+            System.out.println("ERYDON_FINIAL_STATE_SPACE_OK: 280 actual catalogue IDs, " + stateCount
+                    + " states with 51 saved support profiles and three properties; prior 32-profile state space for this catalogue=71680"
+                    + "; retained heap delta=" + (after - before) + " bytes");
             for (FinialBlock finial : finials) {
                 require(finial.getStateManager().getProperties().size() == 3,
                         "Mounting metadata added redundant state properties");
@@ -96,10 +103,11 @@ public final class FinialCopingCompatLaunchProbe implements PreLaunchEntrypoint 
             require(styles.size() == 5, "Missing finial style");
             int mounted = 0, invalidAlignedOffsets = 0;
             Box bounds = new Box(0, 0, 0, 1, 1, 1);
+            for (CopingBlock design:designs)
             for (FinialBlock finial : styles) for (TwoSizeDecorBlock.Size size : TwoSizeDecorBlock.Size.values()) {
                 for (CopingBlock.Surface surface : CopingBlock.Surface.values()) {
                     for (Direction facing : Direction.Type.HORIZONTAL) {
-                        BlockState support = coping.getDefaultState().with(CopingBlock.SURFACE, surface)
+                        BlockState support = design.getDefaultState().with(CopingBlock.SURFACE, surface)
                                 .with(CopingBlock.FACING, facing);
                         BlockState fitted = assertMount(finial, size, support);
                         bounds = bounds.union(fitted.getCollisionShape(view(Map.of(COPING_OWNER, support)),
@@ -108,7 +116,8 @@ public final class FinialCopingCompatLaunchProbe implements PreLaunchEntrypoint 
                         if (surface == CopingBlock.Surface.STEEP_UPPER) {
                             BlockState offset = support.with(CopingBlock.OFFSET, true);
                             BlockState offsetFitted = assertMount(finial, size, offset);
-                            require(offsetFitted.get(FinialBlock.SUPPORT) == FinialSupport.Profile.COPING_STEEP_UPPER_OFFSET,
+                            require(offsetFitted.get(FinialBlock.SUPPORT) == FinialSupport.Profile.find("steep_upper_offset",true,
+                                            design.design()==CopingDesign.GEORGIAN_GRAND),
                                     "Steep owner offset was not packed into saved support metadata");
                             bounds = bounds.union(offsetFitted.getCollisionShape(view(Map.of(COPING_OWNER, offset)),
                                     FINIAL_OWNER).getBoundingBox());
@@ -126,7 +135,7 @@ public final class FinialCopingCompatLaunchProbe implements PreLaunchEntrypoint 
                     }
                 }
             }
-            require(mounted == 5 * 2 * (CopingBlock.Surface.values().length + 1) * 4,
+            require(mounted == designs.size() * 5 * 2 * (CopingBlock.Surface.values().length + 1) * 4,
                     "Valid mounting matrix was incomplete");
             require(Double.isFinite(bounds.minX) && Double.isFinite(bounds.maxY)
                     && bounds.minX > -3 && bounds.minY > -4 && bounds.minZ > -3
@@ -138,7 +147,7 @@ public final class FinialCopingCompatLaunchProbe implements PreLaunchEntrypoint 
             require(horizontalReach <= 2 && below <= 3 && above <= 2,
                     "Finial's outside-owner interaction search grew beyond its narrow proven envelope");
             System.out.println("ERYDON_FINIAL_COPING_SOURCE_OK: " + mounted + " valid real-class poses, "
-                    + invalidAlignedOffsets + " irrelevant aligned-offset checks; all five styles/sizes/facings and transforms");
+                    + invalidAlignedOffsets + " irrelevant aligned-offset checks; both coping designs, half-height, all five styles/sizes/facings and transforms");
             require(replayedBaseQuads == (mounted + invalidAlignedOffsets) * 6,
                     "Actual fitted base replay matrix was incomplete");
             System.out.println("ERYDON_FINIAL_BASE_REPLAY_TAGS_OK: " + replayedBaseQuads
@@ -153,6 +162,7 @@ public final class FinialCopingCompatLaunchProbe implements PreLaunchEntrypoint 
             System.out.println("ERYDON_FINIAL_OUTSIDE_OWNER_RAYCAST_OK: " + outsideOwnerRaycasts
                     + " actual lower-base/overhang hits through Minecraft raycast from empty cells, with index removal verified");
             assertCombinedRaycast(coping,styles);
+            directHalfHeightSupports(styles,designs);
             standaloneAndSlopeFallback(styles);
             directWallFallback(styles);
             System.exit(0);
@@ -171,7 +181,7 @@ public final class FinialCopingCompatLaunchProbe implements PreLaunchEntrypoint 
                 require(stream != null, "Missing current source catalogue " + resource);
                 var values = JsonParser.parseReader(new InputStreamReader(stream, StandardCharsets.UTF_8))
                         .getAsJsonObject().getAsJsonArray("values");
-                require(values.size() == 55, "A finial style no longer has all 55 published IDs");
+                require(values.size() == 56, "A finial style no longer has all 56 current IDs");
                 for (var value : values) {
                     FinialBlock block = new FinialBlock(Block.Settings.copy(Blocks.STONE), style);
                     register(value.getAsString(), block);
@@ -373,6 +383,103 @@ public final class FinialCopingCompatLaunchProbe implements PreLaunchEntrypoint 
         require(Math.abs(length-1)<=2.0/127,"Packed ornament normal lost its unit-vector length");
         double yawCosine=(nx*yawX+nz*yawZ)/length;
         require(yawCosine>=1-2.0/(127*127),"Packed ornament normal no longer points along the actual upright yaw");
+    }
+
+    private static void directHalfHeightSupports(List<FinialBlock> finials,List<CopingBlock> designs) {
+        LayerBlock layer=new LayerBlock(Block.Settings.copy(Blocks.STONE));
+        LayerMultifaceBlock multiface=new LayerMultifaceBlock(Block.Settings.copy(Blocks.STONE));
+        register("erydon:glacium_layer",layer);
+        register("erydon:glacium_layer_multiface",multiface);
+        layer.getStateManager().getStates().forEach(BlockState::initShapeCache);
+        multiface.getStateManager().getStates().forEach(BlockState::initShapeCache);
+        BlockState bottom=Blocks.STONE_SLAB.getDefaultState().with(net.minecraft.block.SlabBlock.TYPE,net.minecraft.block.enums.SlabType.BOTTOM);
+        BlockState top=bottom.with(net.minecraft.block.SlabBlock.TYPE,net.minecraft.block.enums.SlabType.TOP);
+        BlockState doubled=bottom.with(net.minecraft.block.SlabBlock.TYPE,net.minecraft.block.enums.SlabType.DOUBLE);
+        BlockState halfLayer=layer.getDefaultState().with(LayerBlock.LAYERS,4).with(LayerBlock.TOP,false);
+        BlockState halfMultiface=multiface.getDefaultState().with(LayerMultifaceBlock.LAYERS,4)
+                .with(LayerMultifaceBlock.DOWN,true).with(LayerMultifaceBlock.UP,false)
+                .with(LayerMultifaceBlock.NORTH,false).with(LayerMultifaceBlock.SOUTH,false)
+                .with(LayerMultifaceBlock.EAST,false).with(LayerMultifaceBlock.WEST,false);
+        int direct=0,capped=0;
+        for(FinialBlock finial:finials) for(var size:TwoSizeDecorBlock.Size.values()) {
+            BlockState original=finial.getDefaultState().with(TwoSizeDecorBlock.SIZE,size);
+            for(Direction facing:List.of(Direction.NORTH,Direction.WEST)) {
+                BlockState refitted=original.with(FinialBlock.FACING,facing);
+                for(BlockState support:List.of(bottom,top,doubled,halfLayer,halfMultiface)) {
+                    refitted=FinialSupportPlacement.fitted(refitted,view(Map.of(COPING_OWNER,support)),COPING_OWNER);
+                    require(refitted.get(FinialBlock.FACING)==facing,
+                            "Real slab/layer refit changed copied or mirrored finial facing: "+support);
+                }
+            }
+            for(BlockState support:List.of(bottom,top,doubled,halfLayer,halfMultiface)) {
+                boolean half=support!=top && support!=doubled;
+                BlockState fitted=FinialSupportPlacement.fitted(original,view(Map.of(COPING_OWNER,support)),COPING_OWNER);
+                var fit=FinialSupport.fit(fitted,finial.style());
+                require(fitted.get(FinialBlock.SUPPORT)==(half ? FinialSupport.Profile.HALF_HEIGHT : FinialSupport.Profile.NONE),
+                        "Real horizontal support lost its saved height "+support);
+                close(fit.bodyY(),half ? -.5 : 0,"Real slab/layer ornament foot");
+                require(!fit.mounted(),"Horizontal slab placement added an unwanted fitted pedestal");
+                require(FinialSupportPlacement.isClear(fitted,worldView(Map.of(COPING_OWNER,support)),FINIAL_OWNER),
+                        "Actual horizontal support incorrectly blocked its touching finial");
+                if(half) {
+                    BlockState refreshed=FinialSupportPlacement.fitted(fitted,view(Map.of(COPING_OWNER,top)),COPING_OWNER);
+                    require(refreshed.get(FinialBlock.SUPPORT)==FinialSupport.Profile.NONE,"Top-slab refit kept its lowered pose");
+                    require(FinialSupportPlacement.fitted(fitted,view(Map.of()),COPING_OWNER)==fitted,
+                            "Support removal discarded the saved half-height pose");
+                    BlockView rayWorld=view(Map.of(COPING_OWNER,support,FINIAL_OWNER,fitted));
+                    FinialRaycast.update(rayWorld,FINIAL_OWNER,fitted);
+                    Vec3d point=Vec3d.of(FINIAL_OWNER).add(.5,-.45,.5);
+                    Vec3d rayStart=point.add(0,.1,0),rayEnd=point.add(0,-.1,0);
+                    var raw=fitted.getOutlineShape(rayWorld,FINIAL_OWNER).raycast(rayStart,rayEnd,FINIAL_OWNER);
+                    var indexed=FinialRaycast.closest(rayWorld,rayStart,rayEnd,COPING_OWNER,support,null);
+                    var hit=rayWorld.raycast(rayContext(rayStart,rayEnd));
+                    var lowerBounds=fitted.getOutlineShape(rayWorld,FINIAL_OWNER).getBoundingBox();
+                    Vec3d outsideStart=Vec3d.of(FINIAL_OWNER).add(lowerBounds.minX-.25,lowerBounds.minY+.125,fit.centreZ());
+                    Vec3d outsideEnd=Vec3d.of(FINIAL_OWNER).add(lowerBounds.maxX+.25,lowerBounds.minY+.125,fit.centreZ());
+                    var expected=fitted.getOutlineShape(rayWorld,FINIAL_OWNER).raycast(outsideStart,outsideEnd,FINIAL_OWNER);
+                    require(expected!=null && BlockPos.ofFloored(expected.getPos()).getY()==COPING_OWNER.getY(),
+                            "Lowered ornament witness missed the actual body below its owner cell");
+                    var outsideHit=rayWorld.raycast(rayContext(outsideStart,outsideEnd));
+                    require(outsideHit.getType()==HitResult.Type.BLOCK && outsideHit.getBlockPos().equals(FINIAL_OWNER),
+                            "Actual outside-body lower-cell ray did not select its ornament owner");
+                    close(outsideHit.getPos().squaredDistanceTo(expected.getPos()),0,"Actual lower-cell ornament hit position");
+                    require(raw!=null && indexed!=null && indexed.getBlockPos().equals(FINIAL_OWNER),
+                            "Direct lower-cell geometry/index lookup lost the ornament owner");
+                    if(support==halfMultiface) {
+                        // This artificial ray begins inside both the ornament and
+                        // LayerMultifaceBlock's deliberate full-height targeting post.
+                        // Equal-distance vanilla hits retain their existing owner.
+                        var post=support.getOutlineShape(rayWorld,COPING_OWNER).raycast(rayStart,rayEnd,COPING_OWNER);
+                        require(post!=null && hit.getType()==HitResult.Type.BLOCK && hit.getBlockPos().equals(COPING_OWNER),
+                                "Inside targeting-post tie did not preserve the existing layer owner");
+                        close(post.getPos().squaredDistanceTo(raw.getPos()),0,"Inside targeting-post/ornament tie");
+                        close(hit.getPos().squaredDistanceTo(post.getPos()),0,"Inside targeting-post owner hit position");
+                    } else {
+                        require(hit.getType()==HitResult.Type.BLOCK && hit.getBlockPos().equals(FINIAL_OWNER),
+                                "Actual lowered ornament was not selectable through its support cell: "+fitted+"/"+support);
+                    }
+                    FinialRaycast.clearWorld(rayWorld);
+                    for(CopingBlock design:designs) {
+                        BlockState cap=design.forSupport(support,view(Map.of(COPING_OWNER.down(),support)),COPING_OWNER.down(),false,false);
+                        require(cap!=null && cap.get(CopingBlock.SURFACE)==CopingBlock.Surface.FLAT_HALF,
+                                "Actual coping design did not inherit its half-height support");
+                        BlockState onCap=FinialSupportPlacement.fitted(original,view(Map.of(COPING_OWNER,cap,COPING_OWNER.down(),support)),COPING_OWNER);
+                        assertPose(FinialSupport.fit(onCap,finial.style()),CopingBlock.attachmentPose(cap),"Actual capped half-height support");
+                        assertRawMeshContact(onCap,finial,cap);
+                        capped++;
+                    }
+                }
+                direct++;
+            }
+            for(BlockState unsupported:List.of(halfLayer.with(LayerBlock.LAYERS,3),halfLayer.with(LayerBlock.TOP,true),
+                    halfMultiface.with(LayerMultifaceBlock.EAST,true),halfMultiface.with(LayerMultifaceBlock.DOWN,false).with(LayerMultifaceBlock.UP,true))) {
+                require(FinialSupportPlacement.fitted(original,view(Map.of(COPING_OWNER,unsupported)),COPING_OWNER)==original,
+                        "An unsupported actual layer arrangement acquired a lowered finial");
+            }
+        }
+        require(direct==50 && capped==60,"Actual slab/layer support matrix was incomplete");
+        System.out.println("ERYDON_FINIAL_REAL_HALF_HEIGHT_SUPPORT_OK: "+direct+" actual slab/layer fits, "+capped
+                +" actual original/Grand coping-on-half-support poses; selection, refit and unsupported-layer rejection");
     }
 
     private static void standaloneAndSlopeFallback(List<FinialBlock> finials) {

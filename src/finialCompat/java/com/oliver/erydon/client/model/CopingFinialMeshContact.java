@@ -3,6 +3,7 @@ package com.oliver.erydon.client.model;
 import com.google.gson.JsonParser;
 import com.oliver.erydon.block.CopingBlock;
 import com.oliver.erydon.block.CopingConnections;
+import com.oliver.erydon.block.CopingDesign;
 import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.Identifier;
@@ -18,7 +19,8 @@ import java.util.Map;
 
 /** Test-only snapshots from the same editable raw geometry and fitted emitter as placed copings. */
 public final class CopingFinialMeshContact {
-    private static final Map<CopingBlock.Surface,CopingGeometry> GEOMETRY = new EnumMap<>(CopingBlock.Surface.class);
+    private record Key(CopingDesign design,CopingBlock.Surface profile) { }
+    private static final Map<Key,CopingGeometry> GEOMETRY = new HashMap<>();
     private static final Map<BlockState,TopPlane> PLANES = new HashMap<>();
     private static final double EPSILON = .00001;
 
@@ -51,7 +53,8 @@ public final class CopingFinialMeshContact {
 
     private static TopPlane placedTop(BlockState state) {
         CopingBlock.Surface profile=state.get(CopingBlock.SURFACE);
-        CopingGeometry geometry=GEOMETRY.computeIfAbsent(profile,CopingFinialMeshContact::readGeometry);
+        CopingDesign design=((CopingBlock)state.getBlock()).design();
+        CopingGeometry geometry=GEOMETRY.computeIfAbsent(new Key(design,profile),CopingFinialMeshContact::readGeometry);
         var surfaces=geometry.joined(profile,new CopingConnections.Joins(0));
         CopingGeometry.Surface top=surfaces.stream().filter(surface -> surface.face()==Direction.UP
                 && !surface.normals().isEmpty()).max(java.util.Comparator.comparingDouble(surface ->
@@ -70,14 +73,18 @@ public final class CopingFinialMeshContact {
         return plane;
     }
 
-    private static CopingGeometry readGeometry(CopingBlock.Surface profile) {
+    private static CopingGeometry readGeometry(Key key) {
+        CopingBlock.Surface profile=key.profile();
+        CopingDesign design=key.design();
         CopingBlock.Surface authored=profile.authoringProfile();
-        String path="/assets/erydon/authoring_models/block/coping/georgian/coping_georgian_"+authored.asString()+".json";
+        String path="/assets/erydon/authoring_models/block/coping/"+design.authoringDirectory()+"/"
+                +design.idSuffix()+"_"+authored.asString()+".json";
         try(var stream=CopingFinialMeshContact.class.getResourceAsStream(path)) {
             if(stream==null) throw new AssertionError("Missing approved coping geometry "+path);
             try(var reader=new InputStreamReader(stream,StandardCharsets.UTF_8)) {
                 return CopingGeometry.parse(JsonParser.parseReader(reader).getAsJsonObject(),
-                        new Identifier("erydon","glacium_coping_georgian"),authored).fitted(profile.fit);
+                        new Identifier("erydon","glacium_"+design.idSuffix()),authored).fitted(profile.fit)
+                        .translatedY((float)(profile.high-authored.high));
             }
         } catch(java.io.IOException exception) { throw new IllegalStateException("Cannot read raw coping geometry",exception); }
     }
