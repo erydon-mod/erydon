@@ -18,6 +18,7 @@
     "compat.worldedit.WorldEditBlockStateMixin"
   ],
   "client": [
+    "client.BlockBreakParticlesMixin",
     "client.ArchModelIdentifierMixin",
     "client.WindowArchBreakParticlesMixin",
     "client.CorniceRedrawMixin",
