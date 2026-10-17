@@ -348,7 +348,9 @@ public class CorniceBlock extends HorizontalFacingBlock implements ClusterRebuil
 
     @Override
     public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
-        if (!world.isClient) {
+        // Conversion publishes its entity payload after setBlockState returns.
+        // Refreshing now would expose an empty carrier to dependent outer corners.
+        if (!world.isClient && !(newState.getBlock() instanceof CorniceAssemblyBlock)) {
             if (newState.getBlock() instanceof CorniceBlock) {
                 refreshCorniceAt(world, pos);
             }
@@ -440,6 +442,11 @@ public class CorniceBlock extends HorizontalFacingBlock implements ClusterRebuil
         if (state.isOf(this)) {
             return this.coversWall(state, wallDirection);
         }
+        if (state.getBlock() instanceof CorniceAssemblyBlock) {
+            for (BlockState part : CorniceAssembly.contents(world, pos).cornices()) {
+                if (this.coversWall(part, wallDirection)) return true;
+            }
+        }
 
         return isWall(world, pos, wallDirection);
     }
@@ -485,6 +492,10 @@ public class CorniceBlock extends HorizontalFacingBlock implements ClusterRebuil
         );
     }
 
+    public boolean isSupported(BlockState state, BlockView world, BlockPos pos) {
+        return hasAttachment(state, world, pos);
+    }
+
     private static Direction resolveStraightFacing(boolean northWall, boolean eastWall, boolean southWall, boolean westWall,
                                                    Direction preferredWall, Direction fallbackWall) {
         if (hasWall(preferredWall, northWall, eastWall, southWall, westWall)) {
@@ -526,14 +537,14 @@ public class CorniceBlock extends HorizontalFacingBlock implements ClusterRebuil
     private static boolean isWall(BlockView world, BlockPos pos, Direction direction) {
         BlockPos wallPos = pos.offset(direction);
         BlockState wallState = world.getBlockState(wallPos);
-        if (wallState.getBlock() instanceof CorniceBlock) return false;
+        if (CorniceAssembly.isOwner(wallState)) return false;
         return wallState.isSideSolidFullSquare(world, wallPos, direction.getOpposite());
     }
 
     private static boolean hasFilledCorner(BlockView world, BlockPos pos, Direction first, Direction second) {
         BlockPos cornerPos = pos.offset(first).offset(second);
         BlockState cornerState = world.getBlockState(cornerPos);
-        if (cornerState.getBlock() instanceof CorniceBlock) return false;
+        if (CorniceAssembly.isOwner(cornerState)) return false;
         return cornerState.isSideSolidFullSquare(world, cornerPos, first.getOpposite())
                 && cornerState.isSideSolidFullSquare(world, cornerPos, second.getOpposite());
     }
@@ -652,13 +663,17 @@ public class CorniceBlock extends HorizontalFacingBlock implements ClusterRebuil
         if (world instanceof World live) redrawNearbyCornices(live, pos);
     }
 
+    public static void refreshAroundAssembly(World world, BlockPos pos) {
+        refreshNearbyCornices(world, pos);
+    }
+
     private static void redrawNearbyCornices(World world, BlockPos pos) {
         // A source discovers an adjacent target within two cells, and the
         // target's own two-cell search can reject that source as ambiguous.
         for (int x = -4; x <= 4; x++) for (int z = -4; z <= 4; z++) {
             BlockPos owner = pos.add(x, 0, z);
             BlockState current = world.getBlockState(owner);
-            if (current.getBlock() instanceof CorniceBlock) {
+            if (CorniceAssembly.isOwner(current)) {
                 // Listener-only flags redraw remote owner chunks without
                 // invoking neighbour updates or altering their saved poses.
                 world.updateListeners(owner, current, current, Block.NOTIFY_LISTENERS);

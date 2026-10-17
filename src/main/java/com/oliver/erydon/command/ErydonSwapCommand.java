@@ -352,6 +352,27 @@ public final class ErydonSwapCommand {
                 for (int x = box.minX(); x <= box.maxX(); x++) {
                     mutable.set(x, y, z);
                     BlockState sourceState = world.getBlockState(mutable);
+                    if (sourceState.getBlock() instanceof com.oliver.erydon.block.CorniceAssemblyBlock) {
+                        BlockPos pos = mutable.toImmutable();
+                        NbtCompound previousNbt = createBlockEntityNbt(world, pos);
+                        int[] componentCounts = {0, 0};
+                        NbtCompound targetNbt = ErydonSwapBlockEntitySupport.swapComponents(previousNbt, componentId -> {
+                            var mapped = plan.targetId().apply(componentId);
+                            if (mapped.isEmpty()) return componentId;
+                            componentCounts[0]++;
+                            if (resolveTargetBlock(mapped.get(), counterpartCache) == null) {
+                                componentCounts[1]++;
+                                return componentId;
+                            }
+                            return mapped.get();
+                        });
+                        if (componentCounts[0] > 0) matchingBlocks++;
+                        if (componentCounts[1] > 0) missingCounterparts++;
+                        if (!java.util.Objects.equals(previousNbt, targetNbt)) {
+                            replacements.add(new Replacement(pos, sourceState, sourceState, previousNbt, targetNbt));
+                        }
+                        continue;
+                    }
                     Identifier sourceId = Registries.BLOCK.getId(sourceState.getBlock());
                     Optional<Identifier> match = matchCache.computeIfAbsent(sourceId, plan.targetId());
                     if (match.isEmpty()) {
@@ -397,7 +418,8 @@ public final class ErydonSwapCommand {
         try (ClusterManualLockState.SwapPreservation ignored =
                      ClusterManualLockState.beginSwapPreservation(positionsOf(replacements))) {
             for (Replacement replacement : replacements) {
-                if (world.setBlockState(replacement.pos(), replacement.state(), MATERIAL_SWAP_FLAGS)) {
+                if (replacement.state() == replacement.previousState()
+                        || world.setBlockState(replacement.pos(), replacement.state(), MATERIAL_SWAP_FLAGS)) {
                     try {
                         restoreBlockEntityNbt(world, replacement.pos(), replacement.targetBlockEntityNbt());
                     } finally {
@@ -415,7 +437,15 @@ public final class ErydonSwapCommand {
             }
         } finally {
             if (!undoEntries.isEmpty()) {
-                LAST_UNDO_BY_WORLD.put(world, new LastSwapUndo(List.copyOf(undoEntries)));
+                // A later replacement can settle an earlier shared cover's EXT
+                // or a native neighbour's derived state. Guard undo against the
+                // final batch result, rather than that temporary intermediate.
+                List<UndoEntry> settled = new ArrayList<>(undoEntries.size());
+                for (UndoEntry entry : undoEntries) {
+                    settled.add(new UndoEntry(entry.pos(), entry.state(), entry.blockEntityNbt(),
+                            world.getBlockState(entry.pos()), createBlockEntityNbt(world, entry.pos())));
+                }
+                LAST_UNDO_BY_WORLD.put(world, new LastSwapUndo(List.copyOf(settled)));
             }
         }
 
@@ -463,16 +493,19 @@ public final class ErydonSwapCommand {
 
     private static UndoOutcome undoSwap(ServerWorld world, LastSwapUndo undo) {
         int restoredBlocks = 0;
+        // Restoring one cell may update a neighbouring assembly's extension
+        // metadata. Establish eligibility before any restoration changes it.
+        List<UndoEntry> eligible = undo.entries().stream().filter(entry ->
+                world.getBlockState(entry.pos()).equals(entry.swappedState())
+                        && java.util.Objects.equals(createBlockEntityNbt(world, entry.pos()), entry.swappedBlockEntityNbt()))
+                .toList();
         try (ClusterManualLockState.SwapPreservation ignored =
-                     ClusterManualLockState.beginSwapPreservation(undo.entries().stream()
+                     ClusterManualLockState.beginSwapPreservation(eligible.stream()
                              .map(UndoEntry::pos)
                              .toList())) {
-            for (UndoEntry entry : undo.entries()) {
-                if (!world.getBlockState(entry.pos()).equals(entry.swappedState())
-                        || !java.util.Objects.equals(createBlockEntityNbt(world, entry.pos()), entry.swappedBlockEntityNbt())) {
-                    continue;
-                }
-                if (world.setBlockState(entry.pos(), entry.state(), MATERIAL_SWAP_FLAGS)) {
+            for (UndoEntry entry : eligible) {
+                if (entry.state() == entry.swappedState()
+                        || world.setBlockState(entry.pos(), entry.state(), MATERIAL_SWAP_FLAGS)) {
                     restoredBlocks++;
                 }
                 restoreBlockEntityNbt(world, entry.pos(), entry.blockEntityNbt());

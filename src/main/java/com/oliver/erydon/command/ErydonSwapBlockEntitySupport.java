@@ -2,6 +2,7 @@ package com.oliver.erydon.command;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -45,7 +46,17 @@ final class ErydonSwapBlockEntitySupport {
                 plinth.putString("Name", mapId.apply(id).toString());
             }
         }
+        if ("erydon:cornice_assembly".equals(result.getString("id"))) {
+            var cornices = result.getList("Cornices", NbtElement.COMPOUND_TYPE);
+            for (int index = 0; index < cornices.size(); index++) swapState(cornices.getCompound(index), mapId);
+            if (result.contains("Cover", NbtElement.COMPOUND_TYPE)) swapState(result.getCompound("Cover"), mapId);
+        }
         return result;
+    }
+
+    private static void swapState(NbtCompound state, UnaryOperator<Identifier> mapId) {
+        Identifier id = Identifier.tryParse(state.getString("Name"));
+        if (id != null) state.putString("Name", mapId.apply(id).toString());
     }
 
     static void validateRefresh(BlockState state) {
@@ -53,6 +64,11 @@ final class ErydonSwapBlockEntitySupport {
     }
 
     static void refreshAssembly(ServerWorld world, BlockPos pos, BlockState state) {
+        if (state.getBlock() instanceof com.oliver.erydon.block.CorniceAssemblyBlock) {
+            com.oliver.erydon.block.CoverBlock.refreshSharedCover(world, pos);
+            com.oliver.erydon.block.CorniceAssembly.redraw(world, pos);
+            return;
+        }
         REFRESH.get(state.getBlock().getClass()).ifPresent(method -> {
             try {
                 method.invoke(null, world, pos, state);

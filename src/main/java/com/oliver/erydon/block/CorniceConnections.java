@@ -5,6 +5,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.EmptyBlockView;
+import net.minecraft.world.World;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +27,8 @@ public final class CorniceConnections {
         }
     }
 
-    private record Placed(BlockPos owner, BlockState state, int index, CorniceRun run) { }
+    private record Placed(BlockPos owner, BlockState state, int part, int index, CorniceRun run,
+                          CorniceAssembly.Contents contents) { }
     private record Candidate(Placed placed, int end, CorniceRun.Join join) { }
     private record Ports(Candidate start, Candidate end) {
         boolean admissible() {
@@ -56,6 +58,11 @@ public final class CorniceConnections {
 
     /** One angled item can also return along a real full wall in its own cell. */
     public static List<Segment> placedComponents(BlockView world, BlockState state, BlockPos pos) {
+        if (!state.get(CorniceBlock.SHAPE).isAngled()) return nativeComponents(state);
+        return placedComponents(world, state, pos, world == null ? CorniceAssembly.EMPTY : sourceContents(world, state, pos));
+    }
+
+    private static List<Segment> placedComponents(BlockView world, BlockState state, BlockPos pos, CorniceAssembly.Contents contents) {
         List<Segment> nativeRuns = nativeComponents(state);
         if (world == null || !state.get(CorniceBlock.SHAPE).isAngled()) return nativeRuns;
         CorniceRun angled = nativeRuns.get(0).run;
@@ -65,7 +72,7 @@ public final class CorniceConnections {
             BlockState support = world.getBlockState(supportPos);
             // Dynamic neighbouring cornices can query their own joins while
             // calculating shapes. They are never a full supporting wall here.
-            if (support.getBlock() instanceof CorniceBlock
+            if (CorniceAssembly.isOwner(support)
                     || !support.isSideSolidFullSquare(EmptyBlockView.INSTANCE, supportPos, wall.getOpposite())) continue;
             Segment cardinal = nativeComponents(state.with(CorniceBlock.SHAPE, CorniceBlock.CorniceShape.STRAIGHT)
                     .with(CorniceBlock.FACING, wall)).get(0);
@@ -75,6 +82,15 @@ public final class CorniceConnections {
                 if (join != null && safe(join, end, -end)) meets = true;
             }
             if (!meets) continue;
+            // An explicitly paid part owns this return already; do not emit a duplicate inferred strip.
+            boolean explicit = false;
+            for (BlockState part : contents.cornices()) {
+                if (part == state) continue;
+                for (Segment existing : nativeComponents(part)) {
+                    if (sameRun(existing.run, cardinal.run)) explicit = true;
+                }
+            }
+            if (explicit) continue;
             // A third supported arm has no unique two-piece corner profile;
             // preserve the saved angled edge instead of guessing ownership.
             if (returnArm != null) return nativeRuns;
@@ -90,14 +106,18 @@ public final class CorniceConnections {
     }
 
     public static List<Segment> components(BlockView world, BlockState state, BlockPos pos) {
-        List<Segment> nativeRuns = placedComponents(world, state, pos);
+        if (state.get(CorniceBlock.SHAPE) == CorniceBlock.CorniceShape.OUTER_CORNER) return nativeComponents(state);
+        CorniceAssembly.Contents sourceContents = world == null ? CorniceAssembly.EMPTY : sourceContents(world, state, pos);
+        List<Segment> nativeRuns = placedComponents(world, state, pos, sourceContents);
         if (nativeRuns.isEmpty() || world == null) return nativeRuns;
-        List<Placed> placed = neighbours(world, state, pos);
-        if (placed.stream().noneMatch(peer -> peer.state.get(CorniceBlock.SHAPE).isAngled())) return nativeRuns;
+        List<Placed> placed = neighbours(world, state, pos, sourceContents);
+        if (placed.stream().noneMatch(peer -> peer.state.get(CorniceBlock.SHAPE).isAngled())
+                && sourceContents.cornices().size() < 2) return nativeRuns;
         List<Segment> result = new ArrayList<>(nativeRuns.size());
         for (int index = 0; index < nativeRuns.size(); index++) {
             CorniceRun run = nativeRuns.get(index).run;
-            Placed source = new Placed(pos, state, index, run.translated(pos.getX(), pos.getZ()));
+            int part = Math.max(0, sourceContents.cornices().indexOf(state));
+            Placed source = new Placed(pos, state, part, index, run.translated(pos.getX(), pos.getZ()), sourceContents);
             Ports sourcePorts = ports(source, placed);
             Candidate start = sourcePorts.admissible() ? mutual(source, -1, sourcePorts.start, world) : null;
             Candidate end = sourcePorts.admissible() ? mutual(source, 1, sourcePorts.end, world) : null;
@@ -112,7 +132,8 @@ public final class CorniceConnections {
         if (candidate == null) return null;
         // The target must consult its own discovery radius: another owner just
         // beyond the source's radius can make the target port ambiguous.
-        Ports targetPorts = ports(candidate.placed, neighbours(world, candidate.placed.state, candidate.placed.owner));
+        Ports targetPorts = ports(candidate.placed, neighbours(world, candidate.placed.state, candidate.placed.owner,
+                candidate.placed.contents));
         if (!targetPorts.admissible()) return null;
         Candidate reciprocal = candidate.end < 0 ? targetPorts.start : targetPorts.end;
         return reciprocal != null && same(reciprocal.placed, source) && reciprocal.end == sourceEnd ? candidate : null;
@@ -122,16 +143,22 @@ public final class CorniceConnections {
         return new Ports(only(source, -1, placed), only(source, 1, placed));
     }
 
-    private static List<Placed> neighbours(BlockView world, BlockState state, BlockPos pos) {
+    private static List<Placed> neighbours(BlockView world, BlockState state, BlockPos pos, CorniceAssembly.Contents sourceContents) {
         List<Placed> placed = new ArrayList<>();
         for (int x = -2; x <= 2; x++) for (int z = -2; z <= 2; z++) {
             BlockPos owner = pos.add(x, 0, z);
-            BlockState other = owner.equals(pos) ? state : world.getBlockState(owner);
-            if (!other.isOf(state.getBlock())) continue;
-            List<Segment> otherRuns = placedComponents(world, other, owner);
-            for (int index = 0; index < otherRuns.size(); index++) {
-                placed.add(new Placed(owner, other, index,
-                        otherRuns.get(index).run.translated(owner.getX(), owner.getZ())));
+            CorniceAssembly.Contents contents = owner.equals(pos) ? sourceContents : CorniceAssembly.contents(world, owner);
+            List<BlockState> parts = contents.cornices();
+            // Pure pose callers may not have installed the source state in their view yet.
+            if (owner.equals(pos) && parts.isEmpty()) parts = List.of(state);
+            for (int part = 0; part < parts.size(); part++) {
+                BlockState other = parts.get(part);
+                if (!other.isOf(state.getBlock())) continue;
+                List<Segment> otherRuns = placedComponents(world, other, owner, contents);
+                for (int index = 0; index < otherRuns.size(); index++) {
+                    placed.add(new Placed(owner, other, part, index,
+                            otherRuns.get(index).run.translated(owner.getX(), owner.getZ()), contents));
+                }
             }
         }
         return placed;
@@ -141,7 +168,8 @@ public final class CorniceConnections {
         Candidate result = null;
         for (Placed target : placed) {
             if (same(source, target)) continue;
-            if (!source.state.get(CorniceBlock.SHAPE).isAngled() && !target.state.get(CorniceBlock.SHAPE).isAngled()) continue;
+            if (!source.state.get(CorniceBlock.SHAPE).isAngled() && !target.state.get(CorniceBlock.SHAPE).isAngled()
+                    && !(source.owner.equals(target.owner) && source.part != target.part)) continue;
             int targetEnd = -sourceEnd;
             CorniceRun.Join join = CorniceRun.join(source.run, sourceEnd, target.run, targetEnd);
             if (join == null || !safe(join, sourceEnd, targetEnd)) continue;
@@ -159,6 +187,17 @@ public final class CorniceConnections {
     }
 
     private static boolean same(Placed a, Placed b) {
-        return a.owner.equals(b.owner) && a.index == b.index;
+        return a.owner.equals(b.owner) && a.part == b.part && a.index == b.index;
+    }
+
+    private static boolean sameRun(CorniceRun a, CorniceRun b) {
+        return Math.hypot(a.a().x() - b.a().x(), a.a().z() - b.a().z()) < .000001
+                && Math.hypot(a.b().x() - b.b().x(), a.b().z() - b.b().z()) < .000001;
+    }
+
+    private static CorniceAssembly.Contents sourceContents(BlockView world, BlockState state, BlockPos pos) {
+        // Real World has no frozen render attachment. Inspect its actual owner
+        // once, because the supplied state can be one stored assembly part.
+        return world instanceof World ? CorniceAssembly.contents(world, pos) : CorniceAssembly.contents(world, pos, state);
     }
 }

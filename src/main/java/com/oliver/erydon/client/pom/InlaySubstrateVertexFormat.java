@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /** Fails closed if the pinned Iris encoder's byte layout or synchronous Indium sink changes. */
-final class InlaySubstrateVertexFormat {
+public final class InlaySubstrateVertexFormat {
     static final String ENCODER = "net/irisshaders/iris/compat/sodium/impl/vertex_format/terrain_xhfp/XHFPTerrainVertex";
     static final String CONTEXT = "net/irisshaders/iris/compat/sodium/impl/block_context/BlockContextHolder";
     static final String WRITE_DESCRIPTOR = "(JLme/jellysquid/mods/sodium/client/render/chunk/terrain/material/Material;"
@@ -17,9 +17,10 @@ final class InlaySubstrateVertexFormat {
 
     private InlaySubstrateVertexFormat() { }
 
-    static boolean supported() {
+    /** Reads raw class resources only, so optional mixins can be rejected before target classes are loaded. */
+    public static boolean supported() {
         try {
-            return matchesEncoder(read(ENCODER)) && signedRenderType(read(
+            return matchesEncoder(read(ENCODER)) && matchesContextStateMap(read(CONTEXT)) && signedRenderType(read(
                     "net/irisshaders/iris/compat/sodium/impl/vertex_format/terrain_xhfp/XHFPModelVertexType"))
                     && immediateEmitter(read(
                     "link/infra/indium/renderer/render/AbstractBlockRenderContext$1"));
@@ -39,10 +40,11 @@ final class InlaySubstrateVertexFormat {
 
     static boolean matchesEncoder(ClassNode type) {
         if (!ENCODER.equals(type.name)) return false;
+        if (!instanceField(type, "contextHolder", "L" + CONTEXT + ";")) return false;
         var methods = type.methods.stream().filter(m -> m.name.equals("write") && m.desc.equals(WRITE_DESCRIPTOR)).toList();
         if (methods.size() != 1) return false;
         List<AbstractInsnNode> code = instructions(methods.get(0));
-        int shorts = 0, renderType = 0, blockId = 0, stride = 0, returns = 0;
+        int shorts = 0, renderType = 0, blockId = 0, lightValue = 0, stride = 0, returns = 0;
         for (int i = 0; i < code.size(); i++) {
             AbstractInsnNode instruction = code.get(i);
             if (instruction.getOpcode() == Opcodes.LRETURN) returns++;
@@ -52,24 +54,41 @@ final class InlaySubstrateVertexFormat {
                 if (matchesShort(code, i, 34L, "renderType")) renderType++;
                 if (matchesShort(code, i, 32L, "blockId")) blockId++;
             }
+            if (instruction instanceof MethodInsnNode call && call.owner.equals("org/lwjgl/system/MemoryUtil")
+                    && call.name.equals("memPutByte") && call.desc.equals("(JB)V")
+                    && matchesFieldWrite(code, i, 39L, "lightValue", "B")) lightValue++;
             if (instruction instanceof LdcInsnNode constant && Long.valueOf(40).equals(constant.cst)
                     && i > 0 && variable(code.get(i - 1), Opcodes.LLOAD, 1)
                     && i + 2 < code.size() && code.get(i + 1).getOpcode() == Opcodes.LADD
                     && variable(code.get(i + 2), Opcodes.LSTORE, 1)) stride++;
         }
-        return shorts == 2 && renderType == 1 && blockId == 1 && stride == 1 && returns == 1;
+        return shorts == 2 && renderType == 1 && blockId == 1 && lightValue == 1 && stride == 1 && returns == 1;
+    }
+
+    static boolean matchesContextStateMap(ClassNode type) {
+        return CONTEXT.equals(type.name)
+                && instanceField(type, "blockStateIds", "Lit/unimi/dsi/fastutil/objects/Object2IntMap;");
+    }
+
+    private static boolean instanceField(ClassNode type, String name, String descriptor) {
+        return type.fields.stream().filter(field -> field.name.equals(name) && field.desc.equals(descriptor)
+                && (field.access & Opcodes.ACC_STATIC) == 0).count() == 1;
     }
 
     private static boolean matchesShort(List<AbstractInsnNode> code, int call, long offset, String field) {
+        return matchesFieldWrite(code, call, offset, field, "S");
+    }
+
+    private static boolean matchesFieldWrite(List<AbstractInsnNode> code, int call, long offset, String field, String descriptor) {
         if (call < 6) return false;
         return variable(code.get(call - 6), Opcodes.LLOAD, 1)
                 && code.get(call - 5) instanceof LdcInsnNode constant && Long.valueOf(offset).equals(constant.cst)
                 && code.get(call - 4).getOpcode() == Opcodes.LADD
                 && variable(code.get(call - 3), Opcodes.ALOAD, 0)
                 && code.get(call - 2) instanceof FieldInsnNode holder && holder.getOpcode() == Opcodes.GETFIELD
-                && holder.owner.equals(ENCODER) && holder.name.equals("contextHolder")
+                && holder.owner.equals(ENCODER) && holder.name.equals("contextHolder") && holder.desc.equals("L" + CONTEXT + ";")
                 && code.get(call - 1) instanceof FieldInsnNode value && value.getOpcode() == Opcodes.GETFIELD
-                && value.owner.equals(CONTEXT) && value.name.equals(field) && value.desc.equals("S");
+                && value.owner.equals(CONTEXT) && value.name.equals(field) && value.desc.equals(descriptor);
     }
 
     static boolean immediateEmitter(ClassNode type) {

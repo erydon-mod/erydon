@@ -1,0 +1,5 @@
+{
+  "multipart": [
+    { "apply": { "model": "erydon:block/internal/wrapped/cornice_assembly" } }
+  ]
+}

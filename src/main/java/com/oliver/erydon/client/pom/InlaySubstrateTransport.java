@@ -47,6 +47,7 @@ public final class InlaySubstrateTransport {
     public static boolean supportsContext(RenderContext context) {
         // This emitter calls renderQuad -> bufferQuad -> the vertex encoder synchronously.
         // A mesh-building/caching context must never capture this transient payload.
+        context = CornicePartMaterialTransport.unwrap(context);
         return enabled() && context != null && context.getClass().getName().equals(
                 "link.infra.indium.renderer.render.TerrainRenderContext");
     }

@@ -41,6 +41,15 @@ Additional model geometry tooling remains available through:
 In-game visual and lighting validation remains a release test; it is not
 represented as a clean-clone CI assertion.
 
+`verifyCopingPlacement` also runs the shared-cell cornice checks. They exercise a
+closed eight-edge room with multiple wall attachments and a ceiling cover in one
+cell, placement-order independence, paid item consumption, partial removal,
+save/load and horizontal transforms. Rendering checks retain each source part's
+CTM/model state and material/AO policy, including lit covers and global AO off.
+See [cornice-assemblies.md](cornice-assemblies.md) for the storage and live-preview
+boundary. The fixture timing report is CPU evidence; it does not measure FPS or
+prove the appearance of a CurseForge scene.
+
 `verifyWideArches` exercises the shared Romanesque, Modern and Gothic cluster
 callbacks with widths one to six, mixed materials, placement inheritance,
 removal and recalc. It checks taller crowns, column transitions, selectable

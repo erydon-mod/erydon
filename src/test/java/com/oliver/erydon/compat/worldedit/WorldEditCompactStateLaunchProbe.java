@@ -41,6 +41,7 @@ public final class WorldEditCompactStateLaunchProbe implements PreLaunchEntrypoi
                     throw new AssertionError("Unsupported sparse layout did not use original populate");
                 }
             }
+            CorniceAssemblyWorldEditLaunchChecks.run();
             System.out.println("ERYDON_WORLDEDIT_COMPACT_OK: enabled=" + enabled + ", transitions=" + cases);
             System.exit(0);
         } catch (Throwable failure) {

@@ -170,7 +170,7 @@ public final class CornicePerformanceLaunchChecks {
         }
         require(cases == 208, "Particle budget skipped saved poses or styles");
         System.out.printf(Locale.ROOT,
-                "ERYDON_CORNICE_BREAK_PARTICLES_OK: %d style/shape/facing cases; one <=1-block box; central moulding enclosed; vanilla maximum %d particles per break (hard bound64)%n",
+                "ERYDON_CORNICE_BREAK_PARTICLES_OK: %d style/shape/facing cases; one <=1-block box; central moulding enclosed; raw unbudgeted vanilla maximum %d particles per break (hard bound64)%n",
                 cases, maximumParticles);
     }
 

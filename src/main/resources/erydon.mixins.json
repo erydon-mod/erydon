@@ -10,12 +10,14 @@
     "PalettedContainerSaveMixin",
     "CopingRaycastMixin",
     "CorniceCollisionIteratorMixin",
+    "CorniceAssemblyBreakMixin",
     "BlockItemMixin",
     "DebugStickItemMixin",
     "WorldMixin",
     "compat.axiom.SmearBuilderToolMixin",
     "compat.worldedit.WorldEditBlockStateAccessor",
-    "compat.worldedit.WorldEditBlockStateMixin"
+    "compat.worldedit.WorldEditBlockStateMixin",
+    "compat.worldedit.CorniceAssemblyTransformMixin"
   ],
   "client": [
     "client.BlockBreakParticlesMixin",
@@ -23,6 +25,8 @@
     "client.WindowArchBreakParticlesMixin",
     "client.CorniceRedrawMixin",
     "client.CorniceChangedBlockRedrawMixin",
+    "client.CorniceAssemblyPickMixin",
+    "client.CorniceAssemblyClientBreakMixin",
     "client.HighPolishResourceManagerMixin",
     "client.HighPolishCommandSuggestionsMixin",
     "client.BakedQuadFactoryMixin",
@@ -38,6 +42,7 @@
     "client.compat.iris.InlaySubstrateVertexMixin",
     "client.compat.iris.HighPolishBlockMaterialMixin",
     "client.compat.iris.HighPolishIdMapAccessor",
+    "client.compat.iris.CornicePartBlockContextAccessor",
     "client.compat.iris.HighPolishShaderPackMixin",
     "client.compat.iris.ProgramSetMixin",
     "client.compat.iris.ShaderPropertiesMixin",

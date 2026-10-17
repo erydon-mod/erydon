@@ -3,6 +3,7 @@ package com.oliver.erydon.mixin;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.oliver.erydon.block.CorniceBlock;
+import com.oliver.erydon.block.CorniceAssembly;
 import com.oliver.erydon.block.CorniceSlopePlacement;
 import com.oliver.erydon.block.SlopeVerticalBlock;
 import com.oliver.erydon.block.SlopeVerticalShallowBroadBlock;
@@ -54,7 +55,7 @@ public abstract class CorniceCollisionIteratorMixin<T> {
     @WrapOperation(method = "computeNext", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/block/BlockState;isOf(Lnet/minecraft/block/Block;)Z"))
     private boolean erydon$admitCorniceCorners(BlockState state, Block block, Operation<Boolean> original) {
-        return original.call(state, block) || block == Blocks.MOVING_PISTON && state.getBlock() instanceof CorniceBlock;
+        return original.call(state, block) || block == Blocks.MOVING_PISTON && CorniceAssembly.isOwner(state);
     }
 
     @WrapOperation(method = "computeNext", at = @At(value = "INVOKE",
@@ -75,11 +76,15 @@ public abstract class CorniceCollisionIteratorMixin<T> {
                     ChunkSectionPos.getSectionCoord(owner.getZ()));
             if (ownerChunk == null) continue;
             BlockState state = ownerChunk.getBlockState(owner);
-            if (!(state.getBlock() instanceof CorniceBlock) || !state.get(CorniceBlock.SHAPE).isAngled()
-                    || !CorniceSlopePlacement.supportPos(state, owner).equals(supportPos)
-                    || CorniceSlopePlacement.shapeFor(support, CorniceSlopePlacement.outward(state)) != state.get(CorniceBlock.SHAPE)
-                    || CorniceSlopePlacement.facing(support) != state.get(CorniceBlock.FACING)
-                    || forEntity && !state.shouldSuffocate(ownerChunk, owner)) continue;
+            if (!CorniceAssembly.isOwner(state) || forEntity && !state.shouldSuffocate(ownerChunk, owner)) continue;
+            boolean attached = false;
+            for (BlockState part : CorniceAssembly.contents(ownerChunk, owner).cornices()) {
+                if (part.get(CorniceBlock.SHAPE).isAngled()
+                        && CorniceSlopePlacement.supportPos(part, owner).equals(supportPos)
+                        && CorniceSlopePlacement.shapeFor(support, CorniceSlopePlacement.outward(part)) == part.get(CorniceBlock.SHAPE)
+                        && CorniceSlopePlacement.facing(support) == part.get(CorniceBlock.FACING)) attached = true;
+            }
+            if (!attached) continue;
             if (erydon$corniceOwners == null) {
                 erydon$corniceOwners = new ArrayDeque<>();
                 erydon$queuedCornices = new HashSet<>();

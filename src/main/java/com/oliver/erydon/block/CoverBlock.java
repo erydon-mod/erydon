@@ -262,12 +262,12 @@ public class CoverBlock extends Block implements Waterloggable, ClusterRebuildab
     }
 
     private boolean isSamePlaneCover(WorldAccess world, BlockPos otherPos, Direction attach) {
-        BlockState other = world.getBlockState(otherPos);
-        if (!other.isOf(this)) return false;
+        BlockState other = coverAt(world, otherPos);
+        if (other == null || !other.isOf(this)) return false;
         return other.get(ATTACH) == attach;
     }
 
-    private void updateNeighboursInPlane(WorldAccess world, BlockPos pos, Direction attach) {
+    public void updateNeighboursInPlane(WorldAccess world, BlockPos pos, Direction attach) {
         Direction wN = mapLocalToWorld(attach, LocalDir.NORTH);
         Direction wE = mapLocalToWorld(attach, LocalDir.EAST);
         Direction wS = mapLocalToWorld(attach, LocalDir.SOUTH);
@@ -287,14 +287,34 @@ public class CoverBlock extends Block implements Waterloggable, ClusterRebuildab
     }
 
     private void updateIfCoverSamePlane(WorldAccess world, BlockPos p, Direction attach) {
-        BlockState other = world.getBlockState(p);
-        if (!other.isOf(this)) return;
+        BlockState other = coverAt(world, p);
+        if (other == null || !other.isOf(this)) return;
         if (other.get(ATTACH) != attach) return;
 
         BlockState fixed = updateExtensions(other, world, p);
         if (fixed.get(EXT) != other.get(EXT)) {
-            world.setBlockState(p, fixed, Block.NOTIFY_LISTENERS);
+            if (world.getBlockState(p).getBlock() instanceof CorniceAssemblyBlock && world instanceof World live) {
+                CorniceAssembly.replacePart(live, p, CorniceAssembly.contents(world, p).cornices().size(), fixed);
+            } else {
+                world.setBlockState(p, fixed, Block.NOTIFY_LISTENERS);
+            }
         }
+    }
+
+    /** The skin retains its original material/state even when moulding shares its cell. */
+    public static BlockState coverAt(BlockView world, BlockPos pos) {
+        BlockState state = world.getBlockState(pos);
+        if (state.getBlock() instanceof CoverBlock) return state;
+        return state.getBlock() instanceof CorniceAssemblyBlock ? CorniceAssembly.contents(world, pos).cover() : null;
+    }
+
+    /** Local extension refresh used after an assembly publishes its new contents. */
+    public static void refreshSharedCover(World world, BlockPos pos) {
+        BlockState cover = coverAt(world, pos);
+        if (cover == null || world.isClient) return;
+        CoverBlock block = (CoverBlock) cover.getBlock();
+        block.updateIfCoverSamePlane(world, pos, cover.get(ATTACH));
+        block.updateNeighboursInPlane(world, pos, cover.get(ATTACH));
     }
 
     private Set<BlockPos> collectPlaneComponent(WorldAccess world, BlockPos seed, Direction attach) {
@@ -389,8 +409,8 @@ public class CoverBlock extends Block implements Waterloggable, ClusterRebuildab
 
 
     private boolean isSamePlaneLargeCover(WorldAccess world, BlockPos otherPos, Direction attach) {
-        BlockState other = world.getBlockState(otherPos);
-        if (!other.isOf(this)) return false;
+        BlockState other = coverAt(world, otherPos);
+        if (other == null || !other.isOf(this)) return false;
         if (other.get(SIZE) != CoverSize.LARGE) return false;
         return other.get(ATTACH) == attach;
     }

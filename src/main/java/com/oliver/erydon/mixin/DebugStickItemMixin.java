@@ -5,6 +5,8 @@ import com.oliver.erydon.block.ArchRomanesqueBlock;
 import com.oliver.erydon.block.CeilingBlock;
 import com.oliver.erydon.block.ChimneyBlock;
 import com.oliver.erydon.block.CoverBlock;
+import com.oliver.erydon.block.CorniceAssemblyBlock;
+import com.oliver.erydon.block.CorniceAssemblyDebugControls;
 import com.oliver.erydon.block.DoubleCircularColumnBlock;
 import com.oliver.erydon.block.LightBlock;
 import com.oliver.erydon.block.LightPendantBlock;
@@ -41,7 +43,9 @@ public abstract class DebugStickItemMixin {
     @Inject(method="use",at=@At("HEAD"),cancellable=true)
     private void erydon$companionCapitalControls(PlayerEntity player,BlockState state,WorldAccess world,
             BlockPos pos,boolean update,ItemStack stack,CallbackInfoReturnable<Boolean> callback) {
-        if(CapitalDebugControls.handles(state)) callback.setReturnValue(
+        if (state.getBlock() instanceof CorniceAssemblyBlock && world instanceof World mutableWorld) {
+            callback.setReturnValue(CorniceAssemblyDebugControls.use(player, mutableWorld, pos, update, stack));
+        } else if(CapitalDebugControls.handles(state)) callback.setReturnValue(
                 CapitalDebugControls.use(player,state,world,pos,update,stack));
         else if (update && player.isCreativeLevelTwoOp() && state.getBlock() instanceof ArchRomanesqueBlock arch
                 && world instanceof World mutableWorld) {

@@ -1,5 +1,6 @@
 package com.oliver.erydon.mixin;
 
+import com.oliver.erydon.client.pom.InlaySubstrateVertexFormat;
 import net.fabricmc.loader.api.FabricLoader;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
@@ -24,7 +25,12 @@ public final class ErydonMixinPlugin implements IMixinConfigPlugin {
             return FabricLoader.getInstance().isModLoaded("axiom");
         }
         if (mixinClassName.contains(".compat.iris.")) {
-            return FabricLoader.getInstance().isModLoaded("iris");
+            if (!FabricLoader.getInstance().isModLoaded("iris")) return false;
+            if (mixinClassName.equals("com.oliver.erydon.mixin.client.compat.iris.InlaySubstrateVertexMixin")
+                    || mixinClassName.equals("com.oliver.erydon.mixin.client.compat.iris.CornicePartBlockContextAccessor")) {
+                return IrisTerrainHooks.SUPPORTED;
+            }
+            return true;
         }
         if (mixinClassName.contains(".compat.continuity.")) {
             return FabricLoader.getInstance().isModLoaded("continuity");
@@ -40,6 +46,10 @@ public final class ErydonMixinPlugin implements IMixinConfigPlugin {
                     && FabricLoader.getInstance().isModLoaded("sodium");
         }
         return true;
+    }
+
+    private static final class IrisTerrainHooks {
+        private static final boolean SUPPORTED = InlaySubstrateVertexFormat.supported();
     }
 
     @Override

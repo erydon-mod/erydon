@@ -28,6 +28,16 @@ final class CorniceInteractionShapes {
     private static final Map<String, double[][]> PROFILE_BOXES = new ConcurrentHashMap<>();
     private CorniceInteractionShapes() { }
 
+    static int estimatedBytes(VoxelShape shape) {
+        if (shape instanceof RasterShape raster) return raster.estimatedBytes;
+        if (shape instanceof CorniceAssemblyBlock.CombinedShape combined) return combined.estimatedBytes;
+        if (shape.isEmpty()) return 128;
+        Box bounds = shape.getBoundingBox();
+        double cells = (Math.ceil((bounds.maxX - bounds.minX) * 32) + 2) * (Math.ceil((bounds.maxY - bounds.minY) * 32) + 2)
+                * (Math.ceil((bounds.maxZ - bounds.minZ) * 32) + 2);
+        return (int) Math.min(Integer.MAX_VALUE, 512 + cells / 8 + 80L * shape.getBoundingBoxes().size());
+    }
+
     /** Rolled mouldings and rotated ornaments use their actual authored element envelopes. */
     static double[][] profileBoxes(String style, double[][] existingBoxes) {
         return PROFILE_BOXES.computeIfAbsent(style, ignored -> loadProfileBoxes(style, existingBoxes));

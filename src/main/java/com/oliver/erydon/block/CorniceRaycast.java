@@ -28,7 +28,7 @@ public final class CorniceRaycast {
                                          BlockPos cell, BlockState cellState, BlockHitResult original) {
         // Vanilla raycasts an overhanging outline against the full ray too.
         // Its hit must still belong to this DDA cell before traversal can stop.
-        if (original != null && original.getBlockPos().equals(cell) && cellState.getBlock() instanceof CorniceBlock
+        if (original != null && original.getBlockPos().equals(cell) && CorniceAssembly.isOwner(cellState)
                 && !insideCell(original.getPos(), cell)) original = null;
         if (!touchesMouldingHeight(start, end, cell)) return original;
         List<Candidate> candidates = new ArrayList<>();
@@ -38,21 +38,21 @@ public final class CorniceRaycast {
             if (x == 0 && z == 0) continue;
             add(world, cell.add(x, 0, z), candidates);
         }
-        if (candidates.isEmpty() && !(cellState.getBlock() instanceof CorniceBlock)) return original;
+        if (candidates.isEmpty() && !CorniceAssembly.isOwner(cellState)) return original;
         for (int x = -2; x <= 2; x++) for (int z = -2; z <= 2; z++) {
             if (Math.abs(x) < 2 && Math.abs(z) < 2) continue;
             add(world, cell.add(x, 0, z), candidates);
         }
         List<Candidate> angled = new ArrayList<>();
         for (Candidate candidate : candidates)
-            if (candidate.state.get(CorniceBlock.SHAPE).isAngled()) angled.add(candidate);
-        if (cellState.getBlock() instanceof CorniceBlock && cellState.get(CorniceBlock.SHAPE).isAngled())
+            if (angled(world, candidate.owner, candidate.state)) angled.add(candidate);
+        if (CorniceAssembly.isOwner(cellState) && angled(world, cell, cellState))
             angled.add(new Candidate(cell, cellState));
         if (angled.isEmpty()) return original;
         BlockHitResult best = original;
         for (Candidate candidate : candidates) {
             if (!touchesBounds(start, end, candidate.owner, conservativeBounds(candidate.state))) continue;
-            if (!candidate.state.get(CorniceBlock.SHAPE).isAngled() && !touchesAngledEnd(candidate, angled)) continue;
+            if (!angled(world, candidate.owner, candidate.state) && !touchesAngledEnd(world, candidate, angled)) continue;
             var hit = candidate.state.getOutlineShape(world, candidate.owner, ShapeContext.absent()).raycast(start, end, candidate.owner);
             if (hit != null && insideCell(hit.getPos(), cell) && (best == null || hit.getPos().squaredDistanceTo(start)
                     < best.getPos().squaredDistanceTo(start))) best = hit;
@@ -62,6 +62,7 @@ public final class CorniceRaycast {
 
     /** Includes all finite accepted end cuts and the authored profile envelopes. */
     public static Box conservativeBounds(BlockState state) {
+        if (state.getBlock() instanceof CorniceAssemblyBlock) return new Box(-3, 0, -3, 4, 1, 4);
         int index = state.get(CorniceBlock.SHAPE).ordinal() * 4 + state.get(CorniceBlock.FACING).getHorizontal();
         Box cached = BOUNDS.get(index);
         if (cached != null) return cached;
@@ -79,6 +80,12 @@ public final class CorniceRaycast {
         highX = Math.ceil(highX * 32) / 32; highZ = Math.ceil(highZ * 32) / 32;
         BOUNDS.compareAndSet(index, null, new Box(lowX, .25, lowZ, highX, 1, highZ));
         return BOUNDS.get(index);
+    }
+
+    private static boolean angled(BlockView world, BlockPos owner, BlockState state) {
+        if (state.getBlock() instanceof CorniceBlock) return state.get(CorniceBlock.SHAPE).isAngled();
+        return CorniceAssembly.contents(world, owner, state).cornices().stream()
+                .anyMatch(part -> part.get(CorniceBlock.SHAPE).isAngled());
     }
 
     private static boolean touchesBounds(Vec3d start, Vec3d end, BlockPos owner, Box bounds) {
@@ -107,16 +114,20 @@ public final class CorniceRaycast {
 
     private static void add(BlockView world, BlockPos owner, List<Candidate> candidates) {
         BlockState state = world.getBlockState(owner);
-        if (state.getBlock() instanceof CorniceBlock) candidates.add(new Candidate(owner, state));
+        if (CorniceAssembly.isOwner(state)) candidates.add(new Candidate(owner, state));
     }
 
-    private static boolean touchesAngledEnd(Candidate candidate, List<Candidate> angled) {
-        for (var source : CorniceConnections.nativeComponents(candidate.state)) for (Candidate other : angled) {
-            if (!other.state.isOf(candidate.state.getBlock())) continue;
-            CorniceRun target = CorniceSlopePlacement.run(other.state).translated(
-                    other.owner.getX() - candidate.owner.getX(), other.owner.getZ() - candidate.owner.getZ());
-            if (CorniceRun.join(source.run(), -1, target, 1) != null
-                    || CorniceRun.join(source.run(), 1, target, -1) != null) return true;
+    private static boolean touchesAngledEnd(BlockView world, Candidate candidate, List<Candidate> angled) {
+        for (BlockState sourcePart : CorniceAssembly.contents(world, candidate.owner).cornices()) {
+            for (var source : CorniceConnections.nativeComponents(sourcePart)) for (Candidate other : angled) {
+                for (BlockState targetPart : CorniceAssembly.contents(world, other.owner).cornices()) {
+                    if (!targetPart.isOf(sourcePart.getBlock()) || !targetPart.get(CorniceBlock.SHAPE).isAngled()) continue;
+                    CorniceRun target = CorniceSlopePlacement.run(targetPart).translated(
+                            other.owner.getX() - candidate.owner.getX(), other.owner.getZ() - candidate.owner.getZ());
+                    if (CorniceRun.join(source.run(), -1, target, 1) != null
+                            || CorniceRun.join(source.run(), 1, target, -1) != null) return true;
+                }
+            }
         }
         return false;
     }

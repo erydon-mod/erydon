@@ -62,7 +62,8 @@ tasks.register('auditErydonAxiomIconParity') {
         def itemModelIds = itemModelsById.keySet() as Set
         def publicIds = new TreeSet<String>(blockstateIds.intersect(itemModelIds))
 
-        def expectedTechnicalBlocks = ['light_pendant_halo'] as Set
+        // Internal carriers have no inventory item; their saved parts supply the player-facing items.
+        def expectedTechnicalBlocks = ['light_pendant_halo', 'cornice_assembly'] as Set
         def expectedItemOnlyModels = [
                 'emblem',
                 'surround_georgian_icon',
@@ -73,6 +74,7 @@ tasks.register('auditErydonAxiomIconParity') {
         def blockstateOnly = new TreeSet<String>(blockstateIds - itemModelIds)
         def itemModelOnly = new TreeSet<String>(itemModelIds - blockstateIds)
         def unexpectedBlockstateOnly = blockstateOnly - expectedTechnicalBlocks
+        def missingTechnicalBlocks = expectedTechnicalBlocks - blockstateOnly
         def unexpectedItemModelOnly = itemModelOnly - expectedItemOnlyModels
 
         int unconditionalBlockstates = 0
@@ -158,6 +160,12 @@ tasks.register('auditErydonAxiomIconParity') {
         def errors = []
         if (!unexpectedBlockstateOnly.isEmpty()) {
             errors << "unexpected blocks without item models: ${unexpectedBlockstateOnly.join(', ')}"
+        }
+        if (!missingTechnicalBlocks.isEmpty()) {
+            errors << "internal no-item blocks missing or given inventory models: ${missingTechnicalBlocks.join(', ')}"
+        }
+        if (!registrationsSource.contains('registerBlockWithoutItem("cornice_assembly",')) {
+            errors << 'shared cornice carrier must remain an explicit internal block without an item'
         }
         if (!unexpectedItemModelOnly.isEmpty()) {
             errors << "unexpected item-only models: ${unexpectedItemModelOnly.join(', ')}"

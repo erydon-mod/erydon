@@ -167,6 +167,10 @@ public final class CopingPlacementLaunchProbe implements PreLaunchEntrypoint {
                 }
             System.out.println("ERYDON_COPING_OK: registered="+registered+" support/transform/water/stack/raycast cases="+(cases+3));
             System.out.println("ERYDON_COPING_FREE_OK: "+(CopingBlock.Surface.values().length*48)+" unsupported neighbour updates, "+(CopingBlock.Surface.values().length*8)+" profile/facing/offset particle bounds");
+            CorniceAssemblyLaunchChecks.run();
+            CorniceAssemblyBreakLaunchChecks.run();
+            com.oliver.erydon.client.model.CorniceAssemblyRenderingLaunchChecks.run();
+            com.oliver.erydon.command.CorniceAssemblySwapLaunchChecks.run();
             System.exit(0);
         } catch (Throwable failure) { failure.printStackTrace(); System.exit(1); }
     }

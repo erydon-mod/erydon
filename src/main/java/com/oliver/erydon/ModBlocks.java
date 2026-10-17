@@ -87,6 +87,7 @@ public final class ModBlocks {
     private static final Map<String, Block> OVERLAY_SHAPE_BLOCKS = new LinkedHashMap<>();
 
     public static Block LIGHT_PENDANT_HALO;
+    public static Block CORNICE_ASSEMBLY;
 
     public static Block AGANITE_BRAZIER;
     public static Block BOREALIS_BRAZIER;
@@ -26445,6 +26446,10 @@ private static Block registerBlock(String name, Block block) {
 
     private static Item registerBlockItem(String name, Block block) {
         Item.Settings settings = new Item.Settings();
+        if (block instanceof CoverBlock) {
+            return Registry.register(Registries.ITEM, new Identifier(Erydon.MOD_ID, name),
+                    new com.oliver.erydon.item.CoverItem(block, settings));
+        }
         if (block instanceof CorniceBlock) {
             return Registry.register(Registries.ITEM, new Identifier(Erydon.MOD_ID, name),
                     new com.oliver.erydon.item.CorniceItem(block, settings));
@@ -26478,6 +26483,8 @@ private static Block registerBlock(String name, Block block) {
     public static void registerModBlocks() {
         Erydon.logStartupTextLogo();
         Erydon.LOGGER.info("Registering mod blocks for {}", Erydon.MOD_ID);
+        CORNICE_ASSEMBLY = registerBlockWithoutItem("cornice_assembly",
+                new CorniceAssemblyBlock(AbstractBlock.Settings.copy(Blocks.STONE)));
 
         LIGHT_PENDANT_HALO = registerBlockWithoutItem("light_pendant_halo",
             new LightPendantHaloBlock(AbstractBlock.Settings.copy(Blocks.LIGHT)

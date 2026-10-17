@@ -206,6 +206,7 @@ tasks.register('auditErydonHighStateBlocks') {
                 columnBase: enumCount('block/ColumnBlock.java', 'BaseStyle', 2),
                 columnOrientation: enumCount('block/ColumnBlock.java', 'Orientation', 2),
                 corniceShape: enumCount('block/CorniceBlock.java', 'CorniceShape', 3),
+                corniceAssemblyLight: enumCount('block/CorniceAssemblyBlock.java', 'Light', 3),
                 chimneyPart: enumCount('block/ChimneyBlock.java', 'ChimneyPart', 3),
                 postAxis: enumCount('block/PostBlock.java', 'AxisMode', 3),
                 spiralPart: enumCount('block/StairsSpiralLargeBlock.java', 'Part', 4)
@@ -272,6 +273,7 @@ tasks.register('auditErydonHighStateBlocks') {
 
         def kindFor = { String id ->
             def base = stripAged(id)
+            if (base == 'cornice_assembly') return 'CorniceAssemblyBlock'
             if (base.startsWith('cover_')) return 'CoverBlock'
             if (base == 'light_pendant') return 'LightPendantBlock'
             if (base == 'light_pendant_halo') return 'LightPendantHaloBlock'
@@ -366,6 +368,9 @@ tasks.register('auditErydonHighStateBlocks') {
                 case 'CorniceBlock':
                     return [states: 4 * counts.corniceShape,
                             properties: "facing(4) * shape(${counts.corniceShape})"]
+                case 'CorniceAssemblyBlock':
+                    return [states: 4 * 2 * 2 * counts.corniceAssemblyLight,
+                            properties: "facing(4) * mirrored(2) * waterlogged(2) * light(${counts.corniceAssemblyLight}); paid parts stored in entity NBT"]
                 case 'ChimneyBlock':
                     return [states: counts.chimneyPart,
                             properties: "part(${counts.chimneyPart})"]
@@ -429,6 +434,8 @@ tasks.register('auditErydonHighStateBlocks') {
                     return 'yes: column baked model'
                 case 'CorniceBlock':
                     return 'yes: cornice baked model'
+                case 'CorniceAssemblyBlock':
+                    return 'yes: original paid-part models from immutable entity attachment'
                 case 'CoverBlock':
                     return 'yes: cover baked model'
                 case 'SurroundBlock':

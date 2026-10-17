@@ -55,7 +55,8 @@ class ErydonSwapInventoryAuditTest {
                     + "\t" + (ids.contains(plainId) ? plainId : "unavailable")
                     + "\t" + (agedId != null && ids.contains(agedId) ? agedId : "unavailable"));
         }
-        assertEquals(43, excluded.size(), "Review non-material blocks when the inventory changes");
+        assertEquals(44, excluded.size(), "Review non-material blocks when the inventory changes");
+        assertTrue(excluded.contains("erydon:cornice_assembly"), "Stored part IDs are swapped instead of the internal carrier");
         Files.createDirectories(REPORTS);
         Files.write(REPORTS.resolve("blocks.tsv"), rows);
         Files.write(REPORTS.resolve("non-material-blocks.txt"), excluded);
@@ -168,6 +169,7 @@ class ErydonSwapInventoryAuditTest {
 
     private static boolean isNonMaterialErydonBlock(String path) {
         return path.startsWith("glazing_") || path.startsWith("cover_")
-                || path.startsWith("ceiling_coffered_") || path.equals("light_pendant_halo");
+                || path.startsWith("ceiling_coffered_") || path.equals("light_pendant_halo")
+                || path.equals("cornice_assembly");
     }
 }

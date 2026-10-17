@@ -72,9 +72,10 @@ public final class CorniceSlopePlacement {
             if (shapeFor(support, side) == null) continue;
             BlockPos otherPos = supportPos.offset(side);
             if (otherPos.equals(pos)) continue;
-            BlockState other = world.getBlockState(otherPos);
-            if (other.getBlock() instanceof CorniceBlock && other.get(CorniceBlock.SHAPE).isAngled()
-                    && supportPos(other, otherPos).equals(supportPos)) return null;
+            for (BlockState other : CorniceAssembly.contents(world, otherPos).cornices()) {
+                if (other.get(CorniceBlock.SHAPE).isAngled()
+                        && supportPos(other, otherPos).equals(supportPos)) return null;
+            }
         }
         return state.with(CorniceBlock.FACING, facing(support)).with(CorniceBlock.SHAPE, shape);
     }
