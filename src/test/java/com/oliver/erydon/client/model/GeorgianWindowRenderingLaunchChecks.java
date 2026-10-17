@@ -88,6 +88,8 @@ public final class GeorgianWindowRenderingLaunchChecks {
                                 var transform = (RenderContext.QuadTransform) args[0];
                                 if (transform instanceof WorldAlignedYRotation)
                                     field(WorldAlignedYRotation.class, "spriteFinder").set(transform, finder);
+                                if (transform instanceof WindowSillTransform)
+                                    field(WindowSillTransform.class, "spriteFinder").set(transform, finder);
                                 transforms.push(transform);
                             }
                             case "popTransform" -> transforms.pop();
@@ -103,6 +105,7 @@ public final class GeorgianWindowRenderingLaunchChecks {
                         }
                         return null;
                     });
+            Map<BlockState, List<FrameQuad>> fabricFrames = new HashMap<>();
             int checked = 0;
             for (BlockState state : block.getStateManager().getStates()) {
                 models.lookups.clear();
@@ -115,6 +118,8 @@ public final class GeorgianWindowRenderingLaunchChecks {
                 renderer.emitBlockQuads(null, state, BlockPos.ORIGIN, () -> Random.create(0), context);
                 require(transforms.isEmpty(), "Georgian rendering leaked a transform");
                 List<float[]> emitted = new ArrayList<>();
+                List<float[]> emittedUvs = new ArrayList<>();
+                List<Direction> emittedFaces = new ArrayList<>();
                 mesh.build().forEach(quad -> {
                     float[] positions = new float[12];
                     for (int vertex = 0; vertex < 4; vertex++) {
@@ -123,10 +128,20 @@ public final class GeorgianWindowRenderingLaunchChecks {
                         positions[vertex * 3 + 2] = quad.z(vertex);
                     }
                     emitted.add(positions);
+                    float[] uvs = new float[8];
+                    for (int vertex = 0; vertex < 4; vertex++) {
+                        uvs[vertex * 2] = quad.u(vertex);
+                        uvs[vertex * 2 + 1] = quad.v(vertex);
+                    }
+                    emittedUvs.add(uvs);
+                    emittedFaces.add(quad.lightFace());
                 });
                 List<Identifier> expected = expected(state);
                 require(fabric.equals(expected), "Fabric selected wrong components: " + state + " " + fabric);
                 require(axiom.equals(expected), "Axiom selected different components: " + state + " " + axiom);
+                boolean[] sourcePanes = sillGeometryAndUnchangedFrame(renderer, state, actual, expected, models,
+                        emitted, emittedUvs, emittedFaces, fabricFrames);
+                fabricAxiomParity(state, actual, emitted, emittedUvs, emittedFaces, sourcePanes);
                 if (state.get(CORNER) == Corner.NONE) {
                     if (!state.get(OPEN)) {
                         // Closing a wide run retains the exact one-wide appearance from 1.5.44,
@@ -161,13 +176,100 @@ public final class GeorgianWindowRenderingLaunchChecks {
                 }
                 checked++;
             }
+            sillUvGuards();
             System.out.println("ERYDON_GEORGIAN_WINDOW_RENDERING_OK states=" + checked
                     + " FabricAxiomComponents=exact closedStraightQuads=exact openCentres=clear openOuterWings=retained openCornerPost=6quads"
-                    + " fixedFanlightJambs=FabricMesh+AxiomAllFacings");
+                    + " fixedFanlightJambs=FabricMesh+AxiomAllFacings inwardSills=mirrorAboutFrame+unchangedFrameGlass+UVGuards");
         } finally {
             singleton.set(null, previous);
         }
     }
+
+    private static void fabricAxiomParity(BlockState state, List<BakedQuad> fallback, List<float[]> emitted,
+                                          List<float[]> uvs, List<Direction> faces, boolean[] sourcePanes) {
+        require(fallback.size() == emitted.size(), "Fabric/Axiom quad counts differ: " + state);
+        for (int at = 0; at < fallback.size(); at++) {
+            BakedQuad quad = fallback.get(at);
+            int[] data = quad.getVertexData();
+            for (int vertex = 0; vertex < 4; vertex++) {
+                for (int axis = 0; axis < 3; axis++) require(Math.abs(emitted.get(at)[vertex * 3 + axis]
+                                - Float.intBitsToFloat(data[vertex * 8 + axis])) <= .000002,
+                        "Fabric/Axiom sill/frame position differs: " + state + " quad=" + at);
+                // Established two-way mirror coatings use world-locked UV baking in
+                // Fabric and authored UV remapping in Axiom. Test each against its own
+                // frame baseline instead; every stone sill/cap remains strictly equal.
+                boolean coatedPane = state.get(GLASS) == com.oliver.erydon.block.WindowArchBlock.Glass.TWO_WAY
+                        && sourcePanes[at] && quad.getColorIndex() == -1;
+                if (!coatedPane) for (int axis = 0; axis < 2; axis++) require(Math.abs(uvs.get(at)[vertex * 2 + axis]
+                                - Float.intBitsToFloat(data[vertex * 8 + 4 + axis])) <= .000002,
+                        "Fabric/Axiom texture coordinates differ: " + state + " quad=" + at);
+            }
+            // Flat horizontal face classification controls CTM projection and lighting.
+            boolean flat = true;
+            for (int vertex = 1; vertex < 4; vertex++)
+                flat &= Math.abs(emitted.get(at)[vertex * 3 + 1] - emitted.get(at)[1]) < .000001;
+            if (flat && quad.getFace().getAxis() == Direction.Axis.Y)
+                require(faces.get(at) == quad.getFace(), "Sill rotation changed a horizontal face normal");
+        }
+    }
+
+    private static boolean[] sillGeometryAndUnchangedFrame(WindowFrenchGeorgianBakedModel renderer, BlockState state,
+                                                       List<BakedQuad> actual, List<Identifier> components, Lookup models,
+                                                       List<float[]> emitted, List<float[]> uvs, List<Direction> faces,
+                                                       Map<BlockState, List<FrameQuad>> fabricFrames) {
+        List<BakedQuad> frame = new ArrayList<>();
+        List<FrameQuad> fabricFrame = new ArrayList<>();
+        boolean[] sourcePanes = new boolean[actual.size()];
+        int at = 0, sillFace = 0;
+        Direction facing = state.get(FACING);
+        for (Identifier id : components) {
+            BakedModel source = models.get(id);
+            List<BakedQuad> quads = new ArrayList<>(source.getQuads(null, null, Random.create(0)));
+            for (Direction face : Direction.values()) quads.addAll(source.getQuads(null, face, Random.create(0)));
+            String path = id.getPath();
+            boolean sill = path.endsWith("_sill") || path.endsWith("_sill_lh") || path.endsWith("_sill_rh");
+            if (sill && path.endsWith("_sill")) facing = sillFace++ == 0 ? state.get(FACING) : secondaryFacing(state);
+            for (BakedQuad sourceQuad : quads) {
+                require(at < actual.size(), "Component geometry count changed");
+                BakedQuad placed = actual.get(at++);
+                sourcePanes[at - 1] = sourceQuad.getColorIndex() == 0;
+                if (!sill) {
+                    frame.add(placed);
+                    fabricFrame.add(new FrameQuad(emitted.get(at - 1), uvs.get(at - 1), faces.get(at - 1)));
+                    continue;
+                }
+                for (int vertex = 0; vertex < 4; vertex++) {
+                    int offset = vertex * 8;
+                    double x = Float.intBitsToFloat(sourceQuad.getVertexData()[offset]);
+                    double z = Float.intBitsToFloat(sourceQuad.getVertexData()[offset + 2]);
+                    if (state.get(SILL_SIDE) == SillSide.INWARD) { x = 1 - x; z = 3 / 16.0 - z; }
+                    double[] point = rotate(x, z, facing);
+                    require(Math.abs(point[0] - Float.intBitsToFloat(placed.getVertexData()[offset])) <= .000002
+                                    && Math.abs(point[1] - Float.intBitsToFloat(placed.getVertexData()[offset + 2])) <= .000002
+                                    && Math.abs(Float.intBitsToFloat(sourceQuad.getVertexData()[offset + 1])
+                                            - Float.intBitsToFloat(placed.getVertexData()[offset + 1])) <= .000002,
+                            "Sill/cap did not reflect about the window frame's own 3/16 depth: " + state);
+                }
+            }
+        }
+        require(at == actual.size(), "Unexpected geometry outside authored components");
+        same(frame, renderer.getQuads(state.with(SILL, false).with(SILL_SIDE, SillSide.OUTWARD), null, Random.create(0)));
+        same(frame, renderer.getQuads(state.with(SILL, false).with(SILL_SIDE, SillSide.INWARD), null, Random.create(0)));
+        BlockState baselineState = state.with(SILL, false).with(SILL_SIDE, SillSide.OUTWARD);
+        List<FrameQuad> baseline = fabricFrames.putIfAbsent(baselineState, fabricFrame);
+        if (baseline != null) {
+            require(baseline.size() == fabricFrame.size(), "Sill side changed Fabric frame/glass quad count");
+            for (int quad = 0; quad < baseline.size(); quad++) {
+                FrameQuad before = baseline.get(quad), after = fabricFrame.get(quad);
+                require(Arrays.equals(before.positions, after.positions) && Arrays.equals(before.uvs, after.uvs)
+                                && before.face == after.face,
+                        "Sill side changed Fabric frame/glass geometry, coating UVs or normals: " + state);
+            }
+        }
+        return sourcePanes;
+    }
+
+    private record FrameQuad(float[] positions, float[] uvs, Direction face) { }
 
     /** Real emitted faces, not component IDs, must close both sides of each fixed fanlight. */
     private static void fixedFrameSurfaces(WindowFrenchGeorgianBakedModel renderer, BlockState state,
@@ -265,9 +367,12 @@ public final class GeorgianWindowRenderingLaunchChecks {
         if (state.get(SILL)) {
             add(result, "sill");
             if (open && !corner) {
-                if (piece == Piece.LOWER_SINGLE) add(result, "sill_" + hinge);
-                else if (piece == Piece.LOWER_MULTI_LH) add(result, "sill_lh");
-                else if (piece == Piece.LOWER_MULTI_RH) add(result, "sill_rh");
+                String cap = piece == Piece.LOWER_SINGLE ? hinge
+                        : piece == Piece.LOWER_MULTI_LH ? "lh" : piece == Piece.LOWER_MULTI_RH ? "rh" : null;
+                if (cap != null) {
+                    if (state.get(SILL_SIDE) == SillSide.INWARD) cap = cap.equals("lh") ? "rh" : "lh";
+                    add(result, "sill_" + cap);
+                }
             }
         }
     }
@@ -283,21 +388,29 @@ public final class GeorgianWindowRenderingLaunchChecks {
                 int rotation = switch (state.get(FACING)) {
                     case EAST -> 90; case SOUTH -> 180; case WEST -> 270; default -> 0;
                 };
+                if (state.get(SILL_SIDE) == SillSide.INWARD) rotation = (rotation + 180) % 360;
                 AxiomFallbackQuads.add(expected, authoredSill, rotation, null, Random.create(0), true);
                 for (Direction side : Direction.values()) {
                     AxiomFallbackQuads.add(expected, authoredSill, rotation, side, Random.create(0), true);
                 }
+                if (state.get(SILL_SIDE) == SillSide.INWARD) for (int at = 0; at < expected.size(); at++)
+                    expected.set(at, WindowSillTransform.translate(expected.get(at), state.get(FACING)));
             }
             same(quads, expected);
             require(quads.stream().allMatch(quad -> quad.getColorIndex() == -1),
                     "An open lower centre retained glass or lead");
         } else if (piece == Piece.UPPER_MULTI_MID) {
-            // The one-wide fanlight stays glazed, but no pane may project into the opening.
-            for (BakedQuad quad : quads) for (int vertex = 0; vertex < 4; vertex++) {
+            // Sills are independently checked against their reflected authored geometry.
+            // An inward sill can project beyond this fanlight-only depth bound; do not
+            // discard stone/two-way faces by tint, since that could hide a real wing.
+            BlockState withoutSill = state.with(SILL, false);
+            List<BakedQuad> fanlight = new ArrayList<>(renderer.getQuads(withoutSill, null, Random.create(0)));
+            for (Direction side : Direction.values()) fanlight.addAll(renderer.getQuads(withoutSill, side, Random.create(0)));
+            for (BakedQuad quad : fanlight) for (int vertex = 0; vertex < 4; vertex++) {
                 require(depth(quad, vertex, state.get(FACING)) <= .250001,
                         "A centre fanlight retained a deep hinged pane");
             }
-            require(quads.stream().anyMatch(quad -> quad.getColorIndex() == 0), "An upper centre lost its fixed fanlight glass");
+            require(fanlight.stream().anyMatch(quad -> quad.getColorIndex() == 0), "An upper centre lost its fixed fanlight glass");
         } else if (piece == Piece.LOWER_MULTI_LH || piece == Piece.LOWER_MULTI_RH
                 || piece == Piece.UPPER_MULTI_LH || piece == Piece.UPPER_MULTI_RH) {
             require(quads.stream().anyMatch(quad -> {
@@ -305,6 +418,85 @@ public final class GeorgianWindowRenderingLaunchChecks {
                 return false;
             }), "An outer edge lost its opening wing");
         }
+    }
+
+    /** Real mutable quads and fallback quads must agree on safe world UV projection. */
+    private static void sillUvGuards() throws Exception {
+        int checked = 0;
+        var material = IndigoRenderer.INSTANCE.materialFinder().find();
+        for (String texture : new String[]{"block/aganite_block", "block/glazing_silver"}) {
+            try (SpriteContents contents = new SpriteContents(new Identifier("erydon", texture),
+                    new SpriteDimensions(16, 16), new NativeImage(16, 16, false), AnimationResourceMetadata.EMPTY)) {
+                Sprite sprite = new Sprite(new Identifier("erydon", "sill_uv_probe_atlas"), contents, 64, 64, 16, 32) {};
+                SpriteFinder finder = (SpriteFinder) Proxy.newProxyInstance(SpriteFinder.class.getClassLoader(),
+                        new Class<?>[]{SpriteFinder.class}, (proxy, method, args) -> sprite);
+                for (Direction facing : Direction.Type.HORIZONTAL) for (Direction face : new Direction[]{Direction.UP, Direction.DOWN}) {
+                    for (boolean crossesBoundary : new boolean[]{false, true}) {
+                        double low = crossesBoundary ? .75 : .875, high = .9375;
+                        double[][] points = face == Direction.UP
+                                ? new double[][]{{.25, high}, {.75, high}, {.75, low}, {.25, low}}
+                                : new double[][]{{.25, low}, {.75, low}, {.75, high}, {.25, high}};
+                        int[] data = new int[32];
+                        double[][] expected = new double[4][];
+                        for (int vertex = 0; vertex < 4; vertex++) {
+                            double[] before = rotate(points[vertex][0], points[vertex][1], facing);
+                            expected[vertex] = rotate(points[vertex][0], points[vertex][1] - 13 / 16.0, facing);
+                            int at = vertex * 8;
+                            data[at] = Float.floatToRawIntBits((float) before[0]);
+                            data[at + 1] = Float.floatToRawIntBits(.25F);
+                            data[at + 2] = Float.floatToRawIntBits((float) before[1]);
+                            data[at + 3] = -1;
+                            data[at + 4] = Float.floatToRawIntBits(sprite.getFrameU(vertex < 2 ? 2 : 14));
+                            data[at + 5] = Float.floatToRawIntBits(sprite.getFrameV(vertex % 2 == 0 ? 3 : 13));
+                        }
+                        BakedQuad source = new BakedQuad(data, -1, face, sprite, true);
+                        BakedQuad fallback = WindowSillTransform.translate(source, facing);
+                        var mutable = new MutableQuadViewImpl() {
+                            { this.data = new int[EncodingFormat.TOTAL_STRIDE]; clear(); }
+                            @Override public void emitDirectly() { throw new AssertionError("UV fixture unexpectedly emitted"); }
+                        };
+                        mutable.fromVanilla(source, material, null);
+                        for (int vertex = 0; vertex < 4; vertex++) mutable.normal(vertex, 0, face.getOffsetY(), 0);
+                        var transform = new WindowSillTransform(facing);
+                        field(WindowSillTransform.class, "spriteFinder").set(transform, finder);
+                        require(transform.transform(mutable), "Sill translation rejected its quad");
+                        boolean project = texture.endsWith("_block") && !crossesBoundary;
+                        float[] u = new float[4], v = new float[4];
+                        for (int vertex = 0; vertex < 4; vertex++) {
+                            u[vertex] = (float) (expected[vertex][0] * 16);
+                            v[vertex] = (float) ((face == Direction.UP ? expected[vertex][1] : 1 - expected[vertex][1]) * 16);
+                        }
+                        float centreU = (u[0] + u[1] + u[2] + u[3]) / 4;
+                        float centreV = (v[0] + v[1] + v[2] + v[3]) / 4;
+                        for (int vertex = 0; vertex < 4; vertex++) {
+                            int at = vertex * 8;
+                            require(Math.abs(mutable.x(vertex) - expected[vertex][0]) < .000001
+                                            && Math.abs(mutable.z(vertex) - expected[vertex][1]) < .000001
+                                            && Math.abs(Float.intBitsToFloat(fallback.getVertexData()[at]) - expected[vertex][0]) < .000001
+                                            && Math.abs(Float.intBitsToFloat(fallback.getVertexData()[at + 2]) - expected[vertex][1]) < .000001,
+                                    "Native/fallback sill translation moved a quad away from its frame");
+                            float expectedU = project ? sprite.getFrameU(u[vertex] + sprite.getAnimationFrameDelta() * (centreU - u[vertex]))
+                                    : Float.intBitsToFloat(data[at + 4]);
+                            float expectedV = project ? sprite.getFrameV(v[vertex] + sprite.getAnimationFrameDelta() * (centreV - v[vertex]))
+                                    : Float.intBitsToFloat(data[at + 5]);
+                            require(Math.abs(mutable.u(vertex) - expectedU) < .000001
+                                            && Math.abs(mutable.v(vertex) - expectedV) < .000001
+                                            && Math.abs(Float.intBitsToFloat(fallback.getVertexData()[at + 4]) - expectedU) < .000001
+                                            && Math.abs(Float.intBitsToFloat(fallback.getVertexData()[at + 5]) - expectedV) < .000001,
+                                    "Sill UVs projected across an atlas boundary, changed glazing, or lost their world phase");
+                            require(mutable.hasNormal(vertex) && Math.abs(mutable.normalX(vertex)) < .000001
+                                            && Math.abs(mutable.normalY(vertex) - face.getOffsetY()) < .000001
+                                            && Math.abs(mutable.normalZ(vertex)) < .000001,
+                                    "Translating an inward sill changed its normals");
+                        }
+                        require(mutable.lightFace() == face && fallback.getFace() == face, "Sill translation changed its lighting face");
+                        checked++;
+                    }
+                }
+            }
+        }
+        System.out.println("ERYDON_GEORGIAN_SILL_UV_OK cases=" + checked
+                + " nativeFallback=exact stoneWorldProjection=safe boundaryCrossing+glazing=authored normals=preserved");
     }
 
     private static double depth(BakedQuad quad, int vertex, Direction facing) {

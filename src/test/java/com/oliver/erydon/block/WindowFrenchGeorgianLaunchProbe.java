@@ -17,6 +17,7 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.BlockMirror;
+import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.math.BlockPos;
@@ -55,9 +56,11 @@ public final class WindowFrenchGeorgianLaunchProbe implements PreLaunchEntrypoin
         int states = states(block);
         int layouts = layouts(block);
         cornerAttachment(block);
+        WindowDebugControlsLaunchChecks.run(block);
+        sillInheritance(block);
         GeorgianWindowRenderingLaunchChecks.run(block);
         System.out.println("ERYDON_GEORGIAN_WINDOWS_OK states=" + states + " layouts=" + layouts
-                + " oldStateKeys=preserved closedStraightCollision=single openClusterCentres=clear cornerOpenings=clear clusterSync=preserved cornerAttachment=runEnds");
+                + " oldStateKeys=preserved closedStraightCollision=single openClusterCentres=clear cornerOpenings=clear clusterSync=preserved cornerAttachment=runEnds sillSide=legacyDefault+clusterSync+placementInheritance");
     }
 
     private static void cornerAttachment(WindowFrenchGeorgianBlock block) throws Exception {
@@ -84,7 +87,9 @@ public final class WindowFrenchGeorgianLaunchProbe implements PreLaunchEntrypoin
 
     private static int states(WindowFrenchGeorgianBlock block) throws Exception {
         require(Piece.values().length == 8, "Published piece schema changed");
-        require(block.getStateManager().getStates().size() == 1536, "Published state combinations changed");
+        require(SillSide.values().length == 2 && block.getDefaultState().get(SILL_SIDE) == SillSide.OUTWARD,
+                "The new sill side must default to the published outward appearance");
+        require(block.getStateManager().getStates().size() == 3072, "Sill side must only double the published 1536 states");
         Method oldFace = WindowFrenchGeorgianBlock.class.getDeclaredMethod("getWindowFaceShape", BlockState.class,
                 Direction.class, Piece.class, DoorHinge.class, boolean.class);
         oldFace.setAccessible(true);
@@ -92,11 +97,24 @@ public final class WindowFrenchGeorgianLaunchProbe implements PreLaunchEntrypoin
         for (BlockState state : block.getStateManager().getStates()) {
             var saved = NbtHelper.fromBlockState(state);
             require(NbtHelper.toBlockState(Registries.BLOCK.getReadOnlyWrapper(), saved) == state,
-                    "An old piece/glass/hinge/corner state no longer round-trips");
+                    "A piece/glass/hinge/corner/sill-side state no longer round-trips");
+            if (state.get(SILL_SIDE) == SillSide.OUTWARD) {
+                saved.getCompound("Properties").remove("sill_side");
+                require(NbtHelper.toBlockState(Registries.BLOCK.getReadOnlyWrapper(), saved) == state,
+                        "A published state without sill_side no longer loads as outward");
+            }
             Piece expected = state.get(CORNER) == Corner.NONE && !state.get(OPEN)
                     ? state.get(PIECE).single() : state.get(PIECE);
             require(primaryPiece(state) == expected, "Wrong effective primary piece");
             VoxelShape shape = collision(block, state);
+            VoxelShape frameOnly = collision(block, state.with(SILL, false).with(SILL_SIDE, SillSide.OUTWARD));
+            VoxelShape expectedShape = frameOnly;
+            if (state.get(SILL)) {
+                expectedShape = VoxelShapes.combine(expectedShape, expectedSill(state.get(FACING), state.get(SILL_SIDE)), BooleanBiFunction.OR);
+                if (secondaryFacing(state) != null) expectedShape = VoxelShapes.combine(expectedShape,
+                        expectedSill(secondaryFacing(state), state.get(SILL_SIDE)), BooleanBiFunction.OR);
+            }
+            same(expectedShape, shape, "Changing sill side changed collision outside the sill or lost a corner arm");
             if (state.get(CORNER) == Corner.NONE) {
                 if (!state.get(OPEN)) {
                     same(shape, collision(block, state.with(PIECE, state.get(PIECE).single())),
@@ -143,6 +161,11 @@ public final class WindowFrenchGeorgianLaunchProbe implements PreLaunchEntrypoin
                 BlockState mirrored = block.mirror(state, mirror);
                 require(block.mirror(mirrored, mirror) == state, "Mirroring is not reversible");
                 require(primaryPiece(mirrored).single() == state.get(PIECE).single(), "Mirror changed upper/lower placement");
+                require(mirrored.get(SILL_SIDE) == state.get(SILL_SIDE), "Mirroring changed inward/outward sill selection");
+            }
+            for (BlockRotation rotation : BlockRotation.values()) {
+                require(block.rotate(state, rotation).get(SILL_SIDE) == state.get(SILL_SIDE),
+                        "Rotation changed inward/outward sill selection");
             }
             checked++;
         }
@@ -162,7 +185,8 @@ public final class WindowFrenchGeorgianLaunchProbe implements PreLaunchEntrypoin
                     // previously open save, so reflow must restore horizontal end metadata.
                     Piece piece = y == heights[column] - 1 ? Piece.UPPER_SINGLE : Piece.LOWER_SINGLE;
                     world.states.put(pos, block.getDefaultState().with(FACING, facing).with(OPEN, true)
-                            .with(PIECE, piece).with(HINGE, column % 2 == 0 ? DoorHinge.LEFT : DoorHinge.RIGHT));
+                            .with(PIECE, piece).with(HINGE, column % 2 == 0 ? DoorHinge.LEFT : DoorHinge.RIGHT)
+                            .with(SILL_SIDE, column % 2 == 0 ? SillSide.INWARD : SillSide.OUTWARD));
                 }
                 Set<BlockPos> positions = Set.copyOf(world.states.keySet());
                 require(block.recalcCluster(world, anchor).recalculated(), "Straight cluster did not recalculate");
@@ -172,6 +196,8 @@ public final class WindowFrenchGeorgianLaunchProbe implements PreLaunchEntrypoin
                     BlockState actual = world.getBlockState(anchor.offset(right, column).up(y));
                     require(actual.get(HINGE) == (column % 2 == 0 ? DoorHinge.LEFT : DoorHinge.RIGHT),
                             "Adjacent columns lost their hinges");
+                    require(actual.get(SILL_SIDE) == (column % 2 == 0 ? SillSide.INWARD : SillSide.OUTWARD),
+                            "Column reflow reset the selected sill side");
                 }
                 sync(block, world, anchor);
                 checked++;
@@ -274,20 +300,62 @@ public final class WindowFrenchGeorgianLaunchProbe implements PreLaunchEntrypoin
         Method glass = WindowFrenchGeorgianBlock.class.getDeclaredMethod("applyGlassToCluster", World.class, BlockPos.class, WindowArchBlock.Glass.class);
         open.setAccessible(true); glass.setAccessible(true);
         Map<BlockPos, BlockState> layout = Map.copyOf(world.states);
-        for (WindowArchBlock.Glass finish : WindowArchBlock.Glass.values()) {
-            glass.invoke(block, world, anchor, finish);
-            require(world.states.values().stream().allMatch(state -> state.get(GLASS) == finish), "Cluster glazing stopped synchronizing");
-            for (boolean value : new boolean[]{true, false}) {
-                open.invoke(block, world, anchor, value);
-                require(world.states.values().stream().allMatch(state -> state.get(OPEN) == value), "Adjacent windows stopped opening together");
-                for (var entry : layout.entrySet()) {
-                    BlockState before = entry.getValue();
-                    BlockState after = world.getBlockState(entry.getKey());
-                    require(before.with(OPEN, value).with(GLASS, finish) == after,
-                            "Opening/glazing changed the fanlight, sill, hinge or cluster-end placement");
+        for (SillSide side : SillSide.values()) {
+            // Exercise the actual single-property edit hook used by the debug stick.
+            // Straight columns and both corner arms must follow the edited owner.
+            BlockState before = world.getBlockState(anchor);
+            if (before.get(SILL_SIDE) == side) before = before.with(SILL_SIDE,
+                    side == SillSide.INWARD ? SillSide.OUTWARD : SillSide.INWARD);
+            world.states.put(anchor, before.with(SILL_SIDE, side));
+            block.onBlockAdded(world.getBlockState(anchor), world, anchor, before, false);
+            require(world.states.values().stream().allMatch(state -> state.get(SILL_SIDE) == side),
+                    "A sill-side edit did not synchronize every connected window/corner arm");
+            require(block.recalcCluster(world, anchor).recalculated(), "Sill-side reflow failed");
+            require(world.states.values().stream().allMatch(state -> state.get(SILL_SIDE) == side),
+                    "Cluster reflow reset the selected sill side");
+            for (WindowArchBlock.Glass finish : WindowArchBlock.Glass.values()) {
+                glass.invoke(block, world, anchor, finish);
+                require(world.states.values().stream().allMatch(state -> state.get(GLASS) == finish), "Cluster glazing stopped synchronizing");
+                for (boolean value : new boolean[]{true, false}) {
+                    open.invoke(block, world, anchor, value);
+                    require(world.states.values().stream().allMatch(state -> state.get(OPEN) == value), "Adjacent windows stopped opening together");
+                    for (var entry : layout.entrySet()) {
+                        BlockState expected = entry.getValue().with(SILL_SIDE, side).with(OPEN, value).with(GLASS, finish);
+                        require(expected == world.getBlockState(entry.getKey()),
+                                "Sill/open/glazing synchronization changed the fanlight, sill, hinge or cluster-end placement");
+                    }
                 }
             }
         }
+    }
+
+    private static void sillInheritance(WindowFrenchGeorgianBlock block) throws Exception {
+        BlockPos anchor = new BlockPos(0, 64, 0);
+        for (Direction facing : Direction.Type.HORIZONTAL) for (SillSide side : SillSide.values()) {
+            for (Corner corner : Corner.values()) {
+                TestWorld world = world();
+                BlockState source = block.getDefaultState().with(FACING, facing).with(CORNER, corner)
+                        .with(SILL_SIDE, side).with(GLASS, WindowArchBlock.Glass.TWO_WAY).with(OPEN, true).with(HINGE, DoorHinge.RIGHT);
+                world.states.put(anchor, source);
+                for (Direction extension : new Direction[]{Direction.UP, facing.rotateYClockwise()}) {
+                    BlockPos target = anchor.offset(extension);
+                    var context = new AutomaticItemPlacementContext(world, target, facing.getOpposite(),
+                            new ItemStack(Items.STONE), extension);
+                    BlockState placed = block.getPlacementState(context);
+                    require(placed != null && placed.get(SILL_SIDE) == side && placed.get(GLASS) == source.get(GLASS)
+                                    && placed.get(OPEN) == source.get(OPEN) && placed.get(HINGE) == source.get(HINGE),
+                            "An added window did not inherit sill side, glass, opening and hinge from its connected neighbour");
+                }
+            }
+        }
+    }
+
+    private static VoxelShape expectedSill(Direction facing, SillSide side) {
+        double z0 = side == SillSide.INWARD ? 1 / 16.0 : 0;
+        double z1 = side == SillSide.INWARD ? 3 / 16.0 : 1 / 8.0;
+        double[] first = rotate(0, 0, z0, facing), second = rotate(1, 1 / 32.0, z1, facing);
+        return VoxelShapes.cuboid(Math.min(first[0], second[0]), 0, Math.min(first[2], second[2]),
+                Math.max(first[0], second[0]), 1 / 32.0, Math.max(first[2], second[2]));
     }
 
     private static VoxelShape collision(WindowFrenchGeorgianBlock block, BlockState state) {

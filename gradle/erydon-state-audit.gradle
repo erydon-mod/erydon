@@ -183,6 +183,9 @@ tasks.register('auditErydonHighStateBlocks') {
         def counts = [
                 archArrangement: enumCount('block/ArchRomanesqueBlock.java', 'Arrangement', 48),
                 frenchPiece: enumCount('block/WindowFrenchGeorgianBlock.java', 'Piece', 10),
+                frenchCorner: enumCount('block/WindowFrenchGeorgianBlock.java', 'Corner', 3),
+                frenchSillSide: enumCount('block/WindowFrenchGeorgianBlock.java', 'SillSide', 2),
+                windowGlass: enumCount('block/WindowArchBlock.java', 'Glass', 2),
                 archWindowPiece: enumCount('block/WindowArchBlock.java', 'Piece', 9),
                 surroundSection: enumCount('block/SurroundBlock.java', 'Section', 35),
                 ceilingHidden: enumCount('block/CeilingBlock.java', 'CeilingHiddenState', 82),
@@ -341,11 +344,11 @@ tasks.register('auditErydonHighStateBlocks') {
                     return [states: 4 * counts.archArrangement * 3 * 2,
                             properties: "facing(4) * arrangement(${counts.archArrangement}) * width(3) * waterlogged(2)"]
                 case 'WindowFrenchGeorgianBlock':
-                    return [states: 4 * 2 * 2 * counts.frenchPiece * 2,
-                            properties: "facing(4) * open(2) * hinge(2) * piece(${counts.frenchPiece}) * sill(2)"]
+                    return [states: 4 * 2 * 2 * counts.frenchPiece * 2 * counts.windowGlass * counts.frenchCorner * counts.frenchSillSide,
+                            properties: "facing(4) * open(2) * hinge(2) * piece(${counts.frenchPiece}) * sill(2) * glass(${counts.windowGlass}) * corner(${counts.frenchCorner}) * sill_side(${counts.frenchSillSide})"]
                 case 'WindowArchBlock':
-                    return [states: 4 * 2 * counts.archWindowPiece * 2,
-                            properties: "facing(4) * open(2) * piece(${counts.archWindowPiece}) * sill(2)"]
+                    return [states: 4 * 2 * counts.archWindowPiece * 2 * counts.windowGlass,
+                            properties: "facing(4) * open(2) * piece(${counts.archWindowPiece}) * sill(2) * glass(${counts.windowGlass})"]
                 case 'SurroundBlock':
                 case 'HandedSurroundBlock':
                 case 'ModernSurroundBlock':

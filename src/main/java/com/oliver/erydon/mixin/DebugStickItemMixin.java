@@ -32,6 +32,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 
 // The later-applied lower-priority HEAD injection runs before the older companion's handler.
@@ -61,6 +62,11 @@ public abstract class DebugStickItemMixin {
         Block block = state.getBlock();
         List<Property<?>> visible = manager.getProperties().stream()
                 .filter(property -> !erydon$isHidden(block, property))
+                .sorted(Comparator.comparingInt(property ->
+                        (block instanceof WindowArchBlock || block instanceof WindowFrenchGeorgianBlock)
+                                && property == WindowArchBlock.GLASS ? 0
+                                : block instanceof WindowFrenchGeorgianBlock
+                                && property == WindowFrenchGeorgianBlock.SILL_SIDE ? 1 : 2))
                 .toList();
         return visible;
     }

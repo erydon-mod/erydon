@@ -54,8 +54,16 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
     public static final EnumProperty<DoorHinge> HINGE = Properties.DOOR_HINGE;
     public static final EnumProperty<Piece> PIECE = EnumProperty.of("piece", Piece.class);
     public static final BooleanProperty SILL = BooleanProperty.of("sill");
+    public static final EnumProperty<SillSide> SILL_SIDE = EnumProperty.of("sill_side", SillSide.class);
     public static final EnumProperty<WindowArchBlock.Glass> GLASS = WindowArchBlock.GLASS;
     public static final EnumProperty<Corner> CORNER = EnumProperty.of("corner", Corner.class);
+
+    public enum SillSide implements StringIdentifiable {
+        OUTWARD("outward"), INWARD("inward");
+        private final String name;
+        SillSide(String name) { this.name = name; }
+        @Override public String asString() { return name; }
+    }
 
     // Prevent re-entrant cluster sync loops when we update many blocks at once.
     private static final ThreadLocal<Boolean> SYNCING = ThreadLocal.withInitial(() -> false);
@@ -105,6 +113,7 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
         OPEN_UPPER_MULTI_RH,
 
         SILL,
+        SILL_INWARD,
         CORNER_POST,
         CORNER_FANLIGHT,
         CORNER_FANLIGHT_SINGLE_LH,
@@ -112,7 +121,7 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
     }
 
     private static final EnumMap<ShapeKey, VoxelShape[]> SHAPES = new EnumMap<>(ShapeKey.class);
-    private static final VoxelShape[] OPEN_CORNER_SHAPES = new VoxelShape[64];
+    private static final VoxelShape[] OPEN_CORNER_SHAPES = new VoxelShape[128];
 
     static {
         register(ShapeKey.CLOSED_LOWER_SINGLE, makeClosedLowerSingleShape());
@@ -140,6 +149,12 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
         register(ShapeKey.OPEN_UPPER_MULTI_RH, makeOpenUpperMultiRhShape());
 
         register(ShapeKey.SILL, makeSillShape());
+        VoxelShape outwardSill = makeSillShape();
+        VoxelShape[] inwardSill = {VoxelShapes.empty()};
+        outwardSill.forEachBox((x0, y0, z0, x1, y1, z1) -> inwardSill[0] = VoxelShapes.combine(
+                inwardSill[0], VoxelShapes.cuboid(1 - x1, y0, 3 / 16.0 - z1,
+                        1 - x0, y1, 3 / 16.0 - z0), BooleanBiFunction.OR));
+        register(ShapeKey.SILL_INWARD, inwardSill[0]);
         register(ShapeKey.CORNER_POST, VoxelShapes.cuboid(0, 0, 0, 3 / 16.0, 1, 3 / 16.0));
         VoxelShape fanlight = VoxelShapes.cuboid(0, 4.846 / 16, 0, 1, 1, 3 / 16.0);
         register(ShapeKey.CORNER_FANLIGHT, fanlight);
@@ -151,8 +166,10 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
             for (Direction facing : Direction.Type.HORIZONTAL) {
                 for (Corner corner : new Corner[]{Corner.LEFT, Corner.RIGHT}) {
                     for (boolean sill : new boolean[]{false, true}) {
-                        OPEN_CORNER_SHAPES[openCornerShapeIndex(kind, facing, corner, sill)] =
-                                makeOpenCornerShape(kind, facing, corner, sill);
+                        for (SillSide side : SillSide.values()) {
+                            OPEN_CORNER_SHAPES[openCornerShapeIndex(kind, facing, corner, sill, side)] =
+                                    makeOpenCornerShape(kind, facing, corner, sill, side);
+                        }
                     }
                 }
             }
@@ -199,6 +216,7 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
                 .with(HINGE, DoorHinge.LEFT)
                 .with(PIECE, Piece.LOWER_SINGLE)
                 .with(SILL, false)
+                .with(SILL_SIDE, SillSide.OUTWARD)
                 .with(GLASS, WindowArchBlock.Glass.NORMAL)
                 .with(CORNER, Corner.NONE)
         );
@@ -206,7 +224,7 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
 
     @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        builder.add(FACING, OPEN, HINGE, PIECE, SILL, GLASS, CORNER);
+        builder.add(FACING, OPEN, HINGE, PIECE, SILL, SILL_SIDE, GLASS, CORNER);
     }
 
     @Override
@@ -271,6 +289,7 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
             open = inherit.get(OPEN);
         }
         return getDefaultState().with(FACING, facing).with(OPEN, open).with(HINGE, hinge)
+                .with(SILL_SIDE, inherit == null ? SillSide.OUTWARD : inherit.get(SILL_SIDE))
                 .with(GLASS, inherit == null ? WindowArchBlock.Glass.NORMAL : inherit.get(GLASS));
     }
 
@@ -296,6 +315,7 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
         if (state.get(CORNER) != Corner.NONE) {
             applyOpenToCluster(world, pos, state.get(OPEN));
             applyGlassToCluster(world, pos, state.get(GLASS));
+            applySillSideToCluster(world, pos, state.get(SILL_SIDE));
         }
     }
 
@@ -328,13 +348,15 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
 
         boolean openChanged = state.get(OPEN) != oldState.get(OPEN);
         boolean glassChanged = state.get(GLASS) != oldState.get(GLASS);
+        boolean sillSideChanged = state.get(SILL_SIDE) != oldState.get(SILL_SIDE);
         boolean cornerChanged = state.get(CORNER) != oldState.get(CORNER);
-        if (!openChanged && !glassChanged && !cornerChanged) return;
+        if (!openChanged && !glassChanged && !sillSideChanged && !cornerChanged) return;
 
         boolean started = beginSync();
         try {
             if (openChanged) applyOpenToCluster(world, pos, state.get(OPEN));
             if (glassChanged) applyGlassToCluster(world, pos, state.get(GLASS));
+            if (sillSideChanged) applySillSideToCluster(world, pos, state.get(SILL_SIDE));
             if (cornerChanged) {
                 reflowConnectedAutoComponent(world, pos);
                 Direction oldSecondary = secondaryFacing(oldState);
@@ -413,6 +435,16 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
         }
     }
 
+    private void applySillSideToCluster(World world, BlockPos anchor, SillSide side) {
+        if (!world.getBlockState(anchor).isOf(this)) return;
+        for (BlockPos pos : collectConnectedComponent(world, anchor)) {
+            BlockState state = world.getBlockState(pos);
+            if (state.isOf(this) && state.get(SILL_SIDE) != side) {
+                world.setBlockState(pos, state.with(SILL_SIDE, side), Block.NOTIFY_LISTENERS);
+            }
+        }
+    }
+
     @Override
     public void afterBreak(World world, PlayerEntity player, BlockPos pos, BlockState state,
                            BlockEntity blockEntity, ItemStack tool) {
@@ -474,7 +506,8 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
             Piece piece = state.get(PIECE);
             int kind = piece.single() == Piece.LOWER_SINGLE ? 0
                     : piece != Piece.UPPER_SINGLE ? 1 : state.get(HINGE) == DoorHinge.LEFT ? 2 : 3;
-            return OPEN_CORNER_SHAPES[openCornerShapeIndex(kind, state.get(FACING), state.get(CORNER), state.get(SILL))];
+            return OPEN_CORNER_SHAPES[openCornerShapeIndex(kind, state.get(FACING), state.get(CORNER),
+                    state.get(SILL), state.get(SILL_SIDE))];
         }
         VoxelShape shape = getWindowFaceShape(state, state.get(FACING), primaryPiece(state),
                 state.get(HINGE), state.get(SILL));
@@ -487,12 +520,12 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
         return shape;
     }
 
-    private static int openCornerShapeIndex(int kind, Direction facing, Corner corner, boolean sill) {
-        return (((kind * 4 + facingIndex(facing)) * 2 + (corner == Corner.RIGHT ? 1 : 0)) * 2)
-                + (sill ? 1 : 0);
+    private static int openCornerShapeIndex(int kind, Direction facing, Corner corner, boolean sill, SillSide side) {
+        return ((((kind * 4 + facingIndex(facing)) * 2 + (corner == Corner.RIGHT ? 1 : 0)) * 2)
+                + (sill ? 1 : 0)) * 2 + side.ordinal();
     }
 
-    private static VoxelShape makeOpenCornerShape(int kind, Direction facing, Corner corner, boolean sill) {
+    private static VoxelShape makeOpenCornerShape(int kind, Direction facing, Corner corner, boolean sill, SillSide side) {
         Direction secondary = corner.secondaryFacing(facing);
         Direction postFacing = corner == Corner.RIGHT ? facing.rotateYClockwise() : facing;
         VoxelShape shape = SHAPES.get(ShapeKey.CORNER_POST)[facingIndex(postFacing)];
@@ -504,8 +537,9 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
                     BooleanBiFunction.OR);
         }
         if (sill) {
-            shape = VoxelShapes.combine(shape, SHAPES.get(ShapeKey.SILL)[facingIndex(facing)], BooleanBiFunction.OR);
-            shape = VoxelShapes.combine(shape, SHAPES.get(ShapeKey.SILL)[facingIndex(secondary)], BooleanBiFunction.OR);
+            VoxelShape[] sills = SHAPES.get(side == SillSide.INWARD ? ShapeKey.SILL_INWARD : ShapeKey.SILL);
+            shape = VoxelShapes.combine(shape, sills[facingIndex(facing)], BooleanBiFunction.OR);
+            shape = VoxelShapes.combine(shape, sills[facingIndex(secondary)], BooleanBiFunction.OR);
         }
         return shape;
     }
@@ -523,7 +557,8 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
 
         if (sill) {
             // Avoid simplify-heavy unions while Minecraft rebuilds the global shape cache.
-            base = VoxelShapes.combine(base, SHAPES.get(ShapeKey.SILL)[idx], BooleanBiFunction.OR);
+            base = VoxelShapes.combine(base, SHAPES.get(state.get(SILL_SIDE) == SillSide.INWARD
+                    ? ShapeKey.SILL_INWARD : ShapeKey.SILL)[idx], BooleanBiFunction.OR);
         }
 
         return base;
