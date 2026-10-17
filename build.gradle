@@ -309,7 +309,7 @@ tasks.withType(ProcessResources).configureEach {
     filteringCharset = 'UTF-8'
     inputs.property('modVersion', project.version.toString())
     inputs.property('familyCompatibilityGeneration', familyCompatibilityGeneration)
-    exclude('**/*.class', '**/*.jar', '**/*.zip')
+    exclude('**/*.class', '**/*.jar', '**/*.zip', '**/*.log', '**/*.log.gz')
     filesMatching('fabric.mod.json') {
         expand('version': project.version)
     }
@@ -325,6 +325,8 @@ tasks.named('processResources') {
         project.delete(fileTree(destinationDir) {
             include 'assets/*/texture_aliases/**'
             include 'assets/*/texture_blobs/**'
+            // Also clear logs copied by an earlier incremental resource build.
+            include '**/*.log', '**/*.log.gz'
         })
     }
     doLast {
@@ -411,6 +413,10 @@ tasks.register('auditErydonJar') {
         try {
             def entries = zip.entries().toList()
             def entryNames = entries.collect { it.name }
+            def runtimeLogEntries = entryNames.findAll { name ->
+                def lowerName = name.toLowerCase(Locale.ROOT)
+                lowerName.endsWith('.log') || lowerName.endsWith('.log.gz')
+            }
             def nestedContinuityJars = entryNames.findAll {
                 it.toLowerCase(Locale.ROOT).contains('continuity') && it.toLowerCase(Locale.ROOT).endsWith('.jar')
             }
@@ -437,6 +443,9 @@ tasks.register('auditErydonJar') {
                     'java'        : '>=17'
             ]
             def metadataErrors = []
+            if (!runtimeLogEntries.isEmpty()) {
+                metadataErrors.add("release jar contains runtime logs: ${runtimeLogEntries}")
+            }
             if (jarFile.name != expectedJarName) {
                 metadataErrors.add("jar filename '${jarFile.name}' does not match '${expectedJarName}'")
             }
@@ -582,6 +591,7 @@ tasks.register('auditErydonJar') {
                     ".properties matches source byte-for-byte: ${yesNo(sourceProperties == jarProperties)}",
                     "required dependencies: ${requiredDependencies.collect { key, value -> "${key}=${dependencies[key]}" }.join(', ')}",
                     "release metadata consistent: ${yesNo(metadataErrors.isEmpty())}",
+                    "runtime log files: ${runtimeLogEntries.size()}",
                     "nested Continuity jar absent: ${yesNo(nestedContinuityJars.isEmpty())}",
                     "CTM property files found: ${ctmEntries.size()}",
                     "CTM property files with UTF-8 BOM: ${ctmEntriesWithUtf8Bom.size()}",
