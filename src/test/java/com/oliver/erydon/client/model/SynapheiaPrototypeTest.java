@@ -580,6 +580,7 @@ final class SynapheiaPrototypeTest {
         int cutoutOverlays = 0;
         int cutoutMippedOverlays = 0;
         Set<Identifier> georgianArches = new java.util.HashSet<>();
+        Set<Identifier> grandCopings = new java.util.HashSet<>();
         try (var paths = Files.walk(namespaceRoot.resolve("optifine/ctm"))) {
             for (Path path : paths.filter(file -> file.toString().endsWith(".properties")).toList()) {
                 Properties properties = new Properties();
@@ -602,6 +603,16 @@ final class SynapheiaPrototypeTest {
                     assertEquals("6", properties.getProperty("width"), relative);
                     assertEquals("6", properties.getProperty("height"), relative);
                 }
+                if (relative.endsWith("/coping_georgian_grand.properties")) {
+                    assertEquals(SynapheiaManifest.Method.REPEAT, rule.method(), relative);
+                    assertEquals(1, blocks.size(), relative);
+                    Identifier block = blocks.iterator().next();
+                    assertTrue(block.getPath().endsWith("_coping_georgian_grand"), relative);
+                    assertTrue(grandCopings.add(block), "Duplicate Grand Coping rule: " + block);
+                    assertEquals("6", properties.getProperty("width"), relative);
+                    assertEquals("6", properties.getProperty("height"), relative);
+                    assertEquals(36, rule.tiles().size(), relative);
+                }
                 if (rule.method() == SynapheiaManifest.Method.REPEAT) {
                     repeatRules++;
                 } else {
@@ -622,7 +633,8 @@ final class SynapheiaPrototypeTest {
             }
         }
         assertEquals(27 * 6, georgianArches.size(), "Every Georgian material and finish needs its own native rule");
-        assertEquals(1322 + 27 * 6, repeatRules); // Existing families plus pack-independent Georgian arches.
+        assertEquals(27 * 5, grandCopings.size(), "Every Grand Coping material and finish needs its own native rule");
+        assertEquals(1322 + 27 * 6 + 27 * 5, repeatRules); // Existing families, Georgian arches and Grand Coping.
         assertEquals(192, overlayRules);
         assertEquals(192, sourceOverlayRules);
         assertEquals(192, ruleConnectedOverlays);

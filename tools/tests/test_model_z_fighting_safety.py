@@ -169,7 +169,12 @@ class ModelZFightingSafetyTests(unittest.TestCase):
             re.findall(r'authoring_models/block/([^"\\]+\.json)', java)
         )
         self.assertEqual(loader_paths, set(scanner.REGISTERED_RAW_MODEL_PATHS))
-        self.assertEqual(len(loader_paths), 168)
+        self.assertEqual(len(loader_paths), 174)
+        self.assertEqual(
+            {f"coping/georgian_grand/coping_georgian_grand_{pose}.json"
+             for pose in ("flat", "slope", "shallow_lower", "shallow_upper", "steep_lower", "steep_upper")},
+            {path for path in loader_paths if path.startswith("coping/georgian_grand/")},
+        )
 
     def test_ordinary_file_audit_uses_raw_transforms_only_for_registered_models(self) -> None:
         repository = TOOLS.parent
@@ -238,6 +243,19 @@ class ModelZFightingSafetyTests(unittest.TestCase):
             "coping/georgian/coping_georgian_steep_lower.json": 6,
             "coping/georgian/coping_georgian_steep_upper.json": 6,
         }
+        # The saved Grand master retains two bands of authored bevel caps.
+        # Their cropped UVs differ from the band sides: they are safe only
+        # because CopingGeometry clips covered caps even for standalone joined(0).
+        # The separate Grand overlap regression directly proves all 96 cap pairs
+        # clip to zero area, including three slope pairs missed by bulk buckets.
+        intentional_grand_coping_overlaps = {
+            "coping/georgian_grand/coping_georgian_grand_flat.json": 16,
+            "coping/georgian_grand/coping_georgian_grand_slope.json": 13,
+            "coping/georgian_grand/coping_georgian_grand_shallow_lower.json": 16,
+            "coping/georgian_grand/coping_georgian_grand_shallow_upper.json": 16,
+            "coping/georgian_grand/coping_georgian_grand_steep_lower.json": 16,
+            "coping/georgian_grand/coping_georgian_grand_steep_upper.json": 16,
+        }
         coping_end_pairs = {
             tuple(sorted((("upper_band", face), (bevel, face))))
             for face, bevel in (
@@ -252,6 +270,7 @@ class ModelZFightingSafetyTests(unittest.TestCase):
         }
         intentional_exact_same_overlaps = {
             **intentional_coping_overlaps,
+            **intentional_grand_coping_overlaps,
             **intentional_triple_panel_overlaps,
             **intentional_georgian_slope_overlaps,
         }
@@ -320,6 +339,26 @@ class ModelZFightingSafetyTests(unittest.TestCase):
                         relative,
                     )
                 observed_intentional_overlaps[relative] = len(same_findings)
+                if relative in intentional_grand_coping_overlaps:
+                    for finding in same_findings:
+                        indices = [finding[side]["element"] for side in ("a", "b")]
+                        self.assertTrue(all(0 <= index < 12 for index in indices), relative)
+                        parts = [document["elements"][index] for index in indices]
+                        band_parts = [part for part in parts if part["name"] in {"upper_band", "lower_band"}]
+                        self.assertEqual(1, len(band_parts), relative)
+                        band = band_parts[0]["name"]
+                        cap = next(part for part in parts if part is not band_parts[0])
+                        self.assertEqual(band, cap.get("erydon_coping_band", "upper_band"), relative)
+                        self.assertEqual(finding["a"]["face"], finding["b"]["face"], relative)
+                        face = finding["a"]["face"]
+                        edge_names = {"edge_north", "edge_south"} if face in {"east", "west"} else {"edge_east", "edge_west"}
+                        self.assertIn(face, {"north", "south", "east", "west"}, relative)
+                        names = {part["name"] for part in parts}
+                        self.assertIn(band, names, relative)
+                        self.assertEqual(1, len(names & edge_names), relative)
+                        for part in parts:
+                            self.assertEqual("#stone", part["faces"][face]["texture"], relative)
+                            self.assertNotIn("erydon_coping_corner", part, relative)
                 if relative in intentional_coping_overlaps:
                     expected_pairs = coping_end_pairs | (
                         flat_east_pairs if relative.endswith("_flat.json") else set()
@@ -344,7 +383,7 @@ class ModelZFightingSafetyTests(unittest.TestCase):
             )
             authored_cullfaces += len(scanner._raw_cull_boundary_state(document))
         self.assertEqual(observed_intentional_overlaps, intentional_exact_same_overlaps)
-        self.assertEqual(exact_same, 1387)
+        self.assertEqual(exact_same, 1480)
         self.assertEqual(georgian_near_contacts, {
             "alcove/alcove_georgian_single_top.json": 3,
             "alcove/alcove_georgian_icon.json": 3,
@@ -516,7 +555,7 @@ class ModelZFightingSafetyTests(unittest.TestCase):
             report = json.loads(json_report.read_text(encoding="utf-8"))
             self.assertEqual(report["mode"], "report-only")
             self.assertIs(report["sourceWrites"], False)
-            self.assertIn("168 registered raw-authoring models", report["policy"]["rawTransforms"])
+            self.assertIn("174 registered raw-authoring models", report["policy"]["rawTransforms"])
             self.assertEqual(report["summary"]["files"], len(before))
             self.assertGreaterEqual(report["summary"]["auto_candidates"], 2)
             with csv_report.open(encoding="utf-8", newline="") as stream:
@@ -898,7 +937,7 @@ class ModelZFightingSafetyTests(unittest.TestCase):
                 raw_canonical_root=raw_root,
                 include_full_recess_repair=True,
             )
-            self.assertEqual(plan["summary"]["registeredRawFilesScanned"], 168)
+            self.assertEqual(plan["summary"]["registeredRawFilesScanned"], 174)
             self.assertEqual(plan["summary"]["rawExactSameFacingFindingsBefore"], 1)
             self.assertEqual(plan["summary"]["predictedRawExactSameFacingFindingsAfter"], 0)
             self.assertEqual(plan["summary"]["predictedUvRegressions"], 0)

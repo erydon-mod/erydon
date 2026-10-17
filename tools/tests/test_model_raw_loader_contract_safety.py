@@ -26,6 +26,12 @@ EXPECTED_AUTHORING_MODELS = {
     "coping_georgian/shallow_upper": "authoring_models/block/coping/georgian/coping_georgian_shallow_upper.json",
     "coping_georgian/steep_lower": "authoring_models/block/coping/georgian/coping_georgian_steep_lower.json",
     "coping_georgian/steep_upper": "authoring_models/block/coping/georgian/coping_georgian_steep_upper.json",
+    "coping_georgian_grand/flat": "authoring_models/block/coping/georgian_grand/coping_georgian_grand_flat.json",
+    "coping_georgian_grand/slope": "authoring_models/block/coping/georgian_grand/coping_georgian_grand_slope.json",
+    "coping_georgian_grand/shallow_lower": "authoring_models/block/coping/georgian_grand/coping_georgian_grand_shallow_lower.json",
+    "coping_georgian_grand/shallow_upper": "authoring_models/block/coping/georgian_grand/coping_georgian_grand_shallow_upper.json",
+    "coping_georgian_grand/steep_lower": "authoring_models/block/coping/georgian_grand/coping_georgian_grand_steep_lower.json",
+    "coping_georgian_grand/steep_upper": "authoring_models/block/coping/georgian_grand/coping_georgian_grand_steep_upper.json",
     "column_gothic/plinth": "authoring_models/block/column/gothic/column_gothic_plinth.json",
     "column_gothic/base": "authoring_models/block/column/gothic/column_gothic_base.json",
     "column_gothic/pillar": "authoring_models/block/column/gothic/column_gothic_pillar.json",
@@ -291,6 +297,7 @@ class RawLoaderSourceContractTests(unittest.TestCase):
             flags=re.DOTALL,
         )
 
+        self.assertEqual(174, len(EXPECTED_AUTHORING_MODELS))
         self.assertEqual(len(EXPECTED_AUTHORING_MODELS), initializer.count("Map.entry("))
         self.assertEqual(len(EXPECTED_AUTHORING_MODELS), len(entries), "Every authoring entry must match the locked path form")
         self.assertEqual(EXPECTED_AUTHORING_MODELS, dict(entries))
