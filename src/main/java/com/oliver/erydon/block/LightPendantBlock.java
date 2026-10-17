@@ -60,7 +60,9 @@ public final class LightPendantBlock extends Block implements ClusterRebuildable
     }
 
     public static int luminance(BlockState state) {
-        return state.get(LIT) ? ErydonConfig.pendantLightLevel() : 0;
+        Part part = state.get(PART);
+        return state.get(LIT) && (part == Part.SINGLE || part == Part.BOTTOM)
+                ? ErydonConfig.pendantLightLevel() : 0;
     }
 
     @Override
