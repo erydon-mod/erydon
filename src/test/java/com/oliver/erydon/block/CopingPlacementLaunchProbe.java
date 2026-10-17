@@ -61,6 +61,7 @@ public final class CopingPlacementLaunchProbe implements PreLaunchEntrypoint {
             CornicePerformanceLaunchChecks.run();
             com.oliver.erydon.client.model.CorniceModelLoadingLaunchChecks.run();
             com.oliver.erydon.client.model.CorniceGeometryPerformanceLaunchChecks.run();
+            com.oliver.erydon.client.model.PendantUvLaunchChecks.run();
             com.oliver.erydon.client.model.CopingMeshProjectionLaunchChecks.run();
             com.oliver.erydon.client.model.SynapheiaCubeConnectionsLaunchChecks.run();
             com.oliver.erydon.migration.ReiSearchLaunchChecks.run();
