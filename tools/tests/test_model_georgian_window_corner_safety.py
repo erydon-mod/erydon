@@ -59,6 +59,12 @@ def fixed_frame_geometry(model):
         if element["from"][1] == 0 and element["to"][1] == 14.5:
             element = copy.deepcopy(element)
             element["from"][1] = 5.852
+        if element["from"][1] == 4.852 and element["to"][1] == 5.852:
+            # Opening the lower jamb exposes the new rail's outer ends. Compare
+            # the common centre here; exact visible end coverage is checked below.
+            element = copy.deepcopy(element)
+            element["from"][0] = max(1.5, element["from"][0])
+            element["to"][0] = min(14.5, element["to"][0])
         # The old outer leaf's top only reaches Y5.856. It is not fixed stone.
         if max(point[2] for point in vertices) > 3.001:
             continue
@@ -106,6 +112,17 @@ class GeorgianWindowCornerSafetyTest(unittest.TestCase):
             self.assertEqual(expected, generator.load(path), str(path.relative_to(ROOT)))
 
     def test_fixed_fanlights_retain_exact_geometry_uvs_and_glass_coatings(self):
+        templates = sorted(generator.MODELS.glob("window_french_georgian_*upper*.json"))
+        self.assertEqual(16, len(templates))
+        for path in templates:
+            model = generator.load(path)
+            self.assertTrue(all("uv" not in face for element in model["elements"]
+                                for face in element["faces"].values()), path.name)
+            # Every cropped rail end remains covered by the original solid jamb.
+            for x in (.25, .75, 1.25, 2, 14, 14.75, 15.25, 15.75):
+                for y, z in itertools.product((4.86, 5.35, 5.84), (.01, 1.5, 2.99)):
+                    self.assertTrue(any(inside((x, y, z), solid) for solid in model["elements"]),
+                                    (path.name, x, y, z))
         for suffix, (removed, _) in generator.WINGS.items():
             original = generator.load(generator.MODELS / f"window_french_georgian_open_upper_{suffix}.json")
             derived = generator.load(generator.MODELS / f"window_french_georgian_open_corner_upper_{suffix}.json")
@@ -131,7 +148,8 @@ class GeorgianWindowCornerSafetyTest(unittest.TestCase):
     def test_open_cluster_keeps_single_fanlights_and_only_original_outer_wings(self):
         source = generator.load(generator.MODELS / "window_french_georgian_open_upper_single_lh.json")
         removed = generator.WINGS["single_lh"][0] | {34}
-        fixed = [element for index, element in enumerate(source["elements"]) if index not in removed]
+        fixed = [copy.deepcopy(element) for index, element in enumerate(source["elements"]) if index not in removed]
+        fixed[18]["from"][0] = 0  # The clipped jamb exposes the authored full-width rail.
         jamb = copy.deepcopy(source["elements"][34])
         jamb["from"][1] = 5.852
         jamb["faces"]["down"].pop("cullface")

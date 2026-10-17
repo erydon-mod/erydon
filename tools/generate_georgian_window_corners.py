@@ -24,13 +24,13 @@ MODEL_ID = "erydon:block/window/french_georgian/"
 # occupy the same depth as a fixed fanlight.
 WINGS = {
     "single_lh": ({0, 3, 4, 5, 14, 23, 24, 33, 35, 36},
-                  "2e54d3f3d32365f88e300f4d671d300ca45476e5fd2099c5fd0966e387fd4673"),
+                  "4510d3aecb435d606b6ab55f53311170a9bb3a3765184bf2594890cf0ce6dfc9"),
     "single_rh": ({0, 10, 11, 12, 13, 23, 24, 33, 34, 36},
-                  "1d73ad0e58b604bf69837d0759c7de95d88310d4ffaaeb6227641492e1e44ed7"),
+                  "5589f32a9fadc9b7e74444495c5ff2a1cf0d728b3fe3bdb768a4641de028121d"),
     "multi_lh": ({1, 2, 3, 4, 12, 13, 14, 15, 16, 42},
-                 "c67d7ae7a4293d62cae906e76298a4624f69a3c8004d5ef9e21c7667f8f2bbaa"),
+                 "a1649babb5ee17a612de0e1136014e0b3bd7dda624f4bb96b252f084038eb88e"),
     "multi_rh": ({1, 2, 3, 4, 5, 13, 15, 16, 17, 43},
-                 "1e46234cf495dc81e96598f71a2e062b4fc9d420e8e6bc56fd71cb03e27a861e"),
+                 "1cada61e07677d7b072b9d1951f48a79eac7748ad664c915434f4a9172eee7f3"),
 }
 
 
@@ -38,13 +38,11 @@ WINGS = {
 # element faces. Keep every original face, and cap only the newly exposed cuts.
 # Indices are in the derived assemblies, protected by the source hashes above.
 CUT_CAPS = {
-    "open_corner_upper_single_lh": {18: ("east",)},
-    "open_corner_upper_single_rh": {18: ("west",)},
-    "open_corner_upper_multi_lh": {12: ("east",), 32: ("down",)},
-    "open_corner_upper_multi_rh": {12: ("west",), 33: ("down",)},
-    "open_upper_single_mid": {18: ("west", "east")},
+    "open_corner_upper_multi_lh": {32: ("down",)},
+    "open_corner_upper_multi_rh": {33: ("down",)},
+    "open_upper_single_mid": {18: ("west",)},
     "open_upper_single_edge_lh": {18: ("west",)},
-    "open_upper_single_edge_rh": {18: ("east",)},
+    "open_upper_single_edge_rh": {18: ("west",)},
 }
 
 
@@ -102,7 +100,10 @@ def outputs() -> dict[Path, dict]:
     if jamb["from"] != [0, 0, 0] or jamb["to"] != [1.5, 14.5, 3]:
         raise ValueError("Authored fixed jamb changed; review open cluster fanlight")
     removed = WINGS["single_lh"][0] | {34}
-    fanlight = [element for index, element in enumerate(single["elements"]) if index not in removed]
+    fanlight = [copy.deepcopy(element) for index, element in enumerate(single["elements"]) if index not in removed]
+    # The standalone left jamb hides the rail's first 1.5 units. Clipping that
+    # jamb above the opening exposes the full authored, one-wide bottom rail.
+    fanlight[18]["from"][0] = 0
     fixed_jamb = copy.deepcopy(jamb)
     fixed_jamb["from"][1] = single["elements"][2]["from"][1]
     # The clipped bottom lies inside the cell, not on its neighbour boundary.
