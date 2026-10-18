@@ -64,4 +64,13 @@ Codex is responsible for routine Git and GitHub maintenance for this repository:
 
 ## Related projects
 
-Daedalon, Themelios, and the ERYDON resource packs are intended to receive separate public repositories only after individual clean-export reviews. Do not create or publish them automatically; each requires its own licensing review, README, ignore rules, CI, and explicit publication approval. Never import private development history.
+Daedalon's public source is `https://github.com/erydon-mod/daedalon-fabric-mc1.20.1`.
+Themelios's public source is `https://github.com/erydon-mod/themelios`, with
+`main` for Fabric/Minecraft 1.20.1 and `codex/fabric-1.21.1` for 1.21.1. Its
+public history starts from reviewed source snapshots; retain the older private
+branches and repositories separately and never push that private ancestry.
+
+The ERYDON resource packs still require their own clean-export review and
+explicit publication approval before receiving a public repository. Do not
+create or publish one automatically. Preserve its licensing review, README,
+ignore rules, and CI boundary, and never import private development history.
