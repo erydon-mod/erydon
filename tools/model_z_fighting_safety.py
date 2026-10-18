@@ -921,8 +921,11 @@ def _canonical_plane(face: FaceRecord) -> tuple[Vec3, float]:
     return normal, plane_d
 
 
-def _bucket_key(face: FaceRecord) -> tuple[int, int, int, int]:
+def _bucket_key(face: FaceRecord, *, opposite: bool = False) -> tuple[int, int, int, int]:
     normal, plane_d = _canonical_plane(face)
+    if opposite:
+        normal = _mul(normal, -1.0)
+        plane_d = -plane_d
     return (
         math.floor(normal[0] / NORMAL_BUCKET_SIZE),
         math.floor(normal[1] / NORMAL_BUCKET_SIZE),
@@ -934,22 +937,29 @@ def _bucket_key(face: FaceRecord) -> tuple[int, int, int, int]:
 def _broad_phase_pairs(faces: Sequence[FaceRecord]) -> Iterator[tuple[FaceRecord, FaceRecord]]:
     buckets: dict[tuple[int, int, int, int], list[FaceRecord]] = {}
     for face in faces:
-        normal_x, normal_y, normal_z, plane_bin = _bucket_key(face)
+        stored_key = _bucket_key(face)
         seen: set[int] = set()
-        for delta_x, delta_y, delta_z in itertools.product((-1, 0, 1), repeat=3):
-            for delta_plane in (-1, 0, 1):
-                key = (
-                    normal_x + delta_x,
-                    normal_y + delta_y,
-                    normal_z + delta_z,
-                    plane_bin + delta_plane,
-                )
-                for other in buckets.get(key, ()):
-                    if other.sequence in seen:
-                        continue
-                    seen.add(other.sequence)
-                    yield other, face
-        buckets.setdefault((normal_x, normal_y, normal_z, plane_bin), []).append(face)
+        # Near-tied dominant axes can give the same plane opposite canonical
+        # signs, including from platform-specific rounding at 45 degrees.
+        # Probe both continuous plane orientations; negating integer bins is
+        # incorrect at floor boundaries. Exact pair checks remain unchanged.
+        for normal_x, normal_y, normal_z, plane_bin in (
+            stored_key, _bucket_key(face, opposite=True)
+        ):
+            for delta_x, delta_y, delta_z in itertools.product((-1, 0, 1), repeat=3):
+                for delta_plane in (-1, 0, 1):
+                    key = (
+                        normal_x + delta_x,
+                        normal_y + delta_y,
+                        normal_z + delta_z,
+                        plane_bin + delta_plane,
+                    )
+                    for other in buckets.get(key, ()):
+                        if other.sequence in seen:
+                            continue
+                        seen.add(other.sequence)
+                        yield other, face
+        buckets.setdefault(stored_key, []).append(face)
 
 
 def _boxes_overlap(first: FaceRecord, second: FaceRecord) -> bool:

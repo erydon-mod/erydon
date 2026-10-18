@@ -247,10 +247,10 @@ class ModelZFightingSafetyTests(unittest.TestCase):
         # Their cropped UVs differ from the band sides: they are safe only
         # because CopingGeometry clips covered caps even for standalone joined(0).
         # The separate Grand overlap regression directly proves all 96 cap pairs
-        # clip to zero area, including three slope pairs missed by bulk buckets.
+        # clip to zero area; broad-phase buckets must retain every slope pair.
         intentional_grand_coping_overlaps = {
             "coping/georgian_grand/coping_georgian_grand_flat.json": 16,
-            "coping/georgian_grand/coping_georgian_grand_slope.json": 13,
+            "coping/georgian_grand/coping_georgian_grand_slope.json": 16,
             "coping/georgian_grand/coping_georgian_grand_shallow_lower.json": 16,
             "coping/georgian_grand/coping_georgian_grand_shallow_upper.json": 16,
             "coping/georgian_grand/coping_georgian_grand_steep_lower.json": 16,
@@ -304,10 +304,19 @@ class ModelZFightingSafetyTests(unittest.TestCase):
                     georgian_near_contacts[relative] = len(near_contacts)
             if relative == "arch/romanesque/arch_romanesque_side_column_upper.json":
                 contacts = [finding for finding in audit["findings"] if finding["plane_quality"] == "near"]
-                # Saved shaft ribs meet at three opposing surfaces. One further
+                # Saved shaft ribs meet at four opposing surfaces. One further
                 # same-facing sliver is below 2e-8 square model units after BB
                 # coordinate serialization; retain the user's enabled faces.
-                self.assertEqual(sum(finding["orientation"] == "opposite" for finding in contacts), 3)
+                self.assertEqual({
+                    (63, "west", 64, "east"),
+                    (18, "north", 26, "south"),
+                    (18, "north", 19, "south"),
+                    (36, "west", 44, "east"),
+                }, {
+                    (finding["a"]["element"], finding["a"]["face"],
+                     finding["b"]["element"], finding["b"]["face"])
+                    for finding in contacts if finding["orientation"] == "opposite"
+                })
                 slivers = [finding for finding in contacts if finding["orientation"] == "same"]
                 self.assertEqual(len(slivers), 1)
                 self.assertLess(slivers[0]["overlap_area"], 2e-8)
@@ -383,12 +392,12 @@ class ModelZFightingSafetyTests(unittest.TestCase):
             )
             authored_cullfaces += len(scanner._raw_cull_boundary_state(document))
         self.assertEqual(observed_intentional_overlaps, intentional_exact_same_overlaps)
-        self.assertEqual(exact_same, 1480)
+        self.assertEqual(exact_same, 1483)
         self.assertEqual(georgian_near_contacts, {
             "alcove/alcove_georgian_single_top.json": 3,
             "alcove/alcove_georgian_icon.json": 3,
         })
-        self.assertEqual(capital_near_contacts, 4)
+        self.assertEqual(capital_near_contacts, 5)
         self.assertEqual(near - sum(georgian_near_contacts.values()) - capital_near_contacts, 36)
         # Existing families retain 933 authored cull entries. The saved manual
         # Romanesque face pass retains 2584, including the separate capital-row

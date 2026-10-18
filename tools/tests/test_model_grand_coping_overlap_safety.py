@@ -30,13 +30,6 @@ EXPECTED_PAIRS = {
     for bevel, name in bevels.items()
     for face in (("north", "south") if name in ("edge_east", "edge_west") else ("east", "west"))
 }
-# At 45 degrees, nearly tied X/Y dominant normals can canonicalize the same
-# plane with opposite signs. Direct pair inspection retains the missing three.
-KNOWN_SLOPE_BUCKET_MISSES = {
-    (2, "east", 9, "east"),
-    (2, "west", 8, "west"),
-    (2, "west", 9, "west"),
-}
 
 
 def pair_key(finding):
@@ -78,8 +71,8 @@ class GrandCopingOverlapSafetyTests(unittest.TestCase):
                 document, relative_path=relative, source_sha256=sha,
                 raw_authoring=True, enable_raw_transforms=True,
             )
-            # Bypass the broad phase so its known 45-degree tie cannot hide a
-            # new conflicting corner or invalidate the clipping proof.
+            # Independently inspect every pair so broad-phase omissions cannot
+            # hide a new conflicting corner or invalidate the clipping proof.
             cls.direct[profile] = [
                 finding
                 for first, second in itertools.combinations(faces, 2)
@@ -142,26 +135,39 @@ class GrandCopingOverlapSafetyTests(unittest.TestCase):
                     checked += 1
         self.assertEqual(96, checked)
 
-    def test_bulk_counts_have_no_new_near_or_cull_entries_and_expose_the_known_tie(self):
+    def test_bulk_counts_match_every_direct_pair_without_near_or_cull_entries(self):
         exact_same = 0
         for profile, audit in self.bulk.items():
             with self.subTest(profile=profile):
                 findings = audit["findings"]
-                expected = EXPECTED_PAIRS - (KNOWN_SLOPE_BUCKET_MISSES if profile == "slope" else set())
-                self.assertEqual(expected, {pair_key(finding) for finding in findings})
-                self.assertEqual(13 if profile == "slope" else 16, len(findings))
+                self.assertEqual(EXPECTED_PAIRS, {pair_key(finding) for finding in findings})
+                self.assertEqual(16, len(findings))
                 self.assertFalse([finding for finding in findings if finding["plane_quality"] == "near"])
                 self.assertEqual(0, len(scanner._raw_cull_boundary_state(self.models[profile])))
                 exact_same += sum(finding["orientation"] == "same" and finding["plane_quality"] == "exact"
                                   for finding in findings)
-        self.assertEqual(93, exact_same)
-        for band, face, bevel, _ in KNOWN_SLOPE_BUCKET_MISSES:
-            first = self.faces["slope"][(band, face)]
-            second = self.faces["slope"][(bevel, face)]
-            first_normal, _ = scanner._canonical_plane(first)
-            second_normal, _ = scanner._canonical_plane(second)
-            self.assertLess(sum(a * b for a, b in zip(first_normal, second_normal)), -.99999)
-            self.assertGreater(max(abs(a - b) for a, b in zip(scanner._bucket_key(first), scanner._bucket_key(second))), 2)
+        self.assertEqual(96, exact_same)
+
+    def test_broad_phase_preserves_overlap_across_rounded_45_degree_normal_ties(self):
+        first = self.faces["slope"][(2, "east")]
+        second = self.faces["slope"][(9, "east")]
+        diagonal = math.sqrt(.5)
+        normals = (
+            (math.nextafter(diagonal, math.inf), -diagonal, 0.0),
+            (diagonal, -math.nextafter(diagonal, math.inf), -1e-15),
+        )
+        for first_normal, second_normal in itertools.product(normals, repeat=2):
+            pair = tuple(
+                replace(face, normal=normal, plane_d=scanner._dot(normal, face.vertices[0]))
+                for face, normal in ((first, first_normal), (second, second_normal))
+            )
+            for ordered in (pair, pair[::-1]):
+                with self.subTest(normals=(first_normal, second_normal), first=ordered[0].sequence):
+                    direct = scanner._inspect_pair(*ordered, "test.json", "0" * 64, True)
+                    self.assertIsNotNone(direct)
+                    candidates = list(scanner._broad_phase_pairs(ordered))
+                    self.assertEqual(1, len(candidates))
+                    self.assertEqual(direct, scanner._inspect_pair(*candidates[0], "test.json", "0" * 64, True))
 
     @staticmethod
     def normal_height(vertex, profile):
