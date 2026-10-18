@@ -56,7 +56,8 @@ removal and recalc. It checks taller crowns, column transitions, selectable
 empty cells, all horizontal facings and reversible mirrors, plus clipped mesh
 area and rotated normals. Larger arches reuse the existing registered IDs and
 child models; their geometry is cached and split between owning block cells.
-The default maximum width remains three; the debug stick selects wider runs.
+Automatic growth supports widths up to six; the debug stick can select a
+smaller maximum for a cluster.
 The probe also checks every canonical state transition and requires the compact
 arch transition lookup to be active under Fabric. For a complete registration
 and collision-cache startup regression check, run
