@@ -7,6 +7,18 @@ import static org.junit.jupiter.api.Assertions.*;
 import static com.oliver.erydon.HighPolishSettings.*;
 
 class HighPolishSettingsTest {
+    @Test void ganosisSpellingLoadsButKeepsThePublishedMirrorSerialization() {
+        var properties = new Properties();
+        properties.setProperty(PREFIX + "enabled", "true");
+        properties.setProperty(PREFIX + "stone.aganite", "ganosis");
+        properties.setProperty(PREFIX + "stone.aganite.herringbone", "ganosis");
+        var settings = read(properties);
+        assertEquals(Level.MIRROR, settings.level("aganite", Finish.PLAIN));
+        assertEquals(Level.MIRROR, settings.level("aganite", Finish.HERRINGBONE));
+        settings.write(properties);
+        assertEquals("mirror", properties.getProperty(PREFIX + "stone.aganite"));
+        assertEquals("mirror", properties.getProperty(PREFIX + "stone.aganite.herringbone"));
+    }
     @Test
     void defaultsAreOffAndOldSingleSwitchMigratesWithoutLosingCoverage() {
         var properties = new Properties();

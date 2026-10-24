@@ -7,7 +7,7 @@ import net.minecraft.util.Identifier;
 import java.io.*;
 import java.util.*;
 
-/** Reload-only command labels. Never replaces or decodes specular/normal textures. */
+/** Reload-only stone and command labels. Never inspects textures, registries or worlds. */
 public final class HighPolishLabelsPack implements ResourcePack {
     private final Map<Identifier, InputSupplier<InputStream>> resources;
 
@@ -19,10 +19,17 @@ public final class HighPolishLabelsPack implements ResourcePack {
                                              HighPolishSettings settings) {
         if (type != ResourceType.CLIENT_RESOURCES) return packs;
         Map<Identifier, InputSupplier<InputStream>> overrides = new HashMap<>();
-        for (var language : Map.of("en_us", List.of("Honed", "Polished", "Mirror"),
-                "de_de", List.of("Geschliffen", "Poliert", "Spiegelglanz"),
-                "es_es", List.of("Apomazado", "Pulido", "Espejo")).entrySet()) {
+        for (var language : Map.of("en_us", List.of("Honed", "Polished", "Ganosis"),
+                "de_de", List.of("Geschliffen", "Poliert", "Ganosis"),
+                "es_es", List.of("Apomazado", "Pulido", "Ganosis")).entrySet()) {
             var labels = new com.google.gson.JsonObject();
+            Bundled.LANGUAGES.get(language.getKey()).forEach((key, name) -> {
+                if (!key.startsWith("block.erydon.") && !key.startsWith("item.erydon.")) return;
+                String path = key.substring(key.indexOf("erydon.") + "erydon.".length());
+                if (!PolishedStoneMaterials.includes("erydon", path)) return;
+                String label = language.getValue().get(PolishedStoneMaterials.level(settings, path).ordinal());
+                labels.addProperty(key, finishedName(name, path, label));
+            });
             for (String material : HighPolishSettings.MATERIALS) {
                 var level = settings.level(material, HighPolishSettings.Finish.PLAIN);
                 labels.addProperty("command.erydon.swap.material." + material,
@@ -36,6 +43,40 @@ public final class HighPolishLabelsPack implements ResourcePack {
         List<ResourcePack> result = new ArrayList<>(packs);
         result.add(new HighPolishLabelsPack(overrides));
         return result;
+    }
+
+    static String finishedName(String original, String path, String label) {
+        // Only a stone-finish word immediately after the known material is replaceable.
+        // In particular, "Bronze Polished" and other authored metal descriptors stay intact.
+        String material = path.substring(0, path.indexOf('_'));
+        String prefix = Character.toUpperCase(material.charAt(0)) + material.substring(1) + " ";
+        if (original.startsWith(prefix)) {
+            String rest = original.substring(prefix.length());
+            for (String old : List.of("Honed", "Polished", "Mirror", "Ganosis", "Geschliffen", "Poliert",
+                    "Spiegelglanz", "Apomazado", "Pulido", "Espejo")) {
+                if (rest.startsWith(old + " ")) { original = prefix + rest.substring(old.length() + 1); break; }
+            }
+        }
+        return original + " (" + label + ")";
+    }
+
+    private static final class Bundled {
+        private static final Map<String, Map<String, String>> LANGUAGES = read();
+        private static Map<String, Map<String, String>> read() {
+            Map<String, Map<String, String>> result = new HashMap<>();
+            for (String language : List.of("en_us", "de_de", "es_es")) {
+                String path = "/assets/erydon/lang/" + language + ".json";
+                try (InputStream input = HighPolishLabelsPack.class.getResourceAsStream(path)) {
+                    if (input == null) throw new IOException("Missing bundled language " + path);
+                    var json = com.google.gson.JsonParser.parseReader(new InputStreamReader(input,
+                            java.nio.charset.StandardCharsets.UTF_8)).getAsJsonObject();
+                    Map<String, String> names = new HashMap<>();
+                    json.entrySet().forEach(entry -> names.put(entry.getKey(), entry.getValue().getAsString()));
+                    result.put(language, Map.copyOf(names));
+                } catch (IOException failure) { throw new java.io.UncheckedIOException(failure); }
+            }
+            return Map.copyOf(result);
+        }
     }
 
     @Override public InputSupplier<InputStream> open(ResourceType type, Identifier id) {

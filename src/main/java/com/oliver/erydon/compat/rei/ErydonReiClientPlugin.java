@@ -47,7 +47,10 @@ public final class ErydonReiClientPlugin implements REIClientPlugin {
         registerGroup(registry, orderedItems, "walls", "ERYDON Walls", ErydonBlockCategories::isWall);
         registerGroup(registry, orderedItems, "layers", "ERYDON Layers", ErydonBlockCategories::isLayer);
         registerGroup(registry, orderedItems, "slices_and_posts", "ERYDON Slices and Posts", ErydonBlockCategories::isSliceOrPost);
-        registerGroup(registry, orderedItems, "slopes", "ERYDON Slopes", ErydonBlockCategories::isSlope);
+        registerGroup(registry, orderedItems, "framed_glazing", Text.translatable("rei.erydon.group.framed_glazing"),
+                ErydonReiClientPlugin::isFramedGlazing);
+        registerGroup(registry, orderedItems, "slopes", "ERYDON Slopes",
+                path -> ErydonBlockCategories.isSlope(path) && !isFramedGlazing(path));
         registerGroup(registry, orderedItems, "arches", "ERYDON Arches", ErydonBlockCategories::isArch);
         registerGroup(registry, orderedItems, "columns", "ERYDON Columns", ErydonBlockCategories::isColumn);
         registerGroup(registry, orderedItems, "chimneys", "ERYDON Chimneys", ErydonBlockCategories::isChimney);
@@ -119,10 +122,19 @@ public final class ErydonReiClientPlugin implements REIClientPlugin {
 
     private static void registerGroup(CollapsibleEntryRegistry registry, List<Item> orderedItems, String id, String name,
                                       Predicate<String> pathPredicate) {
+        registerGroup(registry, orderedItems, id, Text.literal(name), pathPredicate);
+    }
+
+    private static void registerGroup(CollapsibleEntryRegistry registry, List<Item> orderedItems, String id, Text name,
+                                      Predicate<String> pathPredicate) {
         List<EntryStack<?>> entries = entryStacks(orderedItems, pathPredicate);
         if (entries.size() > 1) {
-            registry.group(new Identifier(Erydon.MOD_ID, "rei_group_" + id), Text.literal(name), entries);
+            registry.group(new Identifier(Erydon.MOD_ID, "rei_group_" + id), name, entries);
         }
+    }
+
+    private static boolean isFramedGlazing(String path) {
+        return path.startsWith("glazing_framed_");
     }
 
     private static void registerSubset(SubsetsRegistry registry, List<Item> orderedItems, String path, Predicate<String> pathPredicate) {

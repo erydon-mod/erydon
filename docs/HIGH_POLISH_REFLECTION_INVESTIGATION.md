@@ -6,11 +6,11 @@ The original stone and two-way glass decisions remain current. This file records
 why the earlier implementation was chosen; it is not the current metal specification.
 
 Status: the earlier opaque CU route and two-way mirror were visually approved.
-The current trial adds Honed, Polished and Mirror stone finishes, plus stronger
-metallic reflections, for CU first. Mirror starts at 50%; Polished has full
+The current trial adds Honed, Polished and Ganosis stone finishes, plus stronger
+metallic reflections, for CU first. Ganosis starts at 50%; Polished has full
 smoothness with no added reflection floor; Honed matches the old K/L/P
 smoothness. The 90% two-way coating is unchanged. The new finish levels and
-metal adjustment still need large-scene profiling. The user approved Mirror;
+metal adjustment still need large-scene profiling. The user approved Ganosis;
 the subsequent metal-tint/20%-preservation revision needs in-game comparison.
 Unbound and Reimagined r5.9.3 are now recognised alongside Unbound r5.9 dev5.
 For the current supported release list and atomic program preflight, see the
@@ -63,7 +63,7 @@ file format does not require a transparent rendering pass. Iris documents the
   frames and the stone beneath inlays. Metal overlays remain cutout; their small
   separation from the base stone is retained to avoid flicker.
 - A narrowly matched in-memory CU adapter reuses the existing specular sample
-  and opaque reflection pass. Stone uses Honed or full smoothness; only Mirror
+  and opaque reflection pass. Stone uses Honed or full smoothness; only Ganosis
   gets a 50% reflection floor, increasing toward grazing angles. Geometry
   stays in the opaque pass.
 - Existing normal/height mapping and the CTM-POM bridge remain in place.
@@ -72,7 +72,7 @@ file format does not require a transparent rendering pass. Iris documents the
   reflection stage, and they use 20% rather than 70% texture preservation.
   The blur filter returns this choice using material data it already sampled.
 - Material masks 242 and 243 are unused in the inspected shader; they now
-  identify Mirror stone and boosted metal. Mask 241 remains water. Reserved
+  identify Ganosis stone and boosted metal. Mask 241 remains water. Reserved
   block IDs retain CU's solid/partial-shape parity.
 - Block-state classification runs at shader loading only. The water-neighbour
   wrapper and its chunk-rebuild fluid reads have been removed. Faces, edges and

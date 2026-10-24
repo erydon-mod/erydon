@@ -12,7 +12,7 @@ measure the contribution of every shader stage to the complete scene.
 Commit `4d02ae7c9fede0561be6aea9cf292bab4174dcd7`, dated 2026-10-09 at
 06:32:53 British Summer Time, added the hard-coded cover Gloss treatment.
 The [cover finish specification](POLISH_MATERIAL_AND_SHADER_REVIEW.md#cover-finish-enum)
-explicitly selects Mirror stone's perfect smoothness and 50% frontal reflection
+explicitly selects Ganosis stone's perfect smoothness and 50% frontal reflection
 for ordinary Gloss, and a separate 90% neutral coating for Silver Gloss.
 It records prior user approval. The code implements that distinction.
 
@@ -43,13 +43,13 @@ bronze conductor path even though its authored specular texture remains metallic
 
 | Treatment | Earlier Bronze Gloss | Current Bronze Gloss |
 | --- | --- | --- |
-| Deferred material | Bronze conductor, mask 243 | Mirror stone, mask 242 |
+| Deferred material | Bronze conductor, mask 243 | Ganosis stone, mask 242 |
 | Smoothness | Approximately 0.984 with authored red 255 and minimum roughness 2/255 | 1.0 |
-| Reflection coefficient at normal incidence | Bronze conductor peak 0.92 | Mirror floor 0.50 |
-| Reflection colour | Shared coloured conductor Fresnel | Native Mirror treatment |
+| Reflection coefficient at normal incidence | Bronze conductor peak 0.92 | Ganosis floor 0.50 |
+| Reflection colour | Shared coloured conductor Fresnel | Native Ganosis treatment |
 | Final composition | Linear-light conductor addition and absorption | Native opaque base-colour preservation and interpolation |
 
-The current Mirror curve is `min(0.99, 0.5 + 0.5 * fresnel^3)` before fog/history
+The current Ganosis curve is `min(0.99, 0.5 + 0.5 * fresnel^3)` before fog/history
 attenuation. The earlier full-metal bronze curve starts at 0.92 and approaches
 one at grazing angles, capped at 0.98 for signed-normalized reflection storage.
 Those caps protect against Complementary's exact-one rejection; they do not
@@ -65,7 +65,7 @@ result = mix(base, reflection, reflectionCoefficient);
 For a reflected channel darker than the lit base, this reduces to
 `result = base * (1 - 0.3 * reflectionCoefficient)
         + reflection * (0.3 * reflectionCoefficient)`.
-At the 50% Mirror floor, only 15% of a change in that darker reflected channel
+At the 50% Ganosis floor, only 15% of a change in that darker reflected channel
 reaches the result. For example, with base 0.8 and reflected values 0.1/0.4,
 the outputs are 0.695/0.740: contrast 0.045 from input contrast 0.300.
 These are isolated encoded-channel calculations, not screenshot measurements.
@@ -80,7 +80,7 @@ reflection weighting and final composition; changing only the 50% floor would
 not restore the earlier bronze response.
 
 Silver Gloss already bypasses opaque albedo preservation through mask 245.
-White/Black Gloss and Mirror stone still intentionally use the native opaque blend.
+White/Black Gloss and Ganosis stone still intentionally use the native opaque blend.
 Matte keeps its metal response; its new odd geometry-only ID separately prevents
 thin covers from writing a false full cube into the world-space reflection map.
 That geometry correction must survive any future appearance change.
@@ -88,13 +88,13 @@ That geometry correction must survive any future appearance change.
 ## Initial decision and verification boundary
 
 The initial investigation made no rendering patch: the weaker Bronze Gloss was a consequence of the
-documented, previously approved Mirror treatment rather than a failure to activate
+documented, previously approved Ganosis treatment rather than a failure to activate
 the hard-coded Gloss code. Changing Bronze Gloss to retain coloured conductor
 reflections would revise that appearance decision. A targeted revision should
 retain the independent state-selected finish, authored emission, Matte treatment,
 thin-cover geometry classification and separate Silver coating. Bronze ceiling
 insets already retain their conductor sprite metadata. Only the White/Black inset
-markers carry no conductor alloy or coverage; those continue to use Mirror stone.
+markers carry no conductor alloy or coverage; those continue to use Ganosis stone.
 
 The focused run passed 37 tests with zero failures, errors or skips, using the
 same Unbound r5.9 dev5 archive and driver validation enabled. It included cover
@@ -143,7 +143,7 @@ The new GPU regression test executes the complete composed material function,
 including both conductor guards and the earlier emission/return boundary. A
 uniform fully metallic sprite lookup is supplied by the fixture; finish selection,
 roughness, palette and packing execute production code. It checks Bronze Gloss,
-Matte roughness, Mirror/coating exclusion and retained emission. The actual Iris
+Matte roughness, Ganosis/coating exclusion and retained emission. The actual Iris
 classification/lighting probe and actual CU reflection voxelizer also include
 ID 12065, all Cover states, reserved-ID collision handling and all six normals.
 

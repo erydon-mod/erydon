@@ -39,12 +39,60 @@ public final class ReiRegistrationLaunchChecks {
         REIClientPlugin current = instrumented(false);
         REIClientPlugin previous = instrumented(true);
         List<List<Object>> actual = capture(current);
+        verifyFramedGlazingGroups(actual);
         List<List<Object>> expected = capture(previous);
         require(actual.equals(expected), "REI entry/group/subset names, membership or order changed");
         require(actual.stream().anyMatch(event -> event.get(0).equals("group")), "No nonempty REI groups exercised");
         require(actual.stream().anyMatch(event -> event.get(0).equals("registerPathEntries")), "No REI subsets exercised");
         System.out.println("ERYDON_REI_REGISTRATION_OK events=" + actual.size()
                 + " exactEntryGroupSubsetOrder=true sortsPerReload=3 freshCategoryStacks=true");
+    }
+
+    /** Independent catalogue oracle: inspect actual registered IDs and captured production group calls. */
+    private static void verifyFramedGlazingGroups(List<List<Object>> events) {
+        Set<String> registered = new java.util.HashSet<>();
+        for (var block : net.minecraft.registry.Registries.BLOCK) {
+            var id = net.minecraft.registry.Registries.BLOCK.getId(block);
+            if ("erydon".equals(id.getNamespace()) && id.getPath().startsWith("glazing_framed_")) registered.add(id.getPath());
+        }
+        // The small coping/search fixture intentionally contains no glazing; the full
+        // item-ordering launch registers ModBlocks and must satisfy the entire catalogue below.
+        if (registered.isEmpty()) return;
+        Set<String> expected = new java.util.HashSet<>();
+        for (String finish : List.of("tinted", "crystal", "silver", "bronze"))
+            for (String form : List.of("", "_slope", "_vertical_diagonal", "_shallow_slope_lower", "_shallow_slope_upper"))
+                expected.add("glazing_framed_" + finish + form);
+        require(registered.equals(expected), "Framed glazing registration no longer has all four finishes/five forms: " + registered);
+        List<Item> ordered = ErydonItemOrdering.orderedBlockItems().stream()
+                .filter(item -> expected.contains(net.minecraft.registry.Registries.ITEM.getId(item).getPath())).toList();
+        require(ordered.size() == 20 && Set.copyOf(ordered).size() == 20, "Framed glazing catalogue contains missing/duplicate items");
+        List<Item> grouped = new ArrayList<>();
+        java.util.Map<Item, Integer> membership = new IdentityHashMap<>();
+        Set<String> groupIds = new java.util.HashSet<>();
+        int dedicated = 0;
+        for (List<Object> event : events) {
+            if (!event.get(0).equals("group")) continue;
+            String id = (String) event.get(1);
+            require(groupIds.add(id), "Duplicate REI collapsible group ID: " + id);
+            boolean framed = id.equals("erydon:rei_group_framed_glazing");
+            if (framed) dedicated++;
+            for (Object raw : (List<?>) event.get(3)) {
+                Item item = (Item) ((List<?>) raw).get(0);
+                boolean isFramed = expected.contains(net.minecraft.registry.Registries.ITEM.getId(item).getPath());
+                if (isFramed) {
+                    membership.merge(item, 1, Integer::sum);
+                    require(framed, "Framed glazing also belongs to another collapsible group: " + id);
+                }
+                if (framed) {
+                    require(isFramed, "Framed glazing group acquired an unrelated item: " + item);
+                    grouped.add(item);
+                }
+            }
+        }
+        require(dedicated == 1 && grouped.equals(ordered), "Actual REI registration omitted/reordered the complete framed glazing group");
+        for (Item item : ordered) require(membership.getOrDefault(item, 0) == 1,
+                "Framed glazing must have exactly one collapsible group owner: " + item);
+        System.out.println("ERYDON_REI_FRAMED_GLAZING_OK items=20 finishes=4 forms=5 plain=4 slopes=16 duplicateMembership=0 actualRegistration=true");
     }
 
     private static List<List<Object>> capture(REIClientPlugin plugin) {

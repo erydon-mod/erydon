@@ -24,7 +24,7 @@ class HighPolishCommandWordsTest {
                 .withStone("glacium", new HighPolishSettings.Stone(HighPolishSettings.Level.POLISHED,
                         HighPolishSettings.Choice.INHERIT, HighPolishSettings.Choice.INHERIT, HighPolishSettings.Choice.INHERIT));
         var result = HighPolishCommandWords.present(original, on);
-        assertEquals(List.of("\"Kelastrion Mirror\"", "\"Latmion Honed\"", "\"Psamatheon Mirror\"",
+        assertEquals(List.of("\"Kelastrion Ganosis\"", "\"Latmion Honed\"", "\"Psamatheon Ganosis\"",
                 "\"Glacium Polished\"", "\"Latmion Hewn\""), result.getList().stream().map(Suggestion::getText).toList());
         result.getList().forEach(entry -> assertEquals(range, entry.getRange()));
         assertEquals("\"Kelastrion Honed\"", original.getList().get(0).getText());

@@ -162,7 +162,7 @@ public final class ErydonBlockCategories {
         terms.addAll(ErydonIdMigration.searchTermsForCanonicalPath(path));
 
         if (isStandardFinish(path)) {
-            addAll(terms, "polished", "honed", "mirror");
+            addAll(terms, "polished", "honed", "ganosis", "mirror");
             terms.add(Text.translatable("search.erydon.standard_finish").getString());
         }
 

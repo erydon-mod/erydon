@@ -40,7 +40,7 @@ two-way coating keeps its 90% floor. Frame finishes, Gloss covers, grout,
 authored metal channels and height maps retain their existing handling.
 
 Daedalon's published form-first Spartan statue IDs use the same per-stone
-Honed, Polished or Mirror preference as its other fresh stone sculptures.
+Honed, Polished or Ganosis preference as its other fresh stone sculptures.
 Their registry IDs stay unchanged; aged, bronze, silver and white finishes
 remain outside the configurable stone-finish selection.
 
@@ -96,7 +96,7 @@ optional setting or third-party modification.
 
 Compiler and pre-launch checks do not prove the appearance in a world. For future
 shader profiles or rendering changes, compare
-Honed/Polished/Mirror, tinted/clear glazing, frame finishes, two-way glass, Gloss
+Honed/Polished/Ganosis, tinted/clear glazing, frame finishes, two-way glass, Gloss
 covers and patterned CTM-POM joins in a separately authorized client. Inspect
 reflection opacity and world texture phase across joins and all four facings.
 No active capture profile, protected instance, save or player configuration is

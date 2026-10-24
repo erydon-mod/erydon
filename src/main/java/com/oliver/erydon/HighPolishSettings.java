@@ -118,6 +118,7 @@ public record HighPolishSettings(boolean enabled, boolean glazing, boolean twoWa
         public Level resolve(Level base) { return this == INHERIT ? base : Level.valueOf(name()); }
         static Choice read(String value) {
             if (value == null) return INHERIT;
+            if ("ganosis".equalsIgnoreCase(value.trim())) return MIRROR;
             if ("on".equalsIgnoreCase(value.trim())) return MIRROR;
             if ("off".equalsIgnoreCase(value.trim())) return HONED;
             try { return valueOf(value.trim().toUpperCase(Locale.ROOT)); }

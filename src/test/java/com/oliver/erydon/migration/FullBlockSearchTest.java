@@ -22,7 +22,7 @@ class FullBlockSearchTest {
                 "glacium_cornice_byzantine", "glacium_cornice_guilloche", "latmion_block",
                 "psamatheon_window_arch", "kelastrion_light_wall")) {
             assertTrue(ErydonBlockCategories.isStandardFinish(path), path);
-            assertTrue(ErydonBlockCategories.searchTerms(path).containsAll(List.of("polished", "honed", "mirror")), path);
+            assertTrue(ErydonBlockCategories.searchTerms(path).containsAll(List.of("polished", "honed", "ganosis", "mirror")), path);
         }
         for (String path : List.of("glacium_aged_block", "glacium_block_aged", "glacium_hewn_slab",
                 "glacium_ashlar_slope", "glacium_rusticated_coping_georgian", "glacium_aged_coping_georgian_grand",
@@ -32,7 +32,7 @@ class FullBlockSearchTest {
                 "glacium_quatrefoil_bronze_stairs", "glacium_rosette_silver_layer_multiface",
                 "aganite_diaphanes_block", "glazing_clear", "cover_white")) {
             assertFalse(ErydonBlockCategories.isStandardFinish(path), path);
-            for (String term : List.of("polished", "honed", "mirror")) {
+            for (String term : List.of("polished", "honed", "ganosis", "mirror")) {
                 assertFalse(ErydonBlockCategories.searchTerms(path).contains(term), path + ": " + term);
             }
         }
@@ -46,7 +46,7 @@ class FullBlockSearchTest {
             String path = entry.getKey().substring("block.erydon.".length());
             boolean standard = ErydonBlockCategories.isStandardFinish(path);
             if (standard) expected.add(path);
-            for (String term : List.of("polished", "honed", "mirror")) {
+            for (String term : List.of("polished", "honed", "ganosis", "mirror")) {
                 assertEquals(standard, ErydonBlockCategories.searchTerms(path).contains(term), path + ": " + term);
             }
         }

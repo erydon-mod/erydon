@@ -1,6 +1,6 @@
 # Stone finish and metal review
 
-Updated 2026-10-08. Honed, Polished and Mirror remain separate from metallic
+Updated 2026-10-08. Honed, Polished and Ganosis remain separate from metallic
 materials. The new sprite-based metal treatment replaces the earlier 85%/20%
 metal boost; it does not stack another boost on top. The approved stone finish
 controls and 90% two-way coating retain their existing behavior. The follow-up
@@ -42,7 +42,7 @@ workaround for that old shader error. Upstream was inspected, not installed.
 Mod Menu offers all-stone presets and per-stone choices for all 27 families.
 Herringbone, weave and inlays can inherit or select any of the three levels.
 The master remains default-off; Off selects Honed in CU and disables the glass
-extras. Existing true/on stone preferences migrate to Mirror; false/off migrate
+extras. Existing true/on stone preferences migrate to Ganosis; false/off migrate
 to Honed. Saving still requires a full restart. English, German and Spanish
 labels and swap aliases have been updated together.
 
@@ -50,12 +50,12 @@ labels and swap aliases have been updated together.
 | --- | --- | --- |
 | Honed | Red 175/255, matching the old K/L/P maps | Ordinary CU dielectric response, with valid F0 of at least 10/255 |
 | Polished | Red 1.0 | Ordinary CU dielectric response; 0% extra reflection boost |
-| Mirror | Red 1.0 | 50% floor before smoothness weighting, rising toward grazing angles |
+| Ganosis | Red 1.0 | 50% floor before smoothness weighting, rising toward grazing angles |
 
 CU squares the red input when calculating smoothness. The adapter sets the
 selected input before that calculation, using the specular sample CU already
-read. A dull source map therefore does not weaken Polished or Mirror. The 50%
-Mirror floor is an artistic starting point, not compensation for the old map.
+read. A dull source map therefore does not weaken Polished or Ganosis. The 50%
+Ganosis floor is an artistic starting point, not compensation for the old map.
 These are material coefficients, not percentages of final screen colour.
 
 The K/L/P image replacement has been removed. Every finish uses the same
@@ -122,18 +122,18 @@ The native maps remain non-metallic under the
 ### Cover finish enum
 
 Cover blocks select their reflection treatment through the existing `finish`
-property. With supported Complementary shaders, White/Black Gloss uses Mirror stone's
+property. With supported Complementary shaders, White/Black Gloss uses Ganosis stone's
 perfect smoothness and 50% frontal reflection response. Silver + Gloss instead
 uses the outward two-way window coating's 90% reflection floor and neutral
 reflection blend. This is opaque mirror cladding: the cover remains opaque.
 Bronze Gloss retains the shared full conductor response, canonical bronze colour
 and authored polish, with only the finite 2/255 roughness minimum. It does not
-receive Mirror stone's opaque albedo preservation. The 2026-10-09 revision restores
-this treatment after the first cover override also sent Bronze through Mirror stone.
+receive Ganosis stone's opaque albedo preservation. The 2026-10-09 revision restores
+this treatment after the first cover override also sent Bronze through Ganosis stone.
 
 The treatment belongs to actual CoverBlock Gloss states, including lit covers,
 and is independent of the stone, glazing and two-way-glass preferences. White/Black Gloss
-coffered-ceiling insets use the Mirror treatment; bronze inset sprites retain their
+coffered-ceiling insets use the Ganosis treatment; bronze inset sprites retain their
 conductor response. Matte retains its existing material. No texture,
 model, geometry, CTM rule or Collection pack changes are involved. Shader state
 classification runs at shader load; changing the placed finish uses the existing
@@ -145,7 +145,7 @@ stone finish. These panel markers carry no metal coverage or conductor alloy.
 
 Dedicated partial-block material IDs 12059/12061 preserve voxel-lighting rules.
 Bronze Gloss uses geometry-only ID 12065, keeping its metallic sprite treatment
-without either Mirror override or a false full-cube reflection voxel.
+without either Ganosis override or a false full-cube reflection voxel.
 Matte covers use geometry-only ID 12063. An unmapped thin cover previously entered
 CU's world reflection map as a full cube at its owner cell, producing a false
 central square on the 3x3 metal panel. The odd ID excludes that phantom cube;
@@ -154,7 +154,7 @@ unchanged. White and Black matte covers receive the same thin geometry classific
 Opaque mask 242 carries White/Black Gloss and 245 carries Silver + Gloss; the
 sprite-metal adapter leaves these explicit finishes alone. Bronze Gloss uses
 conductor mask 243 with full authored metal coverage. Authored emission is
-evaluated before the cover override. Mirror and Silver reflections are capped at .99 to
+evaluated before the cover override. Ganosis and Silver reflections are capped at .99 to
 survive CU's signed-normalized history storage. The normal composite path reuses
 its material read to distinguish the Silver coating from native opaque albedo
 preservation. CU's restricted low-sampler composite path keeps its original
@@ -190,7 +190,7 @@ retain the flush overlay. Embedded patterns keep their authored POM normals.
 Colored conductor Fresnel, finite roughness and material-aware reflection history
 replace the previous high-contrast metal boost. Ordinary stone is unchanged at
 zero metal coverage. Mixed pixels retain the selected underlying finish. Material
-mask 242 remains Mirror stone/White/Black Gloss covers, 243 is bronze and 244 silver; Silver
+mask 242 remains Ganosis stone/White/Black Gloss covers, 243 is bronze and 244 silver; Silver
 Gloss covers use mask 245 and the window coating keeps its separate path.
 The metal adapter preflights all eight affected programs
 before enabling a dimension, including the existing buffer-format declarations.
@@ -264,7 +264,7 @@ No companion-mod source change or dependency is required.
 This only extends the existing shader-load classification to additional block
 states; it introduces no extra texture, draw pass, reflection ray or per-frame
 Java work. The original native and Collection specular maps remain in use.
-Cross-mod Honed/Polished/Mirror visual comparisons are still required.
+Cross-mod Honed/Polished/Ganosis visual comparisons are still required.
 
 Validation passed: compilation, 29 focused material/settings/shader tests,
 the three-language Mod Menu source audit and the real Fabric/Iris mixin

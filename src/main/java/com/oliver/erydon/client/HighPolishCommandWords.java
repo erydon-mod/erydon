@@ -13,9 +13,9 @@ public final class HighPolishCommandWords {
             for (String material : HighPolishSettings.MATERIALS) {
                 String name = Character.toUpperCase(material.charAt(0)) + material.substring(1);
                 if (text.equals('"' + name + " Honed\"") || text.equals('"' + name + " Polished\"")
-                        || text.equals('"' + name + " Mirror\"")) {
+                        || text.equals('"' + name + " Mirror\"") || text.equals('"' + name + " Ganosis\"")) {
                     String key = settings.level(material, HighPolishSettings.Finish.PLAIN).key();
-                    String finish = Character.toUpperCase(key.charAt(0)) + key.substring(1);
+                    String finish = key.equals("mirror") ? "Ganosis" : Character.toUpperCase(key.charAt(0)) + key.substring(1);
                     return new Suggestion(suggestion.getRange(), '"' + name + " " + finish + '"', suggestion.getTooltip());
                 }
             }

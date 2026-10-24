@@ -12,7 +12,7 @@ JAR was produced.
 ## Current follow-up checks (25 September)
 
 - Circular ERYDON columns: with Complementary's world-space reflections enabled,
-  check that a circular column appears in a nearby Mirror-finish stone surface.
+  check that a circular column appears in a nearby Ganosis-finish stone surface.
   Its reflected silhouette is deliberately a square-block approximation; the
   visible column, collision and voxel-light behaviour remain unchanged.
 - Medium alcoves: Georgian and Gothic two-wide side walls are 30% thicker
@@ -34,7 +34,7 @@ JAR was produced.
 - Shared stone finishes: compare Themelios plain Imperium, ERYDON plain
   Imperium and ERYDON bronze-trim Imperium with Inlays set to Inherit. The
   original mismatch was a Themelios block excluded from the finish controls.
-  Repeat Honed, Polished and Mirror, plus the master-off setting, after restarts.
+  Repeat Honed, Polished and Ganosis, plus the master-off setting, after restarts.
   Themelios shapes and Daedalon stone decor now follow the same 27 material
   choices; include a Daedalon statue/capital and another shared stone family.
   Check pattern overrides on Themelios herringbone/weave/inlays and all three
@@ -49,7 +49,7 @@ and the latest high-polish performance trial. The items above are new checks.
 
 Cover enum review (2026-10-09): with supported Complementary, compare Matte and
 Gloss on White, Black, Bronze and Silver covers, both sizes and all six attachment
-faces. White/Black Gloss should match Mirror stone's sharp reflections; Bronze
+faces. White/Black Gloss should match Ganosis stone's sharp reflections; Bronze
 Gloss should retain strong coloured metallic reflections and authored smoothness,
 with dark marble detail visible in the matched diagnostic scene. Silver + Gloss should
 match the outward two-way mirror coating, including a dark reflected scene.
@@ -66,31 +66,31 @@ White/Black matte and non-Complementary rendering retain their previous appearan
 restarted-client visual review.
 
 - In Mods > ERYDON > Configure > High polish, enable the master. Compare the
-  same Glacium wall and Gothic/Georgian alcove view at Honed, Polished and Mirror,
+  same Glacium wall and Gothic/Georgian alcove view at Honed, Polished and Ganosis,
   restarting each time and keeping the camera, time, weather and shader settings
   fixed. Honed should soften reflections, Polished should sharpen them, and
-  Mirror should make them stronger. Mirror uses a 50% floor; Polished adds no
+  Ganosis should make them stronger. Ganosis uses a 50% floor; Polished adds no
   reflection boost. These coefficients do not specify final screen brightness.
-- Test the All: Honed / All: Polished / All: Mirror presets. They reset pattern
+- Test the All: Honed / All: Polished / All: Ganosis presets. They reset pattern
   overrides to Inherit and preserve glass preferences. Small windows may omit
   the presets while retaining per-stone controls and paging.
 - Set different finishes on Glacium and Portorium; only the chosen material
   should change. Compare full blocks, slabs, stairs, slopes, arches, columns,
   walls and window frames at matching angles.
-- Test Herringbone, Weave and Inlays at Inherit, Honed, Polished and Mirror.
+- Test Herringbone, Weave and Inlays at Inherit, Honed, Polished and Ganosis.
   Inherit follows the main stone choice. Weaves follow their first named stone
   (Glacium-Nerium follows Glacium). The stone grid should show Mixed when needed.
 - Repeat Kelastrion, Latmion and Psamatheon at all three levels with native 16x,
   Collection 32x and Collection 64x. They use their original specular maps now;
-  CU selects smoothness directly. Polished and Mirror should no longer depend
+  CU selects smoothness directly. Polished and Ganosis should no longer depend
   on a separate replacement map. Grout and normal/height detail must remain.
 - Check aged, ashlar, hewn, rusticated, rock and Diaphanes controls alongside
   the samples. These stone finishes should remain unchanged.
 - Turn the master off and restart: eligible stone should use Honed in CU and
   glass enhancements should turn off. Re-enabling restores saved stone choices.
-- Existing true/on preferences should load as Mirror; false/off as Honed.
+- Existing true/on preferences should load as Ganosis; false/off as Honed.
   Swap suggestions and success messages should use the active plain finish.
-  Honed, Polished, Mirror and the old plain material names must all remain
+  Honed, Polished, Ganosis and the old plain material names must all remain
   accepted command aliases without changing block IDs.
 
 ## 2. Metallic details, connected textures and depth
@@ -141,7 +141,7 @@ restarted-client visual review.
 - On Arch and French Georgian Windows, select two_way with the debug stick.
   The approved CU exterior mirror keeps its 90% target. Test all facings, wide
   windows, both Georgian hinges and opened wings; the inside should stay glass.
-- Change the surrounding stone between Honed, Polished and Mirror while leaving
+- Change the surrounding stone between Honed, Polished and Ganosis while leaving
   Two-way glass enabled. The exterior mirror should remain equally strong.
 - Toggle Two-way glass independently of ordinary glazing, then restart. Off
   restores the ordinary coating response without deleting the two_way mode.
@@ -194,7 +194,7 @@ restarted-client visual review.
 
 ## 7. Performance and shader switching
 
-- Compare the same small sample, then a large facade at Honed/Polished/Mirror.
+- Compare the same small sample, then a large facade at Honed/Polished/Ganosis.
   Keep camera, render distance, weather, time and shader settings fixed. Compare
   standing still, turning, walking past it and loading its chunks.
 - Repeat with shaders off. Check sustained FPS, frame-time spikes, chunk-loading
@@ -223,3 +223,10 @@ restarted-client visual review.
 For reports, include the material/shape, facing, saved finish, restart status,
 shader/pack selection and screenshot. See POLISH_MATERIAL_AND_SHADER_REVIEW.md
 for the implementation and HIGH_POLISH_REFLECTION_INVESTIGATION.md for history.
+
+Stone catalogue names use the active finish as a suffix: `(Honed)`, `(Polished)`
+or `(Ganosis)`. Ganosis is the mirror finish; saved `mirror` configuration values
+and old Mirror command spellings remain compatible. Check plain stone,
+Herringbone, Weave and Inlays separately, including material-specific overrides,
+two-material weaves and master Off. Fixed aged/ashlar/hewn/rusticated/Rock finishes,
+metal descriptions and two-way glass names must remain unchanged.

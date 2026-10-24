@@ -24,6 +24,7 @@ public final class ItemOrderingLaunchChecks implements PreLaunchEntrypoint {
             SharedConstants.createGameVersion();
             Bootstrap.initialize();
             com.oliver.erydon.ModBlocks.registerModBlocks();
+            com.oliver.erydon.client.StoneFinishLabelsLaunchChecks.run();
             run();
             com.oliver.erydon.compat.rei.ReiRegistrationLaunchChecks.run();
             benchmark();

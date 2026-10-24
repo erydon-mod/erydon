@@ -10,6 +10,13 @@ Gothic and Gothic Ornate have separate tags; Byzantine and Guilloche share
 search vocabulary. Geology follows each material's plain block classification,
 including its contribution to mixed weaves.
 
+`verifyReiCatalogue` is an opt-in headless check of the complete registered
+catalogue, including all 20 framed-glazing entries and setting-dependent finish
+names in all three languages. It uses a 24 GB heap by default, overridable with
+`-Perydon.catalogueHeap=24G`, and is separate from the standard `check` and CI
+graphs because full block-state registration needs substantially more memory
+than the small fixtures.
+
 The public `build` task retains the production checks that operate only on the
 current source, generated build output, or small redistributable fixtures.
 These include Java tests, ID migration, CTM path and isolation checks,

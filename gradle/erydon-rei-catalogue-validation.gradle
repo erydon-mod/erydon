@@ -1,0 +1,38 @@
+// Explicit opt-in full registry proof. Never added to check/CI: millions of block states need a larger heap.
+tasks.register('verifyReiCatalogue', JavaExec) {
+    group = 'verification'
+    description = 'Registers the complete ERYDON catalogue and verifies actual REI groups, subsets and item order without a game window.'
+    dependsOn tasks.named('testClasses'), tasks.named('configureLaunch')
+    def fixture = layout.buildDirectory.dir('rei-catalogue-probe')
+    classpath = sourceSets.test.runtimeClasspath + files(fixture.map { new File(it.asFile, 'probe-mod') })
+    mainClass = 'net.fabricmc.loader.impl.launch.knot.KnotClient'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(17) }
+    maxHeapSize = providers.gradleProperty('erydon.catalogueHeap').getOrElse('24G')
+    doFirst {
+        def root = fixture.get().asFile
+        def mod = new File(root, 'probe-mod')
+        mod.mkdirs()
+        workingDir root
+        new File(mod, 'fabric.mod.json').text = groovy.json.JsonOutput.toJson([
+                schemaVersion: 1, id: 'erydon_rei_catalogue_probe', version: '1.0.0',
+                environment: 'client', entrypoints: [preLaunch: ['com.oliver.erydon.item.ItemOrderingLaunchChecks']]
+        ])
+        systemProperty 'fabric.development', 'true'
+        systemProperty 'java.awt.headless', 'true'
+        def gameJar = classpath.files.find { candidate ->
+            if (!candidate.name.startsWith('minecraft-merged-') || !candidate.name.endsWith('.jar')) return false
+            def archive = new java.util.jar.JarFile(candidate)
+            try { return archive.getEntry('net/minecraft/client/main/Main.class') != null }
+            finally { archive.close() }
+        }
+        if (gameJar == null) throw new GradleException('The named Minecraft client archive is missing from the REI catalogue probe classpath')
+        systemProperty 'fabric.gameJarPath', gameJar.absolutePath
+        if (System.getProperty('os.name').toLowerCase(java.util.Locale.ROOT).contains('windows')) {
+            def argumentFile = new File(root, 'launch-classpath.args')
+            argumentFile.setText('-classpath\n"' + classpath.asPath.replace('\\', '\\\\').replace('"', '\\"') + '"\n', 'UTF-8')
+            classpath = files()
+            jvmArgs '@' + argumentFile.absolutePath
+        }
+        args '--gameDir', root.absolutePath, '--version', minecraft_version, '--accessToken', '0'
+    }
+}

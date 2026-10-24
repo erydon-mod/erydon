@@ -5,8 +5,8 @@ This is a shared material change in ERYDON, with no replacement texture pack.
 
 ## Separation from stone finishes
 
-Honed, Polished and Mirror still control the underlying stone, including pattern
-overrides and the existing restart requirement. Mirror's 50% reflection floor and
+Honed, Polished and Ganosis still control the underlying stone, including pattern
+overrides and the existing restart requirement. Ganosis's 50% reflection floor and
 the two-way window coating's 90% target retain their existing paths. The old metal
 85% floor, albedo-normalised tint and fixed 20% texture preservation are removed
 from `HighPolishShaderAdapter`; the metal response does not stack on them.
@@ -104,7 +104,7 @@ avoids applying gamma twice to alloy colour or replacing absorbed light with
 brightly lit albedo. Direct highlights are retained separately from the broad
 metal illumination approximation, whose weight is the greater of perceptual
 roughness squared and 0.06. A previous 0.22 roughness floor forced even fully
-polished metal to CU smoothness 0.603: CU then applied nearly four times Mirror's
+polished metal to CU smoothness 0.603: CU then applied nearly four times Ganosis's
 spatial blur radius, rough reflection normals and blurred reflection mip levels.
 Raising the broad-light share to 0.30 hid this problem behind a milky base.
 Authored polish now reaches CU's sharp-reflection range and both reflection paths
@@ -113,7 +113,7 @@ lighting-dependent contribution vanishes at zero illumination. Matte materials
 keep their roughness and lighting split.
 Fractional stone/metal pixels recover the base smoothness and evaluate CU's
 active SSR/WSR Fresnel curve, instead of merely undoing its final multiplier.
-Only an actually applied Mirror mask selects the Mirror reflection floor.
+Only an actually applied Ganosis mask selects the Ganosis reflection floor.
 Fully covered metal keeps a fully metallic reflection tint even if the stored
 reflection strength rounds upward in CU's SNORM buffer; that rounding must not
 introduce a white substrate contribution into dark bronze channels.
@@ -173,7 +173,7 @@ walls, directional cavity shadows, and displacement over nonflat substrate.
 Groove visibility and shadows were checked at 16x, 32x and 64x. The actual
 RGBA16 material and SNORM reflection targets carried coverage, finish and
 independent metal roughness through production shader slices. SSR and WSR
-curves, all stone finishes, ineligible Mirror, fractional coverage, bright/dark
+curves, all stone finishes, ineligible Ganosis, fractional coverage, bright/dark
 reflected surroundings and preservation of direct lighting were exercised.
 
 All 444 metallic and 204 stone-finish vertex/fragment program pairs compiled and

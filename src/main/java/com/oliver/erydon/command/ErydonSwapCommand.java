@@ -315,7 +315,8 @@ public final class ErydonSwapCommand {
             if (remaining.isEmpty() || canonicalKey.startsWith(remaining) || displayKey.startsWith(remaining)
                     || displayKey.replace("_honed", "_polished").startsWith(remaining)
                     || displayKey.replace("_polished", "_honed").startsWith(remaining)
-                    || displayKey.replace("_polished", "_mirror").replace("_honed", "_mirror").startsWith(remaining)) {
+                    || displayKey.replace("_polished", "_mirror").replace("_honed", "_mirror").startsWith(remaining)
+                    || displayKey.replace("_polished", "_ganosis").replace("_honed", "_ganosis").startsWith(remaining)) {
                 builder.suggest(ErydonSwapFamilyDatabase.commandSuggestion(canonicalKey));
             }
         }
