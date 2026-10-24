@@ -1,7 +1,8 @@
 /*
  * ERYDON-owned CTM-aware POM bridge for the exact supported Complementary
  * Unbound source shape. The shader ZIP is never changed. The vertex stage
- * corrects POM bounds only for ERYDON's reserved large-spiral material id.
+ * restores full sprite bounds for recognized repeat-CTM faces, including
+ * cropped model elements, so their POM rays share one texture domain.
  * Unknown sprites and invalid lookup data leave ordinary albedo intact.
  */
 
@@ -155,9 +156,9 @@ void erydonCtmPomApplyExactBounds(
 
 #ifdef ERYDON_CTM_POM_FRAGMENT_STAGE
 /*
- * Ordinary repeat-CTM blocks retain the established phase-aware POM path,
- * but resolve their record only if a POM ray actually crosses a tile edge.
- * The large spiral already supplies its record from the vertex stage.
+ * Recognized repeat-CTM faces supply the full sprite record from the vertex
+ * stage. Retain lazy fragment resolution for native/unrecognized bounds;
+ * interior rays on that fallback path do not read the lookup.
  */
 int erydonPomFragmentRecord = -2;
 float erydonPomLastTargetRecord = -1.0;

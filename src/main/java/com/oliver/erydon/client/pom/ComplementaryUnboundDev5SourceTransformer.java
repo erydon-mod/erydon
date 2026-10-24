@@ -175,15 +175,11 @@ public final class ComplementaryUnboundDev5SourceTransformer {
         vertexCandidate = replaceFirst(VERTEX_BOUNDS, vertexCandidate,
                 match -> match.group() + "\n"
                         + match.group("indent")
-                        + "erydonPomRecord = -1;\n"
-                        + match.group("indent") + "if (mat == " + SPIRAL_MATERIAL_ID + ") {\n"
+                        + "erydonPomRecord = erydonCtmPomFindRecord(midCoord, vec2(atlasSize));\n"
+                        + match.group("indent") + "if (erydonPomRecord >= 0) {\n"
                         + match.group("indent")
-                        + "    erydonPomRecord = erydonCtmPomFindRecord(midCoord, vec2(atlasSize));\n"
-                        + match.group("indent") + "    if (erydonPomRecord >= 0) {\n"
-                        + match.group("indent")
-                        + "        erydonCtmPomApplyExactBounds(texCoord, vec2(atlasSize), erydonPomRecord, "
+                        + "    erydonCtmPomApplyExactBounds(texCoord, vec2(atlasSize), erydonPomRecord, "
                         + "vTexCoordAM, signMidCoordPos, absMidCoordPos, midCoord);\n"
-                        + match.group("indent") + "    }\n"
                         + match.group("indent") + "}");
 
         String fragmentCandidate = replaceFirst(FRAGMENT_VTEX_DECLARATION, fragmentSource,
@@ -214,10 +210,10 @@ public final class ComplementaryUnboundDev5SourceTransformer {
                 fragmentCandidate, "flat in int erydonPomRecord;"));
         post.put("post_vertex_bounds", occurrences(vertexCandidate,
                 "erydonCtmPomApplyExactBounds(texCoord, vec2(atlasSize), erydonPomRecord,"));
-        post.put("post_vertex_material_gate", occurrences(vertexCandidate,
-                "if (mat == " + SPIRAL_MATERIAL_ID + ")"));
-        post.put("post_vertex_default_record", occurrences(vertexCandidate,
-                "erydonPomRecord = -1;"));
+        post.put("post_vertex_lookup", occurrences(vertexCandidate,
+                "erydonPomRecord = erydonCtmPomFindRecord(midCoord, vec2(atlasSize));"));
+        post.put("post_vertex_record_gate", occurrences(vertexCandidate,
+                "if (erydonPomRecord >= 0)"));
         post.put("post_skip_pom", occurrences(fragmentCandidate,
                 "bool skipPom = mat == " + SPIRAL_MATERIAL_ID + " && erydonPomRecord < 0;"));
         post.put("post_read_normal", occurrences(fragmentCandidate,

@@ -56,10 +56,11 @@ class ComplementaryUnboundDev5SourceTransformerTest {
         assertFalse(result.vertexText().contains("#define"));
         assertFalse(result.fragmentText().contains("#define"));
         assertTrue(result.vertexText().contains("flat out int erydonPomRecord;"));
-        assertTrue(result.vertexText().contains("erydonPomRecord = -1;"));
-        assertTrue(result.vertexText().contains("if (mat == 32120)"));
-        assertTrue(result.vertexText().contains("    erydonPomRecord = erydonCtmPomFindRecord("));
-        assertTrue(result.vertexText().contains("    if (erydonPomRecord >= 0)"));
+        assertTrue(result.vertexText().contains(
+                "erydonPomRecord = erydonCtmPomFindRecord(midCoord, vec2(atlasSize));"));
+        assertTrue(result.vertexText().contains("if (erydonPomRecord >= 0)"));
+        assertFalse(result.vertexText().contains("if (mat == 32120)"),
+                "Cropped elements need full sprite bounds regardless of their finish material ID");
         assertTrue(result.vertexText().contains("erydonCtmPomApplyExactBounds("));
         assertTrue(result.fragmentText().contains("flat in int erydonPomRecord;"));
         assertTrue(result.fragmentText().contains("bool skipPom = mat == 32120 && erydonPomRecord < 0;"));

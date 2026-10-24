@@ -76,6 +76,10 @@ class InlayInitialAlbedoFilterTest {
             String other = SOURCE.replace("8 / 2.0", filter + " / 2.0");
             assertSame(other, InlayInitialAlbedoFilter.adapt(other));
         }
+        for (String discard : List.of("", "if (color.a <= 0.5) discard;")) {
+            String unreviewedDiscard = SOURCE.replace("if (color.a <= 0.00001) discard;", discard);
+            assertSame(unreviewedDiscard, InlayInitialAlbedoFilter.adapt(unreviewedDiscard));
+        }
         assertNull(InlayInitialAlbedoFilter.adapt(null));
         assertSame("unknown shader", InlayInitialAlbedoFilter.adapt("unknown shader"));
     }
@@ -112,9 +116,23 @@ class InlayInitialAlbedoFilterTest {
                     var finish = HighPolishShaderAdapter.adaptFragment("gbuffers_terrain", pom.fragmentText(), true);
                     var metal = MetallicShaderAdapter.adapt("gbuffers_terrain", pom.vertexText(), finish.text(), true);
                     assertTrue(metal.changed(), path.getFileName() + ": " + metal.status());
-                    boolean optimized = options.pom() && options.filtering() == 8 && options.normalStrength() != 0;
+                    String reviewedDiscard = "if (color.a <= 0.00001) discard;";
+                    boolean af8Candidate = options.pom() && options.filtering() == 8 && options.normalStrength() != 0;
+                    boolean hasReviewedDiscard = fragment.contains(reviewedDiscard);
+                    boolean optimized = af8Candidate && hasReviewedDiscard;
                     assertEquals(optimized, metal.fragment().contains(InlayInitialAlbedoFilter.MARKER),
                             path.getFileName() + ": " + options);
+                    if (af8Candidate && !hasReviewedDiscard) {
+                        // Newer CU sources use a different native discard. Retain AF8 until that
+                        // exact source contract is reviewed; the element-bounds fix does not alter it.
+                        String unreviewedDiscard = "if (color.a <= 0.5) discard;";
+                        assertTrue(fragment.contains(unreviewedDiscard), "Unexpected native discard contract: " + path);
+                        assertTrue(metal.fragment().contains("vec4 color = textureAF(tex, texCoord);"),
+                                "Unreviewed native discard must retain the initial AF8 sample");
+                        String restoredContract = metal.fragment().replace(unreviewedDiscard, reviewedDiscard);
+                        assertTrue(InlayInitialAlbedoFilter.adapt(restoredContract).contains(InlayInitialAlbedoFilter.MARKER),
+                                "Native discard must be the only unsupported AF8 precondition");
+                    }
                     HighPolishShaderPackTest.parse(metal.fragment());
                     InstalledShaderTestSupport.validateProgram(path.getFileName() + "/" + options, metal.vertex(), metal.fragment());
                 }
