@@ -15,11 +15,13 @@ public final class PolishedStoneMaterials {
 
     public static boolean enabled(HighPolishSettings settings, String namespace, String path) {
         if (!settings.enabled() || !includes(namespace, path)) return false;
+        if ("daedalon".equals(namespace)) path = materialPath(path);
         String material = path.substring(0, path.indexOf('_'));
         return settings.enables(material, finish(path));
     }
 
     public static HighPolishSettings.Level level(HighPolishSettings settings, String path) {
+        path = materialPath(path);
         return settings.level(path.substring(0, path.indexOf('_')), finish(path));
     }
 
@@ -35,12 +37,24 @@ public final class PolishedStoneMaterials {
     public static boolean includes(String namespace, String path) {
         // Companion mods share these stone textures and the same per-material finish choices.
         if (!"erydon".equals(namespace) && !"themelios".equals(namespace) && !"daedalon".equals(namespace)) return false;
+        if ("daedalon".equals(namespace)) path = materialPath(path);
         String[] parts = path.split("_");
         if (parts.length < 2 || !MATERIALS.contains(parts[0])) return false;
         for (String part : parts) {
             if (EXCLUDED_FINISHES.contains(part)) return false;
         }
         return true;
+    }
+
+    /** Published Daedalon Spartan statues retain their form-first registry IDs. */
+    private static String materialPath(String path) {
+        String prefix = "statue_spartan_promachos_";
+        if (!path.startsWith(prefix)) return path;
+        String material = path.substring(prefix.length());
+        boolean aged = material.endsWith("_aged");
+        if (aged) material = material.substring(0, material.length() - "_aged".length());
+        if (!MATERIALS.contains(material)) return path;
+        return material + (aged ? "_aged" : "") + "_spartan_promachos_statue";
     }
 
     /** The shader's inexpensive square proxy for circular, Gothic and square columns. */

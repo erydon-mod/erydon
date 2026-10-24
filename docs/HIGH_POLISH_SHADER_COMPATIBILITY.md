@@ -39,6 +39,11 @@ its tint and 50% reflection floor independently of pane alpha; the metallic
 two-way coating keeps its 90% floor. Frame finishes, Gloss covers, grout,
 authored metal channels and height maps retain their existing handling.
 
+Daedalon's published form-first Spartan statue IDs use the same per-stone
+Honed, Polished or Mirror preference as its other fresh stone sculptures.
+Their registry IDs stay unchanged; aged, bronze, silver and white finishes
+remain outside the configurable stone-finish selection.
+
 The adapters change shader strings in memory only. They add no reflection pass,
 pane geometry or glass texture samples. Native CTM resources and Collection
 textures are unchanged. Circular-column reflections still depend on the pack

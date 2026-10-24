@@ -85,6 +85,36 @@ class PolishedStoneMaterialsTest {
     }
 
     @Test
+    void publishedDaedalonSpartanIdsUseTheSameFinishWithoutRenamingOrAcceptingNearMatches() {
+        for (String stone : STONES) {
+            String path = "statue_spartan_promachos_" + stone;
+            for (var level : com.oliver.erydon.HighPolishSettings.Level.values()) {
+                var settings = com.oliver.erydon.HighPolishSettings.defaults().withEnabled(true)
+                        .withStone(stone, new com.oliver.erydon.HighPolishSettings.Stone(level,
+                                com.oliver.erydon.HighPolishSettings.Choice.MIRROR,
+                                com.oliver.erydon.HighPolishSettings.Choice.HONED,
+                                com.oliver.erydon.HighPolishSettings.Choice.POLISHED));
+                assertTrue(PolishedStoneMaterials.includes("daedalon", path), path);
+                assertEquals(level, PolishedStoneMaterials.level(settings, path), path);
+                assertEquals(level != com.oliver.erydon.HighPolishSettings.Level.HONED,
+                        PolishedStoneMaterials.enabled(settings, "daedalon", path), path);
+                assertFalse(PolishedStoneMaterials.enabled(settings.withEnabled(false), "daedalon", path));
+                assertEquals(com.oliver.erydon.HighPolishSettings.Level.HONED,
+                        PolishedStoneMaterials.level(settings.withEnabled(false), path));
+            }
+            assertFalse(PolishedStoneMaterials.includes("daedalon", path + "_aged"));
+            assertFalse(PolishedStoneMaterials.includes("erydon", path));
+            assertFalse(PolishedStoneMaterials.includes("themelios", path));
+            assertFalse(PolishedStoneMaterials.includes("unrelated", path));
+            assertFalse(PolishedStoneMaterials.includes("daedalon", path + "_extra"));
+            assertFalse(PolishedStoneMaterials.includes("daedalon", path + "_aged_extra"));
+        }
+        for (String material : List.of("bronze", "silver", "white", "unknown", "glaciumx")) {
+            assertFalse(PolishedStoneMaterials.includes("daedalon", "statue_spartan_promachos_" + material));
+        }
+    }
+
+    @Test
     void allPolishedFormsAndInlaysAreIncluded() {
         for (String stone : STONES) {
             for (String form : List.of("block", "slab", "stairs", "wall_georgian", "arch_gothic",
