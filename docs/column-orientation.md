@@ -14,12 +14,21 @@ default) and `diagonal` (a 45-degree Y rotation around the block centre).
 - Extending a column inherits both orientations from its adjacent column block.
   Recalculation changes structural parts without resetting either choice.
 - The base setting applies to the base and isolated plinth. A shaft, including
-  a square/circular `capital=none` top, remains straight. Gothic capitals retain
-  their fixed style and follow the capital orientation.
+  a `capital=none` top on square, circular or Gothic columns, remains straight.
+  Visible capital models follow the capital orientation.
+
+Gothic capital side-clicks cycle the existing Gothic head (`georgian`), the
+Byzantine placeholder (`guilloche`) and None (`none`). The published internal
+`guilloche` value stays unchanged. Until a separate Gothic Byzantine model is
+authored, that option displays the existing Gothic head. None uses the existing
+raw Gothic pillar with no cap or capital rotation. Its cached five-lobe collision
+and outline follow that shaft's footprint, without the wider invisible head.
+Existing Gothic base, head and middle collision approximations are unchanged.
+The lower Gothic base remains fixed; capital and base orientations remain saved.
 
 These are visual choices over existing baked components: no block entities,
 tickers, extra model JSONs, duplicated baked geometry, or new block/item IDs.
-The saved state space grows from 32 to 128 states per column block; all states
+The saved state space remains 128 states per column block; all states
 continue to share the existing unconditional wrapper and child model set.
 Collision and selection shapes retain their existing simplified shapes.
 
@@ -38,6 +47,16 @@ or shifting their texture phase. Existing quarter-turn callers are unchanged.
 cover enum cycling, independent end selection across styles, unchanged shafts,
 composition with tilted geometry, normals, source-data preservation, matching
 Fabric/Axiom geometry, and cull buckets. The state audit includes both options.
+`GothicColumnControlsLaunchProbe` calls the real `onUse` callback for Gothic,
+square and circular stacks on all four side faces and both orientations, and
+checks saved-state round trips, recalculation and ordinary placement/debug-stick
+pass-through. Run it without a JAR using
+`-I gradle/erydon-gothic-column-validation.init.gradle verifyGothicColumnControls`.
+`test_model_gothic_column_controls_safety.py` checks all 54 stone/aged Gothic
+model routes and native repeat rules. The existing child models and block IDs
+also remain covered by both Collection resolutions; no pack source changes or
+new material rules are needed. Actual lighting and texture joins remain a live
+client check.
 
 In-game visual verification is still required: compare straight and diagonal
 square, circular, Gothic, and Byzantine capitals/bases; inspect stone tops,

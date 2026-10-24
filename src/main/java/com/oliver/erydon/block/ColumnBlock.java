@@ -57,6 +57,7 @@ public class ColumnBlock extends Block implements ClusterRebuildableBlock {
     );
 
     private static final VoxelShape GOTHIC_COLUMN_SHAPE = makeGothicColumnShape();
+    private static final VoxelShape GOTHIC_BARE_TOP_SHAPE = makeGothicBareTopShape();
 
     public ColumnBlock(Settings settings) {
         super(settings);
@@ -134,7 +135,8 @@ public class ColumnBlock extends Block implements ClusterRebuildableBlock {
             return ActionResult.success(world.isClient);
         }
 
-        if (isFixedStyleColumn(state)) {
+        ColumnToggleTarget target = getToggleTarget(state, hit);
+        if (isGothicColumn(state) && target == ColumnToggleTarget.BASE) {
             return ActionResult.PASS;
         }
 
@@ -142,7 +144,6 @@ public class ColumnBlock extends Block implements ClusterRebuildableBlock {
             return ActionResult.SUCCESS;
         }
 
-        ColumnToggleTarget target = getToggleTarget(state, hit);
         BlockPos bottom = findBottom(world, pos);
         BlockPos top = findTop(world, pos);
 
@@ -315,6 +316,9 @@ public class ColumnBlock extends Block implements ClusterRebuildableBlock {
 
     private VoxelShape shapeFor(BlockState s) {
         if (isGothicColumn(s)) {
+            if (s.get(PART) == ColumnPart.CAPITAL && !s.get(CAPITAL).hasCapital()) {
+                return GOTHIC_BARE_TOP_SHAPE;
+            }
             return GOTHIC_COLUMN_SHAPE;
         }
 
@@ -469,10 +473,6 @@ public class ColumnBlock extends Block implements ClusterRebuildableBlock {
         return Registries.BLOCK.getId(state.getBlock()).getPath().contains("column_circular");
     }
 
-    private static boolean isFixedStyleColumn(BlockState state) {
-        return isGothicColumn(state);
-    }
-
     private static boolean isGothicColumn(BlockState state) {
         return Registries.BLOCK.getId(state.getBlock()).getPath().contains("column_gothic");
     }
@@ -485,6 +485,17 @@ public class ColumnBlock extends Block implements ClusterRebuildableBlock {
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.572888125, 0, 0.57446125, 0.9392725, 1, 0.94084875));
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.060914375, 0, 0.060121875, 0.427301875, 1, 0.426506875));
         return shape;
+    }
+
+    private static VoxelShape makeGothicBareTopShape() {
+        // Five shaft lobes from the rotated raw pillar's authored footprints.
+        // Existing base/head/middle approximations remain unchanged.
+        return VoxelShapes.union(
+                VoxelShapes.cuboid(0.1815, 0, 0.180234375, 0.81836375, 1, 0.817098125),
+                VoxelShapes.cuboid(0.63040772, 0, 0.129699990, 0.869231931, 1, 0.368524080),
+                VoxelShapes.cuboid(0.63040772, 0, 0.631475920, 0.869231931, 1, 0.870300010),
+                VoxelShapes.cuboid(0.130768069, 0, 0.129699990, 0.3695925, 1, 0.368524080),
+                VoxelShapes.cuboid(0.130768069, 0, 0.631475920, 0.3695925, 1, 0.870300010));
     }
 
     private Set<BlockPos> collectVerticalComponent(WorldAccess world, BlockPos seed, boolean locked) {

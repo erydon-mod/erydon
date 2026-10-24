@@ -7178,7 +7178,7 @@
     "block.erydon.striatus_column_gothic": "Striatus Columna gotica",
     "block.erydon.striatus_aged_column_gothic": "Striatus Envejecido Columna gotica",
     "tooltip.erydon.family.column_gothic.1": "Auto-assembles plinth, shaft, and capital.",
-    "tooltip.erydon.family.column_gothic.2": "Uses one Gothic base and capital style for now.",
+    "tooltip.erydon.family.column_gothic.2": "Clic derecho en la parte superior de un lateral: capitel gótico, opción bizantina provisional o sin capitel.",
     "tooltip.erydon.family.column_gothic.3": "Agacharse + clic derecho lateral con la mano vacía: Recta / Diagonal (45°).",
     "block.erydon.aganite_alcove_georgian": "Aganite Nicho georgiano",
     "block.erydon.aganite_alcove_modern": "Aganite Nicho moderno",

@@ -1,0 +1,45 @@
+// Isolated output keeps this check separate from concurrent ERYDON development.
+gradle.beforeProject { project ->
+    project.layout.buildDirectory.set(new File(project.projectDir, '.gradle/gothic-column-validation/build'))
+    project.afterEvaluate {
+        project.tasks.register('verifyGothicColumnControls', JavaExec) {
+            group = 'verification'
+            description = 'Exercises real Gothic/square/circular capital side-clicks and saved states under Fabric.'
+            dependsOn project.tasks.named('testClasses'), project.tasks.named('configureLaunch')
+            def fixture = project.layout.buildDirectory.dir('gothic-column-probe')
+            classpath = project.sourceSets.test.runtimeClasspath + project.files(fixture.map { it.dir('probe-mod') })
+            mainClass = 'net.fabricmc.loader.impl.launch.knot.KnotClient'
+            javaLauncher = project.javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(17) }
+            maxHeapSize = '2G'
+            doFirst {
+                def root = fixture.get().asFile
+                root.mkdirs()
+                workingDir root
+                def mod = new File(root, 'probe-mod')
+                mod.mkdirs()
+                new File(mod, 'fabric.mod.json').text = groovy.json.JsonOutput.toJson([
+                        schemaVersion: 1, id: 'erydon_gothic_column_probe', version: '1.0.0',
+                        environment: 'client', entrypoints: [preLaunch: ['com.oliver.erydon.block.GothicColumnControlsLaunchProbe']]])
+                systemProperty 'fabric.development', 'true'
+                // Preserve the actual game archive/classpath on Windows instead
+                // of Gradle's manifest-only classpath-shortening JAR.
+                def gameJar = classpath.files.find { candidate ->
+                    if (!candidate.name.startsWith('minecraft-merged-') || !candidate.name.endsWith('.jar')) return false
+                    def archive = new java.util.jar.JarFile(candidate)
+                    try { return archive.getEntry('net/minecraft/client/main/Main.class') != null }
+                    finally { archive.close() }
+                }
+                if (gameJar == null) throw new GradleException('The named Minecraft client archive is missing')
+                systemProperty 'fabric.gameJarPath', gameJar.absolutePath
+                if (System.getProperty('os.name').toLowerCase(java.util.Locale.ROOT).contains('windows')) {
+                    def argumentFile = new File(root, 'launch-classpath.args')
+                    argumentFile.setText('-classpath\n"' + classpath.asPath.replace('\\', '\\\\').replace('"', '\\"') + '"\n', 'UTF-8')
+                    classpath = project.files()
+                    jvmArgs '@' + argumentFile.absolutePath
+                }
+                systemProperty 'fabric.remapClasspathFile', project.file('.gradle/loom-cache/remapClasspath.txt').absolutePath
+                args '--gameDir', root.absolutePath, '--version', '1.20.1', '--accessToken', '0'
+            }
+        }
+    }
+}

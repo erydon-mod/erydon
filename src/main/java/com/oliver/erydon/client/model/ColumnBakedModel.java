@@ -91,7 +91,7 @@ public final class ColumnBakedModel implements BakedModel, FabricBakedModel {
                 case PLINTH -> "plinth";
                 case PILLAR -> "pillar";
                 case BASE -> "base";
-                case CAPITAL -> "capital";
+                case CAPITAL -> gothicCapitalSuffix(state.get(ColumnBlock.CAPITAL));
             };
         }
 
@@ -112,6 +112,12 @@ public final class ColumnBakedModel implements BakedModel, FabricBakedModel {
         };
     }
 
+    static String gothicCapitalSuffix(ColumnBlock.CapitalStyle style) {
+        // The published guilloche state remains the future Byzantine option.
+        // Until its Gothic model is authored, retain the existing Gothic head.
+        return style.hasCapital() ? "capital" : "pillar";
+    }
+
     private static int orientationDegrees(BlockState state) {
         return orientationForPart(state.get(ColumnBlock.PART), state.get(ColumnBlock.CAPITAL),
                 isGothicColumn(state), state.get(ColumnBlock.CAPITAL_ORIENTATION),
@@ -125,7 +131,7 @@ public final class ColumnBakedModel implements BakedModel, FabricBakedModel {
                                                        ColumnBlock.Orientation baseOrientation) {
         return switch (part) {
             case PLINTH, BASE -> baseOrientation;
-            case CAPITAL -> gothic || capital.hasCapital() ? capitalOrientation : ColumnBlock.Orientation.STRAIGHT;
+            case CAPITAL -> capital.hasCapital() ? capitalOrientation : ColumnBlock.Orientation.STRAIGHT;
             case PILLAR -> ColumnBlock.Orientation.STRAIGHT;
         };
     }

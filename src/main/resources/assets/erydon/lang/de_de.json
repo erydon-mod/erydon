@@ -7178,7 +7178,7 @@
     "block.erydon.striatus_column_gothic": "Striatus Gotisch Saeule",
     "block.erydon.striatus_aged_column_gothic": "Striatus Gealtert Gotisch Saeule",
     "tooltip.erydon.family.column_gothic.1": "Auto-assembles plinth, shaft, and capital.",
-    "tooltip.erydon.family.column_gothic.2": "Uses one Gothic base and capital style for now.",
+    "tooltip.erydon.family.column_gothic.2": "Rechtsklick oben an der Seite: gotisches Kapitell, byzantinischer Platzhalter oder kein Kapitell.",
     "tooltip.erydon.family.column_gothic.3": "Schleichen + seitlicher Rechtsklick mit leerer Hand: Gerade / Diagonal (45°).",
     "block.erydon.aganite_alcove_georgian": "Aganite Georgianische Nische",
     "block.erydon.aganite_alcove_modern": "Aganite Moderne Nische",

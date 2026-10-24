@@ -36,8 +36,7 @@ class ColumnBakedModelTest {
         assertEquals(ColumnBlock.Orientation.STRAIGHT, ColumnBakedModel.orientationForPart(
                 ColumnBlock.ColumnPart.CAPITAL, ColumnBlock.CapitalStyle.NONE, false,
                 ColumnBlock.Orientation.DIAGONAL, ColumnBlock.Orientation.DIAGONAL));
-        // Gothic ignores the unused capital-style property, including NONE.
-        assertEquals(ColumnBlock.Orientation.DIAGONAL, ColumnBakedModel.orientationForPart(
+        assertEquals(ColumnBlock.Orientation.STRAIGHT, ColumnBakedModel.orientationForPart(
                 ColumnBlock.ColumnPart.CAPITAL, ColumnBlock.CapitalStyle.NONE, true,
                 ColumnBlock.Orientation.DIAGONAL, ColumnBlock.Orientation.STRAIGHT));
     }
@@ -60,5 +59,13 @@ class ColumnBakedModelTest {
                 ColumnBakedModel.capitalSuffix(ColumnBlock.CapitalStyle.NARROW, true));
         assertEquals("capital",
                 ColumnBakedModel.capitalSuffix(ColumnBlock.CapitalStyle.NARROW, false));
+    }
+
+    @Test
+    void gothicNoCapitalReusesItsExistingShaftAndByzantineKeepsTheGothicFallback() {
+        assertEquals("pillar", ColumnBakedModel.gothicCapitalSuffix(ColumnBlock.CapitalStyle.NONE));
+        assertEquals("capital", ColumnBakedModel.gothicCapitalSuffix(ColumnBlock.CapitalStyle.GEORGIAN));
+        assertEquals("capital", ColumnBakedModel.gothicCapitalSuffix(ColumnBlock.CapitalStyle.GUILLOCHE));
+        assertEquals("guilloche", ColumnBlock.CapitalStyle.GUILLOCHE.asString());
     }
 }
