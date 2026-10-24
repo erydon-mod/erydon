@@ -1,5 +1,7 @@
 # ERYDON
 
+![Animated ERYDON logo](docs/branding/erydon-logo.gif)
+
 ERYDON is a Fabric mod for Minecraft 1.20.1 focused on detailed architectural
 building. It provides decorative stone and marble families, connected textures,
 custom slopes and structural pieces, lighting, and classical through modern

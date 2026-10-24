@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "project": "ERYDON",
+  "assets": [
+    {
+      "path": "docs/branding/erydon-logo.gif",
+      "role": "readme_logo",
+      "sha256": "b939d88b46aecc3f97df011bbcc3f8ed3ff309d16ae9120e9b0fd341833d9c9c",
+      "bytes": 3013349,
+      "size": [
+        480,
+        199
+      ],
+      "frames": 120,
+      "readme": "README.md"
+    },
+    {
+      "path": "src/main/resources/assets/erydon/icon.png",
+      "role": "static_icon",
+      "sha256": "bc2a874dca64e688db8c625e1f70c8d3d0dc0d1346cf2487ec9c3da6749f1016",
+      "bytes": 199414,
+      "size": [
+        512,
+        512
+      ]
+    },
+    {
+      "path": "src/main/resources/assets/erydon/textures/item/emblem.png",
+      "role": "creative_emblem",
+      "sha256": "ddcc8c49f51aa022a53495f99253ceddd81e95a64b3ae5cc586887976ea2d010",
+      "bytes": 227354,
+      "size": [
+        64,
+        2560
+      ],
+      "frames": 40,
+      "frame_size": [
+        64,
+        64
+      ]
+    },
+    {
+      "path": "src/main/resources/assets/erydon/textures/gui/portorium_logo.png",
+      "role": "gui_logo",
+      "sha256": "a23575b39d2ab762fe2e23e45aa7e2131b3adc44686fe2addc96f89fc5c0fac6",
+      "bytes": 4036112,
+      "size": [
+        2048,
+        1590
+      ],
+      "frames": 120,
+      "frame_size": [
+        256,
+        106
+      ]
+    }
+  ],
+  "runtime_roots": [
+    "src/main/resources/assets"
+  ],
+  "references": [
+    {
+      "path": "src/main/resources/fabric.mod.json",
+      "pointer": [
+        "icon"
+      ],
+      "equals": "assets/erydon/icon.png"
+    },
+    {
+      "path": "src/main/resources/assets/erydon/models/item/emblem.json",
+      "pointer": [
+        "textures",
+        "layer0"
+      ],
+      "equals": "erydon:item/emblem"
+    },
+    {
+      "path": "src/main/java/com/oliver/erydon/item/ModItemGroups.java",
+      "pattern": "ModItems\\.EMBLEM"
+    },
+    {
+      "path": "src/main/java/com/oliver/erydon/client/config/PortoriumLogo.java",
+      "pattern": "textures/gui/portorium_logo\\.png"
+    },
+    {
+      "path": "src/main/java/com/oliver/erydon/client/config/PortoriumLogo.java",
+      "pattern": "FRAME_WIDTH\\s*=\\s*256\\b"
+    },
+    {
+      "path": "src/main/java/com/oliver/erydon/client/config/PortoriumLogo.java",
+      "pattern": "FRAME_HEIGHT\\s*=\\s*106\\b"
+    },
+    {
+      "path": "src/main/java/com/oliver/erydon/client/config/PortoriumLogo.java",
+      "pattern": "FRAME_COUNT\\s*=\\s*120\\b"
+    },
+    {
+      "path": "src/main/java/com/oliver/erydon/client/config/PortoriumLogo.java",
+      "pattern": "/\\s*50L"
+    }
+  ],
+  "forbidden": []
+}

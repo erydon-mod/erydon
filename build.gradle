@@ -853,3 +853,5 @@ publishing {
 if (providers.gradleProperty('erydon.frameRecorder').getOrElse('false') == 'true') {
     apply from: 'gradle/erydon-frame-recorder.gradle'
 }
+
+apply from: 'gradle/branding-validation.gradle'

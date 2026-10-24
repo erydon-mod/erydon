@@ -2,9 +2,9 @@
 
 Copyright (c) 2026 Oliver
 
-Unless a file or notice says otherwise, ERYDON-owned textures, models, sounds,
-resource-pack assets, data-pack resources, authoring models, and test asset
-fixtures in this repository are licensed under the Creative Commons
+Unless a file or notice says otherwise, ERYDON-owned branding artwork, textures,
+models, sounds, resource-pack assets, data-pack resources, authoring models,
+and test asset fixtures in this repository are licensed under the Creative Commons
 Attribution-ShareAlike 4.0 International licence (CC BY-SA 4.0).
 
 The complete legal code is in `LICENSES/CC-BY-SA-4.0.txt` and is also available
@@ -25,6 +25,7 @@ compatible licence, as required by the licence.
 
 This asset licence covers ERYDON-owned material under:
 
+- `docs/branding/`
 - `src/main/resources/assets/erydon/`
 - ERYDON-authored overrides under `src/main/resources/assets/minecraft/`
 - ERYDON-authored resources under `src/main/resources/data/`

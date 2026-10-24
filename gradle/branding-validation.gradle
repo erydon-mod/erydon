@@ -1,0 +1,32 @@
+// Source-only branding gates shared by the family repositories; never package.
+def brandingRoot = project
+def brandingPython = providers.gradleProperty('brandingPython')
+        .orElse(providers.environmentVariable('PYTHON'))
+        .getOrElse(System.getProperty('os.name', '').startsWith('Windows') ? 'python' : 'python3')
+
+def brandingTests = tasks.register('testBranding', Exec) {
+    group = 'verification'
+    description = 'Tests portable branding checks with small, temporary image fixtures.'
+    workingDir brandingRoot.projectDir
+    commandLine brandingPython, '-B', '-m', 'unittest', 'discover',
+            '-s', 'tools', '-p', 'test_branding.py', '-v'
+}
+
+def brandingAudit = tasks.register('verifyBranding', Exec) {
+    group = 'verification'
+    description = 'Verifies approved artwork, animation timing, sizing and source references without packaging.'
+    dependsOn brandingTests
+    workingDir brandingRoot.projectDir
+    commandLine brandingPython, '-B', 'tools/audit_branding.py'
+}
+
+tasks.matching { it.name in ['check', 'processResources', 'checkAdapters'] }.configureEach {
+    dependsOn brandingAudit
+}
+if (project == rootProject) {
+    subprojects {
+        tasks.matching { it.name in ['check', 'processResources'] }.configureEach {
+            dependsOn brandingAudit
+        }
+    }
+}

@@ -16,6 +16,11 @@ def expectedContact = [
 ]
 def requiredStaticResources = [
         'assets/erydon/icon.png',
+        'assets/erydon/models/item/emblem.json',
+        'assets/erydon/textures/item/emblem.png',
+        'assets/erydon/textures/item/emblem.png.mcmeta',
+        'assets/erydon/textures/gui/portorium_logo.png',
+        'assets/erydon/textures/gui/portorium_logo.png.mcmeta',
         'assets/erydon/textures/gui/glacium_config_background.png',
         'assets/erydon/textures/gui/nerium_control_background.png',
         'assets/erydon/textures/gui/portorium_control_background.png',
@@ -27,6 +32,7 @@ def requiredStaticResources = [
         'assets/erydon/font/cinzel.ttf'
 ]
 def requiredConfigClasses = [
+        'PortoriumLogo',
         'ErydonConfigScreen',
         'ErydonConfigUi',
         'ErydonHelpConfigScreen',
