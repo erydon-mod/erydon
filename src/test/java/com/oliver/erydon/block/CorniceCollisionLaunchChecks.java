@@ -329,6 +329,7 @@ public final class CorniceCollisionLaunchChecks {
         states.put(pos, support); return true;
     }
     private static BlockState support(BlockState cornice) {
+        if (cornice.get(CorniceBlock.SHAPE).isHalfSupport()) return CorniceHalfSupportLaunchChecks.supportFor(cornice);
         String name = cornice.get(CorniceBlock.SHAPE).name();
         boolean broad = name.startsWith("BROAD"), narrow = name.startsWith("NARROW");
         String path = broad ? "glacium_slope_vertical_shallow_broad" : narrow ? "glacium_slope_vertical_shallow_narrow" : "glacium_slope_vertical";

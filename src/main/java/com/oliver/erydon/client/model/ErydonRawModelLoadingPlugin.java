@@ -1294,7 +1294,7 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
         synchronized (data) {
             cached = data.cachedWorldUvSurfaces;
             if (cached == null) {
-                cached = splitWorldUvSurfaces(buildRawSurfaces(data));
+                cached = splitWorldUvSurfaces(buildRawSurfaces(data), data.splitAllWorldUv);
                 data.cachedWorldUvSurfaces = cached;
             }
             return cached;
@@ -1335,10 +1335,10 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
     }
 
     /** Split the opted-in default mapping at sprite cells without moving any authored geometry. */
-    private static List<RawSurface> splitWorldUvSurfaces(List<RawSurface> surfaces) {
+    private static List<RawSurface> splitWorldUvSurfaces(List<RawSurface> surfaces, boolean splitAll) {
         List<RawSurface> result = new ArrayList<>(surfaces.size());
         for (RawSurface surface : surfaces) {
-            if (surface.face.uv != null || atlasSafe(surface.uv)) {
+            if ((!splitAll && !surface.face.splitWorldUv) || surface.face.uv != null || atlasSafe(surface.uv)) {
                 result.add(surface);
                 continue;
             }
@@ -1546,6 +1546,7 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
         private final List<RawElement> elements;
         private final Map<String, Identifier> textures;
         private final boolean splitWorldUv;
+        private final boolean splitAllWorldUv;
         private final String geometryKey;
         private volatile List<RawSurface> cachedWorldUvSurfaces;
 
@@ -1557,7 +1558,9 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
             this.sourceId = sourceId;
             this.elements = List.copyOf(elements);
             this.textures = Map.copyOf(textures);
-            this.splitWorldUv = splitWorldUv;
+            this.splitAllWorldUv = splitWorldUv;
+            this.splitWorldUv = splitWorldUv || elements.stream()
+                    .flatMap(element -> element.faces.values().stream()).anyMatch(face -> face.splitWorldUv);
             this.geometryKey = buildGeometryKey();
         }
 
@@ -1624,10 +1627,13 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
                                     .append(',').append(Float.toHexString(vertex.z));
                         }
                     }
+                    if (face != null && face.splitWorldUv) {
+                        offsets.append(";split_world_uv:").append(index).append(':').append(direction.getName());
+                    }
                 }
             }
             String key = offsets.isEmpty() ? sourceId.toString() : sourceId + "|normal_offsets" + offsets;
-            return splitWorldUv ? key + "|split_world_uv" : key;
+            return splitAllWorldUv ? key + "|split_world_uv" : key;
         }
 
         private static Map<String, Identifier> parseTextures(JsonObject textureObject) {
@@ -1855,16 +1861,18 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
         private final float[] uv;
         private final float[] uvOffset;
         private final boolean cullBoundaryOverride;
+        private final boolean splitWorldUv;
         private final float normalOffset;
         private final Vector3f[] vertices;
 
         private RawFace(Direction cullFace, String textureKey, float[] uv, float[] uvOffset,
-                        boolean cullBoundaryOverride, float normalOffset, Vector3f[] vertices) {
+                        boolean cullBoundaryOverride, float normalOffset, Vector3f[] vertices, boolean splitWorldUv) {
             this.cullFace = cullFace;
             this.textureKey = textureKey;
             this.uv = uv == null ? null : uv.clone();
             this.uvOffset = uvOffset.clone();
             this.cullBoundaryOverride = cullBoundaryOverride;
+            this.splitWorldUv = splitWorldUv;
             this.normalOffset = normalOffset;
             this.vertices = vertices == null ? null : new Vector3f[]{
                     new Vector3f(vertices[0]), new Vector3f(vertices[1]),
@@ -1969,7 +1977,15 @@ public final class ErydonRawModelLoadingPlugin implements PreparableModelLoading
                     vertices[index] = new Vector3f(xyz[0], xyz[1], xyz[2]);
                 }
             }
-            return new RawFace(cullFace, textureKey, uv, uvOffset, cullBoundaryOverride, normalOffset, vertices);
+            boolean splitWorldUv = false;
+            if (object.has("erydon_split_world_uv")) {
+                JsonElement flag = object.get("erydon_split_world_uv");
+                if (!flag.isJsonPrimitive() || !flag.getAsJsonPrimitive().isBoolean()) {
+                    throw new IllegalArgumentException("Expected a boolean for face erydon_split_world_uv");
+                }
+                splitWorldUv = flag.getAsBoolean();
+            }
+            return new RawFace(cullFace, textureKey, uv, uvOffset, cullBoundaryOverride, normalOffset, vertices, splitWorldUv);
         }
     }
 

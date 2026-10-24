@@ -655,7 +655,7 @@ public final class CorniceAssemblyLaunchChecks {
     private static boolean contains(VoxelShape shape, double x, double y, double z) { return shape.getBoundingBoxes().stream().anyMatch(box -> box.expand(.00001).contains(x, y, z)); }
     private static void require(boolean condition, String message) { if (!condition) throw new AssertionError(message); }
 
-    private static MemoryWorld world() {
+    static MemoryWorld world() {
         try {
             MemoryWorld world = DoubleColumnRepairLaunchProbe.allocate(MemoryWorld.class);
             world.server = DoubleColumnRepairLaunchProbe.allocate(MemoryServer.class); world.server.owner = Thread.currentThread();
@@ -673,7 +673,7 @@ public final class CorniceAssemblyLaunchChecks {
         @Override public Thread getThread() { return owner; }
     }
     /** Only required world operations are replaced; production part/shape/NBT/item code runs normally. */
-    private static final class MemoryWorld extends ServerWorld {
+    static final class MemoryWorld extends ServerWorld {
         MemoryServer server;
         Map<BlockPos, BlockState> states; Map<BlockPos, BlockEntity> entities; Set<BlockPos> writes; WorldBorder border;
         Set<Long> unloadedChunks;

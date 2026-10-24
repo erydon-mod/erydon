@@ -11,6 +11,7 @@ import net.minecraft.util.shape.ArrayVoxelShape;
 import net.minecraft.util.shape.BitSetVoxelSet;
 import net.minecraft.util.shape.VoxelSet;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Direction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +23,7 @@ import java.nio.charset.StandardCharsets;
 
 /** Cached 1/32-cell outlines follow the same run stretch and profile-depth end cuts as the mesh. */
 final class CorniceInteractionShapes {
-    private record Key(double[][] boxes, List<CorniceConnections.Segment> segments) { }
+    private record Key(double[][] boxes, List<CorniceConnections.Segment> segments, Direction outerFacing) { }
     private static final Cache<Key, VoxelShape> CACHE = CacheBuilder.newBuilder().maximumWeight(16 * 1024 * 1024)
             .weigher((Key key, VoxelShape value) -> value instanceof RasterShape raster ? raster.estimatedBytes : 256).build();
     private static final Map<String, double[][]> PROFILE_BOXES = new ConcurrentHashMap<>();
@@ -106,20 +107,104 @@ final class CorniceInteractionShapes {
     }
 
     static VoxelShape shape(BlockState state, List<CorniceConnections.Segment> segments, double[][] boxes) {
-        Key key = new Key(boxes, List.copyOf(segments));
+        Key key = new Key(boxes, List.copyOf(segments), null);
         VoxelShape cached = CACHE.getIfPresent(key);
         if (cached != null) return cached;
         List<Prism> prisms = new ArrayList<>();
-        int minX = Integer.MAX_VALUE, minY = minX, minZ = minX;
-        int maxX = Integer.MIN_VALUE, maxY = maxX, maxZ = maxX;
         for (CorniceConnections.Segment segment : segments) for (double[] box : boxes) {
+            if (segment.usesProfileCrop()) {
+                for (int tile = -2; tile <= 2; tile++) {
+                    double shift = tile - segment.sourcePhase();
+                    List<CorniceRun.Point> polygon = List.of(new CorniceRun.Point(box[0] / 16 + shift, box[2] / 16),
+                            new CorniceRun.Point(box[3] / 16 + shift, box[2] / 16),
+                            new CorniceRun.Point(box[3] / 16 + shift, box[5] / 16),
+                            new CorniceRun.Point(box[0] / 16 + shift, box[5] / 16));
+                    polygon = profileClip(profileClip(polygon, segment, true), segment, false);
+                    if (polygon.size() < 3) continue;
+                    List<CorniceRun.Point> placed = new ArrayList<>(polygon.size());
+                    for (CorniceRun.Point point : polygon) placed.add(segment.profilePoint(point.x(), point.z()));
+                    prisms.add(new Prism(List.copyOf(placed), floor(box[1] / 16), ceil(box[4] / 16)));
+                }
+                continue;
+            }
             List<CorniceRun.Point> polygon = List.of(segment.point(box[0] / 16, box[2] / 16),
                     segment.point(box[3] / 16, box[2] / 16), segment.point(box[3] / 16, box[5] / 16),
                     segment.point(box[0] / 16, box[5] / 16));
-            int lowY = floor(box[1] / 16), highY = ceil(box[4] / 16);
-            prisms.add(new Prism(polygon, lowY, highY));
-            minY = Math.min(minY, lowY); maxY = Math.max(maxY, highY);
-            for (var point : polygon) {
+            prisms.add(new Prism(polygon, floor(box[1] / 16), ceil(box[4] / 16)));
+        }
+        VoxelShape result = raster(prisms);
+        CACHE.put(key, result);
+        return result;
+    }
+
+    private static List<CorniceRun.Point> profileClip(List<CorniceRun.Point> polygon, CorniceConnections.Segment segment, boolean start) {
+        if (polygon.isEmpty()) return polygon;
+        List<CorniceRun.Point> output = new ArrayList<>();
+        CorniceRun.Cut cut = start ? segment.start() : segment.end();
+        CorniceRun.Point a = polygon.get(polygon.size() - 1);
+        double da = (a.x() - segment.run().length() * cut.at(a.z())) * (start ? 1 : -1);
+        for (CorniceRun.Point b : polygon) {
+            double db = (b.x() - segment.run().length() * cut.at(b.z())) * (start ? 1 : -1);
+            if ((da >= 0) != (db >= 0)) {
+                double t = da / (da - db), depth = a.z() + (b.z() - a.z()) * t;
+                output.add(new CorniceRun.Point(segment.run().length() * cut.at(depth), depth));
+            }
+            if (db >= 0) output.add(b);
+            a = b; da = db;
+        }
+        return output;
+    }
+
+    /** Clip the unchanged authored envelopes at the two actual outer mitres; never stretch ornaments. */
+    static VoxelShape outerShape(double[][] boxes, Direction facing) {
+        Key key = new Key(boxes, List.of(), facing);
+        VoxelShape cached = CACHE.getIfPresent(key);
+        if (cached != null) return cached;
+        List<Prism> prisms = new ArrayList<>();
+        for (double[] box : boxes) {
+            List<CorniceRun.Point> polygon = List.of(new CorniceRun.Point(box[0] / 16, box[2] / 16),
+                    new CorniceRun.Point(box[3] / 16, box[2] / 16), new CorniceRun.Point(box[3] / 16, box[5] / 16),
+                    new CorniceRun.Point(box[0] / 16, box[5] / 16));
+            for (int arm = 0; arm < 2; arm++) {
+                List<CorniceRun.Point> clipped = outerClip(polygon, arm == 0);
+                if (clipped.size() < 3) continue;
+                List<CorniceRun.Point> placed = new ArrayList<>();
+                for (CorniceRun.Point point : clipped) {
+                    double x = arm == 0 ? point.x() : point.z(), z = arm == 0 ? point.z() : 1 - point.x();
+                    int turns = switch (facing) { case EAST -> 1; case SOUTH -> 2; case WEST -> 3; default -> 0; };
+                    for (int turn = 0; turn < turns; turn++) { double next = 1 - z; z = x; x = next; }
+                    placed.add(new CorniceRun.Point(x, z));
+                }
+                prisms.add(new Prism(List.copyOf(placed), floor(box[1] / 16), ceil(box[4] / 16)));
+            }
+        }
+        VoxelShape result = raster(prisms);
+        CACHE.put(key, result);
+        return result;
+    }
+
+    private static List<CorniceRun.Point> outerClip(List<CorniceRun.Point> polygon, boolean first) {
+        List<CorniceRun.Point> result = new ArrayList<>();
+        CorniceRun.Point a = polygon.get(polygon.size() - 1);
+        double da = first ? a.z() - a.x() : a.x() + a.z() - 1;
+        for (CorniceRun.Point b : polygon) {
+            double db = first ? b.z() - b.x() : b.x() + b.z() - 1;
+            if ((da >= 0) != (db >= 0)) {
+                double amount = da / (da - db);
+                result.add(new CorniceRun.Point(a.x() + (b.x() - a.x()) * amount, a.z() + (b.z() - a.z()) * amount));
+            }
+            if (db >= 0) result.add(b);
+            a = b; da = db;
+        }
+        return result;
+    }
+
+    private static VoxelShape raster(List<Prism> prisms) {
+        int minX = Integer.MAX_VALUE, minY = minX, minZ = minX;
+        int maxX = Integer.MIN_VALUE, maxY = maxX, maxZ = maxX;
+        for (Prism prism : prisms) {
+            minY = Math.min(minY, prism.lowY); maxY = Math.max(maxY, prism.highY);
+            for (CorniceRun.Point point : prism.polygon) {
                 minX = Math.min(minX, floor(point.x())); maxX = Math.max(maxX, ceil(point.x()));
                 minZ = Math.min(minZ, floor(point.z())); maxZ = Math.max(maxZ, ceil(point.z()));
             }
@@ -141,9 +226,7 @@ final class CorniceInteractionShapes {
         }
         // Fill one small uniform grid instead of repeatedly unioning and
         // simplifying thousands of differently spaced authored envelopes.
-        VoxelShape result = new RasterShape(cells, coordinates(minX, maxX), coordinates(minY, maxY), coordinates(minZ, maxZ));
-        CACHE.put(key, result);
-        return result;
+        return new RasterShape(cells, coordinates(minX, maxX), coordinates(minY, maxY), coordinates(minZ, maxZ));
     }
 
     private record Prism(List<CorniceRun.Point> polygon, int lowY, int highY) { }

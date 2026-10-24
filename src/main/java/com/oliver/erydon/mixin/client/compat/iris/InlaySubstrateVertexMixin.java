@@ -3,6 +3,7 @@ package com.oliver.erydon.mixin.client.compat.iris;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.oliver.erydon.client.pom.InlaySubstrateTransport;
 import com.oliver.erydon.client.pom.CornicePartMaterialTransport;
+import com.oliver.erydon.client.pom.ColumnMeshNormalTransport;
 import net.irisshaders.iris.compat.sodium.impl.block_context.BlockContextHolder;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.Material;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEncoder;
@@ -22,6 +23,8 @@ public abstract class InlaySubstrateVertexMixin {
             at = @At("RETURN"), remap = false, require = 0)
     private long erydon$writeInlaySubstrate(long result, long pointer, Material material,
                                            ChunkVertexEncoder.Vertex[] vertices, int section) {
+        // Independent +28 guard: a changed normal layout disables only this tagged mesh bridge.
+        ColumnMeshNormalTransport.writeNormals(result, vertices);
         int record = InlaySubstrateTransport.currentRecord();
         var part = CornicePartMaterialTransport.current();
         if ((record < 0 && part == null) || vertices.length != 4) return result;

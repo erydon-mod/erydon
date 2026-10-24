@@ -129,8 +129,12 @@ public final class CorniceAssembly {
     /** Material-independent support identity prevents duplicate mouldings across the two front cells. */
     public static boolean sameAttachment(BlockState a, BlockState b, BlockPos aOwner, BlockPos bOwner) {
         if (a.get(CorniceBlock.SHAPE).isAngled() || b.get(CorniceBlock.SHAPE).isAngled()) {
-            return a.get(CorniceBlock.SHAPE).isAngled() && b.get(CorniceBlock.SHAPE).isAngled()
-                    && CorniceSlopePlacement.supportPos(a, aOwner).equals(CorniceSlopePlacement.supportPos(b, bOwner));
+            if (!a.get(CorniceBlock.SHAPE).isAngled() || !b.get(CorniceBlock.SHAPE).isAngled()) return false;
+            if (!CorniceSlopePlacement.supportPos(a, aOwner).equals(CorniceSlopePlacement.supportPos(b, bOwner))) return false;
+            CorniceRun first = CorniceSlopePlacement.run(a).translated(aOwner.getX(), aOwner.getZ());
+            CorniceRun second = CorniceSlopePlacement.run(b).translated(bOwner.getX(), bOwner.getZ());
+            return Math.hypot(first.a().x() - second.a().x(), first.a().z() - second.a().z()) < .000001
+                    && Math.hypot(first.b().x() - second.b().x(), first.b().z() - second.b().z()) < .000001;
         }
         if (!aOwner.equals(bOwner)) return false;
         for (Direction side : walls(a)) if (walls(b).contains(side)) return true;

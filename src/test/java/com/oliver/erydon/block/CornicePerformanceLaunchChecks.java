@@ -12,6 +12,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.RaycastContext;
 
@@ -84,7 +86,16 @@ public final class CornicePerformanceLaunchChecks {
                     && segments.stream().noneMatch(segment -> segment.joinedStart() || segment.joinedEnd())) {
                 Baseline baseline = new Baseline();
                 VoxelShape legacy = baseline.shape(fixture.state);
-                require(legacy == shape, "Ordinary outline is not the existing prebuilt profile: " + fixture.name);
+                if (fixture.state.get(CorniceBlock.SHAPE) == CorniceBlock.CorniceShape.OUTER_CORNER) {
+                    // This fixture is Modern: its exterior remains exactly the published stepped quarter.
+                    require(!VoxelShapes.matchesAnywhere(legacy, shape, BooleanBiFunction.NOT_SAME),
+                            "Cached outer miter changed the published Modern occupied volume");
+                    require(shape == CorniceInteractionShapes.outerShape(profileBoxes("modern"), fixture.state.get(CorniceBlock.FACING))
+                                    && shape.getBoundingBoxes() == shape.getBoundingBoxes(),
+                            "Outer miter did not reuse the shared immutable profile/pose geometry and boxes");
+                    require(outlines.bytesPerCall < 0 || outlines.bytesPerCall <= 256,
+                            "Warm outer queries allocated geometry rather than bounded cache lookup keys");
+                } else require(legacy == shape, "Ordinary outline is not the existing prebuilt profile: " + fixture.name);
                 // This is the previous implementation's state/profile/array path, not a second JVM or historical build.
                 Measurement ordinary = measure(() -> baseline.shape(fixture.state));
                 System.out.printf(Locale.ROOT,
@@ -95,7 +106,7 @@ public final class CornicePerformanceLaunchChecks {
         raycasts(cornice, fixtures.get(fixtures.size() - 1).world);
         coldAndSharedShapes(fixtures);
         int states = cornice.getStateManager().getStates().size();
-        require(states == 52, "Cornice state matrix changed; review total state and cache budgets");
+        require(states == 72, "Cornice state matrix changed; review total state and cache budgets");
         long representatives = Registries.BLOCK.stream().filter(block -> block instanceof CorniceBlock).count();
         System.out.printf(Locale.ROOT,
                 "ERYDON_CORNICE_PERF_STATES: %d registered probe representatives x %d saved states; former 12 states each; full-source inventory must be verified independently (probe intentionally skips other families)%n",
@@ -168,7 +179,7 @@ public final class CornicePerformanceLaunchChecks {
                     cases++;
                 }
         }
-        require(cases == 208, "Particle budget skipped saved poses or styles");
+        require(cases == 288, "Particle budget skipped saved poses or styles");
         System.out.printf(Locale.ROOT,
                 "ERYDON_CORNICE_BREAK_PARTICLES_OK: %d style/shape/facing cases; one <=1-block box; central moulding enclosed; raw unbudgeted vanilla maximum %d particles per break (hard bound64)%n",
                 cases, maximumParticles);
@@ -268,7 +279,8 @@ public final class CornicePerformanceLaunchChecks {
         for (String style : new String[]{"modern", "georgian", "byzantine", "gothic"}) {
             CorniceBlock block = cornice(style);
             for (Fixture fixture : fixtures) {
-                if (!fixture.state.get(CorniceBlock.SHAPE).isAngled()) continue;
+                if (!fixture.state.get(CorniceBlock.SHAPE).isAngled()
+                        && fixture.state.get(CorniceBlock.SHAPE) != CorniceBlock.CorniceShape.OUTER_CORNER) continue;
                 BlockState state = block.getDefaultState().with(CorniceBlock.SHAPE, fixture.state.get(CorniceBlock.SHAPE))
                         .with(CorniceBlock.FACING, fixture.state.get(CorniceBlock.FACING));
                 Map<BlockPos, BlockState> states = new HashMap<>();
@@ -279,20 +291,26 @@ public final class CornicePerformanceLaunchChecks {
                 CountingWorld world = new CountingWorld(states);
                 List<CorniceConnections.Segment> components = CorniceConnections.components(world.view, state, BlockPos.ORIGIN);
                 double[][] boxes = profileBoxes(style);
+                boolean outer = state.get(CorniceBlock.SHAPE) == CorniceBlock.CorniceShape.OUTER_CORNER;
+                Supplier<VoxelShape> construction = outer
+                        ? () -> CorniceInteractionShapes.outerShape(boxes, state.get(CorniceBlock.FACING))
+                        : () -> CorniceInteractionShapes.shape(state, components, boxes);
                 double[] coldNs = new double[TRIALS], coldBytes = new double[TRIALS];
                 VoxelShape result = null;
                 for (int trial = 0; trial < TRIALS; trial++) {
                     // Test-only reflection forces a real cold production construction; never changes runtime code.
                     cache.invalidateAll();
                     long beforeBytes = allocated(), before = System.nanoTime();
-                    result = CorniceInteractionShapes.shape(state, components, boxes);
+                    result = construction.get();
                     coldNs[trial] = System.nanoTime() - before;
                     coldBytes[trial] = deltaBytes(beforeBytes);
                     blackhole = result;
                 }
-                VoxelShape same = CorniceInteractionShapes.shape(state, components, boxes);
+                VoxelShape same = construction.get();
                 require(same == result, "Warm interaction shape was not shared: " + style + "/" + fixture.name);
-                Measurement warm = measure(() -> CorniceInteractionShapes.shape(state, components, boxes));
+                Measurement warm = measure(construction);
+                if (outer) require(warm.bytesPerCall < 0 || warm.bytesPerCall <= 256,
+                        "Warm outer miter rebuilt geometry outside its bounded cache-key allowance");
                 var weightField = result.getClass().getDeclaredField("estimatedBytes");
                 weightField.setAccessible(true);
                 int estimatedBytes = weightField.getInt(result);

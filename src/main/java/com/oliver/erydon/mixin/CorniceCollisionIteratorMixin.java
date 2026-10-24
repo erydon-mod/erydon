@@ -63,8 +63,7 @@ public abstract class CorniceCollisionIteratorMixin<T> {
     private BlockState erydon$discoverAttachedOwners(BlockView chunk, BlockPos supportPos, Operation<BlockState> original) {
         BlockState support = original.call(chunk, supportPos);
         Block block = support.getBlock();
-        if (!(block instanceof SlopeVerticalBlock || block instanceof SlopeVerticalShallowBroadBlock
-                || block instanceof SlopeVerticalShallowNarrowBlock)) return support;
+        if (!CorniceSlopePlacement.candidate(support)) return support;
         if (supportPos.getY() + 1 <= box.minY || supportPos.getY() + .25 >= box.maxY) return support;
         // Lighting and other asynchronous ServerWorld readers must not request additional chunks.
         if (world instanceof ServerWorld server && !server.getServer().isOnThread()) return support;
@@ -81,8 +80,7 @@ public abstract class CorniceCollisionIteratorMixin<T> {
             for (BlockState part : CorniceAssembly.contents(ownerChunk, owner).cornices()) {
                 if (part.get(CorniceBlock.SHAPE).isAngled()
                         && CorniceSlopePlacement.supportPos(part, owner).equals(supportPos)
-                        && CorniceSlopePlacement.shapeFor(support, CorniceSlopePlacement.outward(part)) == part.get(CorniceBlock.SHAPE)
-                        && CorniceSlopePlacement.facing(support) == part.get(CorniceBlock.FACING)) attached = true;
+                        && CorniceSlopePlacement.matches(support, part)) attached = true;
             }
             if (!attached) continue;
             if (erydon$corniceOwners == null) {

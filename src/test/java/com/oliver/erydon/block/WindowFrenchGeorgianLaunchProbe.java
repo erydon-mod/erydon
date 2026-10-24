@@ -58,9 +58,10 @@ public final class WindowFrenchGeorgianLaunchProbe implements PreLaunchEntrypoin
         cornerAttachment(block);
         WindowDebugControlsLaunchChecks.run(block);
         sillInheritance(block);
+        WindowNoSillLaunchChecks.run();
         GeorgianWindowRenderingLaunchChecks.run(block);
         System.out.println("ERYDON_GEORGIAN_WINDOWS_OK states=" + states + " layouts=" + layouts
-                + " oldStateKeys=preserved closedStraightCollision=single openClusterCentres=clear cornerOpenings=clear clusterSync=preserved cornerAttachment=runEnds sillSide=legacyDefault+clusterSync+placementInheritance");
+                + " oldStateKeys=preserved closedStraightCollision=single openClusterCentres=clear cornerOpenings=clear clusterSync=preserved cornerAttachment=runEnds sillSide=legacyDefault+clusterSync+placementInheritance+none");
     }
 
     private static void cornerAttachment(WindowFrenchGeorgianBlock block) throws Exception {
@@ -87,9 +88,9 @@ public final class WindowFrenchGeorgianLaunchProbe implements PreLaunchEntrypoin
 
     private static int states(WindowFrenchGeorgianBlock block) throws Exception {
         require(Piece.values().length == 8, "Published piece schema changed");
-        require(SillSide.values().length == 2 && block.getDefaultState().get(SILL_SIDE) == SillSide.OUTWARD,
+        require(SillSide.values().length == 3 && block.getDefaultState().get(SILL_SIDE) == SillSide.OUTWARD,
                 "The new sill side must default to the published outward appearance");
-        require(block.getStateManager().getStates().size() == 3072, "Sill side must only double the published 1536 states");
+        require(block.getStateManager().getStates().size() == 4608, "Sill options must preserve all old states and append the no-sill choice");
         Method oldFace = WindowFrenchGeorgianBlock.class.getDeclaredMethod("getWindowFaceShape", BlockState.class,
                 Direction.class, Piece.class, DoorHinge.class, boolean.class);
         oldFace.setAccessible(true);
@@ -106,15 +107,42 @@ public final class WindowFrenchGeorgianLaunchProbe implements PreLaunchEntrypoin
             Piece expected = state.get(CORNER) == Corner.NONE && !state.get(OPEN)
                     ? state.get(PIECE).single() : state.get(PIECE);
             require(primaryPiece(state) == expected, "Wrong effective primary piece");
+            require(hasSill(state) == expectedSillVisible(state), "Sill visibility ignored the saved none/row controls");
             VoxelShape shape = collision(block, state);
+            same(block.getOutlineShape(state, null, BlockPos.ORIGIN, null),
+                    block.getOutlineShape(state.with(SILL_SIDE, SillSide.OUTWARD), null, BlockPos.ORIGIN, null),
+                    "No-sill selection changed the deliberate easy-targeting outline");
+            same(block.getRaycastShape(state, null, BlockPos.ORIGIN), VoxelShapes.fullCube(),
+                    "No-sill opening lost its easy raycast target");
             VoxelShape frameOnly = collision(block, state.with(SILL, false).with(SILL_SIDE, SillSide.OUTWARD));
             VoxelShape expectedShape = frameOnly;
-            if (state.get(SILL)) {
+            if (expectedSillVisible(state)) {
                 expectedShape = VoxelShapes.combine(expectedShape, expectedSill(state.get(FACING), state.get(SILL_SIDE)), BooleanBiFunction.OR);
                 if (secondaryFacing(state) != null) expectedShape = VoxelShapes.combine(expectedShape,
                         expectedSill(secondaryFacing(state), state.get(SILL_SIDE)), BooleanBiFunction.OR);
             }
-            same(expectedShape, shape, "Changing sill side changed collision outside the sill or lost a corner arm");
+            expectedShape = VoxelShapes.combine(expectedShape, expectedRail(state), BooleanBiFunction.OR);
+            same(expectedShape, shape, "Changing sill side changed collision outside the sill/rail or lost a corner arm");
+            if (state.get(SILL) && !state.get(OPEN) && state.get(SILL_SIDE) == SillSide.NONE) {
+                require(contains(shape, rotate(.5, 1 / 16.0, 1 / 16.0, state.get(FACING))),
+                        "Closed bottom sash rail has no collision");
+                require(shape == collision(block, state), "Closed bottom collision was rebuilt per query");
+            }
+            if (state.get(SILL) && state.get(OPEN) && state.get(CORNER) == Corner.NONE) {
+                VoxelShape sash = expectedRail(state);
+                if (!sash.isEmpty()) {
+                    Piece piece = state.get(PIECE);
+                    boolean left = piece == Piece.LOWER_SINGLE || piece == Piece.UPPER_SINGLE
+                            ? state.get(HINGE) == DoorHinge.LEFT
+                            : piece == Piece.LOWER_MULTI_LH || piece == Piece.UPPER_MULTI_LH;
+                    require(contains(shape, rotate((left ? 13.1 : 2.9) / 16, .5 / 16, .5, state.get(FACING))),
+                            "Moving sash bottom rail has no collision at its actual opened frame");
+                }
+                if (state.get(SILL_SIDE) == SillSide.NONE && state.get(PIECE).single() == Piece.LOWER_SINGLE)
+                    require(!contains(shape, rotate(.5, .5 / 16, 1.5 / 16, state.get(FACING))),
+                            "Invented threshold collision still crosses the open lower window");
+                require(shape == collision(block, state), "Sash bottom collision was rebuilt per query");
+            }
             if (state.get(CORNER) == Corner.NONE) {
                 if (!state.get(OPEN)) {
                     same(shape, collision(block, state.with(PIECE, state.get(PIECE).single())),
@@ -126,7 +154,8 @@ public final class WindowFrenchGeorgianLaunchProbe implements PreLaunchEntrypoin
                     Direction facing = state.get(FACING);
                     if (piece == Piece.LOWER_MULTI_MID) {
                         if (!state.get(SILL)) require(shape.isEmpty(), "Open lower centre retained collision");
-                        else require(shape.getBoundingBoxes().stream().allMatch(box -> box.maxY <= .031251),
+                        else require(shape.getBoundingBoxes().stream().allMatch(box -> box.maxY <=
+                                        (state.get(SILL_SIDE) == SillSide.NONE ? .062501 : .031251)),
                                 "Open lower centre retained collision above the sill");
                     }
                     if (piece == Piece.LOWER_MULTI_MID || piece == Piece.UPPER_MULTI_MID) {
@@ -140,10 +169,12 @@ public final class WindowFrenchGeorgianLaunchProbe implements PreLaunchEntrypoin
                 }
             } else if (!state.get(OPEN)) {
                 VoxelShape first = (VoxelShape) oldFace.invoke(block, state, state.get(FACING), state.get(PIECE),
-                        state.get(HINGE), state.get(SILL));
+                        state.get(HINGE), expectedSillVisible(state));
                 VoxelShape second = (VoxelShape) oldFace.invoke(block, state, secondaryFacing(state), cornerPiece(state),
-                        state.get(HINGE), state.get(SILL));
-                same(shape, VoxelShapes.combine(first, second, BooleanBiFunction.OR), "Closed corner collision changed");
+                        state.get(HINGE), expectedSillVisible(state));
+                VoxelShape cornerExpected = VoxelShapes.combine(first, second, BooleanBiFunction.OR);
+                cornerExpected = VoxelShapes.combine(cornerExpected, expectedRail(state), BooleanBiFunction.OR);
+                same(shape, cornerExpected, "Closed corner collision changed");
             } else {
                 require(shape == collision(block, state), "Open corner collision was rebuilt per query");
                 Direction facing = state.get(FACING);
@@ -350,6 +381,37 @@ public final class WindowFrenchGeorgianLaunchProbe implements PreLaunchEntrypoin
         }
     }
 
+    private static boolean expectedSillVisible(BlockState state) {
+        return state.get(SILL) && state.get(SILL_SIDE) != SillSide.NONE;
+    }
+
+    private static VoxelShape expectedRail(BlockState state) {
+        if (!state.get(SILL)) return VoxelShapes.empty();
+        if (!state.get(OPEN)) {
+            if (state.get(SILL_SIDE) != SillSide.NONE) return VoxelShapes.empty();
+            VoxelShape result = closedRail(state.get(FACING));
+            if (secondaryFacing(state) != null) result = VoxelShapes.combine(result, closedRail(secondaryFacing(state)), BooleanBiFunction.OR);
+            return result;
+        }
+        if (state.get(CORNER) != Corner.NONE) return VoxelShapes.empty();
+        Piece piece = state.get(PIECE);
+        boolean left;
+        if (piece == Piece.UPPER_SINGLE || piece == Piece.LOWER_SINGLE) left = state.get(HINGE) == DoorHinge.LEFT;
+        else if (piece == Piece.UPPER_MULTI_LH || piece == Piece.LOWER_MULTI_LH) left = true;
+        else if (piece == Piece.UPPER_MULTI_RH || piece == Piece.LOWER_MULTI_RH) left = false;
+        else return VoxelShapes.empty();
+        double[] first = rotate((left ? 13.032 : .048) / 16, 0, 1 / 16.0, state.get(FACING));
+        double[] second = rotate((left ? 15.968 : 2.952) / 16, 1.5 / 16.0, 15 / 16.0, state.get(FACING));
+        return VoxelShapes.cuboid(Math.min(first[0], second[0]), 0, Math.min(first[2], second[2]),
+                Math.max(first[0], second[0]), 1.5 / 16.0, Math.max(first[2], second[2]));
+    }
+
+    private static VoxelShape closedRail(Direction facing) {
+        double[] first = rotate(0, 0, 0, facing), second = rotate(1, 1.5 / 16.0, 3 / 16.0, facing);
+        return VoxelShapes.cuboid(Math.min(first[0], second[0]), 0, Math.min(first[2], second[2]),
+                Math.max(first[0], second[0]), 1.5 / 16.0, Math.max(first[2], second[2]));
+    }
+
     private static VoxelShape expectedSill(Direction facing, SillSide side) {
         double z0 = side == SillSide.INWARD ? 1 / 16.0 : 0;
         double z1 = side == SillSide.INWARD ? 3 / 16.0 : 1 / 8.0;
@@ -376,13 +438,13 @@ public final class WindowFrenchGeorgianLaunchProbe implements PreLaunchEntrypoin
         require(!VoxelShapes.matchesAnywhere(expected, actual, BooleanBiFunction.NOT_SAME), message);
     }
     private static void require(boolean value, String message) { if (!value) throw new AssertionError(message); }
-    private static TestWorld world() throws Exception {
+    static TestWorld world() throws Exception {
         TestWorld world = DoubleColumnRepairLaunchProbe.allocate(TestWorld.class);
         world.states = new HashMap<>();
         world.persistentStates = new PersistentStateManager(new java.io.File("in-memory-window-state"), null);
         return world;
     }
-    private static final class TestWorld extends ServerWorld {
+    static final class TestWorld extends ServerWorld {
         Map<BlockPos, BlockState> states;
         PersistentStateManager persistentStates;
         private TestWorld() { super(null, null, null, null, null, null, null, false, 0, List.of(), false, null); }

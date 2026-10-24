@@ -112,11 +112,11 @@ public final class WindowFrenchGeorgianBakedModel implements BakedModel, FabricB
 
         emitFace(state, context, state.get(WindowFrenchGeorgianBlock.FACING),
                 WindowFrenchGeorgianBlock.primaryPiece(state), state.get(WindowFrenchGeorgianBlock.HINGE),
-                state.get(WindowFrenchGeorgianBlock.SILL));
+                WindowFrenchGeorgianBlock.hasSill(state));
         Direction secondary = WindowFrenchGeorgianBlock.secondaryFacing(state);
         if (secondary != null) {
             emitFace(state, context, secondary, WindowFrenchGeorgianBlock.cornerPiece(state),
-                    state.get(WindowFrenchGeorgianBlock.HINGE), state.get(WindowFrenchGeorgianBlock.SILL));
+                    state.get(WindowFrenchGeorgianBlock.HINGE), WindowFrenchGeorgianBlock.hasSill(state));
         }
         if (openCorner(state)) {
             boolean splitLayers = pushSplitLayerTransform(context, state,
@@ -140,15 +140,12 @@ public final class WindowFrenchGeorgianBakedModel implements BakedModel, FabricB
                 emit(state, context, mainSuffix, rotation);
             }
 
-            if (sill) {
-                emitSill(state, context, "sill", facing);
-
-                String sideSillSuffix = openCorner(state) ? null
-                        : sideSillSuffix(piece, state.get(WindowFrenchGeorgianBlock.OPEN), hinge);
-                if (sideSillSuffix != null) {
-                    emitSill(state, context, sideSillSuffix, facing);
-                }
-            }
+            String movingRail = state.get(WindowFrenchGeorgianBlock.SILL) && !openCorner(state)
+                    ? movingRailSuffix(piece, state.get(WindowFrenchGeorgianBlock.OPEN), hinge) : null;
+            if (movingRail != null) emit(state, context, movingRail, rotation);
+            if (closedBottomRail(state) && facing == state.get(WindowFrenchGeorgianBlock.FACING))
+                emit(state, context, "sill", rotation);
+            if (sill) emitSill(state, context, "sill", facing);
         } finally {
             if (splitLayers) {
                 context.popTransform();
@@ -190,15 +187,15 @@ public final class WindowFrenchGeorgianBakedModel implements BakedModel, FabricB
         };
     }
 
-    private static String sideSillSuffix(WindowFrenchGeorgianBlock.Piece piece, boolean open, DoorHinge hinge) {
+    private static String movingRailSuffix(WindowFrenchGeorgianBlock.Piece piece, boolean open, DoorHinge hinge) {
         if (!open) {
             return null;
         }
 
         return switch (piece) {
-            case LOWER_SINGLE -> "sill_" + hingeSuffix(hinge);
-            case LOWER_MULTI_LH -> "sill_lh";
-            case LOWER_MULTI_RH -> "sill_rh";
+            case LOWER_SINGLE, UPPER_SINGLE -> "sill_" + hingeSuffix(hinge);
+            case LOWER_MULTI_LH, UPPER_MULTI_LH -> "sill_lh";
+            case LOWER_MULTI_RH, UPPER_MULTI_RH -> "sill_rh";
             default -> null;
         };
     }
@@ -211,16 +208,16 @@ public final class WindowFrenchGeorgianBakedModel implements BakedModel, FabricB
         return state.get(WindowFrenchGeorgianBlock.SILL_SIDE) == WindowFrenchGeorgianBlock.SillSide.INWARD;
     }
 
-    private static String sillSuffix(BlockState state, String suffix) {
-        if (!inwardSill(state)) return suffix;
-        return switch (suffix) { case "sill_lh" -> "sill_rh"; case "sill_rh" -> "sill_lh"; default -> suffix; };
+    private static boolean closedBottomRail(BlockState state) {
+        return state.get(WindowFrenchGeorgianBlock.SILL) && !state.get(WindowFrenchGeorgianBlock.OPEN)
+                && state.get(WindowFrenchGeorgianBlock.SILL_SIDE) == WindowFrenchGeorgianBlock.SillSide.NONE;
     }
 
     private static void emitSill(BlockState state, RenderContext context, String suffix, Direction facing) {
         boolean inward = inwardSill(state);
         if (inward) context.pushTransform(new WindowSillTransform(facing));
         try {
-            emit(state, context, sillSuffix(state, suffix), (rotationForFacing(facing) + (inward ? 180 : 0)) % 360);
+            emit(state, context, suffix, (rotationForFacing(facing) + (inward ? 180 : 0)) % 360);
         } finally {
             if (inward) context.popTransform();
         }
@@ -230,7 +227,7 @@ public final class WindowFrenchGeorgianBakedModel implements BakedModel, FabricB
                                      Direction facing, Direction face, Random random) {
         boolean inward = inwardSill(state);
         int start = quads.size();
-        addQuads(quads, state, sillSuffix(state, suffix),
+        addQuads(quads, state, suffix,
                 (rotationForFacing(facing) + (inward ? 180 : 0)) % 360, face, random);
         if (inward) for (int at = start; at < quads.size(); at++)
             quads.set(at, WindowSillTransform.translate(quads.get(at), facing));
@@ -376,11 +373,11 @@ public final class WindowFrenchGeorgianBakedModel implements BakedModel, FabricB
         List<BakedQuad> quads = new ArrayList<>();
         appendFaceQuads(quads, state, state.get(WindowFrenchGeorgianBlock.FACING),
                 WindowFrenchGeorgianBlock.primaryPiece(state), state.get(WindowFrenchGeorgianBlock.HINGE),
-                state.get(WindowFrenchGeorgianBlock.SILL), face, random);
+                WindowFrenchGeorgianBlock.hasSill(state), face, random);
         Direction secondary = WindowFrenchGeorgianBlock.secondaryFacing(state);
         if (secondary != null) {
             appendFaceQuads(quads, state, secondary, WindowFrenchGeorgianBlock.cornerPiece(state),
-                    state.get(WindowFrenchGeorgianBlock.HINGE), state.get(WindowFrenchGeorgianBlock.SILL),
+                    state.get(WindowFrenchGeorgianBlock.HINGE), WindowFrenchGeorgianBlock.hasSill(state),
                     face, random);
         }
         if (openCorner(state)) {
@@ -399,15 +396,12 @@ public final class WindowFrenchGeorgianBakedModel implements BakedModel, FabricB
             addQuads(quads, state, mainSuffix, rotation, face, random);
         }
 
-        if (sill) {
-            addSillQuads(quads, state, "sill", facing, face, random);
-
-            String sideSillSuffix = openCorner(state) ? null
-                    : sideSillSuffix(piece, state.get(WindowFrenchGeorgianBlock.OPEN), hinge);
-            if (sideSillSuffix != null) {
-                addSillQuads(quads, state, sideSillSuffix, facing, face, random);
-            }
-        }
+        String movingRail = state.get(WindowFrenchGeorgianBlock.SILL) && !openCorner(state)
+                ? movingRailSuffix(piece, state.get(WindowFrenchGeorgianBlock.OPEN), hinge) : null;
+        if (movingRail != null) addQuads(quads, state, movingRail, rotation, face, random);
+        if (closedBottomRail(state) && facing == state.get(WindowFrenchGeorgianBlock.FACING))
+            addQuads(quads, state, "sill", rotation, face, random);
+        if (sill) addSillQuads(quads, state, "sill", facing, face, random);
         if (state.get(WindowFrenchGeorgianBlock.GLASS) == WindowArchBlock.Glass.TWO_WAY) {
             boolean open = state.get(WindowFrenchGeorgianBlock.OPEN);
             boolean leftWing = leftWing(piece, hinge);
@@ -439,7 +433,7 @@ public final class WindowFrenchGeorgianBakedModel implements BakedModel, FabricB
                                  int degrees,
                                  Direction face,
                                  Random random) {
-        AxiomFallbackQuads.add(quads, getModel(state, suffix), degrees, face, random, true);
+        AxiomFallbackQuads.addWithState(quads, getModel(state, suffix), state, degrees, face, random, true);
     }
 
     @Override

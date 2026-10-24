@@ -62,6 +62,17 @@ public final class WindowDebugControlsLaunchChecks {
                     require(states.get(BlockPos.ORIGIN).get(WindowFrenchGeorgianBlock.SILL_SIDE)
                                     == WindowFrenchGeorgianBlock.SillSide.INWARD,
                             "The sill control did not select inward");
+                    use.invoke(Items.DEBUG_STICK, player, states.get(BlockPos.ORIGIN), world, BlockPos.ORIGIN, true, stick);
+                    require(states.get(BlockPos.ORIGIN).get(WindowFrenchGeorgianBlock.SILL_SIDE)
+                                    == WindowFrenchGeorgianBlock.SillSide.NONE,
+                            "The existing sill-side control did not reach none after inward");
+                } else {
+                    use.invoke(Items.DEBUG_STICK, player, states.get(BlockPos.ORIGIN), world, BlockPos.ORIGIN, false, stick);
+                    require(stick.getOrCreateSubNbt("DebugProperty").getString(id).equals("sill_enabled"),
+                            "Arch sill visibility did not follow the glass control");
+                    use.invoke(Items.DEBUG_STICK, player, states.get(BlockPos.ORIGIN), world, BlockPos.ORIGIN, true, stick);
+                    require(!states.get(BlockPos.ORIGIN).get(WindowArchBlock.SILL_ENABLED),
+                            "Arch sill control did not disable the sill");
                 }
             }
         }
@@ -72,7 +83,7 @@ public final class WindowDebugControlsLaunchChecks {
         require(ordinaryStick.getOrCreateSubNbt("DebugProperty").getString("minecraft:oak_stairs")
                         .equals(ordinary.getBlock().getStateManager().getProperties().iterator().next().getName()),
                 "An unrelated block's debug controls changed");
-        System.out.println("ERYDON_WINDOW_DEBUG_CONTROLS_OK glass=first sill_side=second staleInternal=reset unrelated=preserved");
+        System.out.println("ERYDON_WINDOW_DEBUG_CONTROLS_OK glass=first sillControls=second noSill=bothWindows staleInternal=reset unrelated=preserved");
     }
 
     private static void require(boolean value, String message) { if (!value) throw new AssertionError(message); }

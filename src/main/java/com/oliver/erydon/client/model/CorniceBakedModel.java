@@ -33,6 +33,7 @@ public final class CorniceBakedModel implements BakedModel, FabricBakedModel {
     private final BakedModel wrapped;
     private final Sprite particle;
     private final CorniceFittedCache fittedQuads;
+    private final List<BakedQuad> profileVolumes;
     private volatile List<BakedQuad> straightQuads;
 
     public CorniceBakedModel(BakedModel wrapped) {
@@ -40,9 +41,14 @@ public final class CorniceBakedModel implements BakedModel, FabricBakedModel {
     }
 
     CorniceBakedModel(BakedModel wrapped, CorniceFittedCache fittedQuads) {
+        this(wrapped, fittedQuads, null);
+    }
+
+    CorniceBakedModel(BakedModel wrapped, CorniceFittedCache fittedQuads, List<BakedQuad> profileVolumes) {
         this.wrapped = wrapped;
         this.particle = wrapped.getParticleSprite();
         this.fittedQuads = fittedQuads;
+        this.profileVolumes = profileVolumes == null ? null : List.copyOf(profileVolumes);
     }
 
     @Override
@@ -76,6 +82,13 @@ public final class CorniceBakedModel implements BakedModel, FabricBakedModel {
             return;
         }
 
+        if (state.get(CorniceBlock.SHAPE) == CorniceBlock.CorniceShape.OUTER_CORNER) {
+            var material = RendererAccess.INSTANCE.getRenderer().materialFinder().find();
+            for (BakedQuad quad : outer(blockId.getPath(), state.get(CorniceBlock.FACING)))
+                context.getEmitter().fromVanilla(quad, material, null)
+                        .tag(CopingTexturePlane.corniceTag(quad.getFace())).emit();
+            return;
+        }
         var components = CorniceConnections.components(view, state, pos);
         if (state.get(CorniceBlock.SHAPE).isAngled()
                 || components.stream().anyMatch(component -> component.joinedStart() || component.joinedEnd())) {
@@ -98,15 +111,30 @@ public final class CorniceBakedModel implements BakedModel, FabricBakedModel {
     private List<BakedQuad> fitted(String blockPath, List<CorniceConnections.Segment> segments) {
         List<BakedQuad> cached = fittedQuads.get(blockPath, segments);
         if (cached != null) return cached;
+        List<BakedQuad> source = straight(blockPath);
+        List<BakedQuad> result = new ArrayList<>();
+        for (var segment : segments) result.addAll(CorniceAngledGeometry.fit(source,
+                profileVolumes == null ? source : profileVolumes, segment));
+        cached = List.copyOf(result);
+        fittedQuads.put(blockPath, segments, cached);
+        return cached;
+    }
+
+    private List<BakedQuad> straight(String blockPath) {
         if (straightQuads == null) {
             BakedModel model = MinecraftClient.getInstance().getBakedModelManager().getModel(modelId(blockPath, "straight"));
             straightQuads = List.copyOf(AxiomFallbackQuads.collect(model, null, Random.create(0)));
         }
-        List<BakedQuad> result = new ArrayList<>();
-        for (var segment : segments) result.addAll(CorniceAngledGeometry.fit(straightQuads, segment));
-        cached = List.copyOf(result);
-        fittedQuads.put(blockPath, segments, cached);
-        return cached;
+        return straightQuads;
+    }
+
+    private List<BakedQuad> outer(String blockPath, Direction facing) {
+        List<BakedQuad> result = fittedQuads.getOuter(blockPath, facing);
+        if (result == null) {
+            result = List.copyOf(CorniceOuterCornerGeometry.outer(straight(blockPath), facing));
+            fittedQuads.putOuter(blockPath, facing, result);
+        }
+        return result;
     }
 
     @Override
@@ -225,6 +253,8 @@ public final class CorniceBakedModel implements BakedModel, FabricBakedModel {
             return wrapped.getQuads(state, face, random);
         }
 
+        if (state.get(CorniceBlock.SHAPE) == CorniceBlock.CorniceShape.OUTER_CORNER)
+            return face == null ? outer(blockId.getPath(), state.get(CorniceBlock.FACING)) : List.of();
         if (state.get(CorniceBlock.SHAPE).isAngled()) {
             return face == null ? fitted(blockId.getPath(), CorniceConnections.nativeComponents(state)) : List.of();
         }

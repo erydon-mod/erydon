@@ -69,8 +69,9 @@ public abstract class DebugStickItemMixin {
                 .sorted(Comparator.comparingInt(property ->
                         (block instanceof WindowArchBlock || block instanceof WindowFrenchGeorgianBlock)
                                 && property == WindowArchBlock.GLASS ? 0
-                                : block instanceof WindowFrenchGeorgianBlock
-                                && property == WindowFrenchGeorgianBlock.SILL_SIDE ? 1 : 2))
+                                : (block instanceof WindowFrenchGeorgianBlock
+                                && property == WindowFrenchGeorgianBlock.SILL_SIDE
+                                || block instanceof WindowArchBlock && property == WindowArchBlock.SILL_ENABLED) ? 1 : 2))
                 .toList();
         return visible;
     }

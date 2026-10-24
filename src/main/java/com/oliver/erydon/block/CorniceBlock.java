@@ -296,7 +296,8 @@ public class CorniceBlock extends HorizontalFacingBlock implements ClusterRebuil
     @Override
     public BlockState getPlacementState(ItemPlacementContext ctx) {
         Direction preferredWall = getPreferredWall(ctx);
-        BlockState angled = CorniceSlopePlacement.resolve(this.getDefaultState(), ctx.getWorld(), ctx.getBlockPos(), preferredWall);
+        CorniceShape requested = ctx instanceof com.oliver.erydon.item.CorniceItem.Placement placement ? placement.fittedShape() : null;
+        BlockState angled = CorniceSlopePlacement.resolve(this.getDefaultState(), ctx.getWorld(), ctx.getBlockPos(), preferredWall, requested);
         if (angled != null) return angled;
         // A clicked hypotenuse cannot fall back to another attachment after duplicate rejection.
         if (CorniceSlopePlacement.shapeFor(ctx.getWorld().getBlockState(ctx.getBlockPos().offset(preferredWall)),
@@ -720,7 +721,17 @@ public class CorniceBlock extends HorizontalFacingBlock implements ClusterRebuil
         }
 
         if (shape == CorniceShape.OUTER_CORNER) {
-            return runShape(outerShapes(profile), facing);
+            double[][] boxes = switch (profile) {
+                case GEORGIAN -> GEORGIAN_STRAIGHT_BOXES;
+                case GUILLOCHE -> GUILLOCHE_STRAIGHT_BOXES;
+                case GOTHIC -> GOTHIC_STRAIGHT_BOXES;
+                case MODERN -> MODERN_STRAIGHT_BOXES;
+            };
+            String style = switch (profile) {
+                case GEORGIAN -> "georgian"; case GUILLOCHE -> "guilloche";
+                case GOTHIC -> "gothic"; case MODERN -> "modern";
+            };
+            return CorniceInteractionShapes.outerShape(CorniceInteractionShapes.profileBoxes(style, boxes), facing);
         }
 
         if (shape == CorniceShape.INNER_CORNER) {
@@ -755,12 +766,21 @@ public class CorniceBlock extends HorizontalFacingBlock implements ClusterRebuil
         NARROW_RIGHT_PRIMARY("narrow_right_primary"),
         NARROW_RIGHT_SECONDARY("narrow_right_secondary"),
         NARROW_LEFT_PRIMARY("narrow_left_primary"),
-        NARROW_LEFT_SECONDARY("narrow_left_secondary");
+        NARROW_LEFT_SECONDARY("narrow_left_secondary"),
+        HALF_INSET("half_inset"),
+        HALF_EDGE_LOW("half_edge_low"),
+        HALF_EDGE_HIGH("half_edge_high"),
+        HALF_INSET_LOW("half_inset_low"),
+        HALF_INSET_HIGH("half_inset_high");
 
         private final String name;
 
         CorniceShape(String name) {
             this.name = name;
+        }
+
+        public boolean isHalfSupport() {
+            return ordinal() >= HALF_INSET.ordinal();
         }
 
         public boolean isAngled() {

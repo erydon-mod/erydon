@@ -6,6 +6,7 @@ import com.oliver.erydon.client.model.CopingModelLoadingPlugin;
 import com.oliver.erydon.client.model.CoverModelLoadingPlugin;
 import com.oliver.erydon.client.model.ErydonCtmService;
 import com.oliver.erydon.client.model.ErydonFamilyModelLoadingPlugin;
+import com.oliver.erydon.client.model.DoubleColumnMeshBaker;
 import com.oliver.erydon.client.model.ErydonModelPerformanceProbePlugin;
 import com.oliver.erydon.client.model.ErydonRawModelLoadingPlugin;
 import com.oliver.erydon.client.model.ErydonSharedBakedGeometryPlugin;
@@ -43,7 +44,9 @@ public final class ErydonClient implements ClientModInitializer {
             PreparableModelLoadingPlugin.register(ErydonRawModelLoadingPlugin::load, new ErydonRawModelLoadingPlugin());
         }
         ModelLoadingPlugin.register(new ErydonSharedBakedGeometryPlugin());
-        ModelLoadingPlugin.register(new ErydonFamilyModelLoadingPlugin());
+        PreparableModelLoadingPlugin.register(DoubleColumnMeshBaker::load,
+                (prepared, context) -> new ErydonFamilyModelLoadingPlugin(prepared)
+                        .onInitializeModelLoader(context));
         PreparableModelLoadingPlugin.register(CopingModelLoadingPlugin::load,
                 new CopingModelLoadingPlugin());
         ModelLoadingPlugin.register(new ErydonSlopeModelLoadingPlugin());

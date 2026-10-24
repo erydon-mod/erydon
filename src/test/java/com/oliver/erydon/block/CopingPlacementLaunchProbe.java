@@ -40,6 +40,8 @@ public final class CopingPlacementLaunchProbe implements PreLaunchEntrypoint {
             supportFixture("glacium_slab",new net.minecraft.block.SlabBlock(Block.Settings.copy(Blocks.STONE)));
             supportFixture("glacium_layer",new LayerBlock(Block.Settings.copy(Blocks.STONE)));
             supportFixture("glacium_layer_multiface",new LayerMultifaceBlock(Block.Settings.copy(Blocks.STONE)));
+            supportFixture("glacium_layer_vertical",new LayerVerticalBlock(Block.Settings.copy(Blocks.STONE)));
+            supportFixture("glacium_slice_vertical",new VerticalSliceBlock(Block.Settings.copy(Blocks.STONE)));
             fixture("glacium_slope",new SlopeBlock(Block.Settings.copy(Blocks.STONE)));
             fixture("glacium_slope_shallow_lower",new ShallowSlopeBlock(Block.Settings.copy(Blocks.STONE),ShallowSlopeBlock.Variant.LOWER));
             fixture("glacium_slope_shallow_upper",new ShallowSlopeBlock(Block.Settings.copy(Blocks.STONE),ShallowSlopeBlock.Variant.UPPER));
@@ -56,6 +58,7 @@ public final class CopingPlacementLaunchProbe implements PreLaunchEntrypoint {
             }
             com.oliver.erydon.client.model.SlopeShapeLaunchChecks.run();
             CornicePlacementLaunchChecks.run();
+            com.oliver.erydon.client.model.CorniceOuterCornerLaunchChecks.run();
             CorniceClientRedrawLaunchChecks.run();
             CorniceCollisionLaunchChecks.run();
             CornicePerformanceLaunchChecks.run();
@@ -169,6 +172,7 @@ public final class CopingPlacementLaunchProbe implements PreLaunchEntrypoint {
             System.out.println("ERYDON_COPING_OK: registered="+registered+" support/transform/water/stack/raycast cases="+(cases+3));
             System.out.println("ERYDON_COPING_FREE_OK: "+(CopingBlock.Surface.values().length*48)+" unsupported neighbour updates, "+(CopingBlock.Surface.values().length*8)+" profile/facing/offset particle bounds");
             CorniceAssemblyLaunchChecks.run();
+            CorniceHalfSupportLaunchChecks.run();
             CorniceAssemblyBreakLaunchChecks.run();
             com.oliver.erydon.client.model.CorniceAssemblyRenderingLaunchChecks.run();
             com.oliver.erydon.command.CorniceAssemblySwapLaunchChecks.run();

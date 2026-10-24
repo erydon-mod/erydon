@@ -4,6 +4,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.BlockView;
 
 /** A diagonal cornice keeps an adjacent air-cell owner and the clicked slope as its support. */
@@ -18,7 +19,11 @@ public final class CorniceSlopePlacement {
         boolean diagonal = support.getBlock() instanceof SlopeVerticalBlock;
         boolean broad = support.getBlock() instanceof SlopeVerticalShallowBroadBlock;
         boolean narrow = support.getBlock() instanceof SlopeVerticalShallowNarrowBlock;
-        if (!diagonal && !broad && !narrow || !outwardSide.getAxis().isHorizontal()) return null;
+        if (!outwardSide.getAxis().isHorizontal()) return null;
+        if (!diagonal && !broad && !narrow) {
+            for (var face : CorniceHalfSupports.faces(support)) if (face.outward() == outwardSide) return face.shape();
+            return null;
+        }
         boolean left = broad ? support.get(SlopeVerticalShallowBroadBlock.HAND) == SlopeVerticalShallowBroadBlock.Handedness.LEFT
                 : narrow && support.get(SlopeVerticalShallowNarrowBlock.HAND) == SlopeVerticalShallowNarrowBlock.Handedness.LEFT;
         Direction local = outwardSide;
@@ -34,9 +39,29 @@ public final class CorniceSlopePlacement {
                 : primary ? CorniceBlock.CorniceShape.NARROW_RIGHT_PRIMARY : CorniceBlock.CorniceShape.NARROW_RIGHT_SECONDARY;
     }
 
+    /** Select a real flat half face before its direction is reused as a hypotenuse owner. */
+    public static CorniceBlock.CorniceShape shapeForHit(BlockState support, Direction side, Vec3d localHit) {
+        var face = CorniceHalfSupports.hit(support, side, localHit);
+        if (face != null) return face.shape();
+        CorniceBlock.CorniceShape fallback = shapeFor(support, side);
+        return fallback != null && !fallback.isHalfSupport() ? fallback : null;
+    }
+
+    public static Direction facing(BlockState support, Direction outward, CorniceBlock.CorniceShape shape) {
+        if (!shape.isHalfSupport()) return facing(support);
+        var face = CorniceHalfSupports.face(support, outward, shape);
+        if (face == null) throw new IllegalArgumentException("Missing actual cornice support face");
+        return face.facing();
+    }
+
+    public static boolean candidate(BlockState support) {
+        return support.getBlock() instanceof SlopeVerticalBlock || support.getBlock() instanceof SlopeVerticalShallowNarrowBlock
+                || CorniceHalfSupports.candidate(support);
+    }
+
     public static CorniceRun run(BlockState state) {
         CorniceBlock.CorniceShape shape = state.get(CorniceBlock.SHAPE);
-        CorniceRun run = switch (shape) {
+        CorniceRun run = shape.isHalfSupport() ? CorniceHalfSupports.supportRun(shape) : switch (shape) {
             case DIAGONAL_PRIMARY, DIAGONAL_SECONDARY -> new CorniceRun(0, 1, 1, 0);
             case BROAD_RIGHT_PRIMARY, BROAD_RIGHT_SECONDARY -> new CorniceRun(.5, 1, 1, 0);
             case BROAD_LEFT_PRIMARY, BROAD_LEFT_SECONDARY -> new CorniceRun(1, 1, .5, 0);
@@ -62,28 +87,45 @@ public final class CorniceSlopePlacement {
     }
 
     public static BlockState resolve(BlockState state, BlockView world, BlockPos pos, Direction preferredSupport) {
+        return resolve(state, world, pos, preferredSupport, null);
+    }
+
+    public static BlockState resolve(BlockState state, BlockView world, BlockPos pos, Direction preferredSupport,
+                                     CorniceBlock.CorniceShape requested) {
         if (!preferredSupport.getAxis().isHorizontal()) return null;
         BlockPos supportPos = pos.offset(preferredSupport);
         BlockState support = world.getBlockState(supportPos);
-        CorniceBlock.CorniceShape shape = shapeFor(support, preferredSupport.getOpposite());
+        Direction outward = preferredSupport.getOpposite();
+        CorniceBlock.CorniceShape shape = requested == null ? shapeFor(support, outward) : requested;
         if (shape == null) return null;
+        if (shape.isHalfSupport() && CorniceHalfSupports.face(support, outward, shape) == null) return null;
+        if (!shape.isHalfSupport() && shapeFor(support, outward) != shape) return null;
+        BlockState resolved = state.with(CorniceBlock.FACING, facing(support, outward, shape)).with(CorniceBlock.SHAPE, shape);
         // The alternate front-side cell must never own a second moulding on the same face.
         for (Direction side : Direction.Type.HORIZONTAL) {
             if (shapeFor(support, side) == null) continue;
             BlockPos otherPos = supportPos.offset(side);
             if (otherPos.equals(pos)) continue;
             for (BlockState other : CorniceAssembly.contents(world, otherPos).cornices()) {
-                if (other.get(CorniceBlock.SHAPE).isAngled()
-                        && supportPos(other, otherPos).equals(supportPos)) return null;
+                if (CorniceAssembly.sameAttachment(resolved, other, pos, otherPos)) return null;
             }
         }
-        return state.with(CorniceBlock.FACING, facing(support)).with(CorniceBlock.SHAPE, shape);
+        return resolved;
     }
 
     public static boolean attached(BlockState state, BlockView world, BlockPos pos) {
         BlockState support = world.getBlockState(supportPos(state, pos));
-        return shapeFor(support, outward(state)) == state.get(CorniceBlock.SHAPE)
-                && facing(support) == state.get(CorniceBlock.FACING);
+        return matches(support, state);
+    }
+
+    public static boolean matches(BlockState support, BlockState cornice) {
+        CorniceBlock.CorniceShape shape = cornice.get(CorniceBlock.SHAPE);
+        Direction outward = outward(cornice);
+        if (shape.isHalfSupport()) {
+            var face = CorniceHalfSupports.face(support, outward, shape);
+            return face != null && face.facing() == cornice.get(CorniceBlock.FACING);
+        }
+        return shapeFor(support, outward) == shape && facing(support) == cornice.get(CorniceBlock.FACING);
     }
 
     /** Match the reflected physical edge, including its owner-cell translation and handedness. */

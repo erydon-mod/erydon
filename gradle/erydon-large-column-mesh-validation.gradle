@@ -1,0 +1,50 @@
+// Actual prepared column meshes and optional-renderer contracts, without a game window.
+def registerColumnProbe = { String taskName, String entrypoint, String probeId, String fixtureName ->
+tasks.register(taskName, JavaExec) {
+    group = 'verification'
+    description = 'Checks large-column mesh geometry, CTM, Axiom views, normal transport and section repair under Fabric.'
+    dependsOn tasks.named('testClasses'), tasks.named('configureLaunch')
+    def fixture = layout.buildDirectory.dir(fixtureName)
+    classpath = sourceSets.test.runtimeClasspath + files(fixture.map { new File(it.asFile, 'probe-mod') })
+    mainClass = 'net.fabricmc.loader.impl.launch.knot.KnotClient'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(17) }
+    maxHeapSize = '3G'
+    doFirst {
+        def root = fixture.get().asFile
+        def mod = new File(root, 'probe-mod')
+        mod.mkdirs()
+        workingDir root
+        new File(mod, 'fabric.mod.json').text = groovy.json.JsonOutput.toJson([
+                schemaVersion: 1, id: probeId, version: '1.0.0',
+                environment: 'client', entrypoints: [preLaunch: [entrypoint]]
+        ])
+        systemProperty 'fabric.development', 'true'
+        systemProperty 'java.awt.headless', 'true'
+        systemProperty 'erydon.large_column_test.axiom', 'false'
+        def gameJar = classpath.files.find { candidate ->
+            if (!candidate.name.startsWith('minecraft-merged-') || !candidate.name.endsWith('.jar')) return false
+            def archive = new java.util.jar.JarFile(candidate)
+            try { return archive.getEntry('net/minecraft/client/main/Main.class') != null }
+            finally { archive.close() }
+        }
+        if (gameJar == null) throw new GradleException('The named Minecraft client archive is missing from the mesh probe classpath')
+        systemProperty 'fabric.gameJarPath', gameJar.absolutePath
+        if (System.getProperty('os.name').toLowerCase(java.util.Locale.ROOT).contains('windows')) {
+            def argumentFile = new File(root, 'launch-classpath.args')
+            argumentFile.setText('-classpath\n"' + classpath.asPath.replace('\\', '\\\\').replace('"', '\\"') + '"\n', 'UTF-8')
+            classpath = files()
+            jvmArgs '@' + argumentFile.absolutePath
+        }
+        args '--gameDir', root.absolutePath, '--version', minecraft_version, '--accessToken', '0'
+    }
+}
+}
+
+registerColumnProbe('verifyLargeColumnMeshes',
+        'com.oliver.erydon.block.DoubleColumnRepairLaunchProbe',
+        'erydon_large_column_mesh_probe', 'large-column-mesh-probe')
+registerColumnProbe('verifyColumnMeshNormals',
+        'com.oliver.erydon.client.pom.ColumnMeshNormalProbe',
+        'erydon_column_mesh_normal_probe', 'column-mesh-normal-probe')
+
+tasks.named('check') { dependsOn tasks.named('verifyLargeColumnMeshes') }

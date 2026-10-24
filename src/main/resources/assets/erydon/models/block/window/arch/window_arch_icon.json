@@ -4,7 +4,7 @@
   "textures": {
     "particle": "#stone",
     "stone": "block/stone",
-    "pane": "block/glass",
+    "pane": "erydon:block/glazing_crystal",
     "lead": "block/black_concrete"
   },
   "elements": [

@@ -41,9 +41,12 @@ public final class ErydonMixinPlugin implements IMixinConfigPlugin {
         if (mixinClassName.contains(".compat.worldedit.")) {
             return FabricLoader.getInstance().isModLoaded("worldedit");
         }
-        if (mixinClassName.endsWith(".client.indium.TerrainRenderContextMixin")) {
+        if (mixinClassName.contains(".client.indium.")) {
             return FabricLoader.getInstance().isModLoaded("indium")
                     && FabricLoader.getInstance().isModLoaded("sodium");
+        }
+        if (mixinClassName.contains(".client.indigo.")) {
+            return FabricLoader.getInstance().isModLoaded("fabric-renderer-indigo");
         }
         return true;
     }

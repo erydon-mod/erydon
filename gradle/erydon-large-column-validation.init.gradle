@@ -8,6 +8,7 @@ gradle.beforeProject { project ->
             dependsOn project.tasks.named('testClasses')
             classpath = project.sourceSets.test.runtimeClasspath
             mainClass = 'net.fabricmc.loader.impl.launch.knot.KnotClient'
+            javaLauncher = project.javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(17) }
             maxHeapSize = '2G'
             def fixture = project.layout.buildDirectory.dir('large-column-probe')
             // Optional named/remapped Axiom + client API classes. No external mod is initialised.

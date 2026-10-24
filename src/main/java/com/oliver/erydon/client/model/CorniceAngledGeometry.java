@@ -13,6 +13,11 @@ final class CorniceAngledGeometry {
     private CorniceAngledGeometry() { }
 
     static List<BakedQuad> fit(List<BakedQuad> source, CorniceConnections.Segment segment) {
+        return fit(source, source, segment);
+    }
+
+    static List<BakedQuad> fit(List<BakedQuad> source, List<BakedQuad> volumes, CorniceConnections.Segment segment) {
+        if (segment.usesProfileCrop()) return CorniceCroppedGeometry.fit(source, volumes, segment);
         List<BakedQuad> result = new ArrayList<>(source.size());
         for (BakedQuad quad : source) {
             int[] original = quad.getVertexData();

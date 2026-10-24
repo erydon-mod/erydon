@@ -1,6 +1,7 @@
 package com.oliver.erydon.client.model;
 
 import com.oliver.erydon.Erydon;
+import com.oliver.erydon.client.pom.ColumnMeshNormalTransport;
 import com.oliver.erydon.client.pom.ErydonCuPomRuntimeState;
 import com.oliver.erydon.client.pom.InlaySubstrateTransport;
 import net.fabricmc.fabric.api.renderer.v1.Renderer;
@@ -159,8 +160,7 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
             emitted++;
         }
         for (SourceOverlay overlay : renderCall.sourceOverlays()) {
-            emitSourceOverlay(emitter, neighbourCache, selectedOverlays, state, pos, overlay);
-            emitted++;
+            emitted += emitSourceOverlay(emitter, neighbourCache, selectedOverlays, state, pos, overlay);
         }
 
         if (metricsEnabled) {
@@ -200,6 +200,11 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
     }
 
     static Direction repeatProjectionFace(Identifier id, Direction lightingFace, Direction authoredFace,int tag) {
+        if (id != null && Erydon.MOD_ID.equals(id.getNamespace())
+                && id.getPath().endsWith("_column_circular_double")) {
+            Direction columnPlane = ColumnMeshNormalTransport.projectionFace(tag);
+            if (columnPlane != null) return columnPlane;
+        }
         Direction stored=CopingTexturePlane.face(tag);
         if (stored != null && id != null && Erydon.MOD_ID.equals(id.getNamespace())
                 && id.getPath().contains("_cornice_")) return stored;
@@ -578,7 +583,7 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
         recordOverlaySelection(pos, face, rule, overlay);
     }
 
-    private void emitSourceOverlay(QuadEmitter emitter,
+    private int emitSourceOverlay(QuadEmitter emitter,
                                    SynapheiaNeighbourCache neighbourCache,
                                    Map<OverlayKey, OverlayTile> selectedOverlays,
                                    BlockState state,
@@ -586,17 +591,40 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
                                    SourceOverlay sourceOverlay) {
         CapturedQuad source = sourceOverlay.source();
         Direction face = source.lightFace();
-        List<SpiralStairCtmGeometry.Vertex> slopeSurface = overlaySourceSpriteOverride != null
-                ? source.vertices() : null;
+        List<List<SpiralStairCtmGeometry.Vertex>> fragments = SynapheiaMultifaceConnections.fragments(
+                neighbourCache, state, face, sourceOverlay.rule(), source.vertices());
+        if (fragments != null) {
+            for (List<SpiralStairCtmGeometry.Vertex> vertices : fragments) {
+                emitSourceOverlay(emitter, neighbourCache, selectedOverlays, state, pos,
+                        sourceOverlay, vertices, true);
+            }
+            return fragments.size();
+        }
+        emitSourceOverlay(emitter, neighbourCache, selectedOverlays, state, pos,
+                sourceOverlay, source.vertices(), overlaySourceSpriteOverride != null);
+        return 1;
+    }
+
+    private void emitSourceOverlay(QuadEmitter emitter,
+                                   SynapheiaNeighbourCache neighbourCache,
+                                   Map<OverlayKey, OverlayTile> selectedOverlays,
+                                   BlockState state,
+                                   BlockPos pos,
+                                   SourceOverlay sourceOverlay,
+                                   List<SpiralStairCtmGeometry.Vertex> vertices,
+                                   boolean physicalConnections) {
+        CapturedQuad source = sourceOverlay.source();
+        Direction face = source.lightFace();
+        List<SpiralStairCtmGeometry.Vertex> connectionVertices = physicalConnections ? vertices : null;
         OverlayTile overlay = selectOverlay(
-                neighbourCache, selectedOverlays, state, face, sourceOverlay.rule(), slopeSurface);
+                neighbourCache, selectedOverlays, state, face, sourceOverlay.rule(), connectionVertices);
         emitter.material(overlay.material());
         emitter.colorIndex(-1);
         emitter.tag(source.tag());
         emitter.cullFace(source.cullFace());
         emitter.nominalFace(source.nominalFace());
         for (int vertexIndex = 0; vertexIndex < 4; vertexIndex++) {
-            SpiralStairCtmGeometry.Vertex vertex = source.vertices().get(vertexIndex);
+            SpiralStairCtmGeometry.Vertex vertex = vertices.get(vertexIndex);
             emitter.pos(vertexIndex, vertex.x(), vertex.y(), vertex.z());
             emitter.uv(vertexIndex,
                     SynapheiaCellGeometry.u(face, vertex, sourceOverlay.cell()),
@@ -619,7 +647,7 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
             if(selectedOverlays.putIfAbsent(diagonalKey,overlay)==null) {
                 var surfaces=trimNeighbours(neighbourCache,state,face,sourceOverlay.rule(),whole);
                 var fragments=SynapheiaDiagonalTrim.compose(face,whole,surfaces);
-                if(!fragments.isEmpty()) SynapheiaDiagonalTrim.emit(emitter,fragments,source.vertices(),face,
+                if(!fragments.isEmpty()) SynapheiaDiagonalTrim.emit(emitter,fragments,vertices,face,
                         source.cullFace(),source.nominalFace(),source.tag(),overlay.material(),
                         SynapheiaService.sprites(snapshot,sourceOverlay.rule()).get(SynapheiaDiagonalTrim.EDGE_TILE),
                         sourceOverlay.substrateRecord());
@@ -672,7 +700,8 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
         if (slopeSurface!=null) {
             var source=SynapheiaSlopeConnections.surface(slopeSurface);
             var family=ErydonSlopeModelClassifier.familyForId(Registries.BLOCK.getId(state.getBlock()));
-            connectionSurface=SynapheiaSlopeConnections.wholeFace(state,family,face,source);
+            connectionSurface = family == ErydonSlopeModelClassifier.Family.NONE ? source
+                    : SynapheiaSlopeConnections.wholeFace(state,family,face,source);
             if (connectionSurface!=source) cacheSurface=connectionSurface;
         }
         OverlayKey key = new OverlayKey(rule.id(), face, cacheSurface);
@@ -770,6 +799,12 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
             BlockState neighbour = cache.get(dx, dy, dz);
             Identifier neighbourId = Registries.BLOCK.getId(neighbour.getBlock());
             if (!overlayBlocksConnect(rule, sourceId, neighbourId)) return false;
+            if (SynapheiaMultifaceConnections.supports(neighbour)) {
+                return rule.faces().contains(face)
+                        && SynapheiaMultifaceConnections.coversEdge(face, source,
+                                SynapheiaMultifaceConnections.surfaces(neighbour), edge, dx, dy, dz, rule.faces())
+                        && surfaceEdgeVisible(cache, sourceId, dx, dy, dz, face, rule, edge);
+            }
             var family = ErydonSlopeModelClassifier.familyForId(neighbourId);
             if (family == ErydonSlopeModelClassifier.Family.NONE) {
                 if (isFullCube(neighbour)) {
@@ -782,7 +817,7 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
                         // A folded ramp meets a differently oriented cube face. Test
                         // that face's visibility, rather than the ramp's UV projection.
                         if (rule.faces().contains(joiningFace)
-                                && connects(cache, sourceId, dx, dy, dz, joiningFace, rule)) return true;
+                                && surfaceEdgeVisible(cache, sourceId, dx, dy, dz, joiningFace, rule, edge)) return true;
                     }
                     return false;
                 }
@@ -801,6 +836,32 @@ final class SynapheiaRepeatBakedModel extends ForwardingBakedModel {
             }
             return false;
         });
+    }
+
+    private static boolean surfaceEdgeVisible(SynapheiaNeighbourCache cache, Identifier sourceId,
+                                              int dx, int dy, int dz, Direction face,
+                                              SynapheiaManifest.Rule rule,
+                                              SynapheiaSlopeConnections.Edge edge) {
+        if (!rule.innerSeams()) return true;
+        float boundary = face.getDirection() == Direction.AxisDirection.POSITIVE ? 1 : 0;
+        int normalOffset = switch (face.getAxis()) {
+            case X -> dx; case Y -> dy; case Z -> dz;
+        };
+        float first = switch (face.getAxis()) {
+            case X -> edge.a().x(); case Y -> edge.a().y(); case Z -> edge.a().z();
+        };
+        float second = switch (face.getAxis()) {
+            case X -> edge.b().x(); case Y -> edge.b().y(); case Z -> edge.b().z();
+        };
+        // An adjacent cell cannot hide a face inset inside its owner's cell.
+        if (Math.abs(first - normalOffset - boundary) > UNIT_EPSILON
+                || Math.abs(second - normalOffset - boundary) > UNIT_EPSILON) return true;
+        if (!SynapheiaSlopeConnections.faceVisibilityInCache(dx, dy, dz, face)) return false;
+        int sx = dx + face.getOffsetX(), sy = dy + face.getOffsetY(), sz = dz + face.getOffsetZ();
+        BlockState seam = cache.get(sx, sy, sz);
+        if (!overlayBlocksConnect(rule, sourceId, Registries.BLOCK.getId(seam.getBlock()))) return true;
+        return SynapheiaMultifaceConnections.supports(seam)
+                && !SynapheiaMultifaceConnections.occludesEdge(seam, edge, sx, sy, sz, face);
     }
 
     private static boolean isFullCube(BlockState state) {

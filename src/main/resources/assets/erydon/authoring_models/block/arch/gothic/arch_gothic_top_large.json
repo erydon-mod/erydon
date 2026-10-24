@@ -45,6 +45,14 @@
         },
         "down": {
           "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone",
+          "erydon_split_world_uv": true
+        },
+        "south": {
+          "texture": "#stone",
+          "erydon_split_world_uv": true
         }
       },
       "color": 2
@@ -80,6 +88,14 @@
         },
         "down": {
           "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone",
+          "erydon_split_world_uv": true
+        },
+        "south": {
+          "texture": "#stone",
+          "erydon_split_world_uv": true
         }
       },
       "color": 2
@@ -113,6 +129,10 @@
         },
         "up": {
           "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone",
+          "erydon_split_world_uv": true
         }
       },
       "color": 2
@@ -156,6 +176,14 @@
         },
         "down": {
           "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone",
+          "erydon_split_world_uv": true
+        },
+        "south": {
+          "texture": "#stone",
+          "erydon_split_world_uv": true
         }
       },
       "color": 5
@@ -191,6 +219,14 @@
         },
         "down": {
           "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone",
+          "erydon_split_world_uv": true
+        },
+        "south": {
+          "texture": "#stone",
+          "erydon_split_world_uv": true
         }
       },
       "color": 5
@@ -224,6 +260,10 @@
         },
         "up": {
           "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone",
+          "erydon_split_world_uv": true
         }
       },
       "name": "element_mirrored",

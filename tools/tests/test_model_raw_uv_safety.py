@@ -92,6 +92,27 @@ def _complete_fixture() -> dict[str, object]:
 
 
 class RawUvSafetyTests(unittest.TestCase):
+    def test_face_split_opt_in_leaves_existing_faces_unmarked(self) -> None:
+        document = {"elements": [{"from": [-2, -1, 0], "to": [18, 17, 16.75], "faces": {
+            "south": {"texture": "#stone"},
+            "north": {"texture": "#stone", "erydon_split_world_uv": True},
+        }}]}
+        before = copy.deepcopy(document)
+        findings, counts = raw_uv._audit_document(document, "face_split.json", "test")
+        self.assertEqual(before, document)
+        self.assertEqual(1, counts["runtimeCellSplitImplicitFaces"])
+        self.assertEqual(1, counts["runtimeCellSplitOutOfRangeFaces"])
+        by_face = {finding["face"]: finding for finding in findings}
+        self.assertNotIn("runtimeCellSplit", by_face["south"])
+        self.assertTrue(by_face["north"]["runtimeCellSplit"])
+
+    def test_face_split_flag_is_strictly_boolean(self) -> None:
+        for invalid in (None, 1, "true", [], {}):
+            document = {"elements": [{"from": [0, 0, 0], "to": [16, 16, 16],
+                                     "faces": {"up": {"erydon_split_world_uv": invalid}}}]}
+            with self.subTest(invalid=invalid), self.assertRaisesRegex(ModelAuditError, "erydon_split_world_uv"):
+                raw_uv._audit_document(document, "face_flag.json", "test")
+
     def test_runtime_split_models_keep_source_uv_ranges_and_disclose_runtime_handling(self) -> None:
         document = {
             "erydon_split_world_uv": True,

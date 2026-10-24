@@ -80,6 +80,7 @@ public final class SynapheiaCubeConnectionsLaunchChecks {
         foldedMasks(tiles, stoneId);
         SynapheiaVerticalOverlayLaunchChecks.run();
         SynapheiaOverlaySelectionLaunchChecks.run();
+        SynapheiaMultifaceOverlayLaunchChecks.run();
     }
 
     /** Actual registry/state/material/visibility branches, with model geometry injected before client startup. */

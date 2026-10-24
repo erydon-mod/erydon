@@ -201,8 +201,13 @@ public final class ArchRepeatCtmRenderer extends ForwardingBakedModel {
                         decoder.colorIndex(),
                         decoder.tag()
                 );
-                for (SpiralStairCtmGeometry.Fragment fragment
-                        : SpiralStairCtmGeometry.split(lightFace, vertices)) {
+                // Outset Gothic caps can leave genuine sub-pixel overlap strips
+                // after ownership clipping. Preserve them if UV-cell snapping
+                // would collapse the entire face; exact cell splitting is safe.
+                List<SpiralStairCtmGeometry.Fragment> fragments = family == Family.GOTHIC
+                        ? SpiralStairCtmGeometry.splitPreservingThinSurfaces(lightFace, vertices)
+                        : SpiralStairCtmGeometry.split(lightFace, vertices);
+                for (SpiralStairCtmGeometry.Fragment fragment : fragments) {
                     appendFragment(result, properties, fragment, family == Family.GOTHIC);
                 }
             }
@@ -602,9 +607,11 @@ public final class ArchRepeatCtmRenderer extends ForwardingBakedModel {
     }
 
     private static float missingBoundsCoordinate(float first, float second, float third) {
-        float minimum = Math.min(first, Math.min(second, third));
-        float maximum = Math.max(first, Math.max(second, third));
-        return 2.0F * (minimum + maximum) - first - second - third;
+        double minimum = Math.min(first, Math.min(second, third));
+        double maximum = Math.max(first, Math.max(second, third));
+        // Keep the mathematically bounded missing corner inside the sprite;
+        // float cancellation can turn an exact edge of 1 into 1.0000001.
+        return (float) (2.0D * (minimum + maximum) - first - second - third);
     }
 
     private static QuadTemplate template(SourceProperties properties,

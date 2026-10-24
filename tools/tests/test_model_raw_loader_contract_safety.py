@@ -352,13 +352,18 @@ class RawLoaderSourceContractTests(unittest.TestCase):
                 "if (!Float.isFinite(parsed))",
                 "throw new IllegalArgumentException",
                 "uvOffset[index] = parsed;",
-                "return new RawFace(cullFace, textureKey, uv, uvOffset, cullBoundaryOverride, normalOffset, vertices);",
+                "return new RawFace(cullFace, textureKey, uv, uvOffset, cullBoundaryOverride, normalOffset, vertices, splitWorldUv);",
             ),
         )
 
         normalized_face = _compact(raw_face)
         self.assertIn("private final float[] uvOffset;", normalized_face)
         self.assertIn("this.uvOffset = uvOffset.clone();", normalized_face)
+        self.assertIn("private final boolean splitWorldUv;", normalized_face)
+        self.assertIn("this.splitWorldUv = splitWorldUv;", normalized_face)
+        self.assertIn('if (object.has("erydon_split_world_uv"))', parse)
+        self.assertIn("!flag.isJsonPrimitive() || !flag.getAsJsonPrimitive().isBoolean()", parse)
+        self.assertIn("splitWorldUv = flag.getAsBoolean();", parse)
     def test_uv_offset_is_applied_after_uv_construction_to_all_four_pairs(self) -> None:
         baked_model = _body_after(self.source, r"\bclass\s+RawBakedModel\b")
         raw_surfaces = _compact(

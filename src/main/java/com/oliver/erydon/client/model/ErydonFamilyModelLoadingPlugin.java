@@ -1,9 +1,16 @@
 package com.oliver.erydon.client.model;
 
 import com.oliver.erydon.Erydon;
+import com.oliver.erydon.block.WindowArchBlock;
+import com.oliver.erydon.block.WindowFrenchGeorgianBlock;
+import com.oliver.erydon.migration.ErydonIdMigration;
+import net.minecraft.block.BlockState;
+import net.minecraft.registry.Registries;
 import com.oliver.erydon.client.profile.ErydonLoadProfiler;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.minecraft.client.render.model.BakedModel;
+import net.minecraft.client.render.model.BakedQuad;
+import net.minecraft.client.render.model.json.JsonUnbakedModel;
 import net.minecraft.client.util.ModelIdentifier;
 import net.minecraft.util.Identifier;
 
@@ -11,18 +18,47 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 public final class ErydonFamilyModelLoadingPlugin implements ModelLoadingPlugin {
+    private final DoubleColumnMeshBaker columnMeshes;
+
+    public ErydonFamilyModelLoadingPlugin() { this(null); }
+
+    public ErydonFamilyModelLoadingPlugin(DoubleColumnMeshBaker columnMeshes) {
+        this.columnMeshes = columnMeshes;
+    }
 
     @Override
     public void onInitializeModelLoader(Context pluginContext) {
         DynamicBakedModelCache cache = new DynamicBakedModelCache();
         CorniceFittedCache fittedQuads = new CorniceFittedCache();
+        var corniceProfiles = new ConcurrentHashMap<String, List<BakedQuad>>();
         pluginContext.addModels(extraModels());
 
         pluginContext.modifyModelAfterBake().register((model, context) -> {
             Identifier id = context.id();
+            if (model != null && !(id instanceof ModelIdentifier) && Erydon.MOD_ID.equals(id.getNamespace())
+                    && (id.getPath().startsWith("block/window/arch/")
+                    || id.getPath().startsWith("block/window/french_georgian/"))
+                    && context.sourceModel() instanceof JsonUnbakedModel source) {
+                JsonUnbakedModel wall = null;
+                String path = id.getPath();
+                String withoutAge = path.endsWith("_aged") ? path.substring(0, path.length() - 5) : path;
+                if (path.startsWith("block/window/arch/") && withoutAge.endsWith("_glass_lower")) {
+                    String wallPath = withoutAge.substring(0, withoutAge.length() - "_glass_lower".length())
+                            + "_wall" + (path.endsWith("_aged") ? "_aged" : "");
+                    if (context.baker().getOrLoadModel(new Identifier(id.getNamespace(), wallPath))
+                            instanceof JsonUnbakedModel sibling) wall = sibling;
+                }
+                BakedModel capped = WindowBottomCaps.wrap(model, source, context.textureGetter(), context.settings(), id, wall);
+                BlockState seed = windowSeed(id);
+                if (seed == null) return capped;
+                return withoutAge.endsWith("_sill")
+                        ? WindowBottomRail.wrapSill(capped, source, context.textureGetter(), context.settings(), id, seed)
+                        : WindowBottomRail.wrapChild(capped, seed);
+            }
             if (!(id instanceof ModelIdentifier mid) || !Erydon.MOD_ID.equals(mid.getNamespace())) {
                 return model;
             }
@@ -33,13 +69,26 @@ public final class ErydonFamilyModelLoadingPlugin implements ModelLoadingPlugin 
                 return wrap(cache, mid, model, CorniceAssemblyBakedModel::new, "cornice_assemblies", itemModel);
             }
             if (path.endsWith("_column_circular_double") && !itemModel) {
-                return wrap(cache, mid, model, DoubleCircularColumnBakedModel::new, "double_circular_columns", false);
+                return wrap(cache, mid, model, wrapped -> columnMeshes == null
+                        ? new DoubleCircularColumnBakedModel(wrapped)
+                        : columnMeshes.wrap(wrapped, path, context.baker(), context.textureGetter()),
+                        "double_circular_columns", false);
             }
             if (ErydonModelFamilyIndex.isColumnBlock(path)) {
                 return wrap(cache, mid, model, ColumnBakedModel::new, "columns", itemModel);
             }
             if (ErydonModelFamilyIndex.isCorniceBlock(path)) {
-                return wrap(cache, mid, model, wrapped -> new CorniceBakedModel(wrapped, fittedQuads), "cornices", itemModel);
+                return wrap(cache, mid, model, wrapped -> {
+                    List<BakedQuad> volumes = null;
+                    if (!itemModel && context.baker() != null) {
+                        volumes = corniceProfiles.computeIfAbsent(path, blockPath -> {
+                            Identifier straight = CorniceBakedModel.modelId(blockPath, "straight");
+                            return context.baker().getOrLoadModel(straight) instanceof JsonUnbakedModel profile
+                                    ? CorniceProfileVolumes.bake(profile, context.textureGetter(), straight) : null;
+                        });
+                    }
+                    return new CorniceBakedModel(wrapped, fittedQuads, volumes);
+                }, "cornices", itemModel);
             }
             if (ErydonModelFamilyIndex.isCofferedCeilingBlock(path)) {
                 return wrap(cache, mid, model, CeilingCofferedBakedModel::new, "coffered_ceilings", itemModel);
@@ -77,6 +126,22 @@ public final class ErydonFamilyModelLoadingPlugin implements ModelLoadingPlugin 
             }
             return model;
         });
+    }
+
+    private static BlockState windowSeed(Identifier id) {
+        String leaf = id.getPath().substring(id.getPath().lastIndexOf('/') + 1);
+        boolean aged = leaf.endsWith("_aged");
+        String base = aged ? leaf.substring(0, leaf.length() - 5) : leaf;
+        String[] suffixes = id.getPath().startsWith("block/window/arch/")
+                ? WindowArchBakedModel.MODEL_SUFFIXES : WindowFrenchGeorgianBakedModel.MODEL_SUFFIXES;
+        for (String suffix : suffixes) {
+            if (!base.endsWith("_" + suffix)) continue;
+            String resourcePath = base.substring(0, base.length() - suffix.length() - 1) + (aged ? "_aged" : "");
+            var block = Registries.BLOCK.get(new Identifier(id.getNamespace(), ErydonIdMigration.canonicalPath(resourcePath)));
+            if (block instanceof WindowArchBlock || block instanceof WindowFrenchGeorgianBlock) return block.getDefaultState();
+            break;
+        }
+        return null;
     }
 
     private static BakedModel wrap(DynamicBakedModelCache cache,

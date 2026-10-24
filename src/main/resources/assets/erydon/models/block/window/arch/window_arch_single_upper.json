@@ -2324,7 +2324,7 @@
   "textures": {
     "particle": "#stone",
     "stone": "minecraft:block/stone",
-    "pane": "minecraft:block/glass",
+    "pane": "erydon:block/glazing_crystal",
     "lead": "minecraft:block/black_concrete"
   }
 }

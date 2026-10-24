@@ -56,6 +56,7 @@ public class WindowArchBlock extends Block implements ClusterRebuildableBlock {
 
     public static final EnumProperty<Piece> PIECE = EnumProperty.of("piece", Piece.class);
     public static final BooleanProperty SILL = BooleanProperty.of("sill");
+    public static final BooleanProperty SILL_ENABLED = BooleanProperty.of("sill_enabled");
     public static final EnumProperty<Glass> GLASS = EnumProperty.of("glass", Glass.class);
 
     // --- Sync guard (prevents feedback loops while we setBlockState across clusters) ---
@@ -80,13 +81,14 @@ public class WindowArchBlock extends Block implements ClusterRebuildableBlock {
                 .with(OPEN, false)
                 .with(PIECE, Piece.LOWER_SINGLE)
                 .with(SILL, false)
+                .with(SILL_ENABLED, true)
                 .with(GLASS, Glass.NORMAL)
         );
     }
 
     @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        builder.add(FACING, OPEN, PIECE, SILL, GLASS);
+        builder.add(FACING, OPEN, PIECE, SILL, SILL_ENABLED, GLASS);
     }
 
     @Override
@@ -124,6 +126,7 @@ public class WindowArchBlock extends Block implements ClusterRebuildableBlock {
         return this.getDefaultState()
                 .with(FACING, facing)
                 .with(OPEN, open)
+                .with(SILL_ENABLED, inherit == null || inherit.get(SILL_ENABLED))
                 .with(GLASS, inherit == null ? Glass.NORMAL : inherit.get(GLASS));
 
     }
@@ -168,7 +171,8 @@ public class WindowArchBlock extends Block implements ClusterRebuildableBlock {
 
         boolean openChanged = state.get(OPEN) != oldState.get(OPEN);
         boolean glassChanged = state.get(GLASS) != oldState.get(GLASS);
-        if (!openChanged && !glassChanged) {
+        boolean sillEnabledChanged = state.get(SILL_ENABLED) != oldState.get(SILL_ENABLED);
+        if (!openChanged && !glassChanged && !sillEnabledChanged) {
             return;
         }
 
@@ -179,6 +183,9 @@ public class WindowArchBlock extends Block implements ClusterRebuildableBlock {
             }
             if (glassChanged) {
                 applyGlassToCluster(world, pos, state.get(GLASS));
+            }
+            if (sillEnabledChanged) {
+                applySillEnabledToCluster(world, pos, state.get(SILL_ENABLED));
             }
         } finally {
             endSync(started);
@@ -252,11 +259,15 @@ public class WindowArchBlock extends Block implements ClusterRebuildableBlock {
     }
 
     private VoxelShape getWindowShape(BlockState state) {
-        return WindowArchShapes.shapeFor(state.get(PIECE), state.get(OPEN), state.get(SILL), state.get(FACING));
+        return WindowArchShapes.shapeFor(state.get(PIECE), state.get(OPEN), hasSill(state), state.get(FACING));
     }
 
     public VoxelShape getBreakParticleShape(BlockState state) {
-        return WindowArchShapes.particleShapeFor(state.get(PIECE), state.get(OPEN), state.get(SILL), state.get(FACING));
+        return WindowArchShapes.particleShapeFor(state.get(PIECE), state.get(OPEN), hasSill(state), state.get(FACING));
+    }
+
+    public static boolean hasSill(BlockState state) {
+        return state.get(SILL) && state.get(SILL_ENABLED);
     }
 
     // --- Cluster sync operations (AUTO must self-heal) ---
@@ -301,6 +312,18 @@ public class WindowArchBlock extends Block implements ClusterRebuildableBlock {
             }
         } finally {
             endSync(started);
+        }
+    }
+
+    private void applySillEnabledToCluster(World world, BlockPos anchor, boolean enabled) {
+        BlockState anchorState = world.getBlockState(anchor);
+        if (!anchorState.isOf(this)) return;
+        Direction facing = anchorState.get(FACING);
+        for (BlockPos pos : collectPlaneComponentAnyMode(world, anchor, facing)) {
+            BlockState state = world.getBlockState(pos);
+            if (state.isOf(this) && state.get(SILL_ENABLED) != enabled) {
+                world.setBlockState(pos, state.with(SILL_ENABLED, enabled), Block.NOTIFY_LISTENERS);
+            }
         }
     }
 

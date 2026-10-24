@@ -133,6 +133,8 @@ def _normalize_authoring_model(model: dict, *, suffix: str) -> dict:
             result, "generated-gothic-arch.json", "0" * 64
         )
         for finding in findings:
+            if finding.get("runtimeCellSplit"):
+                continue
             if not finding["rotated"] or finding["operationClass"] is not None:
                 continue
             index = finding["elementIndex"]
@@ -155,6 +157,8 @@ def _repair_rotated_uvs(model: dict) -> dict:
     result = copy.deepcopy(model)
     findings, _ = raw_uv._audit_document(result, "generated-gothic-arch.json", "0" * 64)
     for finding in findings:
+        if finding.get("runtimeCellSplit"):
+            continue
         if not finding["rotated"]:
             continue
         if (
@@ -168,8 +172,8 @@ def _repair_rotated_uvs(model: dict) -> dict:
         face = result["elements"][finding["elementIndex"]]["faces"][finding["face"]]
         face[raw_uv.OFFSET_KEY] = finding["proposedOffset"]
 
-    _, post_counts = raw_uv._audit_document(result, "generated-gothic-arch.json", "0" * 64)
-    if post_counts.get("rotatedOutOfRangeFaces", 0):
+    post_findings, _ = raw_uv._audit_document(result, "generated-gothic-arch.json", "0" * 64)
+    if any(finding["rotated"] and not finding.get("runtimeCellSplit") for finding in post_findings):
         raise ValueError("Gothic arch UV repair did not converge")
     return result
 

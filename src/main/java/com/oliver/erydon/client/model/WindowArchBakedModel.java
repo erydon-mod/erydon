@@ -106,7 +106,7 @@ public final class WindowArchBakedModel implements BakedModel, FabricBakedModel 
                 case LOWER_GLASS -> emit(state, context, state.get(WindowArchBlock.OPEN) ? "void" : "glass_lower", rotation);
             }
 
-            if (state.get(WindowArchBlock.SILL)) {
+            if (state.get(WindowArchBlock.SILL) && state.get(WindowArchBlock.SILL_ENABLED)) {
                 emit(state, context, "sill", rotation);
             }
         } finally {
@@ -276,7 +276,7 @@ public final class WindowArchBakedModel implements BakedModel, FabricBakedModel 
             case LOWER_GLASS -> addQuads(quads, state, state.get(WindowArchBlock.OPEN) ? "void" : "glass_lower", rotation, face, random);
         }
 
-        if (state.get(WindowArchBlock.SILL)) {
+        if (state.get(WindowArchBlock.SILL) && state.get(WindowArchBlock.SILL_ENABLED)) {
             addQuads(quads, state, "sill", rotation, face, random);
         }
         if (state.get(WindowArchBlock.GLASS) == WindowArchBlock.Glass.TWO_WAY) {
@@ -347,7 +347,7 @@ public final class WindowArchBakedModel implements BakedModel, FabricBakedModel 
                                  int degrees,
                                  Direction face,
                                  Random random) {
-        AxiomFallbackQuads.add(quads, getModel(state, suffix), degrees, face, random, true);
+        AxiomFallbackQuads.addWithState(quads, getModel(state, suffix), state, degrees, face, random, true);
     }
 
     @Override

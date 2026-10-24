@@ -21,7 +21,32 @@ public final class CorniceConnections {
     private CorniceConnections() { }
 
     public record Segment(CorniceRun run, CorniceRun.Cut start, CorniceRun.Cut end,
-                          boolean joinedStart, boolean joinedEnd) {
+                          boolean joinedStart, boolean joinedEnd, boolean cropProfile) {
+        /** Published angled callers retain their existing affine fitting. */
+        public Segment(CorniceRun run, CorniceRun.Cut start, CorniceRun.Cut end, boolean joinedStart, boolean joinedEnd) {
+            this(run, start, end, joinedStart, joinedEnd, false);
+        }
+
+        public Segment cropped() { return cropProfile ? this : new Segment(run, start, end, joinedStart, joinedEnd, true); }
+        public boolean usesProfileCrop() {
+            // A half-support peer can mark either side of a join. Only cardinal
+            // profiles opt in; the published long hypotenuse fitting stays affine.
+            boolean cardinal = Math.abs(run.tangentX()) < .0000001 || Math.abs(run.tangentZ()) < .0000001;
+            return cropProfile && cardinal && (run.length() < 1 - .0000001 || joinedStart || joinedEnd);
+        }
+
+        /** Source texture/ornament phase on the fixed cardinal block grid, in physical blocks. */
+        public double sourcePhase() {
+            double phase = run.a().x() * run.tangentX() + run.a().z() * run.tangentZ();
+            phase -= Math.floor(phase + .0000001);
+            return Math.abs(phase) < .0000001 ? 0 : phase;
+        }
+
+        /** Rigid source coordinate, with no longitudinal ornament scaling or end-cut shear. */
+        public CorniceRun.Point profilePoint(double physicalU, double depth) {
+            return new CorniceRun.Point(run.a().x() + run.tangentX() * physicalU + run.normalX() * depth,
+                    run.a().z() + run.tangentZ() * physicalU + run.normalZ() * depth);
+        }
         public CorniceRun.Point point(double u, double depth) {
             return run.point(start.at(depth) + (end.at(depth) - start.at(depth)) * u, depth);
         }
@@ -51,7 +76,8 @@ public final class CorniceConnections {
         CorniceBlock.CorniceShape shape = state.get(CorniceBlock.SHAPE);
         if (shape == CorniceBlock.CorniceShape.OUTER_CORNER) return List.of();
         CorniceRun first = CorniceSlopePlacement.run(state);
-        if (shape != CorniceBlock.CorniceShape.INNER_CORNER) return List.of(new Segment(first, START, END, false, false));
+        if (shape != CorniceBlock.CorniceShape.INNER_CORNER)
+            return List.of(new Segment(first, START, END, false, false, shape.isHalfSupport()));
         CorniceRun second = new CorniceRun(0, 0, 1, 0).rotate(state.get(CorniceBlock.FACING).rotateYCounterclockwise());
         return List.of(new Segment(first, START, END, false, false), new Segment(second, START, END, false, false));
     }
@@ -79,7 +105,7 @@ public final class CorniceConnections {
             boolean meets = false;
             for (int end : new int[]{-1, 1}) {
                 CorniceRun.Join join = CorniceRun.join(angled, end, cardinal.run, -end);
-                if (join != null && safe(join, end, -end)) meets = true;
+                if (join != null && safe(join, end, -end, angled, cardinal.run)) meets = true;
             }
             if (!meets) continue;
             // An explicitly paid part owns this return already; do not emit a duplicate inferred strip.
@@ -94,7 +120,7 @@ public final class CorniceConnections {
             // A third supported arm has no unique two-piece corner profile;
             // preserve the saved angled edge instead of guessing ownership.
             if (returnArm != null) return nativeRuns;
-            returnArm = cardinal;
+            returnArm = state.get(CorniceBlock.SHAPE).isHalfSupport() ? cardinal.cropped() : cardinal;
         }
         return returnArm == null ? nativeRuns : List.of(nativeRuns.get(0), returnArm);
     }
@@ -123,7 +149,10 @@ public final class CorniceConnections {
             Candidate end = sourcePorts.admissible() ? mutual(source, 1, sourcePorts.end, world) : null;
             CorniceRun.Cut startCut = start == null ? START : start.join.sourceCut();
             CorniceRun.Cut endCut = end == null ? END : end.join.sourceCut();
-            result.add(new Segment(run, startCut, endCut, start != null, end != null));
+            boolean cropped = nativeRuns.get(index).cropProfile
+                    || start != null && start.placed.state.get(CorniceBlock.SHAPE).isHalfSupport()
+                    || end != null && end.placed.state.get(CorniceBlock.SHAPE).isHalfSupport();
+            result.add(new Segment(run, startCut, endCut, start != null, end != null, cropped));
         }
         return List.copyOf(result);
     }
@@ -172,16 +201,20 @@ public final class CorniceConnections {
                     && !(source.owner.equals(target.owner) && source.part != target.part)) continue;
             int targetEnd = -sourceEnd;
             CorniceRun.Join join = CorniceRun.join(source.run, sourceEnd, target.run, targetEnd);
-            if (join == null || !safe(join, sourceEnd, targetEnd)) continue;
+            if (join == null || !safe(join, sourceEnd, targetEnd, source.run, target.run)) continue;
             if (result != null) return null;
             result = new Candidate(target, targetEnd, join);
         }
         return result;
     }
 
-    private static boolean safe(CorniceRun.Join join, int sourceEnd, int targetEnd) {
+    private static boolean safe(CorniceRun.Join join, int sourceEnd, int targetEnd, CorniceRun sourceRun, CorniceRun targetRun) {
         double source = join.sourceCut().at(MAX_DEPTH), target = join.targetCut().at(MAX_DEPTH);
-        return source >= -.75 && source <= 1.75 && target >= -.75 && target <= 1.75
+        // A half-length arm needs twice the normalized extension for the same physical mitre.
+        // Existing full/diagonal bounds remain unchanged.
+        double sourceMargin = .75 / Math.min(1, sourceRun.length());
+        double targetMargin = .75 / Math.min(1, targetRun.length());
+        return source >= -sourceMargin && source <= 1 + sourceMargin && target >= -targetMargin && target <= 1 + targetMargin
                 && (sourceEnd < 0 ? source < 1 - .000001 : source > .000001)
                 && (targetEnd < 0 ? target < 1 - .000001 : target > .000001);
     }

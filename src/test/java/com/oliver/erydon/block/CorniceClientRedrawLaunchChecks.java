@@ -74,9 +74,9 @@ public final class CorniceClientRedrawLaunchChecks {
         world.handleBlockUpdate(owner, pendingCornice, Block.NOTIFY_LISTENERS);
         require(storage.calls == 0 && world.states.get(owner).isOf(Blocks.STONE),
                 "A rejected pending cornice packet redrew a different current client state");
-        require(cases == 208, "Client redraw skipped saved cornice profiles");
+        require(cases == 288, "Client redraw skipped saved cornice profiles");
         packetOrdering(world, storage, owner, pendingCornice);
-        System.out.println("ERYDON_CORNICE_CLIENT_REDRAW_OK: 208 same-state actual packet tails reach ClientWorld listeners and unconditional WorldRenderer scheduling, including both chunk sections at a border; ordinary and rejected pending packets remain untouched");
+        System.out.println("ERYDON_CORNICE_CLIENT_REDRAW_OK: 288 same-state actual packet tails reach ClientWorld listeners and unconditional WorldRenderer scheduling, including both chunk sections at a border; ordinary and rejected pending packets remain untouched");
     }
 
     private static void packetOrdering(TestClientWorld world, CaptureStorage storage, BlockPos peer, BlockState state) throws Exception {

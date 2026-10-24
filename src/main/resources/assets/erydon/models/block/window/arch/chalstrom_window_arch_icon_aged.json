@@ -2,7 +2,7 @@
   "parent": "erydon:block/window/arch/window_arch_icon",
   "textures": {
     "stone": "erydon:block/chalstrom_block_aged",
-    "pane": "erydon:block/glazing_silver",
+    "pane": "erydon:block/glazing_crystal",
     "lead": "erydon:block/lead_black"
   }
 }

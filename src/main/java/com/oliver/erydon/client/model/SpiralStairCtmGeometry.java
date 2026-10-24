@@ -19,6 +19,16 @@ final class SpiralStairCtmGeometry {
     }
 
     static List<Fragment> split(Direction face, List<Vertex> vertices) {
+        return split(face, vertices, true);
+    }
+
+    /** Retain a real thin face when near-cell snapping would otherwise erase it. */
+    static List<Fragment> splitPreservingThinSurfaces(Direction face, List<Vertex> vertices) {
+        List<Fragment> snapped = split(face, vertices, true);
+        return snapped.isEmpty() ? split(face, vertices, false) : snapped;
+    }
+
+    private static List<Fragment> split(Direction face, List<Vertex> vertices, boolean snap) {
         if (face == null || vertices.size() < 3) {
             return List.of();
         }
@@ -30,8 +40,12 @@ final class SpiralStairCtmGeometry {
         float maxT = Float.NEGATIVE_INFINITY;
 
         for (Vertex vertex : vertices) {
-            float s = snapToCell(textureS(face, vertex.x, vertex.y, vertex.z));
-            float t = snapToCell(textureT(face, vertex.x, vertex.y, vertex.z));
+            float s = textureS(face, vertex.x, vertex.y, vertex.z);
+            float t = textureT(face, vertex.x, vertex.y, vertex.z);
+            if (snap) {
+                s = snapToCell(s);
+                t = snapToCell(t);
+            }
             source.add(new ProjectedVertex(vertex, s, t));
             minS = Math.min(minS, s);
             maxS = Math.max(maxS, s);
@@ -287,7 +301,7 @@ final class SpiralStairCtmGeometry {
             this(x, y, z, color, lightmap, hasNormal, normalX, normalY, normalZ, Float.NaN, Float.NaN);
         }
 
-        private static Vertex interpolate(Vertex from, Vertex to, float amount) {
+        static Vertex interpolate(Vertex from, Vertex to, float amount) {
             boolean interpolateNormal = from.hasNormal && to.hasNormal;
             float normalX = interpolateNormal ? lerp(from.normalX, to.normalX, amount) : 0.0F;
             float normalY = interpolateNormal ? lerp(from.normalY, to.normalY, amount) : 0.0F;

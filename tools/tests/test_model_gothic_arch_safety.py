@@ -17,13 +17,13 @@ AUTHORING = ERYDON_ASSETS / "authoring_models" / "block" / "arch" / "gothic"
 GEOMETRY_SIGNATURES = {
     "arch_gothic_corner_large_lower.json": "1b6e35dd246ce7406ef691f7538d3fc66ed6ea439ded4257c0b760fc9616417c",
     "arch_gothic_corner_large_upper.json": "b139a4cd0568bfa01dd7189cc8f96fe1845a3143cfefac924f8123a7ce9f91a1",
-    "arch_gothic_corner_medium.json": "3583015e07e2621558164b7a7c39a5929f5d1f82609cf4284cecaf37c52e6c13",
+    "arch_gothic_corner_medium.json": "5fb3db1647a60cba2b487efa5f6c88605a9e56eb9f15e18794b1913f06922852",
     "arch_gothic_corner_small.json": "05cf4d3e9a92831c8c5fb8b9aa8da8a25d24bc01950b53257f03b0d4426e8902",
     "arch_gothic_icon.json": "264f264859fd5a0715778904e69ea89afba42fc843fbab5a87371ce990d17685",
     "arch_gothic_side_large.json": "9f61896a7ed3fbb524b6073a18d71cea42c88f17b8f470f0c457563ce43da918",
     "arch_gothic_side_medium.json": "9dac45222c567ea9c543e8842923e88598d9ade729fe8f709a9f96b63d6b79e2",
     "arch_gothic_side_small.json": "8a43eaa6beab56d10bd74e55d4b872a7d1c17ae5702522ace702b2752a39324b",
-    "arch_gothic_top_large.json": "2bf85cf1fd65c3f696014892ae149d467535e0f06e159315aa30e06870059c8c",
+    "arch_gothic_top_large.json": "aabb8d199476b814638ef0b7acd8b8dbb1b7bdad05b49d3136d7b84590906c45",
 }
 
 SPEC = importlib.util.spec_from_file_location("generate_gothic_arch", GENERATOR_PATH)
@@ -106,7 +106,14 @@ class GothicArchSafetyTests(unittest.TestCase):
         self.assertEqual(cap["to"][0], filler["to"][0])
         self.assertGreaterEqual(filler["from"][0], cap["from"][0])
         self.assertEqual(12, len(model["elements"]))
-        self.assertEqual(38, sum(len(element.get("faces", {})) for element in model["elements"]))
+        self.assertEqual(39, sum(len(element.get("faces", {})) for element in model["elements"]))
+
+    def test_medium_join_closure_preserves_the_authored_profile(self) -> None:
+        model = load_json(AUTHORING / "arch_gothic_corner_medium.json")
+        face = model["elements"][7]["faces"].pop("south")
+        self.assertEqual({"texture": "#stone", "erydon_split_world_uv": True}, face)
+        self.assertEqual("3583015e07e2621558164b7a7c39a5929f5d1f82609cf4284cecaf37c52e6c13",
+                         geometry_signature(model))
 
     def test_only_live_authoring_components_are_checked_in(self) -> None:
         self.assertEqual(
@@ -168,12 +175,13 @@ class GothicArchSafetyTests(unittest.TestCase):
                     self.assertEqual("#stone", face.get("texture"), filename)
                     explicit_counts[filename] += "uv" in face
                     offset_counts[filename] += GENERATOR.raw_uv.OFFSET_KEY in face
-            _, counts = GENERATOR.raw_uv._audit_document(
+            findings, counts = GENERATOR.raw_uv._audit_document(
                 model,
                 f"arch/gothic/{filename}",
                 hashlib.sha256((AUTHORING / filename).read_bytes()).hexdigest(),
             )
-            self.assertEqual(0, counts.get("rotatedOutOfRangeFaces", 0), filename)
+            self.assertEqual([], [finding for finding in findings
+                                  if finding["rotated"] and not finding.get("runtimeCellSplit")], filename)
             self.assertEqual(expected_signature, geometry_signature(model), filename)
 
         self.assertEqual(16, explicit_counts["arch_gothic_corner_small.json"])
@@ -189,6 +197,17 @@ class GothicArchSafetyTests(unittest.TestCase):
             )
         )
         self.assertEqual(66, sum(offset_counts.values()))
+
+    def test_short_crown_closure_changes_only_missing_faces(self) -> None:
+        model = load_json(AUTHORING / "arch_gothic_top_large.json")
+        self.assertNotIn("erydon_split_world_uv", model)
+        for index, faces in {0: ("up", "south"), 1: ("up", "south"), 3: ("up", "south"),
+                             4: ("up", "south"), 2: ("east",), 5: ("west",)}.items():
+            for direction in faces:
+                face = model["elements"][index]["faces"].pop(direction)
+                self.assertEqual({"texture": "#stone", "erydon_split_world_uv": True}, face)
+        self.assertEqual("2bf85cf1fd65c3f696014892ae149d467535e0f06e159315aa30e06870059c8c",
+                         geometry_signature(model))
 
     def test_world_renderer_runs_after_continuity_and_selects_repeat_tiles(self) -> None:
         model_root = (

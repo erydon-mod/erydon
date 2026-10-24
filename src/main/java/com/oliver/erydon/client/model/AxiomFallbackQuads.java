@@ -1,5 +1,6 @@
 package com.oliver.erydon.client.model;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.render.model.ModelRotation;
@@ -94,6 +95,16 @@ final class AxiomFallbackQuads {
                             Direction requestedFace,
                             Random random,
                             boolean lockHorizontalUv) {
+        add(quads, model, xDegrees, yDegrees, requestedFace, random, lockHorizontalUv, null);
+    }
+
+    static void addWithState(List<BakedQuad> quads, BakedModel model, BlockState state,
+                             int degrees, Direction requestedFace, Random random, boolean lockHorizontalUv) {
+        add(quads, model, 0, degrees, requestedFace, random, lockHorizontalUv, state);
+    }
+
+    private static void add(List<BakedQuad> quads, BakedModel model, int xDegrees, int yDegrees,
+                             Direction requestedFace, Random random, boolean lockHorizontalUv, BlockState state) {
         if (model == null) {
             return;
         }
@@ -101,15 +112,15 @@ final class AxiomFallbackQuads {
         ModelRotation rotation = ModelRotation.get(xDegrees, yDegrees);
         int yTurns = Math.floorMod(yDegrees / 90, 4);
         if (requestedFace == null) {
-            addSourceQuads(quads, model, null, rotation, yTurns, lockHorizontalUv, random);
+            addSourceQuads(quads, model, null, rotation, yTurns, lockHorizontalUv, random, state);
             for (Direction face : Direction.values()) {
-                addSourceQuads(quads, model, face, rotation, yTurns, lockHorizontalUv, random);
+                addSourceQuads(quads, model, face, rotation, yTurns, lockHorizontalUv, random, state);
             }
             return;
         }
 
         addSourceQuads(quads, model, inverseMapFace(requestedFace, rotation), rotation,
-                yTurns, lockHorizontalUv, random);
+                yTurns, lockHorizontalUv, random, state);
     }
 
     static List<BakedQuad> filterByFace(List<BakedQuad> quads, Direction requestedFace) {
@@ -132,8 +143,9 @@ final class AxiomFallbackQuads {
                                        ModelRotation rotation,
                                        int yTurns,
                                        boolean lockHorizontalUv,
-                                       Random random) {
-        for (BakedQuad quad : model.getQuads(null, sourceFace, random)) {
+                                       Random random,
+                                       BlockState state) {
+        for (BakedQuad quad : model.getQuads(state, sourceFace, random)) {
             BakedQuad transformed = rotation == ModelRotation.X0_Y0
                     ? quad
                     : rotate(quad, rotation, yTurns, lockHorizontalUv);

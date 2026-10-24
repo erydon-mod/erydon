@@ -578,6 +578,10 @@ def _audit_document(document: Any, canonical_path: str, source_sha: str) -> tupl
             if rotated:
                 counts["rotatedFaces"] += 1
             label = f"{canonical_path} elements[{element_index}].faces.{face}"
+            face_cell_split = face_data.get("erydon_split_world_uv", False)
+            if not isinstance(face_cell_split, bool):
+                raise ModelAuditError(f"Face erydon_split_world_uv must be boolean: {label}")
+            face_runtime_cell_split = runtime_cell_split or face_cell_split
             offset = _parse_offset(face_data, label)
             if OFFSET_KEY in face_data:
                 counts["offsetFaces"] += 1
@@ -596,7 +600,7 @@ def _audit_document(document: Any, canonical_path: str, source_sha: str) -> tupl
                 base_uv = _rect_uv(authored)
             else:
                 counts["implicitFaces"] += 1
-                if runtime_cell_split:
+                if face_runtime_cell_split:
                     counts["runtimeCellSplitImplicitFaces"] += 1
                 authored = None
                 base_uv = _default_uv(vertices, nominal_face)
@@ -653,7 +657,7 @@ def _audit_document(document: Any, canonical_path: str, source_sha: str) -> tupl
                 "uniformShift": {"u": clean_number(shifts[0]), "v": clean_number(shifts[1])} if shifts else None,
             }
             findings.append(finding)
-            if runtime_cell_split and not explicit:
+            if face_runtime_cell_split and not explicit:
                 finding["runtimeCellSplit"] = True
                 counts["runtimeCellSplitOutOfRangeFaces"] += 1
     return findings, dict(counts)

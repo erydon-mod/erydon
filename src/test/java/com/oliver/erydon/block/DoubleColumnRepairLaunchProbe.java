@@ -113,6 +113,7 @@ public final class DoubleColumnRepairLaunchProbe implements PreLaunchEntrypoint 
             transforms();
             if (Boolean.getBoolean("erydon.large_column_test.axiom"))
                 cases+=DoubleColumnAxiomLaunchChecks.run(block);
+            com.oliver.erydon.client.model.DoubleColumnMeshLaunchChecks.run();
             System.out.println("ERYDON_LARGE_COLUMNS_OK: "+cases+" callback/repair/recalc/transform cases");
             System.exit(0);
         } catch (Throwable failure) { failure.printStackTrace(); System.exit(1); }

@@ -269,20 +269,15 @@ final class WindowArchShapes {
     }
     static VoxelShape shapeFor(Piece piece, boolean open, boolean sill, Direction facing) {
         int idx = facingIndex(facing);
-
         ShapeKey key = shapeKeyForState(piece, open);
-        if (key == null) {
-            return sill ? SHAPES.get(ShapeKey.SILL)[idx] : VoxelShapes.empty();
-        }
+        if (key == null) return sill ? SHAPES.get(ShapeKey.SILL)[idx] : VoxelShapes.empty();
         return (sill ? SILL_SHAPES : SHAPES).get(key)[idx];
     }
 
     static VoxelShape particleShapeFor(Piece piece, boolean open, boolean sill, Direction facing) {
         int idx = facingIndex(facing);
         ShapeKey key = shapeKeyForState(piece, open);
-        if (key == null) {
-            return sill ? PARTICLE_SHAPES.get(ShapeKey.SILL)[idx] : VoxelShapes.empty();
-        }
+        if (key == null) return sill ? PARTICLE_SHAPES.get(ShapeKey.SILL)[idx] : VoxelShapes.empty();
         return (sill ? SILL_PARTICLE_SHAPES : PARTICLE_SHAPES).get(key)[idx];
     }
 

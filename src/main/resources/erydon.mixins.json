@@ -10,6 +10,7 @@
     "PalettedContainerSaveMixin",
     "CopingRaycastMixin",
     "CorniceCollisionIteratorMixin",
+    "SpiralStairCollisionIteratorMixin",
     "CorniceAssemblyBreakMixin",
     "BlockItemMixin",
     "DebugStickItemMixin",
@@ -49,7 +50,9 @@
     "client.compat.rei.ReiFullBlockArgumentMixin",
     "client.compat.rei.ReiIdentifierArgumentTypeMixin",
     "client.compat.rei.ReiTextArgumentTypeMixin",
-    "client.indium.TerrainRenderContextMixin"
+    "client.indium.TerrainRenderContextMixin",
+    "client.indium.ColumnMeshLightingMixin",
+    "client.indigo.ColumnMeshLightingMixin"
   ],
   "injectors": {
     "defaultRequire": 1

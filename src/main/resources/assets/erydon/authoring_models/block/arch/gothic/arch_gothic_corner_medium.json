@@ -307,6 +307,10 @@
             0.3999154567718506,
             0
           ]
+        },
+        "south": {
+          "texture": "#stone",
+          "erydon_split_world_uv": true
         }
       }
     },

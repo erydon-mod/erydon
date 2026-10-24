@@ -68,6 +68,7 @@ public final class GeorgianWindowRenderingLaunchChecks {
             singleton.set(null, client);
             var renderer = new WindowFrenchGeorgianBakedModel(wrapped);
             List<Identifier> fabric = new ArrayList<>();
+            BlockState[] renderedState = {null};
             var transforms = new ArrayDeque<RenderContext.QuadTransform>();
             var mesh = IndigoRenderer.INSTANCE.meshBuilder();
             var delegate = mesh.getEmitter();
@@ -97,7 +98,7 @@ public final class GeorgianWindowRenderingLaunchChecks {
                                 fabric.add(ids.get(model));
                                 for (int face = -1; face < 6; face++) {
                                     Direction side = face < 0 ? null : Direction.values()[face];
-                                    for (BakedQuad quad : model.getQuads(null, side, Random.create(0)))
+                                    for (BakedQuad quad : model.getQuads(renderedState[0], side, Random.create(0)))
                                         emitter.fromVanilla(quad, material, side).emit();
                                 }
                             }; }
@@ -108,11 +109,12 @@ public final class GeorgianWindowRenderingLaunchChecks {
             Map<BlockState, List<FrameQuad>> fabricFrames = new HashMap<>();
             int checked = 0;
             for (BlockState state : block.getStateManager().getStates()) {
+                renderedState[0] = state;
                 models.lookups.clear();
                 List<BakedQuad> actual = renderer.getQuads(state, null, Random.create(0));
                 List<Identifier> axiom = List.copyOf(models.lookups);
                 boolean clearCentre = state.get(CORNER) == Corner.NONE && state.get(OPEN)
-                        && state.get(PIECE) == Piece.LOWER_MULTI_MID && !state.get(SILL);
+                        && state.get(PIECE) == Piece.LOWER_MULTI_MID && !expectedSillVisible(state);
                 require(actual.isEmpty() == clearCentre, "A window disappeared or a lower centre retained geometry: " + state);
                 fabric.clear();
                 renderer.emitBlockQuads(null, state, BlockPos.ORIGIN, () -> Random.create(0), context);
@@ -142,6 +144,8 @@ public final class GeorgianWindowRenderingLaunchChecks {
                 boolean[] sourcePanes = sillGeometryAndUnchangedFrame(renderer, state, actual, expected, models,
                         emitted, emittedUvs, emittedFaces, fabricFrames);
                 fabricAxiomParity(state, actual, emitted, emittedUvs, emittedFaces, sourcePanes);
+                if (bottomRail(state)) WindowBottomRailLaunchChecks.check(state, actual,
+                        renderer.getQuads(state.with(SILL, false), null, Random.create(0)));
                 if (state.get(CORNER) == Corner.NONE) {
                     if (!state.get(OPEN)) {
                         // Closing a wide run retains the exact one-wide appearance from 1.5.44,
@@ -176,10 +180,65 @@ public final class GeorgianWindowRenderingLaunchChecks {
                 }
                 checked++;
             }
+            var arch = (com.oliver.erydon.block.WindowArchBlock) net.minecraft.registry.Registries.BLOCK.get(
+                    new Identifier("erydon", "aganite_window_arch"));
+            for (String suffix : WindowArchBakedModel.MODEL_SUFFIXES) {
+                Identifier id = WindowArchBakedModel.modelId("aganite_window_arch", suffix);
+                BakedModel model = component("arch", suffix, sprite);
+                models.put(id, model); ids.put(model, id);
+            }
+            var archRenderer = new WindowArchBakedModel(wrapped);
+            int archChecked = 0;
+            for (BlockState state : arch.getStateManager().getStates()) {
+                renderedState[0] = state;
+                models.lookups.clear();
+                List<BakedQuad> actual = archRenderer.getQuads(state, null, Random.create(0));
+                List<Identifier> axiom = List.copyOf(models.lookups);
+                if (!state.get(com.oliver.erydon.block.WindowArchBlock.SILL_ENABLED)
+                        && !state.get(com.oliver.erydon.block.WindowArchBlock.SILL)) {
+                    BlockState frameOnly = state.with(com.oliver.erydon.block.WindowArchBlock.SILL, false)
+                            .with(com.oliver.erydon.block.WindowArchBlock.SILL_ENABLED, true);
+                    sameWithBottomCaps(actual, archRenderer.getQuads(frameOnly, null, Random.create(0)));
+                    for (Direction side : Direction.values()) sameWithBottomCaps(archRenderer.getQuads(state, side, Random.create(0)),
+                            archRenderer.getQuads(frameOnly, side, Random.create(0)));
+                }
+                fabric.clear();
+                archRenderer.emitBlockQuads(null, state, BlockPos.ORIGIN, () -> Random.create(0), context);
+                require(transforms.isEmpty(), "Arch no-sill rendering leaked a transform");
+                require(fabric.equals(axiom), "Arch Fabric/Axiom selected different frame/sill components");
+                boolean expectedSill = state.get(com.oliver.erydon.block.WindowArchBlock.SILL)
+                        && state.get(com.oliver.erydon.block.WindowArchBlock.SILL_ENABLED);
+                require(fabric.stream().anyMatch(id -> id.getPath().endsWith("_sill")) == expectedSill,
+                        "Arch base component did not follow bottom-row geometry");
+                List<float[]> emitted = new ArrayList<>();
+                mesh.build().forEach(quad -> {
+                    float[] positions = new float[12];
+                    for (int vertex = 0; vertex < 4; vertex++) {
+                        positions[vertex * 3] = quad.x(vertex);
+                        positions[vertex * 3 + 1] = quad.y(vertex);
+                        positions[vertex * 3 + 2] = quad.z(vertex);
+                    }
+                    emitted.add(positions);
+                });
+                require(actual.size() == emitted.size(), "Arch Fabric/Axiom quad counts differ");
+                for (int quad = 0; quad < actual.size(); quad++) for (int vertex = 0; vertex < 4; vertex++)
+                    for (int axis = 0; axis < 3; axis++) require(Math.abs(emitted.get(quad)[vertex * 3 + axis]
+                                    - Float.intBitsToFloat(actual.get(quad).getVertexData()[vertex * 8 + axis])) < .000002,
+                            "Arch no-sill Fabric/Axiom visual geometry differs");
+                if (state.get(com.oliver.erydon.block.WindowArchBlock.SILL)
+                        && !state.get(com.oliver.erydon.block.WindowArchBlock.SILL_ENABLED))
+                    WindowBottomRailLaunchChecks.check(state, actual,
+                            archRenderer.getQuads(state.with(com.oliver.erydon.block.WindowArchBlock.SILL, false), null, Random.create(0)));
+                archChecked++;
+            }
+            System.out.println("ERYDON_ARCH_WINDOW_RENDERING_OK states=" + archChecked
+                    + " noSill=Fabric+Axiom frameGlass=unchanged allFacings+open+glassModes=passed");
+            WindowBottomCapsLaunchChecks.run(arch, block, sprite);
+            WindowBottomRailLaunchChecks.finish(sprite);
             sillUvGuards();
             System.out.println("ERYDON_GEORGIAN_WINDOW_RENDERING_OK states=" + checked
                     + " FabricAxiomComponents=exact closedStraightQuads=exact openCentres=clear openOuterWings=retained openCornerPost=6quads"
-                    + " fixedFanlightJambs=FabricMesh+AxiomAllFacings inwardSills=mirrorAboutFrame+unchangedFrameGlass+UVGuards");
+                    + " fixedFanlightJambs=FabricMesh+AxiomAllFacings inwardSills=mirrorAboutFrame+unchangedFrameGlass+UVGuards noSill=bothRenderPaths+unchangedFrameGlass");
         } finally {
             singleton.set(null, previous);
         }
@@ -221,11 +280,17 @@ public final class GeorgianWindowRenderingLaunchChecks {
         List<FrameQuad> fabricFrame = new ArrayList<>();
         boolean[] sourcePanes = new boolean[actual.size()];
         int at = 0, sillFace = 0;
+        boolean rail = state.get(SILL) && state.get(OPEN) && state.get(CORNER) == Corner.NONE
+                && state.get(PIECE) != Piece.UPPER_MULTI_MID && state.get(PIECE) != Piece.LOWER_MULTI_MID;
+        rail |= state.get(SILL) && !state.get(OPEN) && state.get(SILL_SIDE) == SillSide.NONE;
         Direction facing = state.get(FACING);
         for (Identifier id : components) {
             BakedModel source = models.get(id);
-            List<BakedQuad> quads = new ArrayList<>(source.getQuads(null, null, Random.create(0)));
-            for (Direction face : Direction.values()) quads.addAll(source.getQuads(null, face, Random.create(0)));
+            var authored = java.util.Collections.newSetFromMap(new IdentityHashMap<BakedQuad, Boolean>());
+            authored.addAll(source.getQuads(null, null, Random.create(0)));
+            for (Direction face : Direction.values()) authored.addAll(source.getQuads(null, face, Random.create(0)));
+            List<BakedQuad> quads = new ArrayList<>(source.getQuads(state, null, Random.create(0)));
+            for (Direction face : Direction.values()) quads.addAll(source.getQuads(state, face, Random.create(0)));
             String path = id.getPath();
             boolean sill = path.endsWith("_sill") || path.endsWith("_sill_lh") || path.endsWith("_sill_rh");
             if (sill && path.endsWith("_sill")) facing = sillFace++ == 0 ? state.get(FACING) : secondaryFacing(state);
@@ -234,6 +299,13 @@ public final class GeorgianWindowRenderingLaunchChecks {
                 BakedQuad placed = actual.get(at++);
                 sourcePanes[at - 1] = sourceQuad.getColorIndex() == 0;
                 if (!sill) {
+                    if (rail) continue; // The separate assembled-mesh oracle checks the clipped base and untouched exterior.
+                    if (!authored.contains(sourceQuad)) {
+                        require(sourceQuad.getFace() == Direction.DOWN && state.get(SILL)
+                                        && state.get(SILL_SIDE) == SillSide.NONE,
+                                "Synthetic caps escaped the explicit no-sill base");
+                        continue;
+                    }
                     frame.add(placed);
                     fabricFrame.add(new FrameQuad(emitted.get(at - 1), uvs.get(at - 1), faces.get(at - 1)));
                     continue;
@@ -242,7 +314,7 @@ public final class GeorgianWindowRenderingLaunchChecks {
                     int offset = vertex * 8;
                     double x = Float.intBitsToFloat(sourceQuad.getVertexData()[offset]);
                     double z = Float.intBitsToFloat(sourceQuad.getVertexData()[offset + 2]);
-                    if (state.get(SILL_SIDE) == SillSide.INWARD) { x = 1 - x; z = 3 / 16.0 - z; }
+                    if (path.endsWith("_sill") && state.get(SILL_SIDE) == SillSide.INWARD) { x = 1 - x; z = 3 / 16.0 - z; }
                     double[] point = rotate(x, z, facing);
                     require(Math.abs(point[0] - Float.intBitsToFloat(placed.getVertexData()[offset])) <= .000002
                                     && Math.abs(point[1] - Float.intBitsToFloat(placed.getVertexData()[offset + 2])) <= .000002
@@ -253,6 +325,7 @@ public final class GeorgianWindowRenderingLaunchChecks {
             }
         }
         require(at == actual.size(), "Unexpected geometry outside authored components");
+        if (rail) return sourcePanes;
         same(frame, renderer.getQuads(state.with(SILL, false).with(SILL_SIDE, SillSide.OUTWARD), null, Random.create(0)));
         same(frame, renderer.getQuads(state.with(SILL, false).with(SILL_SIDE, SillSide.INWARD), null, Random.create(0)));
         BlockState baselineState = state.with(SILL, false).with(SILL_SIDE, SillSide.OUTWARD);
@@ -325,11 +398,16 @@ public final class GeorgianWindowRenderingLaunchChecks {
 
     private static double dot(double[] a, double[] b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
 
+    private static boolean expectedSillVisible(BlockState state) {
+        return state.get(SILL) && state.get(SILL_SIDE) != SillSide.NONE;
+    }
+
     private static List<Identifier> expected(BlockState state) {
         List<Identifier> result = new ArrayList<>();
         boolean corner = state.get(CORNER) != Corner.NONE;
         Piece primary = corner || state.get(OPEN) ? state.get(PIECE) : state.get(PIECE).single();
         face(result, primary, state, corner);
+        if (state.get(SILL) && !state.get(OPEN) && state.get(SILL_SIDE) == SillSide.NONE) add(result, "sill");
         if (corner) {
             boolean left = (state.get(CORNER) == Corner.LEFT) != state.get(OPEN);
             boolean upper = state.get(PIECE).asString().startsWith("upper");
@@ -339,6 +417,10 @@ public final class GeorgianWindowRenderingLaunchChecks {
             if (state.get(OPEN)) add(result, "open_corner_post");
         }
         return result;
+    }
+
+    private static boolean bottomRail(BlockState state) {
+        return state.get(SILL) && state.get(SILL_SIDE) == SillSide.NONE;
     }
 
     private static void face(List<Identifier> result, Piece piece, BlockState state, boolean corner) {
@@ -364,17 +446,13 @@ public final class GeorgianWindowRenderingLaunchChecks {
             case LOWER_MULTI_MID -> null;
         };
         if (suffix != null) add(result, suffix);
-        if (state.get(SILL)) {
-            add(result, "sill");
-            if (open && !corner) {
-                String cap = piece == Piece.LOWER_SINGLE ? hinge
-                        : piece == Piece.LOWER_MULTI_LH ? "lh" : piece == Piece.LOWER_MULTI_RH ? "rh" : null;
-                if (cap != null) {
-                    if (state.get(SILL_SIDE) == SillSide.INWARD) cap = cap.equals("lh") ? "rh" : "lh";
-                    add(result, "sill_" + cap);
-                }
-            }
+        if (state.get(SILL) && open && !corner) {
+            String cap = piece == Piece.LOWER_SINGLE || piece == Piece.UPPER_SINGLE ? hinge
+                    : piece == Piece.LOWER_MULTI_LH || piece == Piece.UPPER_MULTI_LH ? "lh"
+                    : piece == Piece.LOWER_MULTI_RH || piece == Piece.UPPER_MULTI_RH ? "rh" : null;
+            if (cap != null) add(result, "sill_" + cap);
         }
+        if (expectedSillVisible(state)) add(result, "sill");
     }
 
     private static void openStraightGeometry(WindowFrenchGeorgianBakedModel renderer, BlockState state, BakedModel authoredSill) {
@@ -384,14 +462,14 @@ public final class GeorgianWindowRenderingLaunchChecks {
         if (piece == Piece.LOWER_MULTI_MID) {
             if (!state.get(SILL)) require(quads.isEmpty(), "An open lower centre still has a culled frame/glass face");
             List<BakedQuad> expected = new ArrayList<>();
-            if (state.get(SILL)) {
+            if (expectedSillVisible(state)) {
                 int rotation = switch (state.get(FACING)) {
                     case EAST -> 90; case SOUTH -> 180; case WEST -> 270; default -> 0;
                 };
                 if (state.get(SILL_SIDE) == SillSide.INWARD) rotation = (rotation + 180) % 360;
-                AxiomFallbackQuads.add(expected, authoredSill, rotation, null, Random.create(0), true);
+                AxiomFallbackQuads.addWithState(expected, authoredSill, state, rotation, null, Random.create(0), true);
                 for (Direction side : Direction.values()) {
-                    AxiomFallbackQuads.add(expected, authoredSill, rotation, side, Random.create(0), true);
+                    AxiomFallbackQuads.addWithState(expected, authoredSill, state, rotation, side, Random.create(0), true);
                 }
                 if (state.get(SILL_SIDE) == SillSide.INWARD) for (int at = 0; at < expected.size(); at++)
                     expected.set(at, WindowSillTransform.translate(expected.get(at), state.get(FACING)));
@@ -424,7 +502,7 @@ public final class GeorgianWindowRenderingLaunchChecks {
     private static void sillUvGuards() throws Exception {
         int checked = 0;
         var material = IndigoRenderer.INSTANCE.materialFinder().find();
-        for (String texture : new String[]{"block/aganite_block", "block/glazing_silver"}) {
+        for (String texture : new String[]{"block/aganite_block", "block/glazing_silver", "block/glazing_crystal"}) {
             try (SpriteContents contents = new SpriteContents(new Identifier("erydon", texture),
                     new SpriteDimensions(16, 16), new NativeImage(16, 16, false), AnimationResourceMetadata.EMPTY)) {
                 Sprite sprite = new Sprite(new Identifier("erydon", "sill_uv_probe_atlas"), contents, 64, 64, 16, 32) {};
@@ -523,6 +601,26 @@ public final class GeorgianWindowRenderingLaunchChecks {
                     "Expected geometry UV/position/normal/tint/lighting/order differs");
         }
     }
+
+    private static void sameWithBottomCaps(List<BakedQuad> capped, List<BakedQuad> authored) {
+        int next = 0;
+        for (BakedQuad quad : capped) {
+            if (next < authored.size()) {
+                BakedQuad original = authored.get(next);
+                if (Arrays.equals(quad.getVertexData(), original.getVertexData())
+                        && quad.getColorIndex() == original.getColorIndex() && quad.getFace() == original.getFace()
+                        && quad.getSprite() == original.getSprite() && quad.hasShade() == original.hasShade()) {
+                    next++;
+                    continue;
+                }
+            }
+            require(quad.getFace() == Direction.DOWN, "No-sill changed a non-bottom authored surface");
+            for (int vertex = 0; vertex < 4; vertex++)
+                require(Float.intBitsToFloat(quad.getVertexData()[vertex * 8 + 1]) <= .011 / 16 + .000002,
+                        "No-sill added geometry above the exposed bottom");
+        }
+        require(next == authored.size(), "No-sill removed or changed authored frame/glass/UV/tint geometry");
+    }
     private static double[] rotate(double x, double z, Direction facing) {
         return switch (facing) {
             case EAST -> new double[]{1 - z, x}; case SOUTH -> new double[]{1 - x, 1 - z};
@@ -530,7 +628,15 @@ public final class GeorgianWindowRenderingLaunchChecks {
         };
     }
     private static BakedModel component(String suffix, Sprite sprite) throws Exception {
-        String path = "/assets/erydon/models/block/window/french_georgian/window_french_georgian_" + suffix + ".json";
+        return component("french_georgian", suffix, sprite);
+    }
+
+    static BakedModel component(String family, String suffix, Sprite sprite) throws Exception {
+        return component(family, suffix, sprite, true);
+    }
+
+    static BakedModel component(String family, String suffix, Sprite sprite, boolean rail) throws Exception {
+        String path = "/assets/erydon/models/block/window/" + family + "/window_" + family + "_" + suffix + ".json";
         JsonUnbakedModel model;
         try (var stream = GeorgianWindowRenderingLaunchChecks.class.getResourceAsStream(path)) {
             require(stream != null, "Missing authored window component " + path);
@@ -545,13 +651,29 @@ public final class GeorgianWindowRenderingLaunchChecks {
             (entry.getValue().cullFace == null ? unculled
                     : culled.computeIfAbsent(entry.getValue().cullFace, ignored -> new ArrayList<>())).add(quad);
         }
-        return (BakedModel) Proxy.newProxyInstance(BakedModel.class.getClassLoader(), new Class<?>[]{BakedModel.class},
+        BakedModel original = (BakedModel) Proxy.newProxyInstance(BakedModel.class.getClassLoader(), new Class<?>[]{BakedModel.class},
                 (proxy, method, args) -> {
                     if (method.getName().equals("getQuads")) return args[1] == null ? unculled : culled.getOrDefault(args[1], List.of());
                     if (method.getReturnType() == Sprite.class) return sprite;
                     if (method.getReturnType() == boolean.class) return true;
                     throw new AssertionError("Unexpected model method " + method.getName());
                 });
+        Identifier id = family.equals("arch") ? WindowArchBakedModel.modelId("aganite_window_arch", suffix)
+                : WindowFrenchGeorgianBakedModel.modelId("aganite_window_french_georgian", suffix);
+        JsonUnbakedModel wall = null;
+        if (family.equals("arch") && suffix.equals("glass_lower")) {
+            try (var stream = GeorgianWindowRenderingLaunchChecks.class.getResourceAsStream(
+                    "/assets/erydon/models/block/window/arch/window_arch_wall.json")) {
+                require(stream != null, "Missing sibling wall used to trim bottom caps");
+                wall = JsonUnbakedModel.deserialize(new InputStreamReader(stream, StandardCharsets.UTF_8));
+            }
+        }
+        BakedModel capped = WindowBottomCaps.wrap(original, model, ignored -> sprite, ModelRotation.X0_Y0, id, wall);
+        if (!rail) return capped;
+        BlockState seed = net.minecraft.registry.Registries.BLOCK.get(new Identifier("erydon", family.equals("arch")
+                ? "aganite_window_arch" : "aganite_window_french_georgian")).getDefaultState();
+        return suffix.equals("sill") ? WindowBottomRail.wrapSill(capped, model, ignored -> sprite, ModelRotation.X0_Y0, id, seed)
+                : WindowBottomRail.wrapChild(capped, seed);
     }
     private static Field field(Class<?> type, String name) throws Exception {
         Field field = type.getDeclaredField(name); field.setAccessible(true); return field;

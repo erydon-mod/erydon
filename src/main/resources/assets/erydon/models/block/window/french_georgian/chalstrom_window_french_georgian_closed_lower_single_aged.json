@@ -2,7 +2,7 @@
   "parent": "erydon:block/window/french_georgian/window_french_georgian_closed_lower_single",
   "textures": {
     "stone": "erydon:block/chalstrom_block_aged",
-    "pane": "erydon:block/glazing_silver",
+    "pane": "erydon:block/glazing_crystal",
     "lead": "erydon:block/lead_black"
   }
 }

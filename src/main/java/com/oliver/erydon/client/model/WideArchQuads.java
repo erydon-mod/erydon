@@ -1,5 +1,6 @@
 package com.oliver.erydon.client.model;
 
+import com.oliver.erydon.block.ArchGothicBlock;
 import com.oliver.erydon.block.ArchRomanesqueBlock;
 import com.oliver.erydon.block.WideArchLayout;
 import net.minecraft.block.BlockState;
@@ -10,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-/** Clips enlarged component surfaces into their owning cells, without adding seam faces. */
+/** Clips enlarged components at cell seams, without adding faces or trimming the Gothic crown's authored top. */
 final class WideArchQuads {
     private WideArchQuads() { }
 
@@ -19,6 +20,12 @@ final class WideArchQuads {
         var target = state.get(ArchRomanesqueBlock.ARRANGEMENT);
         int width = state.get(ArchRomanesqueBlock.WIDTH);
         Direction facing = state.get(ArchRomanesqueBlock.FACING);
+        // Gothic crown caps sit slightly above y=1, at intentionally different
+        // heights. This is the cluster's exterior edge, not a cell seam: clipping
+        // here deletes the entire UP faces. Keep their authored offsets; lower
+        // crown rows and body cells still clip against the cell above them.
+        boolean exteriorGothicTop = state.getBlock() instanceof ArchGothicBlock
+                && target.wideRows() > 0 && target.wideRow() == 0;
         List<BakedQuad> result = new ArrayList<>();
         for (var component : WideArchLayout.components(target)) {
             BlockState child = state.with(ArchRomanesqueBlock.ARRANGEMENT, component.arrangement())
@@ -38,7 +45,7 @@ final class WideArchQuads {
                 polygon = clip(polygon, 0, 0, true);
                 polygon = clip(polygon, 0, 1, false);
                 polygon = clip(polygon, 1, 0, true);
-                polygon = clip(polygon, 1, 1, false);
+                if (!exteriorGothicTop) polygon = clip(polygon, 1, 1, false);
                 if (polygon.size() == 4) {
                     add(result, quad, facing, polygon.get(0), polygon.get(1), polygon.get(2), polygon.get(3));
                 } else if (polygon.size() >= 3) {
@@ -60,7 +67,7 @@ final class WideArchQuads {
             boolean currentInside = inside(current, axis, boundary, greater);
             if (currentInside != previousInside) {
                 float t = (boundary - previous.coordinate(axis)) / (current.coordinate(axis) - previous.coordinate(axis));
-                output.add(previous.interpolate(current, t));
+                output.add(previous.interpolate(current, t, axis, boundary));
             }
             if (currentInside) output.add(current);
             previous = current;
@@ -146,8 +153,11 @@ final class WideArchQuads {
 
     private record Vertex(float x, float y, float z, float u, float v, int color, int light, int normal) {
         float coordinate(int axis) { return axis == 0 ? x : y; }
-        Vertex interpolate(Vertex next, float t) {
-            return new Vertex(x+(next.x-x)*t, y+(next.y-y)*t, z+(next.z-z)*t,
+        Vertex interpolate(Vertex next, float t, int axis, float boundary) {
+            // The clipped coordinate is mathematically exact; a float lerp can leave
+            // it just outside the cell and incorrectly disable world UV projection.
+            return new Vertex(axis == 0 ? boundary : x+(next.x-x)*t,
+                    axis == 1 ? boundary : y+(next.y-y)*t, z+(next.z-z)*t,
                     u+(next.u-u)*t, v+(next.v-v)*t, color, light, normal);
         }
     }

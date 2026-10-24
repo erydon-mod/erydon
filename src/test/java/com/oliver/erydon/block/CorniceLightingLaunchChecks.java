@@ -43,7 +43,7 @@ final class CorniceLightingLaunchChecks {
                 }
                 return checked;
             }).get(10, TimeUnit.SECONDS);
-            require(cases == 208 && world.reads == 0, "Lighting shape resolution queried unloaded chunks or skipped states");
+            require(cases == 288 && world.reads == 0, "Lighting shape resolution queried unloaded chunks or skipped states");
             for (String style : List.of("modern", "georgian", "byzantine", "gothic"))
                 for (CorniceBlock.CorniceShape shape : List.of(CorniceBlock.CorniceShape.STRAIGHT, CorniceBlock.CorniceShape.DIAGONAL_PRIMARY)) {
                     int before = world.reads;
@@ -52,7 +52,7 @@ final class CorniceLightingLaunchChecks {
                             BlockPos.ORIGIN, ShapeContext.absent());
                     require(world.reads > before, "Main-thread interaction lost dynamic neighbour joins");
                 }
-            System.out.println("ERYDON_CORNICE_LIGHTING_OK: 4 profiles x 52 saved poses; off-thread outline/collision use cached native geometry with zero world/chunk reads; main-thread joins remain dynamic");
+            System.out.println("ERYDON_CORNICE_LIGHTING_OK: 4 profiles x 72 saved poses; off-thread outline/collision use cached native geometry with zero world/chunk reads; main-thread joins remain dynamic");
         } finally {
             worker.shutdownNow();
         }

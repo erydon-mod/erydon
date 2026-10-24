@@ -10,13 +10,16 @@ import net.minecraft.item.ItemUsageContext;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.BlockView;
 
 /** Angled moulding shares front cells when necessary, never occupying the ceiling. */
 public final class CorniceItem extends ErydonBlockItem {
     public CorniceItem(Block block, Settings settings) { super(block, settings); }
 
-    public record Target(BlockPos pos, Direction outward) { }
+    public record Target(BlockPos pos, Direction outward, CorniceBlock.CorniceShape fittedShape) {
+        public Target(BlockPos pos, Direction outward) { this(pos, outward, null); }
+    }
 
     public static Target target(BlockView world, BlockPos support, Direction clickedSide) {
         var state = world.getBlockState(support);
@@ -42,11 +45,22 @@ public final class CorniceItem extends ErydonBlockItem {
             var shape = CorniceSlopePlacement.shapeFor(slope, outward);
             if (shape == null) continue;
             BlockPos owner = support.offset(outward);
-            BlockState part = cornice.with(CorniceBlock.FACING, CorniceSlopePlacement.facing(slope))
+            BlockState part = cornice.with(CorniceBlock.FACING, CorniceSlopePlacement.facing(slope, outward, shape))
                     .with(CorniceBlock.SHAPE, shape);
-            if (CorniceAssembly.canAdd(world, owner, part)) return new Target(owner, outward);
+            if (CorniceAssembly.canAdd(world, owner, part)) return new Target(owner, outward, shape);
         }
         return null;
+    }
+
+    public static Target target(BlockView world, BlockPos support, Direction clickedSide, BlockState cornice, Vec3d hit) {
+        BlockState state = world.getBlockState(support);
+        var shape = CorniceSlopePlacement.shapeForHit(state, clickedSide, hit.subtract(Vec3d.of(support)));
+        if (shape == null) return null;
+        if (!shape.isHalfSupport()) return target(world, support, clickedSide, cornice);
+        BlockPos owner = support.offset(clickedSide);
+        BlockState part = cornice.with(CorniceBlock.FACING, CorniceSlopePlacement.facing(state, clickedSide, shape))
+                .with(CorniceBlock.SHAPE, shape);
+        return CorniceAssembly.canAdd(world, owner, part) ? new Target(owner, clickedSide, shape) : null;
     }
 
     public static final class Placement extends ItemPlacementContext {
@@ -55,13 +69,16 @@ public final class CorniceItem extends ErydonBlockItem {
             super(original);
             this.target = target;
         }
+        public CorniceBlock.CorniceShape fittedShape() { return target == null ? null : target.fittedShape(); }
         @Override public BlockPos getBlockPos() { return target == null ? super.getBlockPos() : target.pos(); }
         @Override public Direction getSide() { return target == null ? super.getSide() : target.outward(); }
     }
 
     @Override public ActionResult useOnBlock(ItemUsageContext context) {
         var source = context.getWorld().getBlockState(context.getBlockPos());
-        if (CorniceSlopePlacement.shapeFor(source, context.getSide()) == null) {
+        if (CorniceSlopePlacement.shapeFor(source, context.getSide()) == null
+                && com.oliver.erydon.block.CorniceHalfSupports.hit(source, context.getSide(),
+                context.getHitPos().subtract(Vec3d.of(context.getBlockPos()))) == null) {
             // A thin ceiling cover may be the first ray hit. Attach within its
             // cell using the player's preferred wall, just as ordinary placement.
             if (CorniceAssemblyPlacement.sharedHost(source)) {
@@ -77,7 +94,7 @@ public final class CorniceItem extends ErydonBlockItem {
             }
             return super.useOnBlock(context);
         }
-        Target target = target(context.getWorld(), context.getBlockPos(), context.getSide(), getBlock().getDefaultState());
+        Target target = target(context.getWorld(), context.getBlockPos(), context.getSide(), getBlock().getDefaultState(), context.getHitPos());
         return target == null ? ActionResult.FAIL : place(new Placement(context, target));
     }
 

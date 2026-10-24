@@ -33,6 +33,7 @@ public final class ShallowStairShapeLaunchProbe implements PreLaunchEntrypoint {
             Bootstrap.initialize();
             GlazingShallowSlopeLaunchChecks.run();
             verifySpiralCollisionShapes();
+            SpiralStairCollisionLaunchChecks.run();
             Method original = ShallowStairsBlockBase.class.getDeclaredMethod("calculateShape", BlockState.class);
             Method shared = ShallowStairsBlockBase.class.getDeclaredMethod("sharedShape", BlockState.class);
             original.setAccessible(true);

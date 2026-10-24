@@ -2,7 +2,7 @@
   "parent": "erydon:block/window/french_georgian/window_french_georgian_open_upper_single_rh",
   "textures": {
     "stone": "erydon:block/laurentium_block_aged",
-    "pane": "erydon:block/glazing_silver",
+    "pane": "erydon:block/glazing_crystal",
     "lead": "erydon:block/lead_black"
   }
 }

@@ -47,6 +47,36 @@ class WindowArchGlassRenderingTest {
     }
 
     @Test
+    void everyWindowPaneReusesTheApprovedCrystalGlazingTexture() throws Exception {
+        Path models = Path.of("src/main/resources/assets/erydon/models/block");
+        var crystal = com.google.gson.JsonParser.parseString(java.nio.file.Files.readString(
+                models.resolve("glazing/block/glazing_crystal_block.json"))).getAsJsonObject();
+        String approved = crystal.getAsJsonObject("textures").get("pane").getAsString();
+        int arch = 0, french = 0, icons = 0;
+        try (var paths = java.nio.file.Files.walk(models.resolve("window"))) {
+            for (Path path : paths.filter(p -> p.toString().endsWith(".json")).toList()) {
+                var model = com.google.gson.JsonParser.parseString(java.nio.file.Files.readString(path)).getAsJsonObject();
+                var textures = model.getAsJsonObject("textures");
+                if (textures == null || !textures.has("pane")) continue;
+                String pane = textures.get("pane").getAsString();
+                if (pane.startsWith("#")) {
+                    assertEquals("#pane", pane, path.toString());
+                    assertTrue(path.getFileName().toString().startsWith("window_"),
+                            "A material child must supply a concrete pane binding: " + path);
+                    continue; // Abstract parent parameters are resolved by the checked material children.
+                }
+                if (!hasPaneFaces(model, models)) continue; // Sill/void placeholders do not render glass.
+                assertEquals(approved, pane, path.toString());
+                if (path.getParent().endsWith("arch")) arch++;
+                if (path.getParent().endsWith("french_georgian")) french++;
+                if (path.getFileName().toString().contains("icon")) icons++;
+            }
+        }
+        assertTrue(arch > 0 && french > 0 && icons > 0,
+                "Crystal pane coverage must include both placed window families and their item icons");
+    }
+
+    @Test
     void glassHasOnlyTwoStableValues() {
         assertEquals(2, Glass.values().length);
         assertEquals("normal", Glass.NORMAL.asString());
@@ -114,6 +144,23 @@ class WindowArchGlassRenderingTest {
                 assertEquals(0xFFFFFF00, specular.getRGB(x, y));
             }
         }
+    }
+
+    private static boolean hasPaneFaces(com.google.gson.JsonObject model, Path models) throws Exception {
+        for (int depth = 0; depth < 8; depth++) {
+            if (model.has("elements")) {
+                for (var element : model.getAsJsonArray("elements"))
+                    for (var face : element.getAsJsonObject().getAsJsonObject("faces").entrySet())
+                        if ("#pane".equals(face.getValue().getAsJsonObject().get("texture").getAsString())) return true;
+                return false;
+            }
+            if (!model.has("parent")) return false;
+            String parent = model.get("parent").getAsString();
+            assertTrue(parent.startsWith("erydon:block/window/"), "Unexpected window geometry parent: " + parent);
+            model = com.google.gson.JsonParser.parseString(java.nio.file.Files.readString(
+                    models.resolve(parent.substring("erydon:block/".length()) + ".json"))).getAsJsonObject();
+        }
+        throw new AssertionError("Window geometry parent chain did not terminate");
     }
 
     private RenderMaterial material() {

@@ -27,7 +27,12 @@ import java.util.function.Supplier;
 /** Renders each part of the shared circular model in its own 2x2 cell. */
 public final class DoubleCircularColumnBakedModel implements BakedModel, FabricBakedModel {
     private final BakedModel wrapped;
-    public DoubleCircularColumnBakedModel(BakedModel wrapped) { this.wrapped = wrapped; }
+    private final DoubleColumnMeshBaker.MaterialMeshes meshes;
+    public DoubleCircularColumnBakedModel(BakedModel wrapped) { this(wrapped, null); }
+    DoubleCircularColumnBakedModel(BakedModel wrapped, DoubleColumnMeshBaker.MaterialMeshes meshes) {
+        this.wrapped = wrapped;
+        this.meshes = meshes;
+    }
 
     private static String suffix(BlockState state) {
         if (!(state.getBlock() instanceof DoubleCircularColumnBlock)) return null;
@@ -60,6 +65,16 @@ public final class DoubleCircularColumnBakedModel implements BakedModel, FabricB
                                          Supplier<Random> randomSupplier, RenderContext context) {
         String suffix = suffix(state);
         if (suffix == null) return;
+        if (meshes != null) {
+            int previousLight = ColumnMeshLighting.push(view, pos);
+            try {
+                meshes.emit(suffix, state.get(DoubleCircularColumnBlock.SECTION) == DoubleCircularColumnBlock.Section.SHAFT,
+                        layer(state), state.get(DoubleCircularColumnBlock.X), state.get(DoubleCircularColumnBlock.Z), context);
+            } finally {
+                ColumnMeshLighting.restore(previousLight);
+            }
+            return;
+        }
         BakedModel model = child(state, suffix);
         if (model == null) return;
         boolean shaft = state.get(DoubleCircularColumnBlock.SECTION) == DoubleCircularColumnBlock.Section.SHAFT;
@@ -89,6 +104,9 @@ public final class DoubleCircularColumnBakedModel implements BakedModel, FabricB
         if (state == null) return wrapped.getQuads(null, face, random);
         String suffix = suffix(state);
         if (suffix == null || face != null) return List.of();
+        if (meshes != null) return meshes.baked(suffix,
+                state.get(DoubleCircularColumnBlock.SECTION) == DoubleCircularColumnBlock.Section.SHAFT,
+                layer(state), state.get(DoubleCircularColumnBlock.X), state.get(DoubleCircularColumnBlock.Z));
         BakedModel model = child(state, suffix);
         if (model == null) return List.of();
         boolean shaft = state.get(DoubleCircularColumnBlock.SECTION) == DoubleCircularColumnBlock.Section.SHAFT;

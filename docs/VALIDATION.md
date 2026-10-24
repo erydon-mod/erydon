@@ -110,6 +110,25 @@ It checks unsupported coping retention and single-box particle bounds, and repla
 coping geometry through Fabric's real mesh encoder/decoder to verify that authored
 CTM planes survive cached lighting normals and all four facings.
 
+`verifyLargeColumnMeshes` checks the prepared large-column meshes, actual Fabric emission,
+cached Axiom views, texture phase, source-profile bounds and section repair without
+opening a game window. It also exercises the real Indium/Iris normal handoff while
+preserving inlay and cornice material payloads. This probe runs as part of `check`.
+
+`verifyColumnMeshNormals` runs the woven normal/tangent renderer-hook checks independently.
+The full mesh probe also checks actual Iris tangent frames across both vertex
+orders, native and Synapheia atlas scales, and chunk-edge positions. Raw encoder
+negative controls reproduce the missing and inconsistent frames, while uniform
+sky and real-gradient controls exercise the selected lighting policy. The actual
+woven lighting path must also match independent closed-form world-light fields,
+with continuous shared vertices at positive and negative chunk boundaries.
+Darkness, full sky, roofed torchlight, authored light and emissive controls guard
+against hiding seams with full-bright rendering; untagged draws retain native
+lighting. The light-sample count is bounded per mesh emission.
+The deterministic asset check is `python -B tools/generate_large_column_meshes.py --check`;
+install the pinned tooling dependencies from `requirements.txt` first. These checks
+do not establish in-game lighting, shader appearance or FPS; those remain live checks.
+
 The standalone large-column probe runs with
 `-I gradle/erydon-large-column-validation.init.gradle verifyLargeColumnRepair`.
 The optional `erydon.largeColumnTestMods` property accepts named/remapped Axiom

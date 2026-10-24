@@ -59,7 +59,7 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
     public static final EnumProperty<Corner> CORNER = EnumProperty.of("corner", Corner.class);
 
     public enum SillSide implements StringIdentifiable {
-        OUTWARD("outward"), INWARD("inward");
+        OUTWARD("outward"), INWARD("inward"), NONE("none");
         private final String name;
         SillSide(String name) { this.name = name; }
         @Override public String asString() { return name; }
@@ -114,6 +114,9 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
 
         SILL,
         SILL_INWARD,
+        MOVING_RAIL_LH,
+        MOVING_RAIL_RH,
+        CLOSED_BOTTOM_RAIL,
         CORNER_POST,
         CORNER_FANLIGHT,
         CORNER_FANLIGHT_SINGLE_LH,
@@ -122,6 +125,9 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
 
     private static final EnumMap<ShapeKey, VoxelShape[]> SHAPES = new EnumMap<>(ShapeKey.class);
     private static final VoxelShape[] OPEN_CORNER_SHAPES = new VoxelShape[128];
+    // Material-independent, immutable shapes are populated once as vanilla initializes states.
+    private static final VoxelShape[] SASH_BOTTOM_SHAPES = new VoxelShape[192];
+    private static final VoxelShape[] CLOSED_BOTTOM_SHAPES = new VoxelShape[96];
 
     static {
         register(ShapeKey.CLOSED_LOWER_SINGLE, makeClosedLowerSingleShape());
@@ -149,6 +155,9 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
         register(ShapeKey.OPEN_UPPER_MULTI_RH, makeOpenUpperMultiRhShape());
 
         register(ShapeKey.SILL, makeSillShape());
+        register(ShapeKey.MOVING_RAIL_LH, VoxelShapes.cuboid(13.032 / 16, 0, 1 / 16.0, 15.968 / 16, 1.5 / 16, 15 / 16.0));
+        register(ShapeKey.MOVING_RAIL_RH, VoxelShapes.cuboid(.048 / 16, 0, 1 / 16.0, 2.952 / 16, 1.5 / 16, 15 / 16.0));
+        register(ShapeKey.CLOSED_BOTTOM_RAIL, VoxelShapes.cuboid(0, 0, 0, 1, 1.5 / 16, 3 / 16.0));
         VoxelShape outwardSill = makeSillShape();
         VoxelShape[] inwardSill = {VoxelShapes.empty()};
         outwardSill.forEachBox((x0, y0, z0, x1, y1, z1) -> inwardSill[0] = VoxelShapes.combine(
@@ -166,7 +175,7 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
             for (Direction facing : Direction.Type.HORIZONTAL) {
                 for (Corner corner : new Corner[]{Corner.LEFT, Corner.RIGHT}) {
                     for (boolean sill : new boolean[]{false, true}) {
-                        for (SillSide side : SillSide.values()) {
+                        for (SillSide side : new SillSide[]{SillSide.OUTWARD, SillSide.INWARD}) {
                             OPEN_CORNER_SHAPES[openCornerShapeIndex(kind, facing, corner, sill, side)] =
                                     makeOpenCornerShape(kind, facing, corner, sill, side);
                         }
@@ -502,27 +511,70 @@ public class WindowFrenchGeorgianBlock extends Block implements ClusterRebuildab
     }
 
     private VoxelShape getWindowShape(BlockState state) {
+        if (state.get(SILL) && !state.get(OPEN) && state.get(SILL_SIDE) == SillSide.NONE) {
+            int index = (state.get(PIECE).ordinal() * 3 + state.get(CORNER).ordinal()) * 4 + facingIndex(state.get(FACING));
+            VoxelShape cached = CLOSED_BOTTOM_SHAPES[index];
+            if (cached != null) return cached;
+            synchronized (CLOSED_BOTTOM_SHAPES) {
+                cached = CLOSED_BOTTOM_SHAPES[index];
+                if (cached == null) {
+                    cached = VoxelShapes.combine(windowBaseShape(state), SHAPES.get(ShapeKey.CLOSED_BOTTOM_RAIL)[facingIndex(state.get(FACING))], BooleanBiFunction.OR);
+                    Direction secondary = secondaryFacing(state);
+                    if (secondary != null) cached = VoxelShapes.combine(cached, SHAPES.get(ShapeKey.CLOSED_BOTTOM_RAIL)[facingIndex(secondary)], BooleanBiFunction.OR);
+                    CLOSED_BOTTOM_SHAPES[index] = cached = cached.simplify();
+                }
+            }
+            return cached;
+        }
+        if (!state.get(SILL) || !state.get(OPEN) || state.get(CORNER) != Corner.NONE) return windowBaseShape(state);
+        int index = ((state.get(PIECE).ordinal() * 2 + state.get(HINGE).ordinal()) * 3
+                + state.get(SILL_SIDE).ordinal()) * 4 + facingIndex(state.get(FACING));
+        VoxelShape cached = SASH_BOTTOM_SHAPES[index];
+        if (cached != null) return cached;
+        synchronized (SASH_BOTTOM_SHAPES) {
+            cached = SASH_BOTTOM_SHAPES[index];
+            if (cached == null) {
+                Piece piece = primaryPiece(state);
+                ShapeKey rail = switch (piece) {
+                    case UPPER_SINGLE, LOWER_SINGLE -> state.get(HINGE) == DoorHinge.LEFT ? ShapeKey.MOVING_RAIL_LH : ShapeKey.MOVING_RAIL_RH;
+                    case UPPER_MULTI_LH, LOWER_MULTI_LH -> ShapeKey.MOVING_RAIL_LH;
+                    case UPPER_MULTI_RH, LOWER_MULTI_RH -> ShapeKey.MOVING_RAIL_RH;
+                    default -> null;
+                };
+                VoxelShape base = windowBaseShape(state);
+                cached = rail == null ? base : VoxelShapes.combine(base, SHAPES.get(rail)[facingIndex(state.get(FACING))], BooleanBiFunction.OR).simplify();
+                SASH_BOTTOM_SHAPES[index] = cached;
+            }
+        }
+        return cached;
+    }
+
+    private VoxelShape windowBaseShape(BlockState state) {
         if (state.get(OPEN) && state.get(CORNER) != Corner.NONE) {
             Piece piece = state.get(PIECE);
             int kind = piece.single() == Piece.LOWER_SINGLE ? 0
                     : piece != Piece.UPPER_SINGLE ? 1 : state.get(HINGE) == DoorHinge.LEFT ? 2 : 3;
             return OPEN_CORNER_SHAPES[openCornerShapeIndex(kind, state.get(FACING), state.get(CORNER),
-                    state.get(SILL), state.get(SILL_SIDE))];
+                    hasSill(state), state.get(SILL_SIDE))];
         }
         VoxelShape shape = getWindowFaceShape(state, state.get(FACING), primaryPiece(state),
-                state.get(HINGE), state.get(SILL));
+                state.get(HINGE), hasSill(state));
         Direction secondary = secondaryFacing(state);
         if (secondary != null) {
             shape = VoxelShapes.combine(shape, getWindowFaceShape(state, secondary,
-                    cornerPiece(state), state.get(HINGE), state.get(SILL)),
+                    cornerPiece(state), state.get(HINGE), hasSill(state)),
                     BooleanBiFunction.OR);
         }
         return shape;
     }
 
+    public static boolean hasSill(BlockState state) {
+        return state.get(SILL) && state.get(SILL_SIDE) != SillSide.NONE;
+    }
+
     private static int openCornerShapeIndex(int kind, Direction facing, Corner corner, boolean sill, SillSide side) {
         return ((((kind * 4 + facingIndex(facing)) * 2 + (corner == Corner.RIGHT ? 1 : 0)) * 2)
-                + (sill ? 1 : 0)) * 2 + side.ordinal();
+                + (sill ? 1 : 0)) * 2 + (side == SillSide.INWARD ? 1 : 0);
     }
 
     private static VoxelShape makeOpenCornerShape(int kind, Direction facing, Corner corner, boolean sill, SillSide side) {
