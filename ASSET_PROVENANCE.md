@@ -5,7 +5,9 @@
 Oliver has approved public release of the current ERYDON-owned textures,
 models, sounds, data resources, authoring models, and native high-resolution
 runtime composites in this repository. They are covered by
-`LICENSE-ASSETS.md` unless a path is listed as an exception below.
+`LICENSE-ASSETS.md` unless a path is listed as an exception below. The current
+primary terms are Oliver's Minecraft Mods Restricted License 1.0; previous
+CC BY-SA 4.0 grants remain intact as explained in `PRIOR-LICENSING.md`.
 
 The `assets/minecraft` namespace contains ERYDON-authored resource overrides;
 using Minecraft's namespace does not claim ownership of Minecraft itself.
@@ -27,7 +29,7 @@ for deterministic geometry validation.
 - Copyright: Copyright 2020 The Cinzel Project Authors
   (<https://github.com/NDISCOVER/Cinzel>)
 
-Cinzel is licensed under OFL-1.1, not CC BY-SA 4.0. The exact upstream licence
+Cinzel retains OFL-1.1 and is excluded from ERYDON's restricted terms. The upstream licence
 and copyright notice are in `LICENSES/OFL-1.1.txt`.
 
 ## Deliberately absent material

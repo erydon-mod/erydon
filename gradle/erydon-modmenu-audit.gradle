@@ -7,7 +7,7 @@ import java.util.zip.ZipFile
 
 def expectedModMenuEntrypoint = 'com.oliver.erydon.client.config.ErydonModMenuIntegration'
 def expectedModMenuVersion = '7.2.2'
-def expectedLicenses = ['MIT', 'CC-BY-SA-4.0']
+def expectedLicenses = ['LicenseRef-Oliver-Restricted-1.0']
 def languageCodes = ['en_us', 'de_de', 'es_es']
 def expectedContact = [
         homepage: 'https://erydon.co.uk',
@@ -294,10 +294,12 @@ tasks.register('auditErydonModMenuSources') {
         File licenseFile = file('LICENSE')
         requireAudit(licenseFile.isFile(), 'missing root LICENSE')
         String licenseText = licenseFile.getText('UTF-8')
-        requireAudit(licenseText.startsWith('ERYDON LICENCE MAP'),
-                'root LICENSE is not the expected public licence map')
-        requireAudit(licenseText.contains('LICENSE-CODE.md') && licenseText.contains('LICENSE-ASSETS.md'),
-                'root LICENSE does not map the code and asset terms')
+        requireAudit(licenseText.startsWith("OLIVER'S MINECRAFT MODS RESTRICTED LICENSE 1.0"),
+                'root LICENSE is not the shared Oliver restricted licence')
+        requireAudit(licenseText.contains('Material that Oliver does not own is not covered by this licence.'),
+                'root LICENSE must preserve separately licensed material')
+        requireAudit(file('PRIOR-LICENSING.md').isFile(),
+                'missing notice preserving earlier licence grants')
 
         def expectedResources = allRequiredResourceEntries(spec)
         def missingResources = expectedResources.findAll { !file("src/main/resources/${it}").isFile() }
@@ -442,6 +444,12 @@ tasks.register('auditErydonModMenuJar') {
             }
             String packagedLicense = "LICENSE_${project.base.archivesName.get()}"
             requireAudit(entryNames.contains(packagedLicense), "${jarFile.name} is missing ${packagedLicense}")
+            ['ERYDON-CODE.md', 'ERYDON-ASSETS.md', 'PRIOR-LICENSING.md',
+             'CC-BY-SA-4.0.txt', 'Cinzel-OFL-1.1.txt', 'ERYDON-PERFORMANCE-TOOLKIT-MIT.txt'].each { notice ->
+                String noticeEntry = "META-INF/licenses/${notice}"
+                requireAudit(entryNames.contains(noticeEntry),
+                        "${jarFile.name} is missing licence notice ${notice}")
+            }
 
             Map<String, Map> languages = [:]
             languageCodes.each { code ->

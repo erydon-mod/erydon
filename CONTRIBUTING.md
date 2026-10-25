@@ -11,11 +11,12 @@ Thank you for helping improve ERYDON.
 5. Do not commit build output, IDE state, worlds, logs, player data, copied mods,
    pack ZIPs, caches, or private contact information.
 
-By contributing code, you agree that your contribution may be distributed
-under the MIT License. By contributing an ERYDON asset, you agree that your
-contribution may be distributed under CC BY-SA 4.0. Submit only material you
-created or have explicit permission to contribute under those terms, and state
-the source and licence of any permitted third-party material.
+The current primary licence is Oliver's Minecraft Mods Restricted License 1.0.
+Obtain Oliver's written permission before work that requires it under `LICENSE`,
+and agree contribution terms with Oliver before submitting material. Submit
+only material you created or have explicit permission to contribute, and state
+the source and licence of any permitted third-party material. Earlier grants
+and separately licensed material remain as described in `PRIOR-LICENSING.md`.
 
 Do not attach suspected credentials or security-sensitive details to a public
 issue. Follow `SECURITY.md` instead.

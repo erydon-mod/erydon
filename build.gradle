@@ -385,7 +385,7 @@ tasks.withType(Jar).configureEach {
     }
     from('LICENSE-CODE.md') {
         into 'META-INF/licenses'
-        rename { 'ERYDON-MIT.txt' }
+        rename { 'ERYDON-CODE.md' }
     }
     from('src/perf/TOOLKIT_LICENCE.txt') {
         into 'META-INF/licenses'
@@ -393,7 +393,10 @@ tasks.withType(Jar).configureEach {
     }
     from('LICENSE-ASSETS.md') {
         into 'META-INF/licenses'
-        rename { 'ERYDON-ASSETS-CC-BY-SA-4.0.md' }
+        rename { 'ERYDON-ASSETS.md' }
+    }
+    from('PRIOR-LICENSING.md') {
+        into 'META-INF/licenses'
     }
 }
 

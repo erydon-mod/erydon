@@ -1,11 +1,22 @@
-# ERYDON asset licence
+# ERYDON asset licensing
 
 Copyright (c) 2026 Oliver
 
-Unless a file or notice says otherwise, ERYDON-owned branding artwork, textures,
-models, sounds, resource-pack assets, data-pack resources, authoring models,
-and test asset fixtures in this repository are licensed under the Creative Commons
-Attribution-ShareAlike 4.0 International licence (CC BY-SA 4.0).
+The current primary licence for Oliver-owned ERYDON branding artwork, textures,
+models, sounds, data-pack resources, authoring models and test fixtures is
+Oliver's Minecraft Mods Restricted License 1.0 in `LICENSE`
+(`LicenseRef-Oliver-Restricted-1.0`). Separate terms and previous grants remain
+effective; see `PRIOR-LICENSING.md` and `THIRD_PARTY_NOTICES.md`.
+
+## Previous CC BY-SA 4.0 grant
+
+ERYDON-owned assets already supplied under Creative Commons
+Attribution-ShareAlike 4.0 International (CC BY-SA 4.0), including the public
+source through commit `76b50dda1c5b3768dc35314b3b3b4821a10ceafa`, retain that
+grant. The current primary licence does not withdraw those permissions or add
+restrictions to their exercise, including where the same material remains in
+current source or releases. The following scope and attribution record the
+earlier grant.
 
 The complete legal code is in `LICENSES/CC-BY-SA-4.0.txt` and is also available
 from <https://creativecommons.org/licenses/by-sa/4.0/>.
@@ -23,7 +34,7 @@ compatible licence, as required by the licence.
 
 ## Scope and exceptions
 
-This asset licence covers ERYDON-owned material under:
+The previous CC BY-SA 4.0 grant covered ERYDON-owned material under:
 
 - `docs/branding/`
 - `src/main/resources/assets/erydon/`

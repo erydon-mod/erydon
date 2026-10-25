@@ -1,5 +1,10 @@
 # ERYDON public candidate report
 
+This is a historical clean-export report, not a statement of current licensing
+or release readiness. Its MIT/CC BY-SA observations record the terms supplied
+at that time. Current primary terms are in `LICENSE`; `PRIOR-LICENSING.md`
+preserves those earlier grants without rewriting this report's evidence.
+
 ## Status
 
 **READY FOR FINAL REVIEW**

@@ -13,8 +13,7 @@
     "issues": "https://github.com/erydon-mod/erydon/issues"
   },
   "license": [
-    "MIT",
-    "CC-BY-SA-4.0"
+    "LicenseRef-Oliver-Restricted-1.0"
   ],
   "environment": "*",
   "icon": "assets/erydon/icon.png",

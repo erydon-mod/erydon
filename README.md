@@ -86,8 +86,12 @@ follow `SECURITY.md`.
 
 ## Licences
 
-- ERYDON code: MIT — `LICENSE-CODE.md`
-- ERYDON-owned assets: CC BY-SA 4.0 — `LICENSE-ASSETS.md`
-- Separately licensed material: its original terms — `THIRD_PARTY_NOTICES.md`
+ERYDON's current primary licence is Oliver's Minecraft Mods Restricted License
+1.0 (`LicenseRef-Oliver-Restricted-1.0`), the same as the other Collection
+products. Public source access does not make it open-source; see [LICENSE](LICENSE).
 
-The root `LICENSE` is the authoritative path-to-licence map.
+Earlier MIT code and CC BY-SA 4.0 asset grants remain intact for material
+already supplied under those terms. See [PRIOR-LICENSING.md](PRIOR-LICENSING.md),
+[LICENSE-CODE.md](LICENSE-CODE.md) and [LICENSE-ASSETS.md](LICENSE-ASSETS.md).
+Fonts, the Gradle wrapper and explicitly licensed helpers retain their own
+terms in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

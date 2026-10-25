@@ -1,3 +1,17 @@
+# ERYDON code licensing
+
+The current primary licence for Oliver-owned ERYDON code is Oliver's Minecraft
+Mods Restricted License 1.0, in `LICENSE` (`LicenseRef-Oliver-Restricted-1.0`).
+Separately licensed material and previously granted permissions are preserved.
+See `PRIOR-LICENSING.md` and `THIRD_PARTY_NOTICES.md` for those exceptions.
+
+## Previous MIT grant
+
+The following complete text remains applicable to code already supplied under
+MIT, including the public source through commit
+`76b50dda1c5b3768dc35314b3b3b4821a10ceafa`. Replacing the current primary licence
+does not withdraw that grant or restrict rights to those copies or material.
+
 MIT License
 
 Copyright (c) 2026 Oliver
